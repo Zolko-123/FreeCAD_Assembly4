@@ -53,11 +53,11 @@ These constraints are not really constraints in the traditional CAD sense, but s
 
 ![](Resources/media/Asm4_wb1.png)
 
-_Close look at the fields contained in an _`App::FeaturePython`_ object associated with the part 'Cuve'_
+_Close look at the fields contained in an `App::FeaturePython` object associated with the part 'Cuve' The small button under the cursor in the image opens the dialog that allows to edit the parameters of the Attachment Offset placement_
 
 ![](Resources/media/Asm4_wb2.png)
 
-_Parameters of the_ `App::Placement` _called 'Offset' allowing relative placement of the link -vs- the attachment LCS_
+_Dialog that opens when clicking the previous small button, and permitting to edit the parameters of the_ `App::Placement` _called_ 'AttachmentOffset' _in the cosntraint associated with a link, and allowing relative placement of the link -vs- the attachment LCS_
 
 ## Workflow
 
