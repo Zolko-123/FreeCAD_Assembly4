@@ -100,8 +100,9 @@ The previous method allows to assemble parts within a single level. If you want 
 
 <br/>
 #### Release notes:<br/>
+
 * 2019.03.09 (version 0.4) : <br/>
-FreeCAD now imports as App
+FreeCAD now imports as App <br/>
 insert_Link launches place_Link
 
 * 2019.03.05 (version 0.3.1) : <br/>
