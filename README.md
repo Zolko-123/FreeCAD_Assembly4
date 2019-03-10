@@ -53,7 +53,7 @@ These constraints are not really constraints in the traditional CAD sense, but s
 
 ![](Resources/media/Asm4_wb1.png)
 
-_Close look at the fields contained in an `App::FeaturePython` object associated with the part 'Cuve' The small button under the cursor in the image opens the dialog that allows to edit the parameters of the Attachment Offset placement_
+_Close look at the fields contained in an `App::FeaturePython` object associated with the part 'Bague'. The small button under the cursor opens the dialog that allows to edit the parameters of the Attachment Offset_
 
 ![](Resources/media/Asm4_wb2.png)
 
