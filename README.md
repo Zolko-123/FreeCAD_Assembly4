@@ -47,7 +47,7 @@ The 2 LCS - the one in the linked part and the one in the assembly, be it from t
 
 * **Constraints**:
 
-To each part inserted into an assembly is associated an `App::FeaturePython` object, placed in the 'Constraints' group. This object contains information about the placement of the linked object in the assembly. It also contains an `App::Placement`, called 'Offset', which introduces an offset between the LCS in the part and the LCS in the assembly. The main purpose of this offset is to correct bad orientations between the 2 matching LCS. 
+To each part inserted into an assembly is associated an `App::FeaturePython` object, placed in the 'Constraints' group. This object contains information about the placement of the linked object in the assembly. It also contains an `App::Placement`, called 'AttachmentOffset', which introduces an offset between the LCS in the part and the LCS in the assembly. The main purpose of this offset is to correct bad orientations between the 2 matching LCS. 
 
 These constraints are not really constraints in the traditional CAD sense, but since `App::FeaturePython` objects are very versatile, they could be expanded to contain real constraints in some (distant) future.
 
@@ -55,7 +55,7 @@ These constraints are not really constraints in the traditional CAD sense, but s
 
 _Close look at the fields contained in an _`App::FeaturePython`_ object associated with the part 'Cuve'_
 
-![](Resources/media/Asm4_wb1.png)
+![](Resources/media/Asm4_wb2.png)
 
 _Parameters of the_ `App::Placement` _called 'Offset' allowing relative placement of the link -vs- the attachment LCS_
 
@@ -86,7 +86,11 @@ The basic workflow for creating a part is the following:
 
 ### Nested assemblies
 
-The previous method allows to assemble parts within a single level. If you want to assemble an assembly into another assembly... **TBW**
+The previous method allows to assemble parts within a single level. 
+
+But this workbench also allows the assembly of assemblies: since there is no difference between parts and assemblies, the 'Insert External Part' allows to chose a part that has other parts linked to it. The only difference will be for the coordinate systems in the inserted assemblies: in order to be used with Assembly 4, a coordinate system must be directly in the root 'Model' container, meaning that a coordinate system inside a linked part cannot be used to attach the assembly to a higher-level assembly.
+
+Therefore, in order to re-use a coordinate system of a part in an assembly, a coordinate system must be created at the root of the 'Model', and the placement of this coordinate system must be 'copied' over from the coordinate system that the user wants to use. This is done by inserting a coordinate system and using the 'Place LCS' command, which allows to select a linked part in the assembly and one of it's coordinate systems: the 2 coordinate systems — the one at the root of 'Model' and the one in the linked part — will always be superimposed, even if the linked part is modified, allowing the placement of the assembly in a higher level assembly using a linked part as reference. It sounds more complicated than it actually is.
 
 ![](Resources/media/asm_V4_2pistons.gif)
 
