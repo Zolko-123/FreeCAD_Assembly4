@@ -28,7 +28,7 @@ To actually include some geometry, a body needs to be created, and designed usin
 
 The result is the following:
 
-![](Resources/media/asm_Bielle_tree_arrows.png)
+![](Resources/media/Asm4_wb0.png)
 
 * the part _Bielle_ is placed in the assembly by attaching it's _LCS_0_ to the _LCS_0_ of the parent assembly. 
 * the part _Cuve_ is placed in the assembly by placing its _LCS_0_ on the _LCS_1_ of the part _Bielle_
@@ -51,11 +51,11 @@ To each part inserted into an assembly is associated an `App::FeaturePython` obj
 
 These constraints are not really constraints in the traditional CAD sense, but since `App::FeaturePython` objects are very versatile, they could be expanded to contain real constraints in some (distant) future.
 
-![](Resources/media/asm_Bielle_constr_Offset.png)
+![](Resources/media/Asm4_wb1.png)
 
 _Close look at the fields contained in an _`App::FeaturePython`_ object associated with the part 'Cuve'_
 
-![](Resources/media/asm_Bielle_demo.png)
+![](Resources/media/Asm4_wb1.png)
 
 _Parameters of the_ `App::Placement` _called 'Offset' allowing relative placement of the link -vs- the attachment LCS_
 
