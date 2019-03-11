@@ -105,6 +105,9 @@ Therefore, in order to re-use a coordinate system of a part in an assembly, a co
 <br/>
 #### Release notes:<br/>
 
+* 2019.03.11 (version 0.4.1) : <br/>
+Added placement of Datum Point
+
 * 2019.03.09 (version 0.4) : <br/>
 FreeCAD now imports as App <br/>
 insert_Link launches place_Link
