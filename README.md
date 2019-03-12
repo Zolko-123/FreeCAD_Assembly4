@@ -92,7 +92,7 @@ But this workbench also allows the assembly of assemblies: since there is no dif
 
 Therefore, in order to re-use a coordinate system of a part in an assembly, a coordinate system must be created at the root of the 'Model', and the placement of this coordinate system must be 'copied' over from the coordinate system that the user wants to use. This is done by inserting a coordinate system and using the 'Place LCS' command, which allows to select a linked part in the assembly and one of it's coordinate systems: the 2 coordinate systems — the one at the root of 'Model' and the one in the linked part — will always be superimposed, even if the linked part is modified, allowing the placement of the assembly in a higher level assembly using a linked part as reference. It sounds more complicated than it actually is.
 
-![](Resources/media/asm_V4_2pistons.gif)
+![](Resources/media/Asm4_V4.gif)
 
 ![](Resources/media/Lego_House+Garden.png)
 
