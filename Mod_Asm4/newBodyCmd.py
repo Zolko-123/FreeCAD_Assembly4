@@ -24,10 +24,14 @@ class newBody:
 				}
 
 	def IsActive(self):
-		if App.ActiveDocument == None:
-			return False
+		if App.ActiveDocument:
+			# is something selected ?
+			if Gui.Selection.getSelection():
+				return(False)
+			else:
+				return(True)
 		else:
-			return True
+			return(False)
 
 	def Activated(self):
 		# do something here...

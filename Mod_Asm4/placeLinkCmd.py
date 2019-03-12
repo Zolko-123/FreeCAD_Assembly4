@@ -31,7 +31,7 @@ class placeLink( QtGui.QDialog ):
 		
 
 	def GetResources(self):
-		return {"MenuText": "Place a linked Part in the Assembly",
+		return {"MenuText": "Edit Placement of a linked Part",
 				"ToolTip": "Move an instance of an external Part",
 				"Pixmap" : os.path.join( iconPath , 'PlaceLink.svg')
 				}
@@ -42,7 +42,8 @@ class placeLink( QtGui.QDialog ):
 		if App.ActiveDocument:
 			# is something selected ?
 			if Gui.Selection.getSelection():
-				return True
+				if Gui.Selection.getSelection()[0].isDerivedFrom('App::Link'):
+					return True
 		else:
 			return(False)
 

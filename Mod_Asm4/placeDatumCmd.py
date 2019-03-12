@@ -28,7 +28,7 @@ class placeDatum( QtGui.QDialog ):
 
 
 	def GetResources(self):
-		return {"MenuText": "Attach a Datum Point or Coordinate System",
+		return {"MenuText": "Edit Attachment of a Datum Point or Coordinate System",
 				"ToolTip": "Attach a Datum Point or Coordinate System to an external Part",
 				"Pixmap" : os.path.join( iconPath , 'Place_AxisCross.svg')
 				}
@@ -39,7 +39,9 @@ class placeDatum( QtGui.QDialog ):
 		if App.ActiveDocument:
 			# is something selected ?
 			if Gui.Selection.getSelection():
-				return True
+				selectedType = Gui.Selection.getSelection()[0].TypeId
+				if selectedType=='PartDesign::CoordinateSystem' or selectedType=='PartDesign::Point':
+					return True
 		else:
 			return(False)
 

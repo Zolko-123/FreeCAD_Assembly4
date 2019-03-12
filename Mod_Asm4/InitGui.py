@@ -82,26 +82,6 @@ class Assembly4_WB(Workbench):
 
 	"""
     ╔═══════════════════════════════════════════════╗
-    ║                      Menu                     ║
-    ╚═══════════════════════════════════════════════╝
-	"""
-    def showMenu(self):
-        from PySide import QtGui
-        window = QtGui.QApplication.activeWindow()
-        #freecad hides wb toolbars on leaving wb, we unhide ours here to keep it around
-        #if the user has it set in parameters to do so
-        pg = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Mod/Assembly4")
-        keep = pg.GetBool('KeepToolbar',False)
-        if not keep:
-            return
-        tb = window.findChildren(QtGui.QToolBar) 
-        for bar in tb:
-            if "Assembly 4" in bar.objectName():
-                bar.setVisible(True)
-
-
-	"""
-    ╔═══════════════════════════════════════════════╗
     ║          Standard necessary functions         ║
     ╚═══════════════════════════════════════════════╝
 	"""
@@ -112,10 +92,6 @@ class Assembly4_WB(Workbench):
 
     def Deactivated(self):
         "This function is executed when the workbench is deactivated"
-        #FreeCAD will hide our menu and toolbar upon exiting the wb, so we setup a singleshot
-        #to unhide them once FreeCAD is finished, 2 seconds later
-        from PySide import QtCore
-        QtCore.QTimer.singleShot(2000, self.showMenu)
         return 
 
 
