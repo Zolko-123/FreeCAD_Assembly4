@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 # coding: utf-8
 # 
-# Command template 
+# newModelCmd.py 
+
 
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
-import Part, os, math, re
+import Part, math, re
 
-__dir__ = os.path.dirname(__file__)
-iconPath = os.path.join( __dir__, 'icons' )
+from libAsm4 import *
+
 
 
 class newModel:

@@ -1,18 +1,15 @@
 #!/usr/bin/env python3
 # coding: utf-8
 # 
-# Command template 
+# insertLinkCmd.py
+
 
 from PySide import QtGui, QtCore
-from libAsm4 import *
 import FreeCADGui as Gui
 import FreeCAD as App
-import Part, os, math, re
+import Part, math, re
 
-
-__dir__ = os.path.dirname(__file__)
-iconPath = os.path.join( __dir__, 'icons' )
-
+from libAsm4 import *
 
 
 """
