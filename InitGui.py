@@ -91,7 +91,7 @@ class Assembly4_WB(Workbench):
         #freecad hides wb toolbars on leaving wb, we unhide ours here to keep it around
         #if the user has it set in parameters to do so
         pg = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Mod/Assembly4")
-        keep = pg.GetBool('KeepToolbar',True)
+        keep = pg.GetBool('KeepToolbar',False)
         if not keep:
             return
         tb = window.findChildren(QtGui.QToolBar) 
