@@ -9,7 +9,7 @@ import FreeCAD as App
 import Part, os, math, re
 
 __dir__ = os.path.dirname(__file__)
-iconPath = os.path.join( __dir__, 'Resources', 'icons' )
+iconPath = os.path.join( __dir__, 'icons' )
 
 
 class newPoint:

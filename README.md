@@ -7,8 +7,11 @@ Welcome to the FreeCAD_aws wiki! This page tries to explain how to make assembli
 
 ## Installation
 
-Place and extract the downloaded archive _Assembly4.zip_ in the `~/.FreeCDA/Mod folder`, containing all extra modules.
+Download and extract the archive, and then move (or link) the sub-directory `Mod_Asm4` (which contains all the actual code) into the `~/.FreeCDA/Mod` folder, containing all additional modules.
 
+Please bear in mind that Assembly 4 is not compatible with stock FreeCAD v0.18. [Pre-built binaries](https://github.com/realthunder/FreeCAD_assembly3/releases) of realthunder's branch can be downloaded from his GitHub repository. (they are called FreeCAD-asm3-xxx but are compatible with Asm4)
+
+You can use the [example assemblies](https://github.com/Zolko-123/FreeCAD_Assembly4/tree/master/Examples) to experiment with this workbench's features.
 
 ## Principle
 
@@ -104,6 +107,9 @@ Therefore, in order to re-use a coordinate system of a part in an assembly, a co
 
 <br/>
 #### Release notes:<br/>
+
+* 2019.03.12 (version 0.5) : <br/>
+moved the actual code to Mod_Asm4
 
 * 2019.03.11 (version 0.4.1) : <br/>
 Added placement of Datum Point

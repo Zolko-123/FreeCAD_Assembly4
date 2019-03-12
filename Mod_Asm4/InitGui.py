@@ -25,7 +25,7 @@
 
 import asm4wb_locator
 asm4wbPath = os.path.dirname( asm4wb_locator.__file__ )
-asm4wb_icons_path = os.path.join( asm4wbPath, 'Resources', 'icons')
+asm4wb_icons_path = os.path.join( asm4wbPath, 'icons')
 
 global main_Assembly4WB_Icon
 main_Assembly4WB_Icon = os.path.join( asm4wb_icons_path , 'Assembly4.svg' )
