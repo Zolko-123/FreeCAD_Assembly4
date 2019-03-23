@@ -25,9 +25,6 @@ class placeLink( QtGui.QDialog ):
 	def __init__(self):
 		super(placeLink,self).__init__()
 		self.selectedLink = []
-		self.old_EE = []
-		self.old_attachment = []
-		self.old_AO = []
 		
 
 	def GetResources(self):
@@ -54,29 +51,37 @@ class placeLink( QtGui.QDialog ):
     ╚═══════════════════════════════════════════════╝
 	"""
 	def Activated(self):
-		
+
 		# get the current active document to avoid errors if user changes tab
 		self.activeDoc = App.activeDocument()
-
-		# check that we have selected an App::Link object with an associated constraint
+		# check that we have selected an App::Link object
 		selection = self.checkSelection()
 		if not selection:
 			self.close()
 		else:
 			self.selectedLink = selection
-		
-		# name of the constraints object for the link
-		self.constrName = constraintPrefix + self.selectedLink.Name
-		# this is the App::FeaturePython object that contains the link's constraints
-		self.constrFeature = self.activeDoc.getObject( self.constrName )
 		# the parent (top-level) assembly is the App::Part called Model (hard-coded)
 		self.parentAssembly = self.activeDoc.Model
+
 		# the parent object to which the linked part will be related
 		# this can be either the parent assembly or a sister part
 		self.parentPart = None
+		# clear any former old variables
+		self.old_attachment = []
+		self.old_AO = []
+		self.old_EE = []
+		self.constrFeature = []
 
-		# the GUI objects are defined later down
-		self.drawUI()
+		# name of the constraints object for the link
+		self.constrName = constraintPrefix + self.selectedLink.Name
+		# check whether it exists
+		constraint = self.activeDoc.getObject('Constraints').getObject( self.constrName )
+		if constraint:
+			self.constrFeature = constraint
+			# get and store the current attachment part
+			self.old_attachment = self.constrFeature.AttachedTo
+			# get and store the current AttachmentOffset
+			self.old_AO = self.constrFeature.AttachmentOffset
 
 		# get and store the current expression engine:
 		old_EE = self.selectedLink.ExpressionEngine
@@ -84,13 +89,9 @@ class placeLink( QtGui.QDialog ):
 			( pla, self.old_EE ) = old_EE[0]
 		else:
 			self.old_EE = False
-		#self.expression.setText( self.old_EE )
 
-		# get and store the current attachment part
-		self.old_attachment = self.constrFeature.AttachedTo
-
-		# get and store the current AttachmentOffset
-		self.old_AO = self.constrFeature.AttachmentOffset
+		# the GUI objects are defined later down
+		self.drawUI()
 
 		# for debugging, use this field to print text
 		#self.expression.setText( self.old_attPart )
@@ -100,8 +101,6 @@ class placeLink( QtGui.QDialog ):
 		# and the other things are set to 'None'
 		( self.old_Expression, self.old_attPart, self.old_attLCS, self.old_constrLink, self.old_linkLCS ) = splitExpressionPart( self.old_EE, self.old_attachment )
 
-		# Part, Left side
-		#
 		# get all the LCS in the selected linked part
 		partLCS = self.getPartLCS( self.selectedLink.LinkedObject )
 		# build the list
@@ -118,13 +117,7 @@ class placeLink( QtGui.QDialog ):
 			# ... and select it
 			self.partLCSlist.setCurrentItem( self.oldLCS[0], QtGui.QItemSelectionModel.Select )
 
-		# Assembly, Right side
-		#
 		# fill the parent selection combo-box
-		self.parentList.addItem('Select attachment Parent')
-		# the parent assembly is hardcoded, and made the first real element
-		parentIcon = self.parentAssembly.ViewObject.Icon
-		self.parentList.addItem( parentIcon, 'Parent Assembly', self.parentAssembly )
 		# Search for all App::Links in the documents
 		allLinkedParts = self.getAllLinkedParts()
 		# Now populate the list with the (linked) sister parts
@@ -136,11 +129,11 @@ class placeLink( QtGui.QDialog ):
 
 		# find the oldPart in the part list...
 		oldPart = self.parentList.findText( self.old_attPart )
-		if oldPart != -1:
-			# ... and select it
-			self.parentList.setCurrentIndex( oldPart )
-		else:
+		# if not found
+		if oldPart == -1:
 			self.parentList.setCurrentIndex( 0 )
+		else:
+			self.parentList.setCurrentIndex( oldPart )
 			# this should have triggered to fill the LCS list
 
 		# find the oldLCS in the list of LCS of the linked part...
@@ -154,125 +147,48 @@ class placeLink( QtGui.QDialog ):
 
 
 
-
 	"""
     ╔═══════════════════════════════════════════════╗
-    ║                 initial check                 ║
+    ║           create the constr_LinkName          ║
+    ║            for the App::Link object           ║
     ╚═══════════════════════════════════════════════╝
 	"""
-	def checkSelection(self):
-		# check that there is an App::Part called 'Model'
-		# a standard App::Part would also do, but then more error checks are necessary
-		if not self.activeDoc.getObject('Model') or not self.activeDoc.getObject('Model').TypeId=='App::Part' :
-			msgBox = QtGui.QMessageBox()
-			msgBox.setWindowTitle('Warning')
-			msgBox.setIcon(QtGui.QMessageBox.Critical)
-			msgBox.setText("This placement is not compatible with this assembly.")
-			msgBox.exec_()
-			return(False)
-		# check that something is selected
-		if not Gui.Selection.getSelection():
-			msgBox = QtGui.QMessageBox()
-			msgBox.setWindowTitle('Warning')
-			msgBox.setIcon(QtGui.QMessageBox.Critical)
-			msgBox.setText("Please select a linked part.")
-			msgBox.exec_()
-			return(False)
-		# set the (first) selected object as global variable
-		selectedObj = Gui.Selection.getSelection()[0]
-		# check that the selected object is of App::Link type
-		if not selectedObj.isDerivedFrom('App::Link'):
-			msgBox = QtGui.QMessageBox()
-			msgBox.setWindowTitle('Warning')
-			msgBox.setIcon(QtGui.QMessageBox.Critical)
-			msgBox.setText("Please select a linked part.")
-			msgBox.exec_()
-			return(False)
-		# check that there is indeed a constraint thing there
-		constraint = constraintPrefix + selectedObj.Name
-		# should we also check that's it's really an App::FeaturPython type ?
-		if not self.activeDoc.getObject( constraint ):
-			msgBox = QtGui.QMessageBox()
-			msgBox.setWindowTitle('Warning')
-			msgBox.setIcon(QtGui.QMessageBox.Critical)
-			msgBox.setText("There is no constraint for this linked object.")
-			msgBox.exec_()
-			return( selectedObj )
-		# now we should be safe
-		return( selectedObj )
+	def makeConstrFeature( self ):
+		# get the name of the App::Link
+		linkName = self.selectedLink.Name
+		# the name of the constraint:
+		constrName = constraintPrefix + linkName
+		# if it exists, return the existing constrFeature
+		# TODO : check that it's of the correct type ?
+		if self.activeDoc.getObject('Constraints').getObject( constrName ):
+			#self.expression.setText( constrName +' already exists' )
+			return self.activeDoc.getObject('Constraints').getObject( constrName )
+		# if it didn't exist, create it ...
+		#self.expression.setText( constrName +' doesn t exist, creating' )
+		constrFeature = self.activeDoc.getObject('Constraints').newObject( 'App::FeaturePython', constrName )
+		#self.expression.setText( constrName +' has been created' )
+		# ...and create the property fields
+		#
+		# store the name of the linked document (only for information)
+		constrFeature.addProperty( 'App::PropertyString', 'LinkedFile' )
+		constrFeature.LinkedFile = self.selectedLink.LinkedObject.Document.Name
+		# store the name of the App::Link this cosntraint refers-to
+		constrFeature.addProperty( 'App::PropertyString', 'LinkName' )
+		constrFeature.LinkName = linkName
+		# Store the type of the constraint
+		constrFeature.addProperty( 'App::PropertyString', 'ConstraintType' )
+		constrFeature.ConstraintType = 'AttachmentByLCS'
+		# add an App::Placement that will be the osffset between attachment and link LCS
+		constrFeature.addProperty( 'App::PropertyPlacement', 'AttachmentOffset', 'Attachment' )
+		# store the name of the part where the link is attached to
+		constrFeature.addProperty( 'App::PropertyString', 'AttachedTo', 'Attachment' )
+		# store the name of the LCS in the assembly where the link is attached to
+		constrFeature.addProperty( 'App::PropertyString', 'AttachmentLCS', 'Attachment' )
+		# store the name of the LCS in the assembly where the link is attached to
+		constrFeature.addProperty( 'App::PropertyString', 'LinkedPartLCS', 'Attachment' )
+		# return
+		return constrFeature
 
-
-
-	"""
-    ╔═══════════════════════════════════════════════╗
-    ║   find all the linked parts in the assembly   ║
-    ╚═══════════════════════════════════════════════╝
-	"""
-	def getAllLinkedParts(self):
-		allLinkedParts = []
-		for obj in self.activeDoc.findObjects("App::Link"):
-			# add it to our list if it's a link to an App::Part ...
-			if obj.LinkedObject.isDerivedFrom('App::Part'):
-				# ... except if it's the selected link itself, because
-				# we don't want to place the new link relative to itself !
-				if obj != self.selectedLink:
-					allLinkedParts.append( obj )
-		return allLinkedParts
-
-
-	"""
-    ╔═══════════════════════════════════════════════╗
-    ║           get all the LCS in a part           ║
-    ╚═══════════════════════════════════════════════╝
-	"""
-	def getPartLCS( self, part ):
-		partLCS = [ ]
-		# parse all objects in the part (they return strings)
-		for objName in part.getSubObjects():
-			# get the proper objects
-			# all object names end with a "." , this needs to be removed
-			obj = part.getObject( objName[0:-1] )
-			if obj.TypeId == 'PartDesign::CoordinateSystem':
-				partLCS.append( obj )
-		return partLCS
-
-
-	"""
-    ╔═══════════════════════════════════════════════╗
-    ║   fill the LCS list when chaning the parent   ║
-    ╚═══════════════════════════════════════════════╝
-	"""
-	def onParentList(self):
-		# clear the LCS list
-		self.attLCSlist.clear()
-		# clear the selection in the GUI window
-		Gui.Selection.clearSelection()
-		# the current text in the combo-box is the link's name...
-		parentName = self.parentList.currentText()
-		partLCS = []
-		# ... or it's 'Parent Assembly' then the parent is the 'Model' root App::Part
-		if parentName =='Parent Assembly':
-			parentPart = self.activeDoc.getObject( 'Model' )
-			# we get the LCS directly in the root App::Part 'Model'
-			partLCS = self.getPartLCS( parentPart )
-			self.parentDoc.setText( parentPart.Document.Name )
-		# a sister object is an App::Link
-		# the .LinkedObject is an App::Part
-		else:
-			parentPart = self.activeDoc.getObject( parentName )
-			if parentPart:
-				# we get the LCS from the linked part
-				partLCS = self.getPartLCS( parentPart.LinkedObject )
-				self.parentDoc.setText( parentPart.LinkedObject.Document.Name )
-				# highlight the selected part:
-				Gui.Selection.addSelection( parentPart.Document.Name, 'Model', parentPart.Name+'.' )
-		# build the list
-		for lcs in partLCS:
-			newItem = QtGui.QListWidgetItem()
-			newItem.setText( lcs.Name )
-			newItem.setIcon( lcs.ViewObject.Icon )
-			self.attLCSlist.addItem( newItem )
-		return
 
 
 	"""
@@ -319,6 +235,8 @@ class placeLink( QtGui.QDialog ):
 			expr = makeExpressionPart( a_Part, a_LCS, self.constrName, l_LCS )
 			# this can be skipped when this method becomes stable
 			self.expression.setText( expr )
+			# fill the constraint feature. Create it if it doesn't exist:
+			self.constrFeature = self.makeConstrFeature()  
 			# store the part where we're attached to in the constraints object
 			self.constrFeature.AttachedTo = a_Part
 			self.constrFeature.AttachmentLCS = a_LCS
@@ -328,6 +246,82 @@ class placeLink( QtGui.QDialog ):
 			# recompute the object to apply the placement:
 			self.selectedLink.recompute()
 		return
+
+
+
+	"""
+    ╔═══════════════════════════════════════════════╗
+    ║   find all the linked parts in the assembly   ║
+    ╚═══════════════════════════════════════════════╝
+	"""
+	def getAllLinkedParts(self):
+		allLinkedParts = []
+		for obj in self.activeDoc.findObjects("App::Link"):
+			# add it to our list if it's a link to an App::Part ...
+			if obj.LinkedObject.isDerivedFrom('App::Part'):
+				# ... except if it's the selected link itself, because
+				# we don't want to place the new link relative to itself !
+				if obj != self.selectedLink:
+					allLinkedParts.append( obj )
+		return allLinkedParts
+
+
+
+	"""
+    ╔═══════════════════════════════════════════════╗
+    ║           get all the LCS in a part           ║
+    ╚═══════════════════════════════════════════════╝
+	"""
+	def getPartLCS( self, part ):
+		partLCS = [ ]
+		# parse all objects in the part (they return strings)
+		for objName in part.getSubObjects():
+			# get the proper objects
+			# all object names end with a "." , this needs to be removed
+			obj = part.getObject( objName[0:-1] )
+			if obj.TypeId == 'PartDesign::CoordinateSystem':
+				partLCS.append( obj )
+		return partLCS
+
+
+
+	"""
+    ╔═══════════════════════════════════════════════╗
+    ║   fill the LCS list when chaning the parent   ║
+    ╚═══════════════════════════════════════════════╝
+	"""
+	def onParentList(self):
+		# clear the LCS list
+		self.attLCSlist.clear()
+		# clear the selection in the GUI window
+		Gui.Selection.clearSelection()
+		# the current text in the combo-box is the link's name...
+		parentName = self.parentList.currentText()
+		partLCS = []
+		# ... or it's 'Parent Assembly' then the parent is the 'Model' root App::Part
+		if parentName =='Parent Assembly':
+			parentPart = self.activeDoc.getObject( 'Model' )
+			# we get the LCS directly in the root App::Part 'Model'
+			partLCS = self.getPartLCS( parentPart )
+			self.parentDoc.setText( parentPart.Document.Name )
+		# a sister object is an App::Link
+		# the .LinkedObject is an App::Part
+		else:
+			parentPart = self.activeDoc.getObject( parentName )
+			if parentPart:
+				# we get the LCS from the linked part
+				partLCS = self.getPartLCS( parentPart.LinkedObject )
+				self.parentDoc.setText( parentPart.LinkedObject.Document.Name )
+				# highlight the selected part:
+				Gui.Selection.addSelection( parentPart.Document.Name, 'Model', parentPart.Name+'.' )
+		# build the list
+		for lcs in partLCS:
+			newItem = QtGui.QListWidgetItem()
+			newItem.setText( lcs.Name )
+			newItem.setIcon( lcs.ViewObject.Icon )
+			self.attLCSlist.addItem( newItem )
+		return
+
 
 
 	"""
@@ -357,6 +351,7 @@ class placeLink( QtGui.QDialog ):
 		return
 
 
+
 	"""
     ╔═══════════════════════════════════════════════╗
     ║                     Cancel                    ║
@@ -373,6 +368,7 @@ class placeLink( QtGui.QDialog ):
 			self.selectedLink.setExpression( 'Placement', self.old_EE )
 		self.selectedLink.recompute()
 		self.close()
+
 
 
 	"""
@@ -400,6 +396,7 @@ class placeLink( QtGui.QDialog ):
 		rotZ = App.Placement( App.Vector(0,0,0), App.Rotation( App.Vector(0,0,1), 90. ) )
 		self.rotAxis(rotZ)
 		return
+
 
 
 	"""
@@ -461,6 +458,7 @@ class placeLink( QtGui.QDialog ):
 		self.partLCSlist = QtGui.QListWidget(self)
 		self.partLCSlist.move(10,190)
 		self.partLCSlist.setMinimumSize(100, 250)
+		self.partLCSlist.setToolTip('Select a coordinate system from the list')
 
 		# Assembly, Right side
 		#
@@ -472,6 +470,12 @@ class placeLink( QtGui.QDialog ):
 		self.parentList = QtGui.QComboBox(self)
 		self.parentList.move(280,50)
 		self.parentList.setMinimumSize(250, 1)
+		self.parentList.setToolTip('Choose the part in which the attachment\ncoordinate system is to be found')
+		# the parent assembly is hardcoded, and made the first real element
+		self.parentList.addItem('Select attachment Parent')
+		parentIcon = self.parentAssembly.ViewObject.Icon
+		self.parentList.addItem( parentIcon, 'Parent Assembly', self.parentAssembly )
+
 		# label
 		self.parentLabel = QtGui.QLabel(self)
 		self.parentLabel.setText("Parent Document :")
@@ -490,7 +494,7 @@ class placeLink( QtGui.QDialog ):
 		self.attLCSlist = QtGui.QListWidget(self)
 		self.attLCSlist.move(280,190)
 		self.attLCSlist.setMinimumSize(250, 250)
-
+		self.attLCSlist.setToolTip('Select a coordinate system from the list')
 
 		# Expression
 		#
@@ -507,28 +511,34 @@ class placeLink( QtGui.QDialog ):
 		#
 		# RotX button
 		self.RotXButton = QtGui.QPushButton('Rot X', self)
+		self.RotXButton.setToolTip("Rotate the instance around the X axis by 90deg")
 		self.RotXButton.setAutoDefault(False)
 		self.RotXButton.move(130, 530)
 		# RotY button
 		self.RotYButton = QtGui.QPushButton('Rot Y', self)
+		self.RotYButton.setToolTip("Rotate the instance around the Y axis by 90deg")
 		self.RotYButton.setAutoDefault(False)
 		self.RotYButton.move(230, 530)
 		# RotZ button
 		self.RotZButton = QtGui.QPushButton('Rot Z', self)
+		self.RotZButton.setToolTip("Rotate the instance around the Z axis by 90deg")
 		self.RotZButton.setAutoDefault(False)
 		self.RotZButton.move(330, 530)
 
 		# Cancel button
 		self.CancelButton = QtGui.QPushButton('Cancel', self)
+		self.CancelButton.setToolTip("Restore initial parameters and close dialog")
 		self.CancelButton.setAutoDefault(False)
 		self.CancelButton.move(10, 600)
 		# Apply button
 		self.ApplyButton = QtGui.QPushButton('Show', self)
+		self.ApplyButton.setToolTip("Previsualise the instance's placement \nwith the chosen parameters")
 		self.ApplyButton.setAutoDefault(False)
 		self.ApplyButton.move(230, 600)
 		self.ApplyButton.setDefault(True)
 		# OK button
 		self.OKButton = QtGui.QPushButton('OK', self)
+		self.OKButton.setToolTip("Apply current parameters and close dialog")
 		self.OKButton.setAutoDefault(False)
 		self.OKButton.move(460, 600)
 
@@ -542,6 +552,55 @@ class placeLink( QtGui.QDialog ):
 		self.CancelButton.clicked.connect(self.onCancel)
 		self.ApplyButton.clicked.connect(self.onApply)
 		self.OKButton.clicked.connect(self.onOK)
+
+
+
+	"""
+    ╔═══════════════════════════════════════════════╗
+    ║                 initial check                 ║
+    ╚═══════════════════════════════════════════════╝
+	"""
+	def checkSelection(self):
+		# check that there is an App::Part called 'Model'
+		# a standard App::Part would also do, but then more error checks are necessary
+		if not self.activeDoc.getObject('Model') or not self.activeDoc.getObject('Model').TypeId=='App::Part' :
+			msgBox = QtGui.QMessageBox()
+			msgBox.setWindowTitle('Warning')
+			msgBox.setIcon(QtGui.QMessageBox.Critical)
+			msgBox.setText("This placement is not compatible with this assembly.")
+			msgBox.exec_()
+			return(False)
+		# check that something is selected
+		if not Gui.Selection.getSelection():
+			msgBox = QtGui.QMessageBox()
+			msgBox.setWindowTitle('Warning')
+			msgBox.setIcon(QtGui.QMessageBox.Critical)
+			msgBox.setText("Please select a linked part.")
+			msgBox.exec_()
+			return(False)
+		# we take the first of the selected object(s)
+		selectedObj = Gui.Selection.getSelection()[0]
+		# check that the selected object is of App::Link type
+		if not selectedObj.isDerivedFrom('App::Link'):
+			msgBox = QtGui.QMessageBox()
+			msgBox.setWindowTitle('Warning')
+			msgBox.setIcon(QtGui.QMessageBox.Critical)
+			msgBox.setText("Please select a linked part.")
+			msgBox.exec_()
+			return(False)
+		# check that there is indeed a constraint thing there
+		#constraint = constraintPrefix + selectedObj.Name
+		# should we also check that's it's really an App::FeaturPython type ?
+		#if not self.activeDoc.getObject( constraint ):
+		#	msgBox = QtGui.QMessageBox()
+		#	msgBox.setWindowTitle('Warning')
+		#	msgBox.setIcon(QtGui.QMessageBox.Critical)
+		#	msgBox.setText("There is no constraint for this linked object.")
+		#	msgBox.exec_()
+		#	return( selectedObj )
+		# now we should be safe
+		return( selectedObj )
+
 
 
 # add the command to the workbench

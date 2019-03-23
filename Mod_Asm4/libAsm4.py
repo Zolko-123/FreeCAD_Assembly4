@@ -73,6 +73,9 @@ def makeExpressionDatum( attPart, attLCS ):
     ╚═══════════════════════════════════════════════╝
 """
 def splitExpressionPart( expr, attPart ):
+	bad_EE = ( False, 'None', 'None', 'None', 'None' )
+	if not expr:
+		return bad_EE
 	#self.expression.setText( expr )
 	if attPart == 'Parent Assembly':
 		# we're attached to an LCS in the parent assembly
@@ -101,7 +104,7 @@ def splitExpressionPart( expr, attPart ):
 		retval = ( expr, attPart, attLCS, constrLink, partLCS )
 	else:
 		# rats ! But still, if the decode is unsuccessful, put some text
-		retval = ( False, 'None', 'None', 'None', 'None' )
+		retval = bad_EE
 	return retval
 
 

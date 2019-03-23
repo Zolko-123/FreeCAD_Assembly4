@@ -62,6 +62,9 @@ class insertLink( QtGui.QDialog ):
 			newItem.setIcon(part.ViewObject.Icon)
 			self.partList.addItem(newItem)
 
+		# show the UI
+		self.show()
+
 
 
 	"""
@@ -78,60 +81,12 @@ class insertLink( QtGui.QDialog ):
 			model = self.allParts[ selected.row() ]
 		# get the name of the link (as it should appear in the tree)
 		linkName = self.linkNameInput.text()
-		# only create link if there is a model and a name
+		# only create link if there is a Part object and a name
 		if model and linkName:
-			# create the App::Link to the previously selected model
+			# create the App::Link with the user-provided name
 			createdLink = self.activeDoc.getObject('Model').newObject( 'App::Link', linkName )
+			# assigne the user-selected model to it
 			createdLink.LinkedObject = model
-			# because of the unique naming principle of FreeCAD, 
-			# the created object might been assigned a different name
-			linkName = createdLink.Name
-		
-			# create an App::FeaturePython for that object in the Constraints group
-			constrName = constraintPrefix + linkName
-			# if it exists, delete it
-			# TODO : a bit aggressive, no ?
-			if self.activeDoc.getObject('Constraints').getObject( constrName ):
-				self.activeDoc.removeObject( constrName )
-			# create the constraints feature
-			constrFeature = self.activeDoc.getObject('Constraints').newObject( 'App::FeaturePython', constrName )
-			# get the App::FeaturePython itself
-			# constrFeature = self.activeDoc.getObject( constrName )
-			# store the name of the linked document (only for information)
-			constrFeature.addProperty( 'App::PropertyString', 'LinkedFile' )
-			constrFeature.LinkedFile = model.Document.Name
-			# store the name of the App::Link this cosntraint refers-to
-			constrFeature.addProperty( 'App::PropertyString', 'LinkName' )
-			constrFeature.LinkName = linkName
-
-			# Store the type of the constraint
-			constrFeature.addProperty( 'App::PropertyString', 'ConstraintType' )
-			constrFeature.ConstraintType = 'AttachmentByLCS'
-
-			# the constraint and how the part is attached with it 
-			# TODO : hard-coded, should do proper error checking
-			attPart = 'Parent Assembly'
-			attLCS  = 'LCS_0'
-			linkLCS = 'LCS_0'
-
-			# populate the App::Link's Expression Engine with this info
-			expr = makeExpressionPart( attPart, attLCS, constrName, linkLCS )
-			# put this expression into the Expression Engine of the link:
-			createdLink.setExpression( 'Placement', expr )
-
-			# add an App::Placement that will be the osffset between attachment and link LCS
-			# the last 'Placement' means that the property will be placed in that group
-			constrFeature.addProperty( 'App::PropertyPlacement', 'AttachmentOffset', 'Attachment' )
-			# store the name of the part where the link is attached to
-			constrFeature.addProperty( 'App::PropertyString', 'AttachedTo', 'Attachment' )
-			constrFeature.AttachedTo = attPart
-			# store the name of the LCS in the assembly where the link is attached to
-			constrFeature.addProperty( 'App::PropertyString', 'AttachmentLCS', 'Attachment' )
-			constrFeature.AttachmentLCS = attLCS
-			# store the name of the LCS in the assembly where the link is attached to
-			constrFeature.addProperty( 'App::PropertyString', 'LinkedPartLCS', 'Attachment' )
-			constrFeature.LinkedPartLCS = linkLCS
-
 			# update the link
 			createdLink.recompute()
 			
@@ -157,6 +112,7 @@ class insertLink( QtGui.QDialog ):
 		# get all App::Part from all open documents
 		self.allParts = []
 		for doc in App.listDocuments().values():
+			# except this document: we don't want to link to itself
 			if doc != self.activeDoc:
 				parts = doc.findObjects("App::Part")
 				# there might be more than 1 App::Part per document
@@ -229,9 +185,6 @@ class insertLink( QtGui.QDialog ):
 		self.CancelButton.clicked.connect(self.onCancel)
 		self.createLinkButton.clicked.connect(self.onCreateLink)
 		self.partList.itemClicked.connect( self.onItemClicked)
-
-		# show the UI
-		self.show()
 
 
 

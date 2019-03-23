@@ -108,6 +108,10 @@ Therefore, in order to re-use a coordinate system of a part in an assembly, a co
 <br/>
 #### Release notes:<br/>
 
+* 2019.03.18 (version 0.5.1) : <br/>
+Part can now be linked without being placed: this is then a raw interface with App::Link<br/>
+The instance can be moved manually with the 'Transform' dragger
+
 * 2019.03.12 (version 0.5) : <br/>
 moved the actual code to Mod_Asm4
 

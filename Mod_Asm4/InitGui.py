@@ -48,7 +48,7 @@ main_Assembly4WB_Icon = os.path.join( asm4wb_icons_path , 'Assembly4.svg' )
     ║            Initialize the workbench           ║
     ╚═══════════════════════════════════════════════╝
 """
-class Assembly4_WB(Workbench):
+class Assembly4_WorkBench(Workbench):
  
     global main_Assembly4WB_Icon
 
@@ -71,9 +71,9 @@ class Assembly4_WB(Workbench):
         import insertLinkCmd   # inserts an App::Link to a 'Model' in another file
         import placeLinkCmd    # places a linked part by snapping LCS (in the Part and in the Assembly)
         import placeDatumCmd     # places an LCS relative to an external file (creates a local attached copy)
-        self.listCmd =           [ "newModelCmd", "insertLinkCmd", "placeLinkCmd", "newSketchCmd", "newLCSCmd", "newPointCmd", "newBodyCmd", "placeDatumCmd" ] # A list of command names created in the line above
-        self.itemsMenu =         [ "newModelCmd", "insertLinkCmd", "placeLinkCmd", "newSketchCmd", "newLCSCmd", "newPointCmd", "newBodyCmd", "placeDatumCmd" ] # A list of command names created in the line above
-        self.itemsToolbar =      [ "newModelCmd", "insertLinkCmd", "placeLinkCmd", "newSketchCmd", "newLCSCmd", "newPointCmd", "newBodyCmd", "placeDatumCmd" ] # A list of command names created in the line above
+        self.listCmd =           [ "newModelCmd", "insertLinkCmd", "placeLinkCmd", "newSketchCmd", "newLCSCmd", "newPointCmd", "placeDatumCmd", "newBodyCmd" ] # A list of command names created in the line above
+        self.itemsMenu =         [ "newModelCmd", "insertLinkCmd", "placeLinkCmd", "newSketchCmd", "newLCSCmd", "newPointCmd", "placeDatumCmd", "newBodyCmd" ] # A list of command names created in the line above
+        self.itemsToolbar =      [ "newModelCmd", "insertLinkCmd", "placeLinkCmd", "newSketchCmd", "newLCSCmd", "newPointCmd", "placeDatumCmd", "newBodyCmd" ] # A list of command names created in the line above
         self.itemsContextMenu =  [ "placeLinkCmd", "placeDatumCmd" ] # A list of command names created in the line above
         self.appendToolbar("Assembly 4",self.itemsToolbar) # leave settings off toolbar
         self.appendMenu("&Assembly",self.itemsMenu) # creates a new menu
@@ -106,7 +106,7 @@ class Assembly4_WB(Workbench):
         return "Gui::PythonWorkbench"
 	
 	
-wb = Assembly4_WB()
+wb = Assembly4_WorkBench()
 Gui.addWorkbench(wb)
 
 
