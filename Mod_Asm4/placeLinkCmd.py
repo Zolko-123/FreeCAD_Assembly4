@@ -25,6 +25,7 @@ class placeLink( QtGui.QDialog ):
 	def __init__(self):
 		super(placeLink,self).__init__()
 		self.selectedLink = []
+		self.attLCStable = []
 		
 
 	def GetResources(self):
@@ -71,6 +72,9 @@ class placeLink( QtGui.QDialog ):
 		self.old_AO = []
 		self.old_EE = []
 		self.constrFeature = []
+		self.attLCStable = []
+		self.partLCStable = []
+
 
 		# name of the constraints object for the link
 		self.constrName = constraintPrefix + self.selectedLink.Name
@@ -102,11 +106,15 @@ class placeLink( QtGui.QDialog ):
 		( self.old_Expression, self.old_attPart, self.old_attLCS, self.old_constrLink, self.old_linkLCS ) = splitExpressionPart( self.old_EE, self.old_attachment )
 
 		# get all the LCS in the selected linked part
-		partLCS = self.getPartLCS( self.selectedLink.LinkedObject )
+		self.partLCStable = self.getPartLCS( self.selectedLink.LinkedObject )
 		# build the list
-		for lcs in partLCS:
+		for lcs in self.partLCStable:
 			newItem = QtGui.QListWidgetItem()
-			newItem.setText( lcs.Name )
+			if lcs.Name == lcs.Label:
+				newItem.setText( lcs.Name )
+			else:
+				newItem.setText( lcs.Label + ' (' +lcs.Name+ ')' )
+
 			#newItem.setIcon( lcs.ViewObject.Icon )
 			#self.lcsIcon = lcs.ViewObject.Icon
 			self.partLCSlist.addItem(newItem)
@@ -115,7 +123,8 @@ class placeLink( QtGui.QDialog ):
 		self.oldLCS = self.partLCSlist.findItems( self.old_linkLCS, QtCore.Qt.CaseSensitive )
 		if self.oldLCS:
 			# ... and select it
-			self.partLCSlist.setCurrentItem( self.oldLCS[0], QtGui.QItemSelectionModel.Select )
+			# self.partLCSlist.setCurrentItem( self.oldLCS[0], QtGui.QItemSelectionModel.Select )
+			self.partLCSlist.setCurrentItem( self.oldLCS[0] )
 
 		# fill the parent selection combo-box
 		# Search for all App::Links in the documents
@@ -140,7 +149,8 @@ class placeLink( QtGui.QDialog ):
 		self.oldLCS = self.attLCSlist.findItems( self.old_attLCS, QtCore.Qt.CaseSensitive )
 		if self.oldLCS:
 			# ... and select it
-			self.attLCSlist.setCurrentItem( self.oldLCS[0], QtGui.QItemSelectionModel.Select )
+			# self.attLCSlist.setCurrentItem( self.oldLCS[0], QtGui.QItemSelectionModel.Select )
+			self.attLCSlist.setCurrentItem( self.oldLCS[0] )
 
 		# the widget is shown and not executed to allow it to stay on top
 		self.show()
@@ -209,7 +219,8 @@ class placeLink( QtGui.QDialog ):
 		# the attachment LCS's name in the parent
 		# check that something is selected in the QlistWidget
 		if self.attLCSlist.selectedItems():
-			a_LCS = self.attLCSlist.selectedItems()[0].text()
+			#a_LCS = self.attLCSlist.selectedItems()[0].text()
+			a_LCS = self.attLCStable[ self.attLCSlist.currentRow() ].Name
 		else:
 			a_LCS = None
 		#self.expression.setText( '***'+ a_LCS +'***' )
@@ -217,7 +228,8 @@ class placeLink( QtGui.QDialog ):
 		# the LCS's name in the linked part to be used for its attachment
 		# check that something is selected in the QlistWidget
 		if self.partLCSlist.selectedItems():
-			l_LCS = self.partLCSlist.selectedItems()[0].text()
+			#l_LCS = self.partLCSlist.selectedItems()[0].text()
+			l_LCS = self.partLCStable[ self.partLCSlist.currentRow() ].Name
 		else:
 			l_LCS = None
 		#self.expression.setText( '***'+ l_LCS +'***' )
@@ -293,16 +305,17 @@ class placeLink( QtGui.QDialog ):
 	def onParentList(self):
 		# clear the LCS list
 		self.attLCSlist.clear()
+		self.attLCStable = []
 		# clear the selection in the GUI window
 		Gui.Selection.clearSelection()
 		# the current text in the combo-box is the link's name...
 		parentName = self.parentList.currentText()
-		partLCS = []
+		# partLCS = []
 		# ... or it's 'Parent Assembly' then the parent is the 'Model' root App::Part
 		if parentName =='Parent Assembly':
 			parentPart = self.activeDoc.getObject( 'Model' )
 			# we get the LCS directly in the root App::Part 'Model'
-			partLCS = self.getPartLCS( parentPart )
+			self.attLCStable = self.getPartLCS( parentPart )
 			self.parentDoc.setText( parentPart.Document.Name )
 		# a sister object is an App::Link
 		# the .LinkedObject is an App::Part
@@ -310,16 +323,20 @@ class placeLink( QtGui.QDialog ):
 			parentPart = self.activeDoc.getObject( parentName )
 			if parentPart:
 				# we get the LCS from the linked part
-				partLCS = self.getPartLCS( parentPart.LinkedObject )
+				self.attLCStable = self.getPartLCS( parentPart.LinkedObject )
 				self.parentDoc.setText( parentPart.LinkedObject.Document.Name )
 				# highlight the selected part:
 				Gui.Selection.addSelection( parentPart.Document.Name, 'Model', parentPart.Name+'.' )
 		# build the list
-		for lcs in partLCS:
+		for lcs in self.attLCStable:
 			newItem = QtGui.QListWidgetItem()
-			newItem.setText( lcs.Name )
+			if lcs.Name == lcs.Label:
+				newItem.setText( lcs.Name )
+			else:
+				newItem.setText( lcs.Label + ' (' +lcs.Name+ ')' )
 			newItem.setIcon( lcs.ViewObject.Icon )
 			self.attLCSlist.addItem( newItem )
+			#self.attLCStable.append(lcs)
 		return
 
 
@@ -334,20 +351,22 @@ class placeLink( QtGui.QDialog ):
 		# clear the selection in the GUI window
 		Gui.Selection.clearSelection()
 		# LCS of the linked part
-		p_LCS = self.partLCSlist.selectedItems()[0].text()
-		Gui.Selection.addSelection( self.activeDoc.Name, 'Model', self.selectedLink.Name+'.'+p_LCS+'.')
+		if self.partLCSlist.selectedItems():
+			#p_LCS = self.partLCSlist.selectedItems()[0].text()
+			p_LCS = self.partLCStable[ self.partLCSlist.currentRow() ].Name
+			Gui.Selection.addSelection( self.activeDoc.Name, 'Model', self.selectedLink.Name+'.'+p_LCS+'.')
 		# LCS in the parent
-		a_LCS = self.attLCSlist.selectedItems()[0].text()
-		# get the part where the selected LCS is
-		a_Part = self.parentList.currentText()
-		# parent assembly and sister part need a different treatment
-		if a_Part == 'Parent Assembly':
-			linkDot = ''
-		else:
-			linkDot = a_Part+'.'
-		# Gui.Selection.addSelection('asm_Test','Model','Lego_3001.LCS_h2x1.')
-		# Gui.Selection.addSelection('asm_Test','Model','LCS_0.')
-		Gui.Selection.addSelection( self.activeDoc.Name, 'Model', linkDot+a_LCS+'.')
+		if self.attLCSlist.selectedItems():
+			#a_LCS = self.attLCSlist.selectedItems()[0].text()
+			a_LCS = self.attLCStable[ self.attLCSlist.currentRow() ].Name
+			# get the part where the selected LCS is
+			a_Part = self.parentList.currentText()
+			# parent assembly and sister part need a different treatment
+			if a_Part == 'Parent Assembly':
+				linkDot = ''
+			else:
+				linkDot = a_Part+'.'
+			Gui.Selection.addSelection( self.activeDoc.Name, 'Model', linkDot+a_LCS+'.')
 		return
 
 

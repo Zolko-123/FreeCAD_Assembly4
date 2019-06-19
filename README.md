@@ -108,6 +108,10 @@ Therefore, in order to re-use a coordinate system of a part in an assembly, a co
 <br/>
 #### Release notes:<br/>
 
+* 2019.06.15 (version 0.5.3) : <br/>
+Now the LCS can be renamed, and they show up in the LCS list in the command placeLink as such. 
+It's only visual, the ExpressionEngine still uses the LCS.Name though
+
 * 2019.05.07 (version 0.5.2) : <br/>
 added insertDatumCmd
 

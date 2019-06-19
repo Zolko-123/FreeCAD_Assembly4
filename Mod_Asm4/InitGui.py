@@ -81,11 +81,11 @@ class Assembly4_WorkBench(Workbench):
         #self.appendMenu(["&Edit","DynamicData"],self.list) # appends a submenu to an existing menu
 
 
-	"""
+    """
     ╔═══════════════════════════════════════════════╗
     ║          Standard necessary functions         ║
     ╚═══════════════════════════════════════════════╝
-	"""
+    """
     def Activated(self):
         "This function is executed when the workbench is activated"
         return
@@ -105,8 +105,8 @@ class Assembly4_WorkBench(Workbench):
     def GetClassName(self): 
         # this function is mandatory if this is a full python workbench
         return "Gui::PythonWorkbench"
-	
-	
+
+
 wb = Assembly4_WorkBench()
 Gui.addWorkbench(wb)
 
