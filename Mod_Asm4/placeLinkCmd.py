@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # coding: utf-8
-# 
-# placeLinkCmd.py 
+#
+# placeLinkCmd.py
 
 
 from PySide import QtGui, QtCore
@@ -26,7 +26,7 @@ class placeLink( QtGui.QDialog ):
 		super(placeLink,self).__init__()
 		self.selectedLink = []
 		self.attLCStable = []
-		
+
 
 	def GetResources(self):
 		return {"MenuText": "Edit Placement of a linked Part",
@@ -174,7 +174,7 @@ class placeLink( QtGui.QDialog ):
 			#self.expression.setText( constrName +' already exists' )
 			return self.activeDoc.getObject('Constraints').getObject( constrName )
 		# if it didn't exist, create it ...
-		#self.expression.setText( constrName +' doesn t exist, creating' )
+		#self.expression.setText( constrName +' does not exist, creating' )
 		constrFeature = self.activeDoc.getObject('Constraints').newObject( 'App::FeaturePython', constrName )
 		#self.expression.setText( constrName +' has been created' )
 		# ...and create the property fields
@@ -185,13 +185,13 @@ class placeLink( QtGui.QDialog ):
 		# store the name of the linked file (only for information)
 		constrFeature.addProperty( 'App::PropertyString', 'LinkedFile' )
 		constrFeature.LinkedFile = self.selectedLink.LinkedObject.Document.FileName
-		# store the name of the App::Link this cosntraint refers-to
+		# store the name of the App::Link this constraint refers-to
 		constrFeature.addProperty( 'App::PropertyString', 'LinkName' )
 		constrFeature.LinkName = linkName
 		# Store the type of the constraint
 		constrFeature.addProperty( 'App::PropertyString', 'ConstraintType' )
 		constrFeature.ConstraintType = 'AttachmentByLCS'
-		# add an App::Placement that will be the osffset between attachment and link LCS
+		# add an App::Placement that will be the offset between attachment and link LCS
 		constrFeature.addProperty( 'App::PropertyPlacement', 'AttachmentOffset', 'Attachment' )
 		# store the name of the part where the link is attached to
 		constrFeature.addProperty( 'App::PropertyString', 'AttachedTo', 'Attachment' )
@@ -243,15 +243,15 @@ class placeLink( QtGui.QDialog ):
 			self.expression.setText( 'Problem in selections' )
 		else:
 			# this is where all the magic is, see:
-			# 
+			#
 			# https://forum.freecadweb.org/viewtopic.php?p=278124#p278124
-			# 
+			#
 			# expr = '<<'+ a_Part +'>>.Placement.multiply( <<'+ a_Part +'>>.<<'+ a_LCS +'.>>.Placement ).multiply( '+ constrName +'.Offset ).multiply( .<<'+ l_LCS +'.>>.Placement.inverse() )'
 			expr = makeExpressionPart( a_Part, a_LCS, self.constrName, l_LCS )
 			# this can be skipped when this method becomes stable
 			self.expression.setText( expr )
 			# fill the constraint feature. Create it if it doesn't exist:
-			self.constrFeature = self.makeConstrFeature()  
+			self.constrFeature = self.makeConstrFeature()
 			# store the part where we're attached to in the constraints object
 			self.constrFeature.AttachedTo = a_Part
 			self.constrFeature.AttachmentLCS = a_LCS
@@ -301,9 +301,9 @@ class placeLink( QtGui.QDialog ):
 
 
 	"""
-    +-----------------------------------------------+
-    |   fill the LCS list when chaning the parent   |
-    +-----------------------------------------------+
+    +------------------------------------------------+
+    |   fill the LCS list when changing the parent   |
+    +------------------------------------------------+
 	"""
 	def onParentList(self):
 		# clear the LCS list
@@ -347,7 +347,7 @@ class placeLink( QtGui.QDialog ):
 	"""
     +-----------------------------------------------+
     |  An LCS has been clicked in 1 of the 2 lists  |
-    |              We higlight both LCS             |
+    |              We highlight both LCS            |
     +-----------------------------------------------+
 	"""
 	def onLCSclicked( self ):
@@ -447,7 +447,7 @@ class placeLink( QtGui.QDialog ):
 		self.setModal(False)
 		# make this dialog stay above the others, always visible
 		self.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
-		
+
 		# Part, Left side
 		#
 		# Selected Link label
@@ -488,7 +488,7 @@ class placeLink( QtGui.QDialog ):
 		self.slectedLabel = QtGui.QLabel(self)
 		self.slectedLabel.setText("Select Part to attach to:")
 		self.slectedLabel.move(280,20)
-		# combobox showing all available App::Link 
+		# combobox showing all available App::Link
 		self.parentList = QtGui.QComboBox(self)
 		self.parentList.move(280,50)
 		self.parentList.setMinimumSize(250, 1)
@@ -631,5 +631,3 @@ class placeLink( QtGui.QDialog ):
     +-----------------------------------------------+
 """
 Gui.addCommand( 'placeLinkCmd', placeLink() )
-
-
