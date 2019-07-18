@@ -14,9 +14,9 @@ from libAsm4 import *
 
 
 """
-    ╔═══════════════════════════════════════════════╗
-    ║                  main class                   ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |                  main class                   |
+    +-----------------------------------------------+
 """
 class placeDatum( QtGui.QDialog ):
 	"My tool object"
@@ -47,9 +47,9 @@ class placeDatum( QtGui.QDialog ):
 
 
 	"""
-    ╔═══════════════════════════════════════════════╗
-    ║                 the real stuff                ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |                 the real stuff                |
+    +-----------------------------------------------+
 	"""
 	def Activated(self):
 		
@@ -116,12 +116,12 @@ class placeDatum( QtGui.QDialog ):
 
 
 	"""
-    ╔═══════════════════════════════════════════════╗
-    ║ check that all necessary things are selected, ║
-    ║   populate the expression with the selected   ║
-    ║    elements, put them into the constraint     ║
-    ║   and trigger the recomputation of the part   ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    | check that all necessary things are selected, |
+    |   populate the expression with the selected   |
+    |    elements, put them into the constraint     |
+    |   and trigger the recomputation of the part   |
+    +-----------------------------------------------+
 	"""
 	def onApply(self):
 		# get the name of the part to attach to:
@@ -159,9 +159,9 @@ class placeDatum( QtGui.QDialog ):
 
 
 	"""
-    ╔═══════════════════════════════════════════════╗
-    ║   find all the linked parts in the assembly   ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |   find all the linked parts in the assembly   |
+    +-----------------------------------------------+
 	"""
 	def getAllLinkedParts(self):
 		allLinkedParts = [ ]
@@ -173,9 +173,9 @@ class placeDatum( QtGui.QDialog ):
 
 
 	"""
-    ╔═══════════════════════════════════════════════╗
-    ║           get all the LCS in a part           ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |           get all the LCS in a part           |
+    +-----------------------------------------------+
 	"""
 	def getPartLCS( self, part ):
 		partLCS = [ ]
@@ -190,9 +190,9 @@ class placeDatum( QtGui.QDialog ):
 
 
 	"""
-    ╔═══════════════════════════════════════════════╗
-    ║   fill the LCS list when chaning the parent   ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |   fill the LCS list when chaning the parent   |
+    +-----------------------------------------------+
 	"""
 	def onParentList(self):
 		# clear the LCS list
@@ -226,10 +226,10 @@ class placeDatum( QtGui.QDialog ):
 
 
 	"""
-    ╔═══════════════════════════════════════════════╗
-    ║  An LCS has been clicked in 1 of the 2 lists  ║
-    ║              We higlight both LCS             ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |  An LCS has been clicked in 1 of the 2 lists  |
+    |              We higlight both LCS             |
+    +-----------------------------------------------+
 	"""
 	def onLCSclicked( self ):
 		# clear the selection in the GUI window
@@ -250,10 +250,10 @@ class placeDatum( QtGui.QDialog ):
 
 
 	"""
-    ╔═══════════════════════════════════════════════╗
-    ║                     Cancel                    ║
-    ║           restores the previous values        ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |                     Cancel                    |
+    |           restores the previous values        |
+    +-----------------------------------------------+
 	"""
 	def onCancel(self):
 		# restore previous expression if it existed
@@ -267,10 +267,10 @@ class placeDatum( QtGui.QDialog ):
 
 
 	"""
-    ╔═══════════════════════════════════════════════╗
-    ║                      OK                       ║
-    ║               accept and close                ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |                      OK                       |
+    |               accept and close                |
+    +-----------------------------------------------+
 	"""
 	def onOK(self):
 		self.onApply()
@@ -278,9 +278,9 @@ class placeDatum( QtGui.QDialog ):
 
 
 	"""
-    ╔═══════════════════════════════════════════════╗
-    ║     defines the UI, only static elements      ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |     defines the UI, only static elements      |
+    +-----------------------------------------------+
 	"""
 	def drawUI(self):
 		# Our main window will be a QDialog
@@ -370,9 +370,9 @@ class placeDatum( QtGui.QDialog ):
 
 
 	"""
-    ╔═══════════════════════════════════════════════╗
-    ║                 initial check                 ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |                 initial check                 |
+    +-----------------------------------------------+
 	"""
 	def checkSelectionLCS(self):
 		# check that there is an App::Part called 'Model'
@@ -407,5 +407,10 @@ class placeDatum( QtGui.QDialog ):
 		return( selectedObj )
 
 
-# add the command to the workbench
+
+"""
+    +-----------------------------------------------+
+    |       add the command to the workbench        |
+    +-----------------------------------------------+
+"""
 Gui.addCommand( 'placeDatumCmd', placeDatum() )

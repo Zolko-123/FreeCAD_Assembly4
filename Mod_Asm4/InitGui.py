@@ -44,9 +44,9 @@ main_Assembly4WB_Icon = os.path.join( asm4wb_icons_path , 'Assembly4.svg' )
 
 
 """
-    ╔═══════════════════════════════════════════════╗
-    ║            Initialize the workbench           ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |            Initialize the workbench           |
+    +-----------------------------------------------+
 """
 class Assembly4_WorkBench(Workbench):
  
@@ -82,9 +82,9 @@ class Assembly4_WorkBench(Workbench):
 
 
     """
-    ╔═══════════════════════════════════════════════╗
-    ║          Standard necessary functions         ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |          Standard necessary functions         |
+    +-----------------------------------------------+
     """
     def Activated(self):
         "This function is executed when the workbench is activated"
@@ -107,6 +107,12 @@ class Assembly4_WorkBench(Workbench):
         return "Gui::PythonWorkbench"
 
 
+
+"""
+    +-----------------------------------------------+
+    |          actually make the workbench          |
+    +-----------------------------------------------+
+"""
 wb = Assembly4_WorkBench()
 Gui.addWorkbench(wb)
 

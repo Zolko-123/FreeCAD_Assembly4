@@ -14,9 +14,9 @@ from libAsm4 import *
 
 
 """
-    ╔═══════════════════════════════════════════════╗
-    ║                  main class                   ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |                  main class                   |
+    +-----------------------------------------------+
 """
 class placeLink( QtGui.QDialog ):
 	"My tool object"
@@ -47,9 +47,9 @@ class placeLink( QtGui.QDialog ):
 
 
 	"""
-    ╔═══════════════════════════════════════════════╗
-    ║                 the real stuff                ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |                 the real stuff                |
+    +-----------------------------------------------+
 	"""
 	def Activated(self):
 
@@ -158,10 +158,10 @@ class placeLink( QtGui.QDialog ):
 
 
 	"""
-    ╔═══════════════════════════════════════════════╗
-    ║           create the constr_LinkName          ║
-    ║            for the App::Link object           ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |           create the constr_LinkName          |
+    |            for the App::Link object           |
+    +-----------------------------------------------+
 	"""
 	def makeConstrFeature( self ):
 		# get the name of the App::Link
@@ -180,8 +180,11 @@ class placeLink( QtGui.QDialog ):
 		# ...and create the property fields
 		#
 		# store the name of the linked document (only for information)
+		constrFeature.addProperty( 'App::PropertyString', 'LinkedDocument' )
+		constrFeature.LinkedDocument = self.selectedLink.LinkedObject.Document.Name
+		# store the name of the linked file (only for information)
 		constrFeature.addProperty( 'App::PropertyString', 'LinkedFile' )
-		constrFeature.LinkedFile = self.selectedLink.LinkedObject.Document.Name
+		constrFeature.LinkedFile = self.selectedLink.LinkedObject.Document.FileName
 		# store the name of the App::Link this cosntraint refers-to
 		constrFeature.addProperty( 'App::PropertyString', 'LinkName' )
 		constrFeature.LinkName = linkName
@@ -202,12 +205,12 @@ class placeLink( QtGui.QDialog ):
 
 
 	"""
-    ╔═══════════════════════════════════════════════╗
-    ║ check that all necessary things are selected, ║
-    ║   populate the expression with the selected   ║
-    ║    elements, put them into the constraint     ║
-    ║   and trigger the recomputation of the part   ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    | check that all necessary things are selected, |
+    |   populate the expression with the selected   |
+    |    elements, put them into the constraint     |
+    |   and trigger the recomputation of the part   |
+    +-----------------------------------------------+
 	"""
 	def onApply( self ):
 		# get the name of the part to attach to:
@@ -262,9 +265,9 @@ class placeLink( QtGui.QDialog ):
 
 
 	"""
-    ╔═══════════════════════════════════════════════╗
-    ║   find all the linked parts in the assembly   ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |   find all the linked parts in the assembly   |
+    +-----------------------------------------------+
 	"""
 	def getAllLinkedParts(self):
 		allLinkedParts = []
@@ -280,9 +283,9 @@ class placeLink( QtGui.QDialog ):
 
 
 	"""
-    ╔═══════════════════════════════════════════════╗
-    ║           get all the LCS in a part           ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |           get all the LCS in a part           |
+    +-----------------------------------------------+
 	"""
 	def getPartLCS( self, part ):
 		partLCS = [ ]
@@ -298,9 +301,9 @@ class placeLink( QtGui.QDialog ):
 
 
 	"""
-    ╔═══════════════════════════════════════════════╗
-    ║   fill the LCS list when chaning the parent   ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |   fill the LCS list when chaning the parent   |
+    +-----------------------------------------------+
 	"""
 	def onParentList(self):
 		# clear the LCS list
@@ -342,10 +345,10 @@ class placeLink( QtGui.QDialog ):
 
 
 	"""
-    ╔═══════════════════════════════════════════════╗
-    ║  An LCS has been clicked in 1 of the 2 lists  ║
-    ║              We higlight both LCS             ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |  An LCS has been clicked in 1 of the 2 lists  |
+    |              We higlight both LCS             |
+    +-----------------------------------------------+
 	"""
 	def onLCSclicked( self ):
 		# clear the selection in the GUI window
@@ -372,10 +375,10 @@ class placeLink( QtGui.QDialog ):
 
 
 	"""
-    ╔═══════════════════════════════════════════════╗
-    ║                     Cancel                    ║
-    ║           restores the previous values        ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |                     Cancel                    |
+    |           restores the previous values        |
+    +-----------------------------------------------+
 	"""
 	def onCancel(self):
 		# restore previous values
@@ -391,9 +394,9 @@ class placeLink( QtGui.QDialog ):
 
 
 	"""
-    ╔═══════════════════════════════════════════════╗
-    ║                  Rotations                    ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |                  Rotations                    |
+    +-----------------------------------------------+
 	"""
 	def rotAxis( self, plaRotAxis ):
 		constrAO = self.constrFeature.AttachmentOffset
@@ -419,10 +422,10 @@ class placeLink( QtGui.QDialog ):
 
 
 	"""
-    ╔═══════════════════════════════════════════════╗
-    ║                      OK                       ║
-    ║               accept and close                ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |                      OK                       |
+    |               accept and close                |
+    +-----------------------------------------------+
 	"""
 	def onOK(self):
 		self.onApply()
@@ -431,9 +434,9 @@ class placeLink( QtGui.QDialog ):
 
 
 	"""
-    ╔═══════════════════════════════════════════════╗
-    ║     defines the UI, only static elements      ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |     defines the UI, only static elements      |
+    +-----------------------------------------------+
 	"""
 	def drawUI(self):
 		# Our main window will be a QDialog
@@ -575,9 +578,9 @@ class placeLink( QtGui.QDialog ):
 
 
 	"""
-    ╔═══════════════════════════════════════════════╗
-    ║                 initial check                 ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |                 initial check                 |
+    +-----------------------------------------------+
 	"""
 	def checkSelection(self):
 		# check that there is an App::Part called 'Model'
@@ -622,7 +625,11 @@ class placeLink( QtGui.QDialog ):
 
 
 
-# add the command to the workbench
+"""
+    +-----------------------------------------------+
+    |       add the command to the workbench        |
+    +-----------------------------------------------+
+"""
 Gui.addCommand( 'placeLinkCmd', placeLink() )
 
 

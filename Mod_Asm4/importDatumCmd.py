@@ -14,9 +14,9 @@ from libAsm4 import *
 
 
 """
-    ╔═══════════════════════════════════════════════╗
-    ║                  main class                   ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |                  main class                   |
+    +-----------------------------------------------+
 """
 class importDatum( QtGui.QDialog ):
 	"My tool object"
@@ -44,10 +44,10 @@ class importDatum( QtGui.QDialog ):
 			return False 
 
 
-	"""
-    ╔═══════════════════════════════════════════════╗
-    ║                 the real stuff                ║
-    ╚═══════════════════════════════════════════════╝
+	"""  
+    +-----------------------------------------------+
+    |                 the real stuff                |
+    +-----------------------------------------------+
 	"""
 	def Activated(self):
 		
@@ -73,12 +73,12 @@ class importDatum( QtGui.QDialog ):
 
 
 	"""
-    ╔═══════════════════════════════════════════════╗
-    ║ check that all necessary things are selected, ║
-    ║   populate the expression with the selected   ║
-    ║    elements, put them into the constraint     ║
-    ║   and trigger the recomputation of the part   ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    | check that all necessary things are selected, |
+    |   populate the expression with the selected   |
+    |    elements, put them into the constraint     |
+    |   and trigger the recomputation of the part   |
+    +-----------------------------------------------+
 	"""
 	def onApply(self):
 		# get the name of the part where the datum to be copied is:
@@ -127,9 +127,9 @@ class importDatum( QtGui.QDialog ):
 
 
 	"""
-    ╔═══════════════════════════════════════════════╗
-    ║   find all the linked parts in the assembly   ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |   find all the linked parts in the assembly   |
+    +-----------------------------------------------+
 	"""
 	def getAllLinkedParts(self):
 		allLinkedParts = [ ]
@@ -141,9 +141,9 @@ class importDatum( QtGui.QDialog ):
 
 
 	"""
-    ╔═══════════════════════════════════════════════╗
-    ║           get all the Datums in a Link        ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |           get all the Datums in a Link        |
+    +-----------------------------------------------+
 	"""
 	def getLinkDatums( self, link ):
 		linkDatums = [ ]
@@ -158,9 +158,9 @@ class importDatum( QtGui.QDialog ):
 
 
 	"""
-    ╔═══════════════════════════════════════════════╗
-    ║   fill the LCS list when chaning the parent   ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |   fill the LCS list when chaning the parent   |
+    +-----------------------------------------------+
 	"""
 	def onParentList(self):
 		# clear the LCS list
@@ -197,10 +197,10 @@ class importDatum( QtGui.QDialog ):
 
 
 	"""
-    ╔═══════════════════════════════════════════════╗
-    ║  An LCS has been clicked in 1 of the 2 lists  ║
-    ║              We higlight both LCS             ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |  An LCS has been clicked in 1 of the 2 lists  |
+    |              We higlight both LCS             |
+    +-----------------------------------------------+
 	"""
 	def onDatumClicked( self ):
 		# clear the selection in the GUI window
@@ -222,20 +222,20 @@ class importDatum( QtGui.QDialog ):
 
 
 	"""
-    ╔═══════════════════════════════════════════════╗
-    ║                     Cancel                    ║
-    ║           restores the previous values        ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |                     Cancel                    |
+    |           restores the previous values        |
+    +-----------------------------------------------+
 	"""
 	def onCancel(self):
 		self.close()
 
 
 	"""
-    ╔═══════════════════════════════════════════════╗
-    ║                      OK                       ║
-    ║               accept and close                ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |                      OK                       |
+    |               accept and close                |
+    +-----------------------------------------------+
 	"""
 	def onOK(self):
 		self.onApply()
@@ -243,9 +243,9 @@ class importDatum( QtGui.QDialog ):
 
 
 	"""
-    ╔═══════════════════════════════════════════════╗
-    ║     defines the UI, only static elements      ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |     defines the UI, only static elements      |
+    +-----------------------------------------------+
 	"""
 	def drawUI(self):
 		# Our main window will be a QDialog
@@ -324,5 +324,9 @@ class importDatum( QtGui.QDialog ):
 
 
 
-# add the command to the workbench
+"""
+    +-----------------------------------------------+
+    |       add the command to the workbench        |
+    +-----------------------------------------------+
+"""
 Gui.addCommand( 'importDatumCmd', importDatum() )

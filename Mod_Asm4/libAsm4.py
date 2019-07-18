@@ -5,9 +5,9 @@
 
 
 """
-    ╔═══════════════════════════════════════════════╗
-    ║          shouldn't these be DEFINE's ?        ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |          shouldn't these be DEFINE's ?        |
+    +-----------------------------------------------+
 """
 constraintPrefix = 'constr_'
 
@@ -17,10 +17,10 @@ iconPath = os.path.join( __dir__, 'icons' )
 
 
 """
-    ╔═══════════════════════════════════════════════╗
-    ║         populate the ExpressionEngine         ║
-    ║             for a linked App::Part            ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |         populate the ExpressionEngine         |
+    |             for a linked App::Part            |
+    +-----------------------------------------------+
 """
 def makeExpressionPart( attPart, attLCS, constrName, linkLCS ):
 	# <<Cuve>>.Placement.multiply(<<Cuve>>.<<LCS_0001.>>.Placement).multiply(<<PLM_Screw_1>>.Placement).multiply(.<<LCS_0.>>.Placement.inverse())
@@ -46,11 +46,11 @@ def makeExpressionPart( attPart, attLCS, constrName, linkLCS ):
 
 
 """
-    ╔═══════════════════════════════════════════════╗
-    ║         populate the ExpressionEngine         ║
-    ║               for a Datum object              ║
-    ║       linked to an LCS in a sister part       ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |         populate the ExpressionEngine         |
+    |               for a Datum object              |
+    |       linked to an LCS in a sister part       |
+    +-----------------------------------------------+
 """
 def makeExpressionDatum( attPart, attLCS ):
 	# expr = '<<'+attPart+'>>.Placement.multiply( <<'+attPart+'>>.<<'+attLCS+'.>>.Placement ).multiply( '+offsetName+'.Offset ).multiply( .<<'+linkLCS+'.>>.Placement.inverse() )'
@@ -65,12 +65,12 @@ def makeExpressionDatum( attPart, attLCS ):
 
 
 """
-    ╔═══════════════════════════════════════════════╗
-    ║  split the ExpressionEngine of a linked part  ║
-    ║          to find the old attachment LCS       ║
-    ║   (in the parent assembly or a sister part)   ║
-    ║   and the old target LCS in the linked Part   ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |  split the ExpressionEngine of a linked part  |
+    |          to find the old attachment LCS       |
+    |   (in the parent assembly or a sister part)   |
+    |   and the old target LCS in the linked Part   |
+    +-----------------------------------------------+
 """
 def splitExpressionPart( expr, attPart ):
 	bad_EE = ( False, 'None', 'None', 'None', 'None' )
@@ -111,11 +111,11 @@ def splitExpressionPart( expr, attPart ):
 
 
 """
-    ╔═══════════════════════════════════════════════╗
-    ║           split the ExpressionEngine          ║
-    ║        of a linked Datum object to find       ║
-    ║         the old attachment Part and LCS       ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |           split the ExpressionEngine          |
+    |        of a linked Datum object to find       |
+    |         the old attachment Part and LCS       |
+    +-----------------------------------------------+
 """
 def splitExpressionDatum( expr ):
 	# no sense to be attached to an LCS in the parent assembly

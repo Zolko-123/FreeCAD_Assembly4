@@ -13,9 +13,9 @@ from libAsm4 import *
 
 
 """
-    ╔═══════════════════════════════════════════════╗
-    ║                  main class                   ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |                  main class                   |
+    +-----------------------------------------------+
 """
 class insertLink( QtGui.QDialog ):
 	"My tool object"
@@ -68,9 +68,9 @@ class insertLink( QtGui.QDialog ):
 
 
 	"""
-    ╔═══════════════════════════════════════════════╗
-    ║         the real stuff happens here           ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |         the real stuff happens here           |
+    +-----------------------------------------------+
 	"""
 	def onCreateLink(self):
 		# parse the selected items 
@@ -104,9 +104,9 @@ class insertLink( QtGui.QDialog ):
 
 
 	"""
-    ╔═══════════════════════════════════════════════╗
-    ║                 some fonctions                ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |                 some fonctions                |
+    +-----------------------------------------------+
 	"""
 	def getAllParts(self):
 		# get all App::Part from all open documents
@@ -134,9 +134,9 @@ class insertLink( QtGui.QDialog ):
 
 
 	"""
-    ╔═══════════════════════════════════════════════╗
-    ║     defines the UI, only static elements      ║
-    ╚═══════════════════════════════════════════════╝
+    +-----------------------------------------------+
+    |     defines the UI, only static elements      |
+    +-----------------------------------------------+
 	"""
 	def drawUI(self):
 
@@ -187,7 +187,10 @@ class insertLink( QtGui.QDialog ):
 		self.partList.itemClicked.connect( self.onItemClicked)
 
 
-
-# add the command to the workbench
+"""
+    +-----------------------------------------------+
+    |       add the command to the workbench        |
+    +-----------------------------------------------+
+"""
 Gui.addCommand( 'insertLinkCmd', insertLink() )
 
