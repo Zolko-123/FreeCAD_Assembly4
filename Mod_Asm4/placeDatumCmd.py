@@ -43,7 +43,7 @@ class placeDatum( QtGui.QDialog ):
 				if selectedType=='PartDesign::CoordinateSystem' or selectedType=='PartDesign::Point':
 					return True
 		else:
-			return(False)
+			return False 
 
 
 	"""

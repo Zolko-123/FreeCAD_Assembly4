@@ -43,7 +43,7 @@ class placeLink( QtGui.QDialog ):
 				if Gui.Selection.getSelection()[0].isDerivedFrom('App::Link'):
 					return True
 		else:
-			return(False)
+			return False
 
 
 	"""
