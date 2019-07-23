@@ -104,46 +104,45 @@ Therefore, in order to re-use a coordinate system of a part in an assembly, a co
 
 
 
+#### Release notes
 
-<br/>
-#### Release notes:<br/>
 
-* 2019.07.23 (version 0.5.5) : <br/>
+* 2019.07.23 (**version 0.5.5**) :  
 Fixed a bug in partLCSlist.findItems
 
-* 2019.07.18 (version 0.5.4) : <br/>
+* 2019.07.18 (**version 0.5.4**) :  
 A cosmetic update to fix a 25 year old Windows bug: 
 some UTF-8 characters in the comments were not accepted on some Windows 10 machines
 
-* 2019.06.15 (version 0.5.3) : <br/>
+* 2019.06.15 (**version 0.5.3**) :  
 Now the LCS can be renamed, and they show up in the LCS list in the command placeLink as such. 
 It's only visual, the ExpressionEngine still uses the LCS.Name though
 
-* 2019.05.07 (version 0.5.2) : <br/>
+* 2019.05.07 (**version 0.5.2**) :  
 added insertDatumCmd
 
-* 2019.03.18 (version 0.5.1) : <br/>
-Part can now be linked without being placed: this is then a raw interface with App::Link<br/>
+* 2019.03.18 (**version 0.5.1**) :  
+Part can now be linked without being placed: this is then a raw interface with App::Link  
 The instance can be moved manually with the 'Transform' dragger
 
-* 2019.03.12 (version 0.5) : <br/>
+* 2019.03.12 (**version 0.5**) :  
 moved the actual code to Mod_Asm4
 
-* 2019.03.11 (version 0.4.1) : <br/>
+* 2019.03.11 (**version 0.4.1**) :  
 Added placement of Datum Point
 
-* 2019.03.09 (version 0.4) : <br/>
-FreeCAD now imports as App <br/>
+* 2019.03.09 (**version 0.4**) :  
+FreeCAD now imports as App  
 insert_Link launches place_Link
 
-* 2019.03.05 (version 0.3.1) : <br/>
+* 2019.03.05 (**version 0.3.1**) :  
 added the RotX-Y-Z buttons
 
-* 2019.02.20 (version 0.3) : <br/>
+* 2019.02.20 (**version 0.3**)  
 mostly working version
 
-* 2019.02.18 (version 0.1) : <br/>
-initial release of Assembly 4 WB.
+* 2019.02.18 (**version 0.1**) :  
+initial release of Assembly 4 WB
 
 
 
