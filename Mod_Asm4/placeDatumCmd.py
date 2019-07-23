@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # coding: utf-8
-# 
-# placeDatumCmd.py 
+#
+# placeDatumCmd.py
 
 
 from PySide import QtGui, QtCore
@@ -52,7 +52,7 @@ class placeDatum( QtGui.QDialog ):
     +-----------------------------------------------+
 	"""
 	def Activated(self):
-		
+
 		# get the current active document to avoid errors if user changes tab
 		self.activeDoc = App.activeDocument()
 
@@ -191,9 +191,9 @@ class placeDatum( QtGui.QDialog ):
 
 
 	"""
-    +-----------------------------------------------+
-    |   fill the LCS list when chaning the parent   |
-    +-----------------------------------------------+
+    +------------------------------------------------+
+    |   fill the LCS list when changing the parent   |
+    +------------------------------------------------+
 	"""
 	def onParentList(self):
 		# clear the LCS list
@@ -229,7 +229,7 @@ class placeDatum( QtGui.QDialog ):
 	"""
     +-----------------------------------------------+
     |  An LCS has been clicked in 1 of the 2 lists  |
-    |              We higlight both LCS             |
+    |              We highlight both LCS            |
     +-----------------------------------------------+
 	"""
 	def onLCSclicked( self ):
@@ -292,7 +292,7 @@ class placeDatum( QtGui.QDialog ):
 		self.setModal(False)
 		# make this dialog stay above the others, always visible
 		self.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
-		
+
 		# Part, Left side
 		#
 		# Selected Link label
@@ -306,7 +306,7 @@ class placeDatum( QtGui.QDialog ):
 		self.lscName.setMinimumSize(150, 1)
 		self.lscName.move(150,18)
 
-		# combobox showing all available App::Link 
+		# combobox showing all available App::Link
 		self.parentList = QtGui.QComboBox(self)
 		self.parentList.move(10,80)
 		self.parentList.setMinimumSize(350, 1)
