@@ -108,6 +108,9 @@ Therefore, in order to re-use a coordinate system of a part in an assembly, a co
 <br/>
 #### Release notes:<br/>
 
+* 2019.07.23 (version 0.5.5) : <br/>
+Fixed a bug in partLCSlist.findItems
+
 * 2019.07.18 (version 0.5.4) : <br/>
 A cosmetic update to fix a 25 year old Windows bug: 
 some UTF-8 characters in the comments were not accepted on some Windows 10 machines
