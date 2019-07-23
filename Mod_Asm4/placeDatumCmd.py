@@ -99,7 +99,8 @@ class placeDatum( QtGui.QDialog ):
 
 		# this should have triggered to fill the LCS list
 		# find the oldLCS in the list of LCS of the linked part...
-		oldLCS = self.attLCSlist.findItems( self.old_attLCS, QtCore.Qt.CaseSensitive )
+		#oldLCS = self.attLCSlist.findItems( self.old_attLCS, QtCore.Qt.CaseSensitive )
+		oldLCS = self.attLCSlist.findItems( self.old_attLCS, QtCore.Qt.MatchExactly )
 		if oldLCS:
 			# ... and select it
 			self.attLCSlist.setCurrentItem( oldLCS[0], QtGui.QItemSelectionModel.Select )

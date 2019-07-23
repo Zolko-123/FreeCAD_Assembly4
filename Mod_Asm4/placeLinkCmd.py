@@ -120,7 +120,8 @@ class placeLink( QtGui.QDialog ):
 			self.partLCSlist.addItem(newItem)
 
 		# find the oldLCS in the list of LCS of the linked part...
-		self.oldLCS = self.partLCSlist.findItems( self.old_linkLCS, QtCore.Qt.CaseSensitive )
+		#self.oldLCS = self.partLCSlist.findItems( self.old_linkLCS, QtCore.Qt.CaseSensitive )
+		self.oldLCS = self.partLCSlist.findItems( self.old_linkLCS, QtCore.Qt.MatchExactly )
 		if self.oldLCS:
 			# ... and select it
 			# self.partLCSlist.setCurrentItem( self.oldLCS[0], QtGui.QItemSelectionModel.Select )
@@ -146,7 +147,8 @@ class placeLink( QtGui.QDialog ):
 			# this should have triggered to fill the LCS list
 
 		# find the oldLCS in the list of LCS of the linked part...
-		self.oldLCS = self.attLCSlist.findItems( self.old_attLCS, QtCore.Qt.CaseSensitive )
+		#self.oldLCS = self.attLCSlist.findItems( self.old_attLCS, QtCore.Qt.CaseSensitive )
+		self.oldLCS = self.attLCSlist.findItems( self.old_attLCS, QtCore.Qt.MatchExactly )
 		if self.oldLCS:
 			# ... and select it
 			# self.attLCSlist.setCurrentItem( self.oldLCS[0], QtGui.QItemSelectionModel.Select )
