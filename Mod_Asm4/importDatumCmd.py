@@ -158,9 +158,9 @@ class importDatum( QtGui.QDialog ):
 
 
 	"""
-    +-----------------------------------------------+
-    |   fill the LCS list when chaning the parent   |
-    +-----------------------------------------------+
+    +------------------------------------------------+
+    |   fill the LCS list when changing the parent   |
+    +------------------------------------------------+
 	"""
 	def onParentList(self):
 		# clear the LCS list
@@ -199,7 +199,7 @@ class importDatum( QtGui.QDialog ):
 	"""
     +-----------------------------------------------+
     |  An LCS has been clicked in 1 of the 2 lists  |
-    |              We higlight both LCS             |
+    |              We highlight both LCS            |
     +-----------------------------------------------+
 	"""
 	def onDatumClicked( self ):
