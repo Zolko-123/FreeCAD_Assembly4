@@ -5,17 +5,12 @@ Welcome to the FreeCAD_aws wiki! This page tries to explain how to make assembli
 
 ## Installation
 
-<<<<<<< HEAD
 Download and extract the archive, and then move (or link) the sub-directory `Mod_Asm4` (which contains all the actual code) into the `~/.FreeCDA/Mod` folder, containing all additional modules.
 
 Please bear in mind that Assembly 4 is not compatible with the stable FreeCAD v0.18, it needs at least v0.19. You can find [pre-built binaries here](https://github.com/FreeCAD/FreeCAD/releases/tag/0.19_pre)
 
 You can use the [example assemblies](https://github.com/Zolko-123/FreeCAD_Assembly4/tree/master/Examples) to experiment with this workbench's features. Open one _asm_something.fcstd_ file and try out the functions. There are ReadMe.txt files in each durectory with some explanations.
-=======
-Download and extract the archive, and then move (or link) the sub-directory `Mod_Asm4` (which contains all the actual code) into the `~/.FreeCDA/Mod` folder, containing all additional modules.  
-Please bear in mind that Assembly 4 is not compatible with stock FreeCAD v0.18. [Pre-built binaries](https://github.com/realthunder/FreeCAD_assembly3/releases) of realthunder's branch can be downloaded from his GitHub repository (they are called FreeCAD-asm3-xxx but are compatible with Asm4).  
-You can use the [example assemblies](https://github.com/Zolko-123/FreeCAD_Assembly4/tree/master/Examples) to experiment with this workbench's features.  
->>>>>>> f955c994a08e7497b488b93a09e1d812bfff0fee
+
 
 ## Principle
 
@@ -53,7 +48,7 @@ In normal use, the ExpressionEngine of an _`App::Link`_ object is hidden, it mus
 
 The syntax of the ExpressionEngine is the following:
 
-<<<<<<< HEAD
+
 * **If the LCS belongs to the parent assembly:**
 
 `LCS_parent.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS_link.Placement ^ -1`
@@ -70,16 +65,9 @@ The syntax of the ExpressionEngine is the following:
 * _LCS_link_ is the LCS in the linked part
 
 **Constraints**:
-=======
-* **If the LCS belongs to the parent assembly:**  
-  `<<attLCS>>.Placement.multiply(<<constr_Link>>.Offset).multiply(.<<partLCS.>>.Placement.inverse())`
 
-* **If the LCS belongs to a sister part:**  
-  `<<attPart>>.Placement.multiply(<<attPart>>.<<attLCS.>>.Placement).multiply(<<constr_Link>>.Offset).multiply(.<<partLCS.>>.Placement.inverse())`
-
-* **Constraints:**  
   To each part inserted into an assembly is associated an `App::FeaturePython` object, placed in the 'Constraints' group. This object contains information about the placement of the linked object in the assembly. It also contains an `App::Placement`, called 'AttachmentOffset', which introduces an offset between the LCS in the part and the LCS in the assembly. The main purpose of this offset is to correct bad orientations between the 2 matching LCS. 
->>>>>>> f955c994a08e7497b488b93a09e1d812bfff0fee
+
 
   These constraints are not really constraints in the traditional CAD sense, but since `App::FeaturePython` objects are very versatile, they could be expanded to contain real constraints in some (distant) future.
 
