@@ -22,45 +22,26 @@ iconPath = os.path.join( __dir__, 'icons' )
     |             for a linked App::Part            |
     +-----------------------------------------------+
 """
-def makeExpressionPart( attPart, attLCS, constrName, linkLCS ):
-	# <<Cuve>>.Placement.multiply(<<Cuve>>.<<LCS_0001.>>.Placement).multiply(<<PLM_Screw_1>>.Placement).multiply(.<<LCS_0.>>.Placement.inverse())
-	# expr = '<<'+attPart+'>>.Placement.multiply( <<'+attPart+'>>.<<'+attLCS+'.>>.Placement ).multiply( '+offsetName+'.Offset ).multiply( .<<'+linkLCS+'.>>.Placement.inverse() )'
-	#
+def makeExpressionPart( attLink, attPart, attLCS, constrName, linkedPart, linkLCS ):
 	# if everything is defined
-	if attPart and attLCS and constrName and linkLCS:
+	if attLink and attLCS and constrName and linkedPart and linkLCS:
 		# this is where all the magic is, see:
 		# 
 		# https://forum.freecadweb.org/viewtopic.php?p=278124#p278124
-		# 
-		# expr = '<<'+ a_Part +'>>.Placement.multiply( <<'+ a_Part +'>>.<<'+ a_LCS +'.>>.Placement ).multiply( '+ constrName +'.Offset ).multiply( .<<'+ l_LCS +'.>>.Placement.inverse() )'
 		#
-		# the syntax for an attachment to the parent assembly is shorter
-		if attPart == 'Parent Assembly':
-			expr = '<<'+attLCS+'>>.Placement.multiply( <<'+constrName+'>>.AttachmentOffset ).multiply( .<<'+linkLCS+'.>>.Placement.inverse() )'
-		else:
-			expr = '<<'+attPart+'>>.Placement.multiply( <<'+attPart+'>>.<<'+attLCS+'.>>.Placement ).multiply( <<'+constrName+'>>.AttachmentOffset ).multiply( .<<'+linkLCS+'.>>.Placement.inverse() )'			
+		# as of FreeCAD v0.19 the syntax is different:
+		# https://forum.freecadweb.org/viewtopic.php?f=17&t=38974&p=337784#p337784
+		# expr = ParentLink.Placement * ParentPart#LCS.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS.Placement ^ -1
+		# expr = LCS_in_the_assembly.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS.Placement ^ -1
+		expr = attLCS+'.Placement * '+constrName+'.AttachmentOffset * '+linkedPart+'#'+linkLCS+'.Placement ^ -1'
+		# if we're attached to another sister part (and not the Parent Assembly)
+		# we need to take into account the Placement of that Part.
+		if attPart:
+			expr = attLink+'.Placement * '+attPart+'#'+expr
 	else:
 		expr = False
 	return expr
 
-
-
-"""
-    +-----------------------------------------------+
-    |         populate the ExpressionEngine         |
-    |               for a Datum object              |
-    |       linked to an LCS in a sister part       |
-    +-----------------------------------------------+
-"""
-def makeExpressionDatum( attPart, attLCS ):
-	# expr = '<<'+attPart+'>>.Placement.multiply( <<'+attPart+'>>.<<'+attLCS+'.>>.Placement ).multiply( '+offsetName+'.Offset ).multiply( .<<'+linkLCS+'.>>.Placement.inverse() )'
-	if attPart and attLCS:
-		# don't forget the last '.' !!!
-		# <<LinkName>>.Placement.multiply( <<LinkName>>.<<LCS.>>.Placement )
-		expr = '<<'+ attPart +'>>.Placement.multiply( <<'+ attPart +'>>.<<'+ attLCS +'.>>.Placement )'
-	else:
-		expr = False
-	return expr
 
 
 
@@ -72,41 +53,60 @@ def makeExpressionDatum( attPart, attLCS ):
     |   and the old target LCS in the linked Part   |
     +-----------------------------------------------+
 """
-def splitExpressionPart( expr, attPart ):
-	bad_EE = ( False, 'None', 'None', 'None', 'None' )
+def splitExpressionPart( expr, parent ):
+		# expr = ParentLink.Placement * ParentPart#LCS.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
+	bad_EE = ( '', 'None', 'None', 'None', 'None', 'None')
 	if not expr:
-		return bad_EE
-	#self.expression.setText( expr )
-	if attPart == 'Parent Assembly':
+		return ( 'Empty expression x1', 'None', 'None', 'None', 'None', 'None')
+	if parent == 'Parent Assembly':
 		# we're attached to an LCS in the parent assembly
-		# <<attLCS>>.Placement.multiply(<<constr_Link>>.Offset).multiply(.<<partLCS.>>.Placement.inverse())
-		( attLCS, separator, rest1 ) = expr[2:-1].partition('>>')
-		( crap, separator, rest2 ) = rest1.partition('<<')
-		( constrLink, separator, rest3 ) = rest2.partition('>>')
-		( crap, separator, rest4 ) = rest3.partition('.<<')
-		( partLCS, separator, rest5 ) = rest4.partition('.>>.')
-		restFinal = rest5[0:9]
-		#self.expression.setText( restFinal )
+		# expr = LCS_in_the_assembly.Placement * constr_Name.AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
+		( attLCS, separator, rest1 ) = expr.partition('.Placement * ')
+		( constrName, separator, rest2 ) = rest1.partition('.AttachmentOffset * ')
+		( linkedPart, separator, rest3 ) = rest2.partition('#')
+		( linkLCS, separator, rest4 ) = rest3.partition('.Placement ^ ')
+		restFinal = rest4[0:2]
+		attLink = parent
+		attPart = 'None'
+		#return ( restFinal, 'None', 'None', 'None', 'None', 'None')
 	else:
 		# we're attached to an LCS in a sister part
-		# <<attPart>>.Placement.multiply(<<attPart>>.<<attLCS.>>.Placement).multiply(<<constr_Link>>.Offset).multiply(.<<partLCS.>>.Placement.inverse())
-		( attPart, separator, rest1 ) = expr[2:-1].partition('>>')
-		( crap, separator, rest2 ) = rest1.partition('<<')
-		( check_attPart, separator, rest3 ) = rest2.partition('>>.<<')
-		( attLCS, separator, rest4 ) = rest3.partition('.>>.')
-		( crap, separator, rest5 ) = rest4.partition('<<')
-		( constrLink, separator, rest6 ) = rest5.partition('>>')
-		( crap, separator, rest7 ) = rest6.partition('.<<')
-		( partLCS, separator, rest8 ) = rest7.partition('.>>.')
-		restFinal = rest8[0:9]
-	if restFinal=='Placement':
+		# expr = ParentLink.Placement * ParentPart#LCS.Placement * constr_Name.AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
+		( attLink,    separator, rest1 ) = expr.partition('.Placement * ')
+		( attPart,    separator, rest2 ) = rest1.partition('#')
+		( attLCS,     separator, rest3 ) = rest2.partition('.Placement * ')
+		( constrName, separator, rest4 ) = rest3.partition('.AttachmentOffset * ')
+		( linkedPart, separator, rest5 ) = rest4.partition('#')
+		( linkLCS,    separator, rest6 ) = rest5.partition('.Placement ^ ')
+		restFinal = rest6[0:2]
+		#return ( restFinal, 'None', 'None', 'None', 'None', 'None')
+	if restFinal=='-1':
 		# wow, everything went according to plan
-		retval = ( expr, attPart, attLCS, constrLink, partLCS )
+		# retval = ( expr, attPart, attLCS, constrLink, partLCS )
+		retval = ( attLink, attPart, attLCS, constrName, linkedPart, linkLCS)
 	else:
-		# rats ! But still, if the decode is unsuccessful, put some text
+		# rats ! Didn't succeed in decoding the ExpressionEngine.
+		# But still, if the decode is unsuccessful, put some text
 		retval = bad_EE
 	return retval
 
+
+
+"""
+    +-----------------------------------------------+
+    |         populate the ExpressionEngine         |
+    |               for a Datum object              |
+    |       linked to an LCS in a sister part       |
+    +-----------------------------------------------+
+"""
+def makeExpressionDatum( attLink, attPart, attLCS ):
+	# check that everything is defined
+	if attLink and attPart and attLCS:
+		# expr = Link.Placement * LinkedPart#LCS.Placement
+		expr = attLink +'.Placement * '+ attPart +'#'+ attLCS +'.Placement'
+	else:
+		expr = False
+	return expr
 
 
 
@@ -118,21 +118,18 @@ def splitExpressionPart( expr, attPart ):
     +-----------------------------------------------+
 """
 def splitExpressionDatum( expr ):
-	# no sense to be attached to an LCS in the parent assembly
-	# <<attPart>>.Placement.multiply( <<attPart>>.<<attLCS.>>.Placement )
-	#self.expression.setText( self.old_Expression )
-	( attPart, separator, rest1 ) = expr[2:-1].partition('>>')
-	( crap, separator, rest2 ) = rest1.partition('<<')
-	( check_attPart, separator, rest3 ) = rest2.partition('>>.<<')
-	( attLCS, separator, rest4 ) = rest3.partition('.>>.')
-	rest5 = rest4[0:9]
-	if rest5=='Placement':
+	# expr = Link.Placement * LinkedPart#LCS.Placement
+	( attLink, separator, rest1 ) = expr.partition('.Placement * ')
+	( attPart, separator, rest2 ) = rest1.partition('#')
+	( attLCS,  separator, rest3 ) = rest2.partition('.')
+	restFinal = rest3[0:9]
+	if restFinal=='Placement':
 		# wow, everything went according to plan
-		retval = ( expr, attPart, attLCS )
+		retval = ( attLink, attPart, attLCS )
 		#self.expression.setText( attPart +'***'+ attLCS )
 	else:
 		# rats ! But still, if the decode is unsuccessful, put some text
-		retval = ( False, 'None', 'None' )
+		retval = ( restFinal, 'None', 'None' )
 	return retval
 
 

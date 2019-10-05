@@ -63,18 +63,19 @@ class Assembly4_WorkBench(Workbench):
 
 
     def Initialize(self):
-        import newModelCmd     # creates a new App::Part container called 'Model'
-        import newSketchCmd    # creates a new Sketch in 'Model'
-        import newLCSCmd       # creates a new LCS in 'Model'
-        import newPointCmd     # creates a new LCS in 'Model'
-        import newBodyCmd      # creates a new Body in 'Model
-        import insertLinkCmd   # inserts an App::Link to a 'Model' in another file
-        import placeLinkCmd    # places a linked part by snapping LCS (in the Part and in the Assembly)
-        import placeDatumCmd   # places an LCS relative to an external file (creates a local attached copy)
-        import importDatumCmd  # creates an LCS in assembly and attaches it to an LCS relative to an external file
-        self.listCmd =           [ "newModelCmd", "insertLinkCmd", "placeLinkCmd", "newLCSCmd", "importDatumCmd", "placeDatumCmd", "newSketchCmd", "newPointCmd", "newBodyCmd" ] # A list of command names created in the line above
-        self.itemsMenu =         [ "newModelCmd", "insertLinkCmd", "placeLinkCmd", "newLCSCmd", "importDatumCmd", "placeDatumCmd", "newSketchCmd", "newPointCmd", "newBodyCmd" ] # A list of command names created in the line above
-        self.itemsToolbar =      [ "newModelCmd", "insertLinkCmd", "placeLinkCmd", "newLCSCmd", "importDatumCmd", "placeDatumCmd", "newSketchCmd", "newPointCmd", "newBodyCmd" ] # A list of command names created in the line above
+        import newModelCmd       # creates a new App::Part container called 'Model'
+        import newSketchCmd      # creates a new Sketch in 'Model'
+        import newLCSCmd         # creates a new LCS in 'Model'
+        import newPointCmd       # creates a new LCS in 'Model'
+        import newBodyCmd        # creates a new Body in 'Model
+        import insertLinkCmd     # inserts an App::Link to a 'Model' in another file
+        import placeLinkCmd      # places a linked part by snapping LCS (in the Part and in the Assembly)
+        import placeDatumCmd     # places an LCS relative to an external file (creates a local attached copy)
+        import importDatumCmd    # creates an LCS in assembly and attaches it to an LCS relative to an external file
+        import updateAssemblyCmd # updates all parts and constraints in the assembly
+        self.listCmd =           [ "newModelCmd", "insertLinkCmd", "placeLinkCmd", "newLCSCmd", "importDatumCmd", "placeDatumCmd", "newSketchCmd", "newPointCmd", "newBodyCmd", "updateAssemblyCmd" ] # A list of command names created in the line above
+        self.itemsMenu =         [ "newModelCmd", "insertLinkCmd", "placeLinkCmd", "newLCSCmd", "importDatumCmd", "placeDatumCmd", "newSketchCmd", "newPointCmd", "newBodyCmd", "updateAssemblyCmd" ] # A list of command names created in the line above
+        self.itemsToolbar =      [ "newModelCmd", "insertLinkCmd", "placeLinkCmd", "newLCSCmd", "importDatumCmd", "placeDatumCmd", "newSketchCmd", "newPointCmd", "newBodyCmd", "updateAssemblyCmd" ] # A list of command names created in the line above
         self.itemsContextMenu =  [ "placeLinkCmd", "placeDatumCmd" ] # A list of command names created in the line above
         self.appendToolbar("Assembly 4",self.itemsToolbar) # leave settings off toolbar
         self.appendMenu("&Assembly",self.itemsMenu) # creates a new menu

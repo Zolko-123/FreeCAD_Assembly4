@@ -63,47 +63,72 @@ class placeDatum( QtGui.QDialog ):
 		else:
 			self.selectedDatum = selection
 
+
 		# Now we can draw the UI
 		self.drawUI()
 		self.show()
 
-		# get and save the current ExpressionEngine:
+
+		# check if the datum object is already mapped to something
+		# TODO : make a warning and confirmation dialog with "Cancel" and "OK" buttons
+		# TODO : see confirmBox below
+		if self.selectedDatum.MapMode != 'Deactivated':
+			self.selectedDatum.MapMode = 'Deactivated'
+
+
+		# We get all the App::Link parts in the assembly 
+		self.asmParts = []
+		# the first item is "Select linked Part" therefore we add an empty object
+		self.asmParts.append( [] )
+		# find all the linked parts in the assembly
+		for obj in self.activeDoc.findObjects("App::Link"):
+			if obj.LinkedObject.isDerivedFrom('App::Part'):
+				# add it to our tree table if it's a link to an App::Part ...
+				self.asmParts.append( obj )
+				# ... and add to the drop-down combo box with the assembly tree's parts
+				objIcon = obj.LinkedObject.ViewObject.Icon
+				self.parentList.addItem( objIcon, obj.Name, obj)
+
+
+		# get and store the current expression engine:
+		self.old_EE = ''
 		old_EE = self.selectedDatum.ExpressionEngine
 		if old_EE:
-			( pla, EE ) = old_EE[0]
-		else:
-			EE = 'megszentsegtelenithetetlensegeskedeseitekert'
+			( pla, self.old_EE ) = old_EE[0]
+
 		# decode the old ExpressionEngine
-		# <<LinkName>>.Placement.multiply( <<LinkName>>.<<LCS.>>.Placement )
 		# if the decode is unsuccessful, old_Expression is set to False
 		# and old_attPart and old_attLCS are set to 'None'
-		( self.old_Expression, self.old_attPart, self.old_attLCS ) = splitExpressionDatum( EE )
+		old_Parent = ''
+		old_ParentPart = ''
+		old_attLCS = ''
+		( old_Parent, old_ParentPart, old_attLCS ) = splitExpressionDatum( self.old_EE )
+		#self.expression.setText( 'old_Parent = '+ old_Parent )
 
-		# Search for all App::Links in the current document
-		allLinkedParts = self.getAllLinkedParts()
-		# Now populate the list with the (linked) sister parts
-		for part in allLinkedParts:
-			itemIcon = part.LinkedObject.ViewObject.Icon
-			itemText = part.Name
-			itemObj = part
-			# fill the parent selection combo-box
-			self.parentList.addItem( itemIcon, itemText, itemObj)
 
 		# find the oldPart in the part list...
-		oldPart = self.parentList.findText( self.old_attPart )
-		if oldPart != -1:
-			# ... and select it
-			self.parentList.setCurrentIndex( oldPart )
-		else:
+		oldPart = self.parentList.findText( old_Parent )
+		# if not found
+		if oldPart == -1:
 			self.parentList.setCurrentIndex( 0 )
+		else:
+			self.parentList.setCurrentIndex( oldPart )
+			# this should have triggered self.getPartLCS() to fill the LCS list
 
-		# this should have triggered to fill the LCS list
+
 		# find the oldLCS in the list of LCS of the linked part...
-		#oldLCS = self.attLCSlist.findItems( self.old_attLCS, QtCore.Qt.CaseSensitive )
-		oldLCS = self.attLCSlist.findItems( self.old_attLCS, QtCore.Qt.MatchExactly )
-		if oldLCS:
+		lcs_found = []
+		lcs_found = self.attLCSlist.findItems( old_attLCS, QtCore.Qt.MatchExactly )
+		if lcs_found:
 			# ... and select it
-			self.attLCSlist.setCurrentItem( oldLCS[0], QtGui.QItemSelectionModel.Select )
+			self.attLCSlist.setCurrentItem( lcs_found[0] )
+		else:
+			# may-be it was renamed, see if we can find it as (name)
+			lcs_found = self.attLCSlist.findItems( '('+old_attLCS+')', QtCore.Qt.MatchContains )
+			if lcs_found:
+				self.attLCSlist.setCurrentItem( lcs_found[0] )
+
+
 
 		#self.msgBox = QtGui.QMessageBox()
 		#self.msgBox.setWindowTitle('Warning')
@@ -128,12 +153,19 @@ class placeDatum( QtGui.QDialog ):
 		# get the name of the part to attach to:
 		# it's either the top level part name ('Model')
 		# or the provided link's name.
-		a_Part = self.parentList.currentText()
+		if self.parentList.currentIndex() > 0:
+			parent = self.asmParts[ self.parentList.currentIndex() ]
+			a_Link = parent.Name
+			a_Part = parent.LinkedObject.Document.Name
+		else:
+			a_Link = None
+			a_Part = None
+
 
 		# the attachment LCS's name in the parent
 		# check that something is selected in the QlistWidget
 		if self.attLCSlist.selectedItems():
-			a_LCS = self.attLCSlist.selectedItems()[0].text()
+			a_LCS = self.attLCStable[ self.attLCSlist.currentRow() ].Name
 		else:
 			a_LCS = None
 
@@ -145,7 +177,7 @@ class placeDatum( QtGui.QDialog ):
 			# don't forget the last '.' !!!
 			# <<LinkName>>.Placement.multiply( <<LinkName>>.<<LCS.>>.Placement )
 			# expr = '<<'+ a_Part +'>>.Placement.multiply( <<'+ a_Part +'>>.<<'+ a_LCS +'.>>.Placement )'
-			expr = makeExpressionDatum( a_Part, a_LCS )
+			expr = makeExpressionDatum( a_Link, a_Part, a_LCS )
 			# this can be skipped when this method becomes stable
 			self.expression.setText( expr )
 			# load the built expression into the Expression field of the constraint
@@ -163,7 +195,7 @@ class placeDatum( QtGui.QDialog ):
     +-----------------------------------------------+
     |   find all the linked parts in the assembly   |
     +-----------------------------------------------+
-	"""
+
 	def getAllLinkedParts(self):
 		allLinkedParts = [ ]
 		for obj in self.activeDoc.findObjects("App::Link"):
@@ -171,7 +203,7 @@ class placeDatum( QtGui.QDialog ):
 			if obj.LinkedObject.isDerivedFrom('App::Part'):
 				allLinkedParts.append( obj )
 		return allLinkedParts
-
+	"""
 
 	"""
     +-----------------------------------------------+
@@ -185,7 +217,7 @@ class placeDatum( QtGui.QDialog ):
 			# get the proper objects
 			# all object names end with a "." , this needs to be removed
 			obj = part.getObject( objName[0:-1] )
-			if obj.TypeId == 'PartDesign::CoordinateSystem':
+			if obj.TypeId == 'PartDesign::CoordinateSystem' or obj.TypeId == 'PartDesign::Point':
 				partLCS.append( obj )
 		return partLCS
 
@@ -198,32 +230,32 @@ class placeDatum( QtGui.QDialog ):
 	def onParentList(self):
 		# clear the LCS list
 		self.attLCSlist.clear()
+		self.attLCStable = []
 		# clear the selection in the GUI window
 		Gui.Selection.clearSelection()
 		# the current text in the combo-box is the link's name...
 		parentName = self.parentList.currentText()
-		# ... or it's 'Parent Assembly' then the parent is the 'Model' root App::Part
-		if parentName =='Parent Assembly':
-			Parent = self.activeDoc.getObject( 'Model' )
-			# we get the LCS directly in the root App::Part 'Model'
-			partLCS = self.getPartLCS( Parent )
-			self.parentDoc.setText( Parent.Document.Name )
-		# a sister object is an App::Link
-		# the .LinkedObject is an App::Part
-		else:
-			Parent = self.activeDoc.getObject( parentName )
+		parentPart = self.activeDoc.getObject( parentName )
+		if parentPart:
 			# we get the LCS from the linked part
-			partLCS = self.getPartLCS( Parent.LinkedObject )
-			self.parentDoc.setText( Parent.LinkedObject.Document.Name )
+			self.attLCStable = self.getPartLCS( parentPart.LinkedObject )
+			self.parentDoc.setText( parentPart.LinkedObject.Document.Name )
 			# highlight the selected part:
-			Gui.Selection.addSelection( Parent.Document.Name, 'Model', Parent.Name+'.' )
+			Gui.Selection.addSelection( parentPart.Document.Name, 'Model', parentPart.Name+'.' )
 		# build the list
-		for lcs in partLCS:
+		for lcs in self.attLCStable:
 			newItem = QtGui.QListWidgetItem()
-			newItem.setText( lcs.Name )
+			# if the LCS has been renamed, we show both the label and the (name)
+			if lcs.Name == lcs.Label:
+				newItem.setText( lcs.Name )
+			else:
+				newItem.setText( lcs.Label + ' (' +lcs.Name+ ')' )
 			newItem.setIcon( lcs.ViewObject.Icon )
 			self.attLCSlist.addItem( newItem )
 		return
+
+
+
 
 
 	"""
@@ -232,21 +264,18 @@ class placeDatum( QtGui.QDialog ):
     |              We highlight both LCS            |
     +-----------------------------------------------+
 	"""
-	def onLCSclicked( self ):
+	def onDatumClicked( self ):
 		# clear the selection in the GUI window
 		Gui.Selection.clearSelection()
-		# get the part where the selected LCS is
-		a_Part = self.parentList.currentText()
-		# LCS in the parent
-		a_LCS = self.attLCSlist.selectedItems()[0].text()
-		# parent assembly and sister part need a different treatment
-		if a_Part == 'Parent Assembly':
-			linkDot = ''
-		else:
-			linkDot = a_Part+'.'
-		# Gui.Selection.addSelection('asm_Test','Model','Lego_3001.LCS_h2x1.')
-		# Gui.Selection.addSelection('asm_Test','Model','LCS_0.')
-		Gui.Selection.addSelection( self.activeDoc.Name, 'Model', linkDot+a_LCS+'.')
+		# check that something is selected
+		if self.attLCSlist.selectedItems():
+			# get the linked part where the selected LCS is
+			a_Part = self.parentList.currentText()
+			# LCS in the linked part
+			a_LCS = self.attLCStable[ self.attLCSlist.currentRow() ].Name
+			# Gui.Selection.addSelection('asm_Test','Model','Lego_3001.LCS_h2x1.')
+			# Gui.Selection.addSelection('asm_Test','Model','LCS_0.')
+			Gui.Selection.addSelection( self.activeDoc.Name, 'Model', a_Part+'.'+a_LCS+'.')
 		return
 
 
@@ -258,8 +287,8 @@ class placeDatum( QtGui.QDialog ):
 	"""
 	def onCancel(self):
 		# restore previous expression if it existed
-		if self.old_Expression:
-			self.selectedDatum.setExpression('Placement', self.old_Expression )
+		if self.old_EE:
+			self.selectedDatum.setExpression('Placement', self.old_EE )
 		self.selectedDatum.recompute()
 		# highlight the selected LCS in its new position
 		Gui.Selection.clearSelection()
@@ -276,6 +305,61 @@ class placeDatum( QtGui.QDialog ):
 	def onOK(self):
 		self.onApply()
 		self.close()
+
+
+
+	"""
+    +-----------------------------------------------+
+    |                  confirm Box                  |
+    +-----------------------------------------------+
+	"""
+	def confirmBox(self):
+		self.setWindowTitle('Please confirm')
+		self.setWindowIcon( QtGui.QIcon( os.path.join( iconPath , 'FreeCad.svg' ) ) )
+		self.setMinimumSize(550, 200)
+		self.resize(550,240)
+		self.setModal(False)
+		# make this dialog stay above the others, always visible
+		self.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
+		self.msgLine1 = QtGui.QLabel(self)
+		self.msgLine1.move(10,20)
+		self.msgLine2 = QtGui.QLabel(self)
+		self.msgLine2.move(10,50)
+		self.msgLine3 = QtGui.QLabel(self)
+		self.msgLine3.move(10,100)
+		self.msgLine1.setText( 'The selected Datum object \"'+self.selectedDatum.Name+'\"')
+		self.msgLine2.setText( 'is currently mapped to geometry in the assembly.' )
+		self.msgLine3.setText( 'Are you sure you want to continue ?')
+		# Cancel button
+		self.CancelButton = QtGui.QPushButton('Cancel', self)
+		self.CancelButton.setToolTip("Quit without changes")
+		self.CancelButton.setAutoDefault(False)
+		self.CancelButton.move(10, 150)
+		# OK button
+		self.OKButton = QtGui.QPushButton('OK', self)
+		self.OKButton.setToolTip("Confirm")
+		self.OKButton.setAutoDefault(True)
+		self.OKButton.move(460, 150)
+		self.CancelButton.clicked.connect( self.onCancelConfirm )
+		self.OKButton.clicked.connect( self.onOKConfirm )
+		self.show()
+
+
+	"""
+    +-----------------------------------------------+
+    |            Cancel the confirmation            |
+    +-----------------------------------------------+
+	"""
+	def onCancelConfirm(self):
+		return(False)
+
+	"""
+    +-----------------------------------------------+
+    |                   OK confirm                  |
+    +-----------------------------------------------+
+	"""
+	def onOKConfirm(self):
+		return(True)
 
 
 	"""
@@ -297,25 +381,25 @@ class placeDatum( QtGui.QDialog ):
 		#
 		# Selected Link label
 		self.lcsLabel = QtGui.QLabel(self)
-		self.lcsLabel.setText("Selected LCS :")
+		self.lcsLabel.setText("Selected Datum object :")
 		self.lcsLabel.move(10,20)
 		# the name as seen in the tree of the selected link
 		self.lscName = QtGui.QLineEdit(self)
 		self.lscName.setReadOnly(True)
 		self.lscName.setText( self.selectedDatum.Name )
 		self.lscName.setMinimumSize(150, 1)
-		self.lscName.move(150,18)
+		self.lscName.move(170,18)
 
 		# combobox showing all available App::Link
 		self.parentList = QtGui.QComboBox(self)
 		self.parentList.move(10,80)
 		self.parentList.setMinimumSize(350, 1)
 		# initialize with an explanation
-		self.parentList.addItem( 'Select attachment Parent' )
+		self.parentList.addItem( 'Select linked Part' )
 
 		# label
 		self.parentLabel = QtGui.QLabel(self)
-		self.parentLabel.setText("Parent Document :")
+		self.parentLabel.setText("Linked Part :")
 		self.parentLabel.move(10,120)
 		# the document containing the linked object
 		self.parentDoc = QtGui.QLineEdit(self)
@@ -324,7 +408,7 @@ class placeDatum( QtGui.QDialog ):
 		self.parentDoc.move(30,150)
 		# label
 		self.labelRight = QtGui.QLabel(self)
-		self.labelRight.setText("Select LCS in Parent :")
+		self.labelRight.setText("Select LCS in linked Part :")
 		self.labelRight.move(10,200)
 		# The list of all attachment LCS in the assembly is a QListWidget
 		# it is populated only when the parent combo-box is activated
@@ -367,7 +451,7 @@ class placeDatum( QtGui.QDialog ):
 		self.ApplyButton.clicked.connect(self.onApply)
 		self.OKButton.clicked.connect(self.onOK)
 		self.parentList.currentIndexChanged.connect( self.onParentList )
-		self.attLCSlist.itemClicked.connect( self.onLCSclicked )
+		self.attLCSlist.itemClicked.connect( self.onDatumClicked )
 
 
 	"""

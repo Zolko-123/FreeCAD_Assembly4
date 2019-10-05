@@ -35,11 +35,7 @@ class importDatum( QtGui.QDialog ):
 
 	def IsActive(self):
 		if App.ActiveDocument:
-			# only activate if nothing is selected
-			if Gui.Selection.getSelection():
-				return False
-			else:
-				return True
+			return True
 		else:
 			return False 
 
@@ -56,19 +52,26 @@ class importDatum( QtGui.QDialog ):
 
 		# Now we can draw the UI
 		self.drawUI()
-		self.show()
 
-		# Search for all App::Links in the current document
-		allLinkedParts = self.getAllLinkedParts()
-		# Now populate the list with the (linked) sister parts
-		for part in allLinkedParts:
-			itemIcon = part.LinkedObject.ViewObject.Icon
-			itemText = part.Name
-			itemObj = part
-			# fill the parent selection combo-box
-			self.parentList.addItem( itemIcon, itemText, itemObj)
+
+		# We get all the App::Link parts in the assembly 
+		self.asmParts = []
+		# the first item is "Select linked Part" therefore we add an empty object
+		self.asmParts.append( [] )
+		# find all the linked parts in the assembly
+		for obj in self.activeDoc.findObjects("App::Link"):
+			if obj.LinkedObject.isDerivedFrom('App::Part'):
+				# add it to our tree table if it's a link to an App::Part ...
+				self.asmParts.append( obj )
+				# ... and add to the drop-down combo box with the assembly tree's parts
+				objIcon = obj.LinkedObject.ViewObject.Icon
+				self.parentList.addItem( objIcon, obj.Name, obj)
 		# Set the list to the first element
 		self.parentList.setCurrentIndex( 0 )
+
+
+		# Now we can show the UI
+		self.show()
 
 
 
@@ -82,7 +85,19 @@ class importDatum( QtGui.QDialog ):
 	"""
 	def onApply(self):
 		# get the name of the part where the datum to be copied is:
-		linkedPartName = self.parentList.currentText()
+		#linkedPartName = self.parentList.currentText()
+
+
+		# get the name of the part to attach to:
+		# it's either the top level part name ('Model')
+		# or the provided link's name.
+		if self.parentList.currentIndex() > 0:
+			parent = self.asmParts[ self.parentList.currentIndex() ]
+			linkName = parent.Name
+			linkedPart = parent.LinkedObject.Document.Name
+		else:
+			linkName = None
+			linkedPart = None
 
 		# check that something is selected in the datum list
 		if self.datumList.selectedItems():
@@ -97,22 +112,25 @@ class importDatum( QtGui.QDialog ):
 		datumAsmName = self.datumName.text()
 		
 		# check that all of them have something in
-		if not linkedPartName or not listDatumName or not datumType or not datumAsmName:
+		if not (linkName and linkedPart and listDatumName and datumType and datumAsmName):
 			self.datumName.setText( 'Please select a Datum object' )
+			self.importDatumName()
 		else:
 			# create the Datum
 			if datumType == 'PartDesign::CoordinateSystem':
 				#createdLink = self.activeDoc.getObject('Model').newObject( 'App::Link', linkName )
 				createdDatum = App.activeDocument().getObject('Model').newObject( 'PartDesign::CoordinateSystem', datumAsmName )
 				self.datumName.setText( '=> ' +createdDatum.Name )
+				self.importSucceeded()
 			elif datumType == 'PartDesign::Point':
 				createdDatum = App.activeDocument().getObject('Model').newObject( 'PartDesign::Point', datumAsmName )
 				self.datumName.setText( '=> ' +createdDatum.Name )
+				self.importSucceeded()
 			else:
 				self.datumName.setText( 'unsupported Datum::Type' )
 				return
 			# build the expression to the linked datum (not the datumName in the assembly !)
-			expr = makeExpressionDatum( linkedPartName, listDatumName )
+			expr = makeExpressionDatum( linkName, linkedPart, listDatumName )
 			# load the built expression into the Expression field of the datum created in the assembly
 			self.activeDoc.getObject( createdDatum.Name ).setExpression( 'Placement', expr )
 			# recompute the object to apply the placement:
@@ -121,8 +139,10 @@ class importDatum( QtGui.QDialog ):
 			Gui.Selection.clearSelection()
 			Gui.Selection.addSelection( self.activeDoc.Name, 'Model', createdDatum.Name +'.')
 			# clear the selection in the datum list
-			self.datumList.setCurrentRow( -1, QtGui.QItemSelectionModel.Clear )
+			#self.datumList.setCurrentRow( -1, QtGui.QItemSelectionModel.Clear )
+			self.datumList.setCurrentRow( -1 )
 		return
+
 
 
 
@@ -130,7 +150,7 @@ class importDatum( QtGui.QDialog ):
     +-----------------------------------------------+
     |   find all the linked parts in the assembly   |
     +-----------------------------------------------+
-	"""
+
 	def getAllLinkedParts(self):
 		allLinkedParts = [ ]
 		for obj in self.activeDoc.findObjects("App::Link"):
@@ -138,7 +158,7 @@ class importDatum( QtGui.QDialog ):
 			if obj.LinkedObject.isDerivedFrom('App::Part'):
 				allLinkedParts.append( obj )
 		return allLinkedParts
-
+	"""
 
 	"""
     +-----------------------------------------------+
@@ -163,6 +183,7 @@ class importDatum( QtGui.QDialog ):
     +------------------------------------------------+
 	"""
 	def onParentList(self):
+		self.importDatumName()
 		# clear the LCS list
 		self.datumList.clear()
 		self.datumTable = [ ]
@@ -203,6 +224,7 @@ class importDatum( QtGui.QDialog ):
     +-----------------------------------------------+
 	"""
 	def onDatumClicked( self ):
+		self.importDatumName()
 		# clear the selection in the GUI window
 		Gui.Selection.clearSelection()
 		# get the part where the selected LCS is
@@ -219,6 +241,28 @@ class importDatum( QtGui.QDialog ):
 		# Highlight the selected datum object
 		Gui.Selection.addSelection( self.activeDoc.Name, 'Model', linkDot+a_LCS+'.')
 		return
+
+
+
+	"""
+    +-----------------------------------------------+
+    |                   success                     |
+    +-----------------------------------------------+
+	"""
+	def importSucceeded(self):
+		self.datumLabel.setText("Datum object successfully imported:")
+		return
+
+
+	"""
+    +-----------------------------------------------+
+    |                   success                     |
+    +-----------------------------------------------+
+	"""
+	def importDatumName(self):
+		self.datumLabel.setText("The imported Datum objects's name:")
+		return
+
 
 
 	"""
@@ -251,8 +295,8 @@ class importDatum( QtGui.QDialog ):
 		# Our main window will be a QDialog
 		self.setWindowTitle('Import a Datum object')
 		self.setWindowIcon( QtGui.QIcon( os.path.join( iconPath , 'FreeCad.svg' ) ) )
-		self.setMinimumSize(400, 600)
-		self.resize(400,600)
+		self.setMinimumSize(400, 590)
+		self.resize(400,590)
 		self.setModal(False)
 		# make this dialog stay above the others, always visible
 		self.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
@@ -279,7 +323,7 @@ class importDatum( QtGui.QDialog ):
 		self.parentDoc.move(30,130)
 		# label
 		self.labelRight = QtGui.QLabel(self)
-		self.labelRight.setText("Select Datum in Link :")
+		self.labelRight.setText("Select Datum object to import :")
 		self.labelRight.move(10,180)
 		# The list of all attachment LCS in the assembly is a QListWidget
 		# it is populated only when the parent combo-box is activated
@@ -289,7 +333,8 @@ class importDatum( QtGui.QDialog ):
 
 		# imported Link name
 		self.datumLabel = QtGui.QLabel(self)
-		self.datumLabel.setText("Enter the imported Datum's name:")
+		#self.datumLabel.setText("The imported Datum objects's name:")
+		self.importDatumName()
 		self.datumLabel.move(10,460)
 		# the name as seen in the tree of the selected link
 		self.datumName = QtGui.QLineEdit(self)
@@ -299,26 +344,26 @@ class importDatum( QtGui.QDialog ):
 		# Buttons
 		#
 		# Cancel button
-		self.CancelButton = QtGui.QPushButton('Cancel', self)
+		self.CancelButton = QtGui.QPushButton('Close', self)
 		self.CancelButton.setAutoDefault(False)
 		self.CancelButton.move(10, 550)
 
 		# Apply button
-		self.ApplyButton = QtGui.QPushButton('Apply', self)
+		self.ApplyButton = QtGui.QPushButton('Import', self)
 		self.ApplyButton.setAutoDefault(False)
-		self.ApplyButton.move(164, 550)
+		self.ApplyButton.move(310, 550)
 		self.ApplyButton.setDefault(True)
 
 		# OK button
-		self.OKButton = QtGui.QPushButton('OK', self)
-		self.OKButton.setAutoDefault(False)
-		self.OKButton.move(310, 550)
-		self.OKButton.setDefault(True)
+		#self.OKButton = QtGui.QPushButton('OK', self)
+		#self.OKButton.setAutoDefault(False)
+		#self.OKButton.move(310, 550)
+		#self.OKButton.setDefault(True)
 
 		# Actions
 		self.CancelButton.clicked.connect(self.onCancel)
 		self.ApplyButton.clicked.connect(self.onApply)
-		self.OKButton.clicked.connect(self.onOK)
+		#self.OKButton.clicked.connect(self.onOK)
 		self.parentList.currentIndexChanged.connect( self.onParentList )
 		self.datumList.itemClicked.connect( self.onDatumClicked )
 

@@ -9,9 +9,9 @@ Welcome to the FreeCAD_aws wiki! This page tries to explain how to make assembli
 
 Download and extract the archive, and then move (or link) the sub-directory `Mod_Asm4` (which contains all the actual code) into the `~/.FreeCDA/Mod` folder, containing all additional modules.
 
-Please bear in mind that Assembly 4 is not compatible with stock FreeCAD v0.18. [Pre-built binaries](https://github.com/realthunder/FreeCAD_assembly3/releases) of realthunder's branch can be downloaded from his GitHub repository. (they are called FreeCAD-asm3-xxx but are compatible with Asm4)
+Please bear in mind that Assembly 4 is not compatible with the stable FreeCAD v0.18, it needs at least v0.19. You can find [pre-built binaries here](https://github.com/FreeCAD/FreeCAD/releases/tag/0.19_pre)
 
-You can use the [example assemblies](https://github.com/Zolko-123/FreeCAD_Assembly4/tree/master/Examples) to experiment with this workbench's features.
+You can use the [example assemblies](https://github.com/Zolko-123/FreeCAD_Assembly4/tree/master/Examples) to experiment with this workbench's features. Open one _asm_something.fcstd_ file and try out the functions. There are ReadMe.txt files in each durectory with some explanations.
 
 ## Principle
 
@@ -38,17 +38,34 @@ The result is the following:
 * the part _Bague_ is placed in the assembly by placing its _LCS_0_ on the _LCS_0_ of the part _Bielle_
 * the parts _Screw_CHC_1_ and _Screw_CHC_2_ are placed in the assembly by placing their _LCS_0_ on the _LCS_1_ and _LCS_2_ of the part _Cuve_
 
-The 2 LCS - the one in the linked part and the one in the assembly, be it from the parent assembly or a sister part - are superimposed using an ExpressionEngine, with the following syntax:
+
+## ExpressionEngine
+
+Assembly4 uses a special and very useful feature of FreeCAD: the ExpressionEngine. Some parameters can be entered through mathematical furmalae, that are evaluated by this ExpressionEngine. For Assembly4, it's the parameter _`Placement`_ of the inserted _`App::Link`_ object that is calculated, such that 2 LCS - one in the linked part and the one in the assembly - are superimposed. 
+
+In normal use, the ExpressionEngine of an _`App::Link`_ object is hidden, it must be shown as in the following screenshot:
+
+![](Resources/media/asm_EE.png)
+
+
+The syntax of the ExpressionEngine is the following:
 
 * **If the LCS belongs to the parent assembly:**
 
-`<<attLCS>>.Placement.multiply(<<constr_Link>>.Offset).multiply(.<<partLCS.>>.Placement.inverse())`
+`LCS_parent.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS_link.Placement ^ -1`
 
 * **If the LCS belongs to a sister part:**
 
-`<<attPart>>.Placement.multiply(<<attPart>>.<<attLCS.>>.Placement).multiply(<<constr_Link>>.Offset).multiply(.<<partLCS.>>.Placement.inverse())`
+`ParentLink.Placement * ParentPart#LCS_parent.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS.Placement ^ -1`
 
-* **Constraints**:
+* _ParentLink_ is the name of the App::Link of the sister part in the assembly
+* _ParentPart_ is the name of the App::Part that the previous ParentLink refers-to
+* _LCS_parent_ is the LCS in the parent part (can be either the assembly itself or a sister part in the assembly)
+* _constr_LinkName_ is a FeaturePython object with a conventional name
+* _LinkedPart_ is the App::Part's name that the inserted App::Link refers-to
+* _LCS_link_ is the LCS in the linked part
+
+**Constraints**:
 
 To each part inserted into an assembly is associated an `App::FeaturePython` object, placed in the 'Constraints' group. This object contains information about the placement of the linked object in the assembly. It also contains an `App::Placement`, called 'AttachmentOffset', which introduces an offset between the LCS in the part and the LCS in the assembly. The main purpose of this offset is to correct bad orientations between the 2 matching LCS. 
 
@@ -63,6 +80,24 @@ _Close look at the fields contained in an `App::FeaturePython` object associated
 _Dialog that opens when clicking the previous small button, and permitting to edit the parameters of the_ `App::Placement` _called_ 'AttachmentOffset' _in the cosntraint associated with a link, and allowing relative placement of the link -vs- the attachment LCS_
 
 ## Workflow
+
+The toolbar for the Assembly4 workbench holds the following buttons:
+
+
+![](Resources/media/Toolbar.png)
+
+
+* New Model
+* Insert link
+* Place linked Part
+* New LCS in the Model
+* Import Datum object
+* Place Datum object
+* New Sketch in the Model
+* New Datum Point in the Model
+* New Body in the Model
+
+
 
 ### Part
 
@@ -106,6 +141,8 @@ Therefore, in order to re-use a coordinate system of a part in an assembly, a co
 
 #### Release notes
 
+* 2019.10.05 (**version 0.6**) :  
+Ported to FreeCAD-v0.19-pre, with new syntax for the ExpressionEngine
 
 * 2019.07.23 (**version 0.5.5**) :  
 Fixed a bug in partLCSlist.findItems

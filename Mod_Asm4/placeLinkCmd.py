@@ -55,57 +55,45 @@ class placeLink( QtGui.QDialog ):
 
 		# get the current active document to avoid errors if user changes tab
 		self.activeDoc = App.activeDocument()
+
 		# check that we have selected an App::Link object
 		selection = self.checkSelection()
 		if not selection:
 			self.close()
 		else:
 			self.selectedLink = selection
-		# the parent (top-level) assembly is the App::Part called Model (hard-coded)
-		self.parentAssembly = self.activeDoc.Model
-
-		# the parent object to which the linked part will be related
-		# this can be either the parent assembly or a sister part
-		self.parentPart = None
-		# clear any former old variables
-		self.old_attachment = []
-		self.old_AO = []
-		self.old_EE = []
-		self.constrFeature = []
-		self.attLCStable = []
-		self.partLCStable = []
 
 
-		# name of the constraints object for the link
-		self.constrName = constraintPrefix + self.selectedLink.Name
-		# check whether it exists
-		constraint = self.activeDoc.getObject('Constraints').getObject( self.constrName )
-		if constraint:
-			self.constrFeature = constraint
-			# get and store the current attachment part
-			self.old_attachment = self.constrFeature.AttachedTo
-			# get and store the current AttachmentOffset
-			self.old_AO = self.constrFeature.AttachmentOffset
-
-		# get and store the current expression engine:
-		old_EE = self.selectedLink.ExpressionEngine
-		if old_EE:
-			( pla, self.old_EE ) = old_EE[0]
-		else:
-			self.old_EE = False
-
-		# the GUI objects are defined later down
+		# draw the GUI, objects are defined later down
 		self.drawUI()
 
-		# for debugging, use this field to print text
-		#self.expression.setText( self.old_attPart )
 
-		# decode the old ExpressionEngine
-		# if the decode is unsuccessful, old_Expression is set to False
-		# and the other things are set to 'None'
-		( self.old_Expression, self.old_attPart, self.old_attLCS, self.old_constrLink, self.old_linkLCS ) = splitExpressionPart( self.old_EE, self.old_attachment )
+		# the parent (top-level) assembly is the App::Part called Model (hard-coded)
+		# What would happen if there are 2 App::Part ?
+		self.parentAssembly = self.activeDoc.Model
+		# Initialize the assembly tree with the Parrent Assembly as first element
+		# all the parts in the assembly, except the selected link
+		self.asmParts = []
+		# the first item is "Select attachment Parent" therefore we add an empty object
+		self.asmParts.append( [] )
+		self.asmParts.append( self.parentAssembly )
+		# Add it as first element to the drop-down combo-box
+		parentIcon = self.parentAssembly.ViewObject.Icon
+		self.parentList.addItem( parentIcon, 'Parent Assembly', self.parentAssembly )
 
-		# get all the LCS in the selected linked part
+		# find all the linked parts in the assembly
+		for obj in self.activeDoc.findObjects("App::Link"):
+			# add it to our list if it's a link to an App::Part ...
+			if obj.LinkedObject.isDerivedFrom('App::Part'):
+				# ... except if it's the selected link itself
+				if obj != self.selectedLink:
+					self.asmParts.append( obj )
+					# add to the drop-down combo box with the assembly tree's parts
+					objIcon = obj.LinkedObject.ViewObject.Icon
+					self.parentList.addItem( objIcon, obj.Name, obj)
+
+
+		# find all the LCS in the selected link
 		self.partLCStable = self.getPartLCS( self.selectedLink.LinkedObject )
 		# build the list
 		for lcs in self.partLCStable:
@@ -114,45 +102,83 @@ class placeLink( QtGui.QDialog ):
 				newItem.setText( lcs.Name )
 			else:
 				newItem.setText( lcs.Label + ' (' +lcs.Name+ ')' )
-
 			#newItem.setIcon( lcs.ViewObject.Icon )
 			#self.lcsIcon = lcs.ViewObject.Icon
 			self.partLCSlist.addItem(newItem)
 
-		# find the oldLCS in the list of LCS of the linked part...
-		#self.oldLCS = self.partLCSlist.findItems( self.old_linkLCS, QtCore.Qt.CaseSensitive )
-		self.oldLCS = self.partLCSlist.findItems( self.old_linkLCS, QtCore.Qt.MatchExactly )
-		if self.oldLCS:
-			# ... and select it
-			# self.partLCSlist.setCurrentItem( self.oldLCS[0], QtGui.QItemSelectionModel.Select )
-			self.partLCSlist.setCurrentItem( self.oldLCS[0] )
 
-		# fill the parent selection combo-box
-		# Search for all App::Links in the documents
-		allLinkedParts = self.getAllLinkedParts()
-		# Now populate the list with the (linked) sister parts
-		for part in allLinkedParts:
-			itemIcon = part.LinkedObject.ViewObject.Icon
-			itemText = part.Name
-			itemObj = part
-			self.parentList.addItem( itemIcon, itemText, itemObj)
+		self.old_AO = []
+		self.constrFeature = []
+		self.old_Parent = ''
+		# name of the constraints object for the link
+		self.constrName = constraintPrefix + self.selectedLink.Name
+		# check whether it exists
+		constraint = self.activeDoc.getObject('Constraints').getObject( self.constrName )
+		if constraint:
+			self.constrFeature = constraint
+			# get and store the current AttachmentOffset
+			self.old_AO = self.constrFeature.AttachmentOffset
+			# get and store the current attachment parent
+			self.old_Parent = self.constrFeature.AttachedTo
+
+		self.old_EE = ''
+		# get and store the current expression engine:
+		old_EE = self.selectedLink.ExpressionEngine
+		if old_EE:
+			( pla, self.old_EE ) = old_EE[0]
+
+		# for debugging, use this field to print text
+		#self.expression.setText( self.old_attPart )
+
+
+		# decode the old ExpressionEngine
+		old_Parent = ''
+		old_ParentPart = ''
+		old_attLCS = ''
+		constrName = ''
+		linkedPart = ''
+		old_linkLCS = ''
+		# if the decode is unsuccessful, old_Expression is set to False and the other things are set to 'None'
+		( old_Parent, old_ParentPart, old_attLCS, constrName, linkedPart, old_linkLCS ) = splitExpressionPart( self.old_EE, self.old_Parent )
+
+
+		# find the old LCS in the list of LCS of the linked part...
+		# MatchExactly, MatchContains, MatchEndsWith ...
+		lcs_found = []
+		lcs_found = self.partLCSlist.findItems( old_linkLCS, QtCore.Qt.MatchExactly )
+		if lcs_found:
+			# ... and select it
+			self.partLCSlist.setCurrentItem( lcs_found[0] )
+		else:
+			# may-be it was renamed, see if we can find it as (name)
+			lcs_found = self.partLCSlist.findItems( '('+old_linkLCS+')', QtCore.Qt.MatchContains )
+			if lcs_found:
+				self.partLCSlist.setCurrentItem( lcs_found[0] )
+
 
 		# find the oldPart in the part list...
-		oldPart = self.parentList.findText( self.old_attPart )
+		oldPart = self.parentList.findText( old_Parent )
 		# if not found
 		if oldPart == -1:
 			self.parentList.setCurrentIndex( 0 )
 		else:
 			self.parentList.setCurrentIndex( oldPart )
-			# this should have triggered to fill the LCS list
+			# this should have triggered self.getPartLCS() to fill the LCS list
 
-		# find the oldLCS in the list of LCS of the linked part...
+
+		# find the oldLCS in the old parent Part (actually the App::Link)...
 		#self.oldLCS = self.attLCSlist.findItems( self.old_attLCS, QtCore.Qt.CaseSensitive )
-		self.oldLCS = self.attLCSlist.findItems( self.old_attLCS, QtCore.Qt.MatchExactly )
-		if self.oldLCS:
+		lcs_found = []
+		lcs_found = self.attLCSlist.findItems( old_attLCS, QtCore.Qt.MatchExactly )
+		if lcs_found:
 			# ... and select it
-			# self.attLCSlist.setCurrentItem( self.oldLCS[0], QtGui.QItemSelectionModel.Select )
-			self.attLCSlist.setCurrentItem( self.oldLCS[0] )
+			self.attLCSlist.setCurrentItem( lcs_found[0] )
+		else:
+			# may-be it was renamed, see if we can find it as (name)
+			lcs_found = self.attLCSlist.findItems( '('+old_attLCS+')', QtCore.Qt.MatchContains )
+			if lcs_found:
+				self.attLCSlist.setCurrentItem( lcs_found[0] )
+
 
 		# the widget is shown and not executed to allow it to stay on top
 		self.show()
@@ -173,34 +199,42 @@ class placeLink( QtGui.QDialog ):
 		# if it exists, return the existing constrFeature
 		# TODO : check that it's of the correct type ?
 		if self.activeDoc.getObject('Constraints').getObject( constrName ):
-			#self.expression.setText( constrName +' already exists' )
 			return self.activeDoc.getObject('Constraints').getObject( constrName )
 		# if it didn't exist, create it ...
-		#self.expression.setText( constrName +' does not exist, creating' )
 		constrFeature = self.activeDoc.getObject('Constraints').newObject( 'App::FeaturePython', constrName )
+		#self.expression.setText( constrName +' does not exist, creating' )
 		#self.expression.setText( constrName +' has been created' )
 		# ...and create the property fields
 		#
-		# store the name of the linked document (only for information)
-		constrFeature.addProperty( 'App::PropertyString', 'LinkedDocument' )
-		constrFeature.LinkedDocument = self.selectedLink.LinkedObject.Document.Name
-		# store the name of the linked file (only for information)
-		constrFeature.addProperty( 'App::PropertyString', 'LinkedFile' )
-		constrFeature.LinkedFile = self.selectedLink.LinkedObject.Document.FileName
-		# store the name of the App::Link this constraint refers-to
-		constrFeature.addProperty( 'App::PropertyString', 'LinkName' )
-		constrFeature.LinkName = linkName
+		# Store the type of solver to use
+		constrFeature.addProperty( 'App::PropertyString', 'Solver' )
+		constrFeature.Solver = 'ExpressionEngine'
 		# Store the type of the constraint
 		constrFeature.addProperty( 'App::PropertyString', 'ConstraintType' )
 		constrFeature.ConstraintType = 'AttachmentByLCS'
-		# add an App::Placement that will be the offset between attachment and link LCS
-		constrFeature.addProperty( 'App::PropertyPlacement', 'AttachmentOffset', 'Attachment' )
+		# Enabled ?
+		constrFeature.addProperty( 'App::PropertyBool', 'Enabled' )
+		constrFeature.Enabled = True
+		# store the name of the inserted Part's instance
+		constrFeature.addProperty( 'App::PropertyString', 'Instance', 'Attachment' )
+		constrFeature.Instance = linkName
+		# store the name of the LCS in the assembly where the link is attached to
+		constrFeature.addProperty( 'App::PropertyString', 'AttachedByLCS', 'Attachment' )
 		# store the name of the part where the link is attached to
 		constrFeature.addProperty( 'App::PropertyString', 'AttachedTo', 'Attachment' )
 		# store the name of the LCS in the assembly where the link is attached to
-		constrFeature.addProperty( 'App::PropertyString', 'AttachmentLCS', 'Attachment' )
-		# store the name of the LCS in the assembly where the link is attached to
-		constrFeature.addProperty( 'App::PropertyString', 'LinkedPartLCS', 'Attachment' )
+		constrFeature.addProperty( 'App::PropertyString', 'AttachedToLCS', 'Attachment' )
+		# add an App::Placement that will be the offset between attachment and link LCS
+		constrFeature.addProperty( 'App::PropertyPlacement', 'AttachmentOffset', 'Attachment' )
+		# store the name of the App::Link this constraint refers-to
+		constrFeature.addProperty( 'App::PropertyString', 'LinkName', 'Information' )
+		constrFeature.LinkName = linkName
+		# store the name of the linked document (only for information)
+		constrFeature.addProperty( 'App::PropertyString', 'LinkedPart', 'Information' )
+		constrFeature.LinkedPart = self.selectedLink.LinkedObject.Document.Name
+		# store the name of the linked file (only for information)
+		constrFeature.addProperty( 'App::PropertyString', 'LinkedFile', 'Information' )
+		constrFeature.LinkedFile = self.selectedLink.LinkedObject.Document.FileName
 		# return
 		return constrFeature
 
@@ -215,11 +249,19 @@ class placeLink( QtGui.QDialog ):
     +-----------------------------------------------+
 	"""
 	def onApply( self ):
-		# get the name of the part to attach to:
-		# it's either the top level part name ('Model')
-		# or the provided link's name.
-		a_Part = self.parentList.currentText()
-		#self.expression.setText( '***'+ a_Part +'***' )
+		# get the instance to attach to:
+		# it's either the top level assembly or a sister App::Link
+		if self.parentList.currentText() == 'Parent Assembly':
+			a_Link = 'Parent Assembly'
+			a_Part = None
+		elif self.parentList.currentIndex() > 1:
+			parent = self.asmParts[ self.parentList.currentIndex() ]
+			a_Link = parent.Name
+			a_Part = parent.LinkedObject.Document.Name
+		else:
+			a_Link = None
+			a_Part = None
+
 
 		# the attachment LCS's name in the parent
 		# check that something is selected in the QlistWidget
@@ -228,7 +270,12 @@ class placeLink( QtGui.QDialog ):
 			a_LCS = self.attLCStable[ self.attLCSlist.currentRow() ].Name
 		else:
 			a_LCS = None
-		#self.expression.setText( '***'+ a_LCS +'***' )
+
+
+		# the linked App::Part's name
+		l_Part = self.selectedLink.LinkedObject.Document.Name
+		# the constraint's name:
+		c_Name = self.constrName
 
 		# the LCS's name in the linked part to be used for its attachment
 		# check that something is selected in the QlistWidget
@@ -241,23 +288,27 @@ class placeLink( QtGui.QDialog ):
 
 		# check that all of them have something in
 		# constrName has been checked at the beginning
-		if not a_Part or not a_LCS or not l_LCS :
+		if not ( a_Link and a_LCS and c_Name and l_Part and l_LCS ) :
 			self.expression.setText( 'Problem in selections' )
 		else:
 			# this is where all the magic is, see:
-			#
+			# 
 			# https://forum.freecadweb.org/viewtopic.php?p=278124#p278124
 			#
-			# expr = '<<'+ a_Part +'>>.Placement.multiply( <<'+ a_Part +'>>.<<'+ a_LCS +'.>>.Placement ).multiply( '+ constrName +'.Offset ).multiply( .<<'+ l_LCS +'.>>.Placement.inverse() )'
-			expr = makeExpressionPart( a_Part, a_LCS, self.constrName, l_LCS )
+			# as of FreeCAD v0.19 the syntax is different:
+			# https://forum.freecadweb.org/viewtopic.php?f=17&t=38974&p=337784#p337784
+			#
+			# expr = ParentLink.Placement * ParentPart#LCS.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
+			# expr = LCS_in_the_assembly.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
+			expr = makeExpressionPart( a_Link, a_Part, a_LCS, c_Name, l_Part, l_LCS )
 			# this can be skipped when this method becomes stable
 			self.expression.setText( expr )
 			# fill the constraint feature. Create it if it doesn't exist:
 			self.constrFeature = self.makeConstrFeature()
 			# store the part where we're attached to in the constraints object
-			self.constrFeature.AttachedTo = a_Part
-			self.constrFeature.AttachmentLCS = a_LCS
-			self.constrFeature.LinkedPartLCS = l_LCS
+			self.constrFeature.AttachedByLCS = '#'+l_LCS
+			self.constrFeature.AttachedTo = a_Link
+			self.constrFeature.AttachedToLCS = '#'+a_LCS
 			# load the expression into the link's Expression Engine
 			self.selectedLink.setExpression('Placement', expr )
 			# recompute the object to apply the placement:
@@ -384,8 +435,6 @@ class placeLink( QtGui.QDialog ):
 	"""
 	def onCancel(self):
 		# restore previous values
-		if self.old_attachment:
-			self.constrFeature.AttachedTo = self.old_attachment
 		if self.old_AO:
 			self.constrFeature.AttachmentOffset = self.old_AO
 		if self.old_EE:
@@ -497,8 +546,6 @@ class placeLink( QtGui.QDialog ):
 		self.parentList.setToolTip('Choose the part in which the attachment\ncoordinate system is to be found')
 		# the parent assembly is hardcoded, and made the first real element
 		self.parentList.addItem('Select attachment Parent')
-		parentIcon = self.parentAssembly.ViewObject.Icon
-		self.parentList.addItem( parentIcon, 'Parent Assembly', self.parentAssembly )
 
 		# label
 		self.parentLabel = QtGui.QLabel(self)
