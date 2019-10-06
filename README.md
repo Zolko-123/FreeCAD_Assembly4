@@ -6,7 +6,7 @@ Welcome to the FreeCAD_aws wiki! This page tries to explain how to make assembli
 ## Prerequisites
 
 **Important Note:** Assembly 4 is **not** compatible with FreeCAD v0.18
-- [x] FreeCAD >= `v0.19.xxxxx`
+- [x] FreeCAD >= `v0.19.18353`
 
 ## Installation
 
