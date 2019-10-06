@@ -212,3 +212,7 @@ mostly working version
 
 * 2019.02.18 (**version 0.1**) :  
 initial release of Assembly 4 WB
+
+## License
+
+LGPLv2.1 (see [LICENSE](LICENSE))
