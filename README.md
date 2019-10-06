@@ -10,9 +10,10 @@ Welcome to the FreeCAD_aws wiki! This page tries to explain how to make assembli
 
 ## Installation
 
-### Automatic Installation
+### Automatic Installation (recommended)
 
-Assembly 4 is available through the [FreeCAD Addon Manager](https://github.com/FreeCAD/FreeCAD-addons/#1-builtin-addon-manager).  
+Assembly 4 is available through the [FreeCAD Addon Manager](https://github.com/FreeCAD/FreeCAD-addons/#1-builtin-addon-manager).
+It is called 'A4' in the Addon Repository.    
 
 **Note:** Restarting FreeCAD is required after installing this Addon.
 
@@ -84,12 +85,12 @@ The syntax of the ExpressionEngine is the following:
 
   `ParentLink.Placement * ParentPart#LCS_parent.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS.Placement ^ -1`
 
-* _ParentLink_ is the name of the App::Link of the sister part in the assembly
-* _ParentPart_ is the name of the App::Part that the previous ParentLink refers-to
-* _LCS_parent_ is the LCS in the parent part (can be either the assembly itself or a sister part in the assembly)
-* _constr_LinkName_ is a FeaturePython object with a conventional name
-* _LinkedPart_ is the App::Part's name that the inserted App::Link refers-to
-* _LCS_link_ is the LCS in the linked part
+* **_ParentLink_ is the name of the App::Link of the sister part in the assembly**
+* **_ParentPart_ is the name of the App::Part that the previous ParentLink refers-to**
+* **_LCS_parent_ is the LCS in the parent part (can be either the assembly itself or a sister part in the assembly)**
+* **_constr_LinkName_ is a FeaturePython object with a conventional name**
+* **_LinkedPart_ is the App::Part's name that the inserted App::Link refers-to**
+* **_LCS_link_ is the LCS in the linked part**
 
 #### Constraints
 
