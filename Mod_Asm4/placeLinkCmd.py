@@ -615,8 +615,8 @@ class placeLink( QtGui.QDialog ):
 
 		# Actions
 		self.parentList.currentIndexChanged.connect( self.onParentList )
-		self.attLCSlist.itemClicked.connect( self.onLCSclicked )
-		self.partLCSlist.itemClicked.connect( self.onLCSclicked )
+		#self.attLCSlist.itemClicked.connect( self.onLCSclicked )
+		#self.partLCSlist.itemClicked.connect( self.onLCSclicked )
 		self.RotXButton.clicked.connect( self.onRotX )
 		self.RotYButton.clicked.connect( self.onRotY )
 		self.RotZButton.clicked.connect( self.onRotZ)

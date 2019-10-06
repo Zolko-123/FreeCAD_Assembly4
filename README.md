@@ -139,9 +139,6 @@ Therefore, in order to re-use a coordinate system of a part in an assembly, a co
 
 
 
-#### Release notes
-
-
 
 #### Release notes
 
