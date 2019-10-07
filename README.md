@@ -31,7 +31,7 @@ To update the Addon:
 ```
 
 **Note:**
-Another method is to download and extract the Github .zip archive. Then move (or link) the sub-directory `Mod_Asm4` (which contains all the actual code) into the `~/.FreeCDA/Mod` folder, containing all additional modules.
+Another method is to download and extract the Github .zip archive. Then move (or link) the directory `A4` into the `~/.FreeCDA/Mod` folder, containing all additional modules.
 
 **Important Note:** Restarting FreeCAD is required after installing this Addon.
 
@@ -42,7 +42,7 @@ You can use the [example assemblies](https://github.com/Zolko-123/FreeCAD_Assemb
 
 ## Principle
 
-The point is that each part is a mostly standard FreeCAD `App::Part` object, and these are assembled using the `App::Link` framework found in the fork of FreeCAD (https://github.com/realthunder/FreeCAD/tree/LinkStage3, pre-built binaries on the [realthunder's FreeCAD_assembly3 release page](https://github.com/realthunder/FreeCAD_assembly3/releases)
+Each Assembly4 model is mostly standard FreeCAD `App::Part` object, and these are assembled using the `App::Link` framework included with FreeCAD 0.19. Pre-built binaries on the v0.19 development branch can be found [here](https://github.com/FreeCAD/FreeCAD/releases/tag/0.19_pre)
 
 The particularities of the `App::Part` used here are the following:
 
