@@ -13,7 +13,7 @@ constraintPrefix = 'constr_'
 
 import os
 __dir__ = os.path.dirname(__file__)
-iconPath = os.path.join( __dir__, 'icons' )
+iconPath = os.path.join( __dir__, 'Resources/icons' )
 
 
 """
