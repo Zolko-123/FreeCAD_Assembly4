@@ -114,23 +114,23 @@ The toolbar for the Assembly4 workbench holds the following buttons:
 
 ![](Resources/media/Toolbar.png)
 
-![New Model Icon](./Mod_Asm4/icons/Model.svg) **New Model**  
+![New Model Icon](./icons/Model.svg) **New Model**  
 
-![Insert Link Icon](./Mod_Asm4/icons/LinkModel.svg) **Insert link**  
+![Insert Link Icon](./icons/LinkModel.svg) **Insert link**  
 
-![Place linked Part Logo](./Mod_Asm4/icons/PlaceLink.svg)  **Place linked Part**
+![Place linked Part Logo](./icons/PlaceLink.svg)  **Place linked Part**
 
-![New LCS in the Model Logo](./Mod_Asm4/icons/AxisCross.svg) **New LCS in the Model**  
+![New LCS in the Model Logo](./icons/AxisCross.svg) **New LCS in the Model**  
 
-![Import Datum object Logo](./Mod_Asm4/icons/ImportDatum.svg) **Import Datum object**  
+![Import Datum object Logo](./icons/ImportDatum.svg) **Import Datum object**  
 
-![Place Datum object Logo](./Mod_Asm4/icons/Place_AxisCross.svg) **Place Datum object**
+![Place Datum object Logo](./icons/Place_AxisCross.svg) **Place Datum object**
 
-![New Sketch in the Model Logo](./Mod_Asm4/icons/Model_NewSketch.svg) **New Sketch in the Model**
+![New Sketch in the Model Logo](./icons/Model_NewSketch.svg) **New Sketch in the Model**
 
-![New Datum Point in the Model Logo](./Mod_Asm4/icons/Point.svg) **New Datum Point in the Model**
+![New Datum Point in the Model Logo](./icons/Point.svg) **New Datum Point in the Model**
 
-![New Body in the Model Logo](./Mod_Asm4/icons/PartDesign_Body.svg) **New Body in the Model**
+![New Body in the Model Logo](./icons/PartDesign_Body.svg) **New Body in the Model**
 
 ### Part
 
@@ -172,6 +172,9 @@ Therefore, in order to re-use a coordinate system of a part in an assembly, a co
 
 
 #### Release notes
+
+* 2019.10.07 (**version 0.6.1**) :  
+Moved the code that was in Mod_Asm4 to the root, to be compatible with the FreeCAD AddonManager
 
 * 2019.10.05 (**version 0.6**) :  
 Ported to FreeCAD-v0.19-pre, with new syntax for the ExpressionEngine
