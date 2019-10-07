@@ -114,23 +114,23 @@ The toolbar for the Assembly4 workbench holds the following buttons:
 
 ![](Resources/media/Toolbar.png)
 
-![New Model Icon](./icons/Model.svg) **New Model** : to be used on a new and empty FreeCAD document. Because of some internal limitations (might be hopefully corrected in some near future) a new document with a new Model should be closed and re-opened before being fully usable. 
+![New Model Icon](./Resources/icons/Model.svg) **New Model** : to be used on a new and empty FreeCAD document. Because of some internal limitations (might be hopefully corrected in some near future) a new document with a new Model should be closed and re-opened before being fully usable. 
 
-![Insert Link Icon](./icons/LinkModel.svg) **Insert link** : Insert an external part. This part must be open in FreeCAD, and must have been saved to disk prior usage (see: _New Model )
+![Insert Link Icon](./Resources/icons/LinkModel.svg) **Insert link** : Insert an external part. This part must be open in FreeCAD, and must have been saved to disk prior usage (see: _New Model )
 
-![Place linked Part Logo](./icons/PlaceLink.svg)  **Place linked Part** : this moves a linked part and places it relative to the assembly.
+![Place linked Part Logo](./Resources/icons/PlaceLink.svg)  **Place linked Part** : this moves a linked part and places it relative to the assembly.
 
-![New LCS in the Model Logo](./icons/AxisCross.svg) **New LCS in the Model** : creates a new PartDesign::CoordinateSystem at the root of the Model.
+![New LCS in the Model Logo](./Resources/icons/AxisCross.svg) **New LCS in the Model** : creates a new PartDesign::CoordinateSystem at the root of the Model.
 
-![Import Datum object Logo](./icons/ImportDatum.svg) **Import Datum object** : clones an existing Datum object of a linked part. In other words, it creates a new Datum object at the root of the Model and populates the _ExpressionEngine_ of its _Placement_ property, so that to place it at the same place as the existing Datum object. This is used to import a Datum object from an linked part into the assembly, to be used there in Sketches for example. This has the combined effect of _New Datum_ and _Place Datum_
+![Import Datum object Logo](./Resources/icons/ImportDatum.svg) **Import Datum object** : clones an existing Datum object of a linked part. In other words, it creates a new Datum object at the root of the Model and populates the _ExpressionEngine_ of its _Placement_ property, so that to place it at the same place as the existing Datum object. This is used to import a Datum object from an linked part into the assembly, to be used there in Sketches for example. This has the combined effect of _New Datum_ and _Place Datum_
 
-![Place Datum object Logo](./icons/Place_AxisCross.svg) **Place Datum object** : moves an existing Datum object in the Model to the same placement as an existing Datum object in another linked part. 
+![Place Datum object Logo](./Resources/icons/Place_AxisCross.svg) **Place Datum object** : moves an existing Datum object in the Model to the same placement as an existing Datum object in another linked part. 
 
-![New Sketch in the Model Logo](./icons/Model_NewSketch.svg) **New Sketch in the Model** : creates a new Sketch at the root of the Model
+![New Sketch in the Model Logo](./Resources/icons/Model_NewSketch.svg) **New Sketch in the Model** : creates a new Sketch at the root of the Model
 
-![New Datum Point in the Model Logo](./icons/Point.svg) **New Datum Point in the Model** : creates a new Datum Point at the root of the Model
+![New Datum Point in the Model Logo](./Resources/icons/Point.svg) **New Datum Point in the Model** : creates a new Datum Point at the root of the Model
 
-![New Body in the Model Logo](./icons/PartDesign_Body.svg) **New Body in the Model** : creates a new PartDesign::Body at the root of the Model, to be used with the PartDesign workbench.
+![New Body in the Model Logo](./Resources/icons/PartDesign_Body.svg) **New Body in the Model** : creates a new PartDesign::Body at the root of the Model, to be used with the PartDesign workbench.
 
 ### Part
 
