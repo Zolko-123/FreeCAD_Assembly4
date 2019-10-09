@@ -20,7 +20,7 @@ Pre-built binaries on the v0.19 development branch can be found [here](https://g
 
 ### Automatic Installation (recommended)
 
-Assembly 4 is available through the FreeCAD Addon Manager (menu Tools > Addon Manager). It is called 'A4' in the Addon Repository.  
+Assembly 4 is available through the FreeCAD Addon Manager (menu Tools > Addon Manager). It is called _Assembly4_ in the Addon Repository.  
 
 **Note:** Restarting FreeCAD is required after installing this Addon.
 
