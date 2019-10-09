@@ -13,7 +13,7 @@ Welcome to the FreeCAD_aws wiki! This page tries to explain how to make assembli
 ### Automatic Installation (recommended)
 
 Assembly 4 is available through the [FreeCAD Addon Manager](https://github.com/FreeCAD/FreeCAD-addons/#1-builtin-addon-manager).
-It is called 'A4' in the Addon Repository.    
+It is called 'Assembly4' in the Addon Repository.    
 
 **Note:** Restarting FreeCAD is required after installing this Addon.
 
@@ -114,23 +114,23 @@ The toolbar for the Assembly4 workbench holds the following buttons:
 
 ![](Resources/media/Toolbar.png)
 
-![New Model Icon](./Resources/icons/Model.svg) **New Model** : to be used on a new and empty FreeCAD document. Because of some internal limitations (might be hopefully corrected in some near future) a new document with a new Model should be closed and re-opened before being fully usable. 
+![New Model Icon](icons/Model.svg) **New Model** : to be used on a new and empty FreeCAD document. Because of some internal limitations (might be hopefully corrected in some near future) a new document with a new Model should be closed and re-opened before being fully usable. 
 
-![Insert Link Icon](./Resources/icons/LinkModel.svg) **Insert link** : Insert an external part. This part must be open in FreeCAD, and must have been saved to disk prior usage (see: _New Model )
+![Insert Link Icon](icons/LinkModel.svg) **Insert link** : Insert an external part. This part must be open in FreeCAD, and must have been saved to disk prior usage (see: _New Model )
 
-![Place linked Part Logo](./Resources/icons/PlaceLink.svg)  **Place linked Part** : this moves a linked part and places it relative to the assembly.
+![Place linked Part Logo](icons/PlaceLink.svg)  **Place linked Part** : this moves a linked part and places it relative to the assembly.
 
-![New LCS in the Model Logo](./Resources/icons/AxisCross.svg) **New LCS in the Model** : creates a new PartDesign::CoordinateSystem at the root of the Model.
+![New LCS in the Model Logo](icons/AxisCross.svg) **New LCS in the Model** : creates a new PartDesign::CoordinateSystem at the root of the Model.
 
-![Import Datum object Logo](./Resources/icons/ImportDatum.svg) **Import Datum object** : clones an existing Datum object of a linked part. In other words, it creates a new Datum object at the root of the Model and populates the _ExpressionEngine_ of its _Placement_ property, so that to place it at the same place as the existing Datum object. This is used to import a Datum object from an linked part into the assembly, to be used there in Sketches for example. This has the combined effect of _New Datum_ and _Place Datum_
+![Import Datum object Logo](icons/ImportDatum.svg) **Import Datum object** : clones an existing Datum object of a linked part. In other words, it creates a new Datum object at the root of the Model and populates the _ExpressionEngine_ of its _Placement_ property, so that to place it at the same place as the existing Datum object. This is used to import a Datum object from an linked part into the assembly, to be used there in Sketches for example. This has the combined effect of _New Datum_ and _Place Datum_
 
-![Place Datum object Logo](./Resources/icons/Place_AxisCross.svg) **Place Datum object** : moves an existing Datum object in the Model to the same placement as an existing Datum object in another linked part. 
+![Place Datum object Logo](icons/Place_AxisCross.svg) **Place Datum object** : moves an existing Datum object in the Model to the same placement as an existing Datum object in another linked part. 
 
-![New Sketch in the Model Logo](./Resources/icons/Model_NewSketch.svg) **New Sketch in the Model** : creates a new Sketch at the root of the Model
+![New Sketch in the Model Logo](icons/Model_NewSketch.svg) **New Sketch in the Model** : creates a new Sketch at the root of the Model
 
-![New Datum Point in the Model Logo](./Resources/icons/Point.svg) **New Datum Point in the Model** : creates a new Datum Point at the root of the Model
+![New Datum Point in the Model Logo](icons/Point.svg) **New Datum Point in the Model** : creates a new Datum Point at the root of the Model
 
-![New Body in the Model Logo](./Resources/icons/PartDesign_Body.svg) **New Body in the Model** : creates a new PartDesign::Body at the root of the Model, to be used with the PartDesign workbench.
+![New Body in the Model Logo](./icons/PartDesign_Body.svg) **New Body in the Model** : creates a new PartDesign::Body at the root of the Model, to be used with the PartDesign workbench.
 
 ### Part
 
@@ -166,55 +166,11 @@ coordinate system inside a linked part cannot be used to attach the assembly to 
 
 Therefore, in order to re-use a coordinate system of a part in an assembly, a coordinate system must be created at the root of the 'Model', and the placement of this coordinate system must be 'copied' over from the coordinate system that the user wants to use. This is done by inserting a coordinate system and using the 'Place LCS' command, which allows to select a linked part in the assembly and one of it's coordinate systems: the 2 coordinate systems — the one at the root of 'Model' and the one in the linked part — will always be superimposed, even if the linked part is modified, allowing the placement of the assembly in a higher level assembly using a linked part as reference. It sounds more complicated than it actually is.
 
-![](Resources/media/Asm4_V4.gif)
+![](media/Asm4_V4.gif)
 
-![](Resources/media/Lego_House+Garden.png)
+![](media/Lego_House+Garden.png)
 
 
-#### Release notes
-
-* 2019.10.07 (**version 0.6.1**) :  
-Moved the code that was in Mod_Asm4 to the root, to be compatible with the FreeCAD AddonManager
-
-* 2019.10.05 (**version 0.6**) :  
-Ported to FreeCAD-v0.19-pre, with new syntax for the ExpressionEngine
-
-* 2019.07.23 (**version 0.5.5**) :  
-Fixed a bug in partLCSlist.findItems
-New Datum Point in the Model
-* 2019.07.18 (**version 0.5.4**) :  
-A cosmetic update to fix a 25 year old Windows bug: 
-some UTF-8 characters in the comments were not accepted on some Windows 10 machines
-
-* 2019.06.15 (**version 0.5.3**) :  
-Now the LCS can be renamed, and they show up in the LCS list in the command placeLink as such. 
-It's only visual, the ExpressionEngine still uses the LCS.Name though
-
-* 2019.05.07 (**version 0.5.2**) :  
-added insertDatumCmd
-
-* 2019.03.18 (**version 0.5.1**) :  
-Part can now be linked without being placed: this is then a raw interface with App::Link  
-The instance can be moved manually with the 'Transform' dragger
-
-* 2019.03.12 (**version 0.5**) :  
-moved the actual code to Mod_Asm4
-
-* 2019.03.11 (**version 0.4.1**) :  
-Added placement of Datum Point
-
-* 2019.03.09 (**version 0.4**) :  
-FreeCAD now imports as App  
-insert_Link launches place_Link
-
-* 2019.03.05 (**version 0.3.1**) :  
-added the RotX-Y-Z buttons
-
-* 2019.02.20 (**version 0.3**)  
-mostly working version
-
-* 2019.02.18 (**version 0.1**) :  
-initial release of Assembly 4 WB
 
 ## License
 
