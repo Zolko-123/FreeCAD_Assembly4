@@ -71,7 +71,7 @@ Assembly4 uses a special and very useful feature of FreeCAD, the **ExpressionEng
 
 In normal use, the ExpressionEngine of an _`App::Link`_ object is hidden, it must be shown as in the following screenshot:
 
-![](Resources/media/asm_EE.png)
+![](media/asm_EE.png)
 
 #### Syntax
 
@@ -99,11 +99,11 @@ To each part inserted into an assembly is associated an `App::FeaturePython` obj
 
 **Note:** These constraints are not really constraints in the traditional CAD sense, but since `App::FeaturePython` objects are very versatile, they could be expanded to contain real constraints in some (distant) future.
 
-![](Resources/media/Asm4_wb1.png)
+![](media/Asm4_wb1.png)
 
 _Taking a closer look at the fields contained in an `App::FeaturePython` object associated with the part 'Bague'. The small button under the cursor opens the dialog that allows to edit the parameters of the Attachment Offset_
 
-![](Resources/media/Asm4_wb2.png)
+![](media/Asm4_wb2.png)
 
 _Dialog that opens when clicking the previous small button, and permitting to edit the parameters of the_ `App::Placement` _called_ 'AttachmentOffset' _in the constraint associated with a link, and allowing relative placement of the link -vs- the attachment LCS_
 
@@ -112,7 +112,7 @@ _Dialog that opens when clicking the previous small button, and permitting to ed
 ### Toolbar
 The toolbar for the Assembly4 workbench holds the following buttons:
 
-![](Resources/media/Toolbar.png)
+![](media/Toolbar.png)
 
 ![New Model Icon](icons/Model.svg) **New Model** : to be used on a new and empty FreeCAD document. Because of some internal limitations (might be hopefully corrected in some near future) a new document with a new Model should be closed and re-opened before being fully usable. 
 
