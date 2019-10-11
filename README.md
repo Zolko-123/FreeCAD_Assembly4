@@ -62,7 +62,15 @@ To each part inserted into an assembly is associated an `App::FeaturePython` obj
 
 ## Instructions and tutorials
 
-You can find more informations in the detailed [instructions](Resources/INSTRUCTIONS.md), as well as a [tutorial](TUTORIAL1.md) for a quick assembly guide.
+You can find more informations in the detailed [instructions](Resources/INSTRUCTIONS.md), as well as tutorials:
+
+* [a quick assembly from scratch](Resources/TUTORIAL1.md)
+* [a cinematic assembly reusing existing FreeCAD parts](Resources/TUTORIAL2.md)
+* [a multy-layered assembly for advanced users](Resources/TUTORIAL3.md)
+* [a Lego assembly](Resources/TUTORIAL4.md)
+* [an architectural assembly](Resources/TUTORIAL5.md)
+
+
 
 
 
