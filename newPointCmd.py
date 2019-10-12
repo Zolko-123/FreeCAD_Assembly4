@@ -17,8 +17,8 @@ class newPoint:
 	"My tool object"
 
 	def GetResources(self):
-		return {"MenuText": "Create a new Point",
-				"ToolTip": "Create a new Datum Point in the Model",
+		return {"MenuText": "New Point",
+				"ToolTip": "Create a new Datum Point in a Part",
 				"Pixmap" : os.path.join( iconPath , 'Asm4_Point.svg')
 				}
 

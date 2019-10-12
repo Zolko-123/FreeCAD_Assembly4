@@ -25,9 +25,9 @@ class insertLink( QtGui.QDialog ):
 
         
 	def GetResources(self):
-		return {"MenuText": "Insert an external Part",
+		return {"MenuText": "Link an external Part",
 				"Accel": "Ctrl+L",
-				"ToolTip": "Insert an external Part from another open document",
+				"ToolTip": "Insert a link to external Part from another open document",
 				"Pixmap" : os.path.join( iconPath , 'Link_Part.svg')
 				}
 

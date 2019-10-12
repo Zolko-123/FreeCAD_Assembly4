@@ -17,9 +17,9 @@ class newBody:
 	"My tool object"
 
 	def GetResources(self):
-		return {"MenuText": "Create a new Body",
+		return {"MenuText": "New Body",
 				"Accel": "Ctrl+B",
-				"ToolTip": "Create a new Body in the Model",
+				"ToolTip": "Create a new Body in a Part",
 				"Pixmap" : os.path.join( iconPath , 'Asm4_Body.svg')
 				}
 

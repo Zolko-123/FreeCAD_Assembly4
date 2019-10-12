@@ -17,9 +17,9 @@ class newModel:
 	"My tool object"
 
 	def GetResources(self):
-		return {"MenuText": "Create a new Model",
+		return {"MenuText": "New Model",
 				"Accel": "Ctrl+M",
-				"ToolTip": "Create a new Model App::Part",
+				"ToolTip": "Create a new Assembly4 Model",
 				"Pixmap" : os.path.join( iconPath , 'Asm4_Model.svg')
 				}
 

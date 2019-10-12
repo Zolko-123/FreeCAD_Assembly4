@@ -17,7 +17,7 @@ class newPart:
 	"My tool object"
 
 	def GetResources(self):
-		return {"MenuText": "Create a new Part",
+		return {"MenuText": "New Part",
 				"Accel": "Ctrl+P",
 				"ToolTip": "Create a new Part in the document",
 				"Pixmap" : os.path.join( iconPath , 'Asm4_Part.svg')

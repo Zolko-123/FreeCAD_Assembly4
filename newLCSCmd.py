@@ -17,8 +17,9 @@ class newLCS:
 	"My tool object"
 
 	def GetResources(self):
-		return {"MenuText": "Create a new LCS",
-				"ToolTip": "Create a new Coordinate System in the Model",
+		return {"MenuText": "New LCS",
+				"Accel": "Ctrl+C",
+				"ToolTip": "Create a new Coordinate System in a Part",
 				"Pixmap" : os.path.join( iconPath , 'Asm4_AxisCross.svg')
 				}
 

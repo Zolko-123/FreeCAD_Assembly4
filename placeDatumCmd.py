@@ -28,8 +28,8 @@ class placeDatum( QtGui.QDialog ):
 
 
 	def GetResources(self):
-		return {"MenuText": "Edit Attachment of a Datum Point or Coordinate System",
-				"ToolTip": "Attach a Datum Point or Coordinate System to an external Part",
+		return {"MenuText": "Edit Attachment of a Datum object",
+				"ToolTip": "Attach a Datum object to an external Part",
 				"Pixmap" : os.path.join( iconPath , 'Place_AxisCross.svg')
 				}
 

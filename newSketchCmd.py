@@ -17,8 +17,8 @@ class newSketch:
 	"My tool object"
 
 	def GetResources(self):
-		return {"MenuText": "Create a new Sketch",
-				"ToolTip": "Create a new Sketch in the Model",
+		return {"MenuText": "New Sketch",
+				"ToolTip": "Create a new Sketch in a Part",
 				"Pixmap" : os.path.join( iconPath , 'Asm4_Sketch.svg')
 				}
 
