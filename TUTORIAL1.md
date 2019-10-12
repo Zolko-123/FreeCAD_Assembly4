@@ -284,7 +284,8 @@ By right-clicking on the Body inside axis, you can **Toggle active body** and ed
 
 ![](Resources/media/Asm_tuto1_final.png)
 
-Should it happen that you make modifications in the assembly and some parts didn't follow, right-click on that part and choose in the contextual menu **Recompute object**. You can also do this on the top level assembly _Model_.
+Should it happen that you make modifications in the assembly and some parts didn't respond, right-click on that part and choose in the contextual menu **Recompute object**.  
+**Note:**You can also do this on the top level assembly _Model_.
 
 ## Feedback
 Did this tutorial help you, do you have anything to share? Please open a ticket or mention something in the [dedicated FreeCAD forum thread](https://forum.freecadweb.org/viewtopic.php?f=20&t=34806) pertaining to this tutorial. You can also make a PR with your proposed changes.
