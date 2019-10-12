@@ -7,7 +7,7 @@ This tutorial will walk you through to build the following assembly:
 ![](Resources/media/Asm_tuto1_final.png)
 
 * The axis is designed in FreeCAD with the PartDesign workbench
-* The beraings are imported from a STEP file
+* The bearings are imported from a STEP file
 
 It is supposed that you have read the [basic instructions](INSTRUCTIONS.md) and that the Assembly4 workbench has been installed before. It is also supposed that you have basic knowledge of FreeCAD, especially the _PartDesign_ workbench.
 
