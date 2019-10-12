@@ -9,11 +9,13 @@ This tutorial will walk you through to build the following assembly:
 * The axis is designed in FreeCAD with the PartDesign workbench
 * The bearings are imported from a STEP file
 
-It is supposed that you have read the [basic instructions](INSTRUCTIONS.md) and that the Assembly4 workbench has been installed before. It is also supposed that you have basic knowledge of FreeCAD, especially the _PartDesign_ workbench.
 
 ### Prerequisites
 
-It is assumed that you have read the [basic instructions](INSTRUCTIONS.md) and that the Assembly4 workbench has been previously installed. It is also assumed that you have basic knowledge of FreeCAD, especially the _PartDesign_ workbench.
+It is assumed that you have read the [Assembly4 instructions](INSTRUCTIONS.md) and that the Assembly4 workbench has been previously installed. It is also assumed that you have basic knowledge of FreeCAD, especially the _PartDesign_ workbench.
+
+Download the STEP file [`bearing_20x37x9.stp`](Resources/parts/bearing_20x37x9.stp ) (direct link to [`bearing_20x37x9.stp`](https://github.com/Zolko-123/FreeCAD_Assembly4/raw/master/Resources/parts/bearing_20x37x9.stp)) to your local hard drive. 
+
 
 ## Toolbar and Menu
 
@@ -84,9 +86,9 @@ Switch to document "_axis_" (by clicking on its tab).
 
 ## Document "bearing"
 
-Switch to document "_bearing_" (by clicking on its tab). Download the STEP file [`bearing_20x37x9.stp`](parts/bearing_20x37x9.stp ) to the same local directory as the 3 previous documents: _axis.fcstd_, _bearing.fcstd_, and _asm_tuto1.fcstd_. 
+Switch to document "_bearing_" (by clicking on its tab). 
 
-Direct Link to [`bearing_20x37x9.stp`](https://github.com/Zolko-123/FreeCAD_Assembly4/raw/master/Resources/parts/bearing_20x37x9.stp)
+If you haven't done so then download the STEP file [`bearing_20x37x9.stp`](parts/bearing_20x37x9.stp ) to the same local directory as the 3 previous documents: _axis.fcstd_, _bearing.fcstd_, and _asm_tuto1.fcstd_. 
 
 
 ### STEP import
