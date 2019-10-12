@@ -28,16 +28,20 @@ class importDatum( QtGui.QDialog ):
 
 
 	def GetResources(self):
-		return {"MenuText": "Import Datum Point or Coordinate System",
-				"ToolTip": "Import a Datum Point or Coordinate System from a linked Part",
-				"Pixmap" : os.path.join( iconPath , 'ImportDatum.svg')
+		return {"MenuText": "Import Datum object",
+				"ToolTip": "Import a Datum object from a linked Part",
+				"Pixmap" : os.path.join( iconPath , 'Import_Datum.svg')
 				}
 
 	def IsActive(self):
 		if App.ActiveDocument:
-			return True
+			# We only insert a link into an Asm4  Model
+			if App.ActiveDocument.getObject('Model'):
+				return(True)
+			else:
+				return(False)
 		else:
-			return False 
+			return(False) 
 
 
 	"""  
@@ -87,7 +91,6 @@ class importDatum( QtGui.QDialog ):
 		# get the name of the part where the datum to be copied is:
 		#linkedPartName = self.parentList.currentText()
 
-
 		# get the name of the part to attach to:
 		# it's either the top level part name ('Model')
 		# or the provided link's name.
@@ -101,64 +104,37 @@ class importDatum( QtGui.QDialog ):
 
 		# check that something is selected in the datum list
 		if self.datumList.selectedItems():
-			# this is in the QWidgetList...
-			listDatumName = self.datumList.currentItem().text()
-			# ... and this is the table with the actual datum objects
-			datumType = self.datumTable[ self.datumList.currentRow() ].TypeId
+			datum = self.datumTable[ self.datumList.currentRow() ]
 		else:
-			listDatumName = None
+			datum = None
 
 		# the name of the datum in the assembly, as per the dialog box
-		datumAsmName = self.datumName.text()
+		setDatumName = self.datumName.text()
 		
 		# check that all of them have something in
-		if not (linkName and linkedPart and listDatumName and datumType and datumAsmName):
+		if not (linkName and linkedPart and datum and setDatumName):
 			self.datumName.setText( 'Please select a Datum object' )
-			self.importDatumName()
 		else:
 			# create the Datum
-			if datumType == 'PartDesign::CoordinateSystem':
+			if datum.TypeId == 'PartDesign::CoordinateSystem' or datum.TypeId == 'PartDesign::Point':
 				#createdLink = self.activeDoc.getObject('Model').newObject( 'App::Link', linkName )
-				createdDatum = App.activeDocument().getObject('Model').newObject( 'PartDesign::CoordinateSystem', datumAsmName )
+				createdDatum = App.activeDocument().getObject('Model').newObject( datum.TypeId, setDatumName )
 				self.datumName.setText( '=> ' +createdDatum.Name )
-				self.importSucceeded()
-			elif datumType == 'PartDesign::Point':
-				createdDatum = App.activeDocument().getObject('Model').newObject( 'PartDesign::Point', datumAsmName )
-				self.datumName.setText( '=> ' +createdDatum.Name )
-				self.importSucceeded()
 			else:
 				self.datumName.setText( 'unsupported Datum::Type' )
 				return
 			# build the expression to the linked datum (not the datumName in the assembly !)
-			expr = makeExpressionDatum( linkName, linkedPart, listDatumName )
+			expr = makeExpressionDatum( linkName, linkedPart, datum.Name )
 			# load the built expression into the Expression field of the datum created in the assembly
 			self.activeDoc.getObject( createdDatum.Name ).setExpression( 'Placement', expr )
 			# recompute the object to apply the placement:
 			createdDatum.recompute()
-			# highlight the selected LCS in its new position
-			Gui.Selection.clearSelection()
-			Gui.Selection.addSelection( self.activeDoc.Name, 'Model', createdDatum.Name +'.')
 			# clear the selection in the datum list
-			#self.datumList.setCurrentRow( -1, QtGui.QItemSelectionModel.Clear )
 			self.datumList.setCurrentRow( -1 )
 		return
 
 
 
-
-	"""
-    +-----------------------------------------------+
-    |   find all the linked parts in the assembly   |
-    +-----------------------------------------------+
-
-	def getAllLinkedParts(self):
-		allLinkedParts = [ ]
-		for obj in self.activeDoc.findObjects("App::Link"):
-			# add it to our list if it's a link to an App::Part
-			if obj.LinkedObject.isDerivedFrom('App::Part'):
-				allLinkedParts.append( obj )
-		return allLinkedParts
-	"""
 
 	"""
     +-----------------------------------------------+
@@ -177,90 +153,52 @@ class importDatum( QtGui.QDialog ):
 		return linkDatums
 
 
+
 	"""
     +------------------------------------------------+
     |   fill the LCS list when changing the parent   |
     +------------------------------------------------+
 	"""
 	def onParentList(self):
-		self.importDatumName()
 		# clear the LCS list
 		self.datumList.clear()
-		self.datumTable = [ ]
 		self.datumName.setText( '' )
 		# clear the selection in the GUI window
 		Gui.Selection.clearSelection()
-		# the current text in the combo-box is the link's name...
-		parentName = self.parentList.currentText()
-		# ... or it's 'Parent Assembly' then the parent is the 'Model' root App::Part
-		if parentName =='Parent Assembly':
-			Parent = self.activeDoc.getObject( 'Model' )
-			# we get the LCS directly in the root App::Part 'Model'
-			partDatums = self.getLinkDatums( Parent )
-			self.parentDoc.setText( Parent.Document.Name )
-		# a sister object is an App::Link
-		# the .LinkedObject is an App::Part
-		else:
-			Parent = self.activeDoc.getObject( parentName )
-			# we get the LCS from the linked part
-			partDatums = self.getLinkDatums( Parent.LinkedObject )
-			self.parentDoc.setText( Parent.LinkedObject.Document.Name )
+		# if something is selected in the linked parts list
+		if self.parentList.currentIndex() > 0:
+			parent = self.asmParts[ self.parentList.currentIndex() ]
+			# we get all the datum objects from the linked part
+			self.datumTable = self.getLinkDatums( parent.LinkedObject )
+			self.parentDoc.setText( parent.LinkedObject.Document.Name )
 			# highlight the selected part:
-			Gui.Selection.addSelection( Parent.Document.Name, 'Model', Parent.Name+'.' )
-		# build the list
-		for datum in partDatums:
-			newItem = QtGui.QListWidgetItem()
-			newItem.setText( datum.Name )
-			newItem.setIcon( datum.ViewObject.Icon )
-			self.datumList.addItem( newItem )
-			self.datumTable.append(datum)
+			Gui.Selection.addSelection( parent.Document.Name, 'Model', parent.Name+'.' )
+		# build the datum objects names list
+			for datum in self.datumTable:
+				newItem = QtGui.QListWidgetItem()
+				if datum.Name == datum.Label:
+					newItem.setText( datum.Name )
+				else:
+					newItem.setText( datum.Label + ' (' +datum.Name+ ')' )
+				newItem.setIcon( datum.ViewObject.Icon )
+				self.datumList.addItem( newItem )
 		return
+
+
 
 
 	"""
     +-----------------------------------------------+
-    |  An LCS has been clicked in 1 of the 2 lists  |
-    |              We highlight both LCS            |
+    |            An LCS has been clicked            |
+    |     We pre-fill the datum's name text-box     |
     +-----------------------------------------------+
 	"""
 	def onDatumClicked( self ):
-		self.importDatumName()
-		# clear the selection in the GUI window
-		Gui.Selection.clearSelection()
-		# get the part where the selected LCS is
-		a_Part = self.parentList.currentText()
 		# LCS in the parent
-		a_LCS = self.datumList.selectedItems()[0].text()
-		# pre-fill the Datum name with the one selected
-		self.datumName.setText( a_LCS )
-		# parent assembly and sister part need a different treatment
-		if a_Part == 'Parent Assembly':
-			linkDot = ''
-		else:
-			linkDot = a_Part+'.'
-		# Highlight the selected datum object
-		Gui.Selection.addSelection( self.activeDoc.Name, 'Model', linkDot+a_LCS+'.')
-		return
-
-
-
-	"""
-    +-----------------------------------------------+
-    |                   success                     |
-    +-----------------------------------------------+
-	"""
-	def importSucceeded(self):
-		self.datumLabel.setText("Datum object successfully imported:")
-		return
-
-
-	"""
-    +-----------------------------------------------+
-    |                   success                     |
-    +-----------------------------------------------+
-	"""
-	def importDatumName(self):
-		self.datumLabel.setText("The imported Datum objects's name:")
+		datum = self.datumTable[ self.datumList.currentRow() ]
+		#a_LCS = self.datumList.selectedItems()[0].text()
+		# pre-fill the Datum name with the Label of the selected Datum
+		self.datumName.setText( datum.Label )
 		return
 
 
@@ -333,8 +271,7 @@ class importDatum( QtGui.QDialog ):
 
 		# imported Link name
 		self.datumLabel = QtGui.QLabel(self)
-		#self.datumLabel.setText("The imported Datum objects's name:")
-		self.importDatumName()
+		self.datumLabel.setText("The imported Datum objects's name:")
 		self.datumLabel.move(10,460)
 		# the name as seen in the tree of the selected link
 		self.datumName = QtGui.QLineEdit(self)

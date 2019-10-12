@@ -19,7 +19,7 @@ class newPlane:
 	def GetResources(self):
 		return {"MenuText": "Create a new Plane",
 				"ToolTip": "Create a new Datum Plane in the Model",
-				"Pixmap" : os.path.join( iconPath , 'New_Plane.svg')
+				"Pixmap" : os.path.join( iconPath , 'Asm4_Plane.svg')
 				}
 
 

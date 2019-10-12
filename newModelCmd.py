@@ -20,24 +20,41 @@ class newModel:
 		return {"MenuText": "Create a new Model",
 				"Accel": "Ctrl+M",
 				"ToolTip": "Create a new Model App::Part",
-				"Pixmap" : os.path.join( iconPath , 'Model.svg')
+				"Pixmap" : os.path.join( iconPath , 'Asm4_Model.svg')
 				}
+
 
 	def IsActive(self):
 		if App.ActiveDocument:
-			# is something selected ?
-			if Gui.Selection.getSelection():
-				return(False)
-			else:
-				return(True)
+			return(True)
 		else:
 			return(False)
 
+
 	def Activated(self):
-		# create a new App::Part called 'Model'
-		App.activeDocument().Tip = App.activeDocument().addObject('App::Part','Model')
-		App.activeDocument().getObject('Model').newObject('App::DocumentObjectGroup','Constraints')
-		App.activeDocument().getObject('Model').newObject('PartDesign::CoordinateSystem','LCS_0')
+		# get the current active document to avoid errors if user changes tab
+		self.activeDoc = App.activeDocument()
+		# check whether there is already Model in the document
+		if not self.checkModel():
+			# create a new App::Part called 'Model'
+			self.activeDoc.Tip = self.activeDoc.addObject('App::Part','Model')
+			self.activeDoc.getObject('Model').newObject('App::DocumentObjectGroup','Constraints')
+			self.activeDoc.getObject('Model').newObject('PartDesign::CoordinateSystem','LCS_0')
+
+
+	def checkModel(self):
+		# check wheter there is already a Model in the document
+		# we don't check whether it's an App::Part or not
+		# Returns True if there is a Model
+		if self.activeDoc.getObject('Model'):
+			msgBox = QtGui.QMessageBox()
+			msgBox.setWindowTitle('Warning')
+			msgBox.setIcon(QtGui.QMessageBox.Critical)
+			msgBox.setText("There is already a Model in this assembly.")
+			msgBox.exec_()
+			return(True)
+		else:
+			return(False)
 
 
 # add the command to the workbench

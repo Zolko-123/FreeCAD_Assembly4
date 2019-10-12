@@ -31,7 +31,7 @@ class placeLink( QtGui.QDialog ):
 	def GetResources(self):
 		return {"MenuText": "Edit Placement of a linked Part",
 				"ToolTip": "Move an instance of an external Part",
-				"Pixmap" : os.path.join( iconPath , 'PlaceLink.svg')
+				"Pixmap" : os.path.join( iconPath , 'Place_Link.svg')
 				}
 
 
@@ -52,7 +52,6 @@ class placeLink( QtGui.QDialog ):
     +-----------------------------------------------+
 	"""
 	def Activated(self):
-
 		# get the current active document to avoid errors if user changes tab
 		self.activeDoc = App.activeDocument()
 

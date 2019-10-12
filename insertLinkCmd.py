@@ -28,17 +28,17 @@ class insertLink( QtGui.QDialog ):
 		return {"MenuText": "Insert an external Part",
 				"Accel": "Ctrl+L",
 				"ToolTip": "Insert an external Part from another open document",
-				"Pixmap" : os.path.join( iconPath , 'LinkModel.svg')
+				"Pixmap" : os.path.join( iconPath , 'Link_Part.svg')
 				}
 
 
 	def IsActive(self):
 		if App.ActiveDocument:
-			# is something selected ?
-			if Gui.Selection.getSelection():
-				return False
+			# We only insert a link into an Asm4  Model
+			if App.ActiveDocument.getObject('Model'):
+				return(True)
 			else:
-				return True
+				return(False)
 		else:
 			return(False)
 
@@ -53,12 +53,23 @@ class insertLink( QtGui.QDialog ):
 		self.drawUI()
 		
 		# Search for all App::Parts in all open documents
-		self.getAllParts()
+		self.allParts = []
+		for doc in App.listDocuments().values():
+			# except this document: we don't want to link to itself
+			if doc != self.activeDoc:
+				parts = doc.findObjects("App::Part")
+				# there might be more than 1 App::Part per document
+				for obj in parts:
+					self.allParts.append( obj )
 		
 		# build the list
 		for part in self.allParts:
 			newItem = QtGui.QListWidgetItem()
-			newItem.setText( part.Document.Name +" -> "+ part.Name )
+			if part.Name == part.Label:
+				partText = part.Name 
+			else:
+				partText = part.Label + ' (' +part.Name+ ')' 
+			newItem.setText( part.Document.Name +"#"+ partText )
 			newItem.setIcon(part.ViewObject.Icon)
 			self.partList.addItem(newItem)
 
@@ -103,29 +114,27 @@ class insertLink( QtGui.QDialog ):
 
 
 
+	def onItemClicked( self, item ):
+		for selected in self.partList.selectedIndexes():
+			# get the selected part
+			part = self.allParts[ selected.row() ]
+			# if the App::Part has been renamed by the user, we suppose it's important
+			# thus we append the Label to the link's name
+			# this might happen if there are multiple App::Parts in a document
+			appendLabel = ''
+			if part.Name != part.Label:
+				appendLabel = '_'+part.Label
+            # set the text of the link to be made to the document where the part is in
+			self.linkNameInput.setText(part.Document.Name+appendLabel)
+
+
+
 	"""
     +-----------------------------------------------+
     |                 some functions                |
     +-----------------------------------------------+
 	"""
-	def getAllParts(self):
-		# get all App::Part from all open documents
-		self.allParts = []
-		for doc in App.listDocuments().values():
-			# except this document: we don't want to link to itself
-			if doc != self.activeDoc:
-				parts = doc.findObjects("App::Part")
-				# there might be more than 1 App::Part per document
-				for obj in parts:
-					self.allParts.append( obj )
 
-
-	def onItemClicked( self, item ):
-		for selected in self.partList.selectedIndexes():
-			# get the selected part
-			model = self.allParts[ selected.row() ]
-            # set the text of the link to be made to the document where the part is in
-			self.linkNameInput.setText(model.Document.Name)
 
 
 	def onCancel(self):

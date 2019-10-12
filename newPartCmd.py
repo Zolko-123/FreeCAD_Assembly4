@@ -18,9 +18,9 @@ class newPart:
 
 	def GetResources(self):
 		return {"MenuText": "Create a new Part",
-				"Accel": "Ctrl+B",
+				"Accel": "Ctrl+P",
 				"ToolTip": "Create a new Part in the document",
-				"Pixmap" : os.path.join( iconPath , 'New_Part.svg')
+				"Pixmap" : os.path.join( iconPath , 'Asm4_Part.svg')
 				}
 
 

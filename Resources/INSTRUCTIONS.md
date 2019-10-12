@@ -44,15 +44,15 @@ You can use the [example assemblies](https://github.com/Zolko-123/FreeCAD_Assemb
 
 Each Assembly4 model is mostly standard FreeCAD `App::Part` object, and these are assembled using the `App::Link` framework included with FreeCAD 0.19. Pre-built binaries on the v0.19 development branch can be found [here](https://github.com/FreeCAD/FreeCAD/releases/tag/0.19_pre)
 
-The particularities of the `App::Part` used here are the following:
+The particularities of the `App::Part` used as Assembly4 Model are the following:
 
 * they are called 'Model' at creation time  
 * they contain a group called 'Constraints' at the root  
 * they contain a Datum Coordinate System called LCS_0 at the root  
 
-The purpose of this is to avoid burdensome error checking: it is supposed that no other usecase would create an `App::Part` called 'Model', _i.e._ that if an `App::Part` is called 'Model' it will conform to these characteristics.  
+Any Model can contain (by `App::Link`) any other Model and any FreeCAD `App::Part` and thus make an assembly, but a standard FreeCAD `App::Part` cannot be used by the Assembly4 workbench to include Parts or Models by App::Link. This is a purposfull feature to avoid burdensome error checking: it is supposed that no other usecase would create an `App::Part` called 'Model', _i.e._ that if an `App::Part` is called 'Model' it will conform to these characteristics. A FreeCAD document can contain many `App::Parts`, but only one `App::Part Model`.
 
-Any Model can contain (by `App::Link`) any other Model, and they are placed to each-other by matching their Datum Coordinate Systems (`PartDesign::CoordinateSystem`, called here-after LCS (Local Coordinate System)). There is no need for any geometry to be present to place and constrain parts relative to each other. LCS are used because they are both mechanical objects, since they fix all 6 degrees of freedom in an isostatic way, and mathematical objects that can be easily manipulated by rigorous methods (mainly combination and inversion).
+Linked parts are placed to each-other by matching their Datum Coordinate Systems (`PartDesign::CoordinateSystem`, called here-after LCS (Local Coordinate System)). There is no need for any geometry to be present to place and constrain parts relative to each other. LCS are used because they are both mechanical objects, since they fix all 6 degrees of freedom in an isostatic way, and mathematical objects that can be easily manipulated by rigorous methods (mainly combination and inversion).
 
 To actually include some geometry, a body needs to be created, and designed using the PartDesign workbench. To be linked with the previously created model, this body needs to be inside the `App::Part container` called 'Model'.  
 
@@ -73,7 +73,7 @@ In normal use, the ExpressionEngine of an _`App::Link`_ object is hidden, it mus
 
 ![](media/asm_EE.png)
 
-#### Syntax
+### Syntax
 
 The syntax of the ExpressionEngine is the following:
 
@@ -92,7 +92,7 @@ The syntax of the ExpressionEngine is the following:
 * **LinkedPart** is the App::Part's name that the inserted App::Link refers-to
 * **LCS_link** is the LCS in the linked part
 
-#### Constraints
+### Constraints
 
 To each part inserted into an assembly is associated an `App::FeaturePython` object, placed in the 'Constraints' group. This object contains information about the placement of the linked object in the assembly. It also contains an `App::Placement`, called '`AttachmentOffset`', which introduces an offset between the LCS in the part and the LCS in the assembly. The main purpose of this offset is to correct bad orientations between the 2 matching LCS. 
 
@@ -107,30 +107,54 @@ _Taking a closer look at the fields contained in an `App::FeaturePython` object 
 
 _Dialog that opens when clicking the previous small button, and permitting to edit the parameters of the_ `App::Placement` _called_ 'AttachmentOffset' _in the constraint associated with a link, and allowing relative placement of the link -vs- the attachment LCS_
 
-## Workflow
+
+## Usage
+
 
 ### Toolbar
-The toolbar for the Assembly4 workbench holds the following buttons:
+
+Buttons in the toolbar are activated with relevant selection. If a button you want to use is inactive try to change the selection (with the mouse).
 
 ![](media/Toolbar.png)
 
-![New Model Icon](icons/Model.svg) **New Model** : to be used on a new and empty FreeCAD document. Because of some internal limitations (might be hopefully corrected in some near future) a new document with a new Model should be closed and re-opened before being fully usable. 
 
-![Insert Link Icon](icons/LinkModel.svg) **Insert link** : Insert an external part. This part must be open in FreeCAD, and must have been saved to disk prior usage (see: _New Model )
+* ![](icons/Asm4_Model.svg) : **New Model** : creates an Assembly4 Model, which is a FreeCAD App::Part called Model and with some extra additions. One document can only contain one Assembly4 Model.
 
-![Place linked Part Logo](icons/PlaceLink.svg)  **Place linked Part** : this moves a linked part and places it relative to the assembly.
+* ![](icons/Asm4_Body.svg) : **New Body** : creates FreeCAD PartDesign::Body in an Assembly4 Model or in an App::Part. This Body can then be used with FreeCAD's PartDesign workbench.
 
-![New LCS in the Model Logo](icons/AxisCross.svg) **New LCS in the Model** : creates a new PartDesign::CoordinateSystem at the root of the Model.
+* ![](icons/Asm4_Part.svg) : **New Part** : creates FreeCAD App::Part in the current document. A document can contain many parts.
 
-![Import Datum object Logo](icons/ImportDatum.svg) **Import Datum object** : clones an existing Datum object of a linked part. In other words, it creates a new Datum object at the root of the Model and populates the _ExpressionEngine_ of its _Placement_ property, so that to place it at the same place as the existing Datum object. This is used to import a Datum object from an linked part into the assembly, to be used there in Sketches for example. This has the combined effect of _New Datum_ and _Place Datum_
+* ![](icons/Asm4_Sketch.svg) : **New Sketch** : creates FreeCAD Sketch in an App::Part (and thus also in Assembly4 Models). This Sketch is unattached, to attach it to an object edit its MapMode in its Placement Property
 
-![Place Datum object Logo](icons/Place_AxisCross.svg) **Place Datum object** : moves an existing Datum object in the Model to the same placement as an existing Datum object in another linked part. 
+* ![](icons/Asm4_AxisCross.svg) : **New LCS** : creates FreeCAD PartDesign::CoordinateSystem in an App::Part (and thus also in Assembly4 Models). This LCS is unattached, to attach it to an object edit its MapMode in its Placement Property
 
-![New Sketch in the Model Logo](icons/Model_NewSketch.svg) **New Sketch in the Model** : creates a new Sketch at the root of the Model
+* ![](icons/Asm4_Plane.svg) : **New Datum Plane** : creates FreeCAD PartDesign::Plane in an App::Part (and thus also in Assembly4 Models). This Datum Plane is unattached, to attach it to an object edit its MapMode in its Placement Property
 
-![New Datum Point in the Model Logo](icons/Point.svg) **New Datum Point in the Model** : creates a new Datum Point at the root of the Model
+* ![](icons/Asm4_Point.svg) : **New Datum Point** : creates FreeCAD PartDesign::Point in an App::Part (and thus also in Assembly4 Models). This Datum Point is unattached, to attach it to an object edit its MapMode in its Placement Property
 
-![New Body in the Model Logo](./icons/PartDesign_Body.svg) **New Body in the Model** : creates a new PartDesign::Body at the root of the Model, to be used with the PartDesign workbench.
+* ![](icons/Link_Part.svg) : **Insert an External Part** : creates a FreeCAD App::Link to an App::Part in another document. Only parts from documents already saved to disk can be used. If there are multiple parts in a document, they can be selected individually. A part can be inserted (linked) many times, but each instance must have a unique name in the assembly tree. If a name already attribuated is given again, FreeCAD will automatically give it a unique (and probably un-user-friendly) name.
+
+* ![](icons/Place_Link.svg) : **Place Link** : this places a linked part in the assembly to its intended position. This attaches an LCS in the linked part to another LCS in the assembly (called target LCS). This target LCS can be either in the assembly itself (in the Model) or in a sister part already linked. In this case, only LCS at the root of the linked part can be used, and not LCS inside a Body (for example) in the linked part.
+
+* ![](icons/Import_Datum.svg) : **Import Datum** : this imports an existing Datum object from a linked part into the assembly. Precisely, it creates a Datum in the assembly and attaches it to a datum in a sister part of the same type. By default, the same name is given to the imported Datum object. 
+
+* ![](icons/Place_AxisCross.svg) : **Place Datum** : this attaches an existing Datum object in the assembly to another existing Datum object in a linked part. Datum objects of different types can be attached. 
+
+* ![](icons/Solver.svg) : **Solve constraints and update assembly** : this recomputes all the links and all the placements in the assembly
+
+
+
+
+
+### Menu
+
+These functions are also accessible with the Assembly menu:
+
+![](media/Asm4_Menu.png)
+
+
+## Workflow
+
 
 ### Part
 

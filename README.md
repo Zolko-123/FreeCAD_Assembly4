@@ -76,6 +76,11 @@ You can find more informations in the detailed [instructions](Resources/INSTRUCT
 
 ## Release notes
 
+* 2019.10.11 (**version 0.6.2**) :  
+Added page for Tutorial 1.
+Fine-tuned some functions
+Renamed icons in a consistent way
+
 * 2019.10.07 (**version 0.6.1**) :  
 Moved the code that was in Mod_Asm4 to the root, to be compatible with the FreeCAD AddonManager
 
