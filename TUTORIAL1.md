@@ -162,7 +162,7 @@ Direct Link to [`bearing_20x37x9.stp`](https://github.com/Zolko-123/FreeCAD_Asse
 
 * Click on **Insert External part**, select **bearing#Model**
 
-  ![](ResoResourcesurces/media/Insert_bearing1.png)
+  ![](Resources/media/Insert_bearing1.png)
 
 * Change the proposed name _bearing_ to _bearing_1_ (we will have 3 bearings)
 
