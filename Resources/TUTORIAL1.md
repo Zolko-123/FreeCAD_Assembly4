@@ -80,6 +80,9 @@ The part _axis_ is now ready for assembly
 
 Switch to document "_bearing_" (by clicking on its tab). Download the STEP file [bearing_20x37x9.stp ](parts/bearing_20x37x9.stp ) to the same local directory as the 3 documents _axis.fcstd_ , _bearing.fcstd_ , _asm_tuto1.fcstd_ . 
 
+[Direct Link to bearing_20x37x9.stp](https://github.com/Zolko-123/FreeCAD_Assembly4/raw/master/Resources/parts/bearing_20x37x9.stp)
+
+
 ### STEP import
 
 * Import the step file bearing_20x37x9.stp : menu File > Import. This will create a bunch of solids in the bearing document, but not in the Model ! 
