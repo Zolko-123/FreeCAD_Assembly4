@@ -156,7 +156,7 @@ If you haven't done so then download the STEP file [`bearing_20x37x9.stp`](parts
 * This has filled the `Expression Engine` field and an object called _constr_axis_ has appeared in the Constraints group.
 * Click **OK**
 
-* Note that the _axis_ part is now in the _asm_tuto1_ document, including the tree, with all its sub-objects.
+* **Note:** the _axis_ part is now in the _asm_tuto1_ document, including the tree, with all its sub-objects.
 
 * Save 
 
