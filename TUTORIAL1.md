@@ -218,9 +218,8 @@ This is easy to correct:
 
 * This will bring up the _Place Link_ dialog: 
   * in the left panel _Select LCS in Part_ choose **LCS_1**
-  * in the drop-down combo-box _Select part to attach to_ choose part **bearing_2**
-  * in the right panel _Select LCS in Parent_ choose **LCS_2(LCS_1001)**   
-    **Note:** When an LCS has been renamed (as we did in the _bearing_ part) this is how it appears.
+  * in the drop-down combo-box _Select part to attach to_ choose part **axis**
+  * in the right panel _Select LCS in Parent_ choose **LCS_1**   
   * Click **Show**
   * Orient _bearing_3_ with the buttons _Rot X_ and _Rot Y_ and _Rot Z_ until it is in its correct position
 
