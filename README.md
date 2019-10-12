@@ -16,6 +16,7 @@ Any Asm4 Model can contain (by `App::Link`) any other Asm4 Model, and they are p
 
 Pre-built binaries on the v0.19 development branch can be found [here](https://github.com/FreeCAD/FreeCAD/releases/tag/0.19_pre)
 
+
 ## Installation
 
 ### Automatic Installation (recommended)
@@ -25,61 +26,51 @@ Assembly 4 is available through the FreeCAD Addon Manager (menu Tools > Addon Ma
 **Note:** Restarting FreeCAD is required after installing this Addon.
 
 
+
 ## Getting Started
 
-You can use the [example assemblies](https://github.com/Zolko-123/FreeCAD_Assembly4/tree/master/Examples) to experiment with this workbench's features. Open one _asm_something.fcstd_ file and try out the functions. There are `ReadMe.txt` files in each directory with some explanations.
+You can use the [example assemblies](https://github.com/Zolko-123/FreeCAD_Assembly4/tree/master/Examples) to experiment with this workbench's features. Open one _asm_something.fcstd_ file and try out the functions. There are `ReadMe.txt` files in each directory with some explanations. There are tutorials available to lear tu use Assembly4:
+
+* [a quick assembly from scratch](TUTORIAL1.md)
+* [a cinematic assembly reusing existing FreeCAD parts](TUTORIAL2.md)
+* [a multy-layered assembly for advanced users](TUTORIAL3.md)
+* [a Lego assembly](TUTORIAL4.md)
+* [an architectural assembly](TUTORIAL5.md)
+
 
 
 ## Principle
 
 Assembly4 uses a very powerful feature of FreeCAD, the **ExpressionEngine**. Some FreeCAD object's parameters can be entered through mathematical formulae, that are evaluated by this ExpressionEngine. For Assembly4, it's the parameter _`Placement`_ of the inserted _`App::Link`_ object that is calculated, such that 2 LCS - one in the linked part and the one in the assembly - are superimposed. 
 
-
-#### Syntax
-
-The syntax of the ExpressionEngine is the following:
-
-**If the target LCS belongs to the parent assembly:**
-
-  `LCS_parent.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS_link.Placement ^ -1`
-
-**If the target LCS belongs to a sister part:**
-
-  `ParentLink.Placement * ParentPart#LCS_parent.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS_link.Placement ^ -1`
-
-* **ParentLink** is the name of the App::Link of the sister part in the assembly
-* **ParentPart** is the name of the App::Part that the previous ParentLink refers-to
-* **LCS_parent** is the target LCS in the parent part (can be either the assembly itself or a sister part in the assembly)
-* **constr_LinkName** is a FeaturePython object with a conventional name
-* **LinkedPart** is the App::Part's name that the inserted App::Link refers-to
-* **LCS_link** is the attachment LCS in the linked part
+You can find more informations in the detailed [instructions](INSTRUCTIONS.md).
 
 
-#### Constraints
 
-To each part inserted into an assembly is associated an `App::FeaturePython` object, placed in the '_Constraints_' group at the root of the assembly. This constraint object contains information about the placement of the linked object in the assembly. It also contains an `App::Placement` property, called '`AttachmentOffset`', which introduces an offset between the attachment LCS in the part and the target LCS in the assembly. The main purpose of this offset is to correct bad orientations between the 2 matching LCS. 
+## Constraints
 
+To each part inserted into an assembly is associated constraint, which is an `App::FeaturePython` object in Assembly4, placed in the '_Constraints_' group at the root of the assembly. This constraint object contains information about the placement of the linked object in the assembly. 
 
-## Instructions and tutorials
+At the time of this writing, there is only 1 type of constraint in Assembly4 : matching of LCS between 2 objects. It is foreseen in the future to extend the available types of constraints.
 
-You can find more informations in the detailed [instructions](Resources/INSTRUCTIONS.md), as well as tutorials:
-
-* [a quick assembly from scratch](Resources/TUTORIAL1.md)
-* [a cinematic assembly reusing existing FreeCAD parts](Resources/TUTORIAL2.md)
-* [a multy-layered assembly for advanced users](Resources/TUTORIAL3.md)
-* [a Lego assembly](Resources/TUTORIAL4.md)
-* [an architectural assembly](Resources/TUTORIAL5.md)
+Each constraint contains an `App::Placement` property, called '`AttachmentOffset`', which introduces an offset between the attachment LCS in the part and the target LCS in the assembly. This allows 
 
 
+
+## Free Placement
+
+It is also possible to insert a part into an assembly without any constraint and without using the ExpressionEngine. In this case the inserted part (its `App::Link` really) can be moved manually by the built-in FreeCAD dragger. Right-click on the link in the Model tree, and in the contextual menu choose _Transform_ . It is also possible to manually edit the inserted link's _Placement_ property.
+
+This is then a raw interface between FreeCAD `App::Part` objects through the `App::Link` functionality.
 
 
 
 ## Release notes
 
 * 2019.10.11 (**version 0.6.2**) :  
-Added page for Tutorial 1.
-Fine-tuned some functions
-Renamed icons in a consistent way
+Added page for Tutorial 1.  
+Fine-tuned some functions  
+Renamed icons in a consistent way  
 
 * 2019.10.07 (**version 0.6.1**) :  
 Moved the code that was in Mod_Asm4 to the root, to be compatible with the FreeCAD AddonManager
@@ -88,15 +79,15 @@ Moved the code that was in Mod_Asm4 to the root, to be compatible with the FreeC
 Ported to FreeCAD-v0.19-pre, with new syntax for the ExpressionEngine
 
 * 2019.07.23 (**version 0.5.5**) :  
-Fixed a bug in partLCSlist.findItems
+Fixed a bug in partLCSlist.findItems  
 New Datum Point in the Model
 
 * 2019.07.18 (**version 0.5.4**) :  
-A cosmetic update to fix a 25 year old Windows bug: 
+A cosmetic update to fix a 25 year old Windows bug:  
 some UTF-8 characters in the comments were not accepted on some Windows 10 machines
 
 * 2019.06.15 (**version 0.5.3**) :  
-Now the LCS can be renamed, and they show up in the LCS list in the command placeLink as such. 
+Now the LCS can be renamed, and they show up in the LCS list in the command placeLink as such.  
 It's only visual, the ExpressionEngine still uses the LCS.Name though
 
 * 2019.05.07 (**version 0.5.2**) :  

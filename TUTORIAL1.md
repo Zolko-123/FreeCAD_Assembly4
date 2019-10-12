@@ -10,12 +10,12 @@ It is supposed that you have read the [basic instructions](INSTRUCTIONS.md) and 
 
 Buttons in the toolbar are activated with relevant selection. If a button you want to use is inactive try to change the selection (with the mouse).
 
-![](media/Toolbar.png)
+![](Resources/media/Toolbar.png)
 
 
 These functions are also accessible with the Assembly menu:
 
-![](media/Asm4_Menu.png)
+![](Resources/media/Asm4_Menu.png)
 
 
 
@@ -46,11 +46,11 @@ Switch to document "_axis_" (by clicking on its tab).
 * Create a new Sketch (should be in the active body). In the Task view, select XY_Plane
 * Draw the following sketch:
 
-![](media/Sketch_Axis.png)
+![](Resources/media/Sketch_Axis.png)
 
 * Make a revolution of the Sketch:
 
-![](media/Sketch_Revolution.png)
+![](Resources/media/Sketch_Revolution.png)
 
 ### LCS_1
 
@@ -60,7 +60,7 @@ Switch to document "_axis_" (by clicking on its tab).
 * Edit its MapMode in the Placement in its Property View (see inlay in screenshot below on how to activate it)
 * Choose the circle as shown:
 
-![](media/LCS_Attachment.png)
+![](Resources/media/LCS_Attachment.png)
 
 * Click OK
 
@@ -78,7 +78,7 @@ The part _axis_ is now ready for assembly
 
 ## Document "bearing"
 
-Switch to document "_bearing_" (by clicking on its tab). Download the STEP file [bearing_20x37x9.stp ](parts/bearing_20x37x9.stp ) to the same local directory as the 3 documents _axis.fcstd_ , _bearing.fcstd_ , _asm_tuto1.fcstd_ . 
+Switch to document "_bearing_" (by clicking on its tab). Download the STEP file [bearing_20x37x9.stp ](Resources/parts/bearing_20x37x9.stp ) to the same local directory as the 3 documents _axis.fcstd_ , _bearing.fcstd_ , _asm_tuto1.fcstd_ . 
 
 Direct Link to [bearing_20x37x9.stp](https://github.com/Zolko-123/FreeCAD_Assembly4/raw/master/Resources/parts/bearing_20x37x9.stp)
 
@@ -87,15 +87,15 @@ Direct Link to [bearing_20x37x9.stp](https://github.com/Zolko-123/FreeCAD_Assemb
 
 * Import the step file bearing_20x37x9.stp : menu File > Import. This will create a bunch of solids in the bearing document, but not in the Model ! 
 
-![](media/Import_bearing.stp.png)
+![](Resources/media/Import_bearing.stp.png)
 
 * Select in the Model tree all the imported solids and drag them over the Model (in the tree). Note how a the cursor changes to a small hand and an arrow appear close to the cursor meaning that the solids are moved:
 
-![](media/Move_bearingsolids.png)
+![](Resources/media/Move_bearingsolids.png)
 
 * You can check that the solids have indeed been moved by collapsing the Model tree (with the small triangle) and hoovering over the Model in the tree with the mouse. If it didn't work fix it. If necessary, delete the file _bearing.fcstd_ and begin again.
 
-![](media/Show_bearingmoved.png)
+![](Resources/media/Show_bearingmoved.png)
 
 ### LCS
 
@@ -107,13 +107,13 @@ Direct Link to [bearing_20x37x9.stp](https://github.com/Zolko-123/FreeCAD_Assemb
 
 * Now place LCS_1: select LCS_1 in the tree, toggle its MapMode, select an edge as shown in the screenshot below, and choose the option _Concentric_ :
 
-![](media/Attach_LCS1.png)
+![](Resources/media/Attach_LCS1.png)
 
 * Click OK
 
 * Now place LCS_2: select LCS_2 in the tree, toggle its MapMode, select an edge as shown in the screenshot below, and choose the option _Concentric_ :
 
-![](media/Attach_LCS2.png)
+![](Resources/media/Attach_LCS2.png)
 
 * Click OK
 
@@ -133,7 +133,7 @@ The part _bearing_ is now ready for assembly
 
 * This will bring up the following dialog:
 
-![](media/Insert_axis.png)
+![](Resources/media/Insert_axis.png)
 
 * Select axis#Model
 
@@ -141,7 +141,7 @@ The part _bearing_ is now ready for assembly
 
 * Click _Insert part_, it will bring up the _Place Link_ dialog:
 
-![](media/Place_axis.png)
+![](Resources/media/Place_axis.png)
 
 * Make the same selections as in the screenshot above
 
@@ -158,7 +158,7 @@ The part _bearing_ is now ready for assembly
 
 * Click on Insert External part, select bearing#Model
 
-![](media/Insert_bearing1.png)
+![](Resources/media/Insert_bearing1.png)
 
 * Change the proposed name _bearing_ to _bearing_1_ (we will have 3 bearings)
 
@@ -171,13 +171,13 @@ The part _bearing_ is now ready for assembly
   * Click _Show_
 
 
-![](media/Place_bearing1.png)
+![](Resources/media/Place_bearing1.png)
 
 As you can see, this has placed the bearing but in an awkward orientation. This is normal, and it's due to the different orientations of the LCS during their mapping. This is easy to correct:
 
 * Click on the _Rot X_ and _Rot Y_ and _Rot Z_ buttons until the bearing is in its correct position and orientation. You can either spend a lot of time thinking around which axis (X-Y-Z) to rotate, or wildly try everything until it fits. The result will be the same:
 
-![](media/Place_bearing1ok.png)
+![](Resources/media/Place_bearing1ok.png)
 
 * In this case 1 _Rot Y_ was needed. 
 
@@ -199,7 +199,7 @@ Now we can see why it was useful to change the axis colour.
   * in the right panel _Select LCS in Parent_ choose _LCS_2(LCS_1001)_ : When an LCS has been renamed (as we did in the _bearing_ part) this is how it appears.
   * Click _Show_
   
-![](media/Place_bearing2.png)
+![](Resources/media/Place_bearing2.png)
 
 * This time the orientation is correct, click _OK_
 
@@ -218,7 +218,7 @@ Now we can see why it was useful to change the axis colour.
   * Click _Show_
   * Orient _bearing_3_ with the buttons _Rot X_ and _Rot Y_ and _Rot Z_ until it is in its correct position
 
-![](media/Place_bearing3.png)
+![](Resources/media/Place_bearing3.png)
 
 * Click _OK_
 
@@ -232,11 +232,11 @@ This is where the **constr_Feature** comes in.
 
 * Select _constr_bearing_3_ in the Model tree
 
-![](media/constr_bearing_3.png)
+![](Resources/media/constr_bearing_3.png)
 
 * Open the _MapMode_ of the _AttachmentOffset_ property
 
-![](media/Offset_bearing3.png)
+![](Resources/media/Offset_bearing3.png)
 
 * In the field Z type 2mm
 
@@ -246,7 +246,7 @@ This is where the **constr_Feature** comes in.
 
 * Save
 
-![](media/Warning_externalfiles.png)
+![](Resources/media/Warning_externalfiles.png)
 
 * Click _Yes_
 
@@ -268,19 +268,19 @@ Now your first Assembly4 assembly is finished....
 
 * Modify the Sketch like in the screenshot below:
 
-![](media/Sketch_Axis_mod.png)
+![](Resources/media/Sketch_Axis_mod.png)
 
 * Click _Close_
 
 * The assembly has updated, the axis is longer, and all the bearings have followed:
 
-![](media/Asm_tuto1.png)
+![](Resources/media/Asm_tuto1.png)
 
 
 By right-clicking on the Body inside axis, you can **Toggle active body** and edit it with PartDesign, modifying and adding features, like for example a chamfer:
 
 
-![](media/Asm_tuto1_final.png)
+![](Resources/media/Asm_tuto1_final.png)
 
 
 Should it happen that you make modifications in the assembly and some parts didn't follow, right-click on that part and choose in the contextual menu _Recompute object_ . You can also do this on the top level assembly _Model_ 

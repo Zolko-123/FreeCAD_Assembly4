@@ -6,4 +6,4 @@
 
 A multy-layered assembly for advanced users
 
-![](media/asm_V4.png)
+![](Resources/media/asm_V4.png)

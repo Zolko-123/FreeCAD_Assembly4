@@ -5,7 +5,7 @@
 
 A cinematic assembly re-using existing FreeCAD parts
 
-![](media/asm_Yoke.png)
+![](Resources/media/asm_Yoke.png)
 
 
 
