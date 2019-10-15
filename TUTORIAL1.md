@@ -93,7 +93,10 @@ If you haven't done so then download the STEP file [`bearing_20x37x9.stp`](https
 
 ### STEP import
 
-* Import (**File > Import**) the previously mentioned STEP file _bearing_20x37x9.stp_, this will create a bunch of solids in the bearing document, but not in the Model! 
+* Import (**File > Import**) the previously mentioned STEP file _bearing_20x37x9.stp_
+
+This will create a bunch of solids in the bearing document, but not in the Model. This is a [documented limitation of `App::Part`](https://www.freecadweb.org/wiki/Std_Part) and there is nothing Assembly4 can do to fix this behaviour. 
+
 
   ![](Resources/media/Import_bearing.stp.png)
 
