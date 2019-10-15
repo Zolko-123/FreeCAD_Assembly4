@@ -137,6 +137,7 @@ class insertLink( QtGui.QDialog ):
 
 
 
+
 	"""
     +-----------------------------------------------+
     |                 some functions                |
