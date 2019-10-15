@@ -88,7 +88,7 @@ Switch to document "_axis_" (by clicking on its tab).
 
 Switch to document "_bearing_" (by clicking on its tab). 
 
-If you haven't done so then download the STEP file [`bearing_20x37x9.stp`](parts/bearing_20x37x9.stp ) to the same local directory as the 3 previous documents: _axis.fcstd_, _bearing.fcstd_, and _asm_tuto1.fcstd_. 
+If you haven't done so then download the STEP file [`bearing_20x37x9.stp`](https://github.com/Zolko-123/FreeCAD_Assembly4/raw/master/Resources/parts/bearing_20x37x9.stp) to the same local directory as the 3 previous documents: _axis.fcstd_, _bearing.fcstd_, and _asm_tuto1.fcstd_. 
 
 
 ### STEP import
