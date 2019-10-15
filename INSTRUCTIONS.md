@@ -52,6 +52,8 @@ The particularities of the `App::Part` used as Assembly4 Model are the following
 
 Any Model can contain (by `App::Link`) any other Model and any FreeCAD `App::Part` and thus make an assembly, but a standard FreeCAD `App::Part` cannot be used by the Assembly4 workbench to include Parts or Models by App::Link. This is a purposfull feature to avoid burdensome error checking: it is supposed that no other usecase would create an `App::Part` called 'Model', _i.e._ that if an `App::Part` is called 'Model' it will conform to these characteristics. A FreeCAD document can contain many `App::Parts`, but only one `App::Part Model`.
 
+The `App::Parts` that are to be linked by `App::Link` can be in the same document as the assembly or an extarnal document, invariably. Having the assembly and all its `App::Parts` in the same document can be handy for small 1-level assemblies, but for larger assemblies is is advised to split parts in various documents (files).
+
 Linked parts are placed to each-other by matching their Datum Coordinate Systems (`PartDesign::CoordinateSystem`, called here-after LCS (Local Coordinate System)). There is no need for any geometry to be present to place and constrain parts relative to each other. LCS are used because they are both mechanical objects, since they fix all 6 degrees of freedom in an isostatic way, and mathematical objects that can be easily manipulated by rigorous methods (mainly combination and inversion).
 
 To actually include some geometry, a body needs to be created, and designed using the PartDesign workbench. To be linked with the previously created model, this body needs to be inside the `App::Part container` called 'Model'.  

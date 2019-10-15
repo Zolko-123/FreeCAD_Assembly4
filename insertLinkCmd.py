@@ -48,6 +48,13 @@ class insertLink( QtGui.QDialog ):
 		
 		# get the current active document to avoid errors if user changes tab
 		self.activeDoc = App.activeDocument()
+
+		# get the 'Model' object of the current document
+		# this is where the App::Link will be placed, even if there are other plain App::Parts
+		if self.activeDoc.getObject('Model'):
+			self.activeModel = self.activeDoc.getObject('Model')
+		else:
+			self.activeModel = []
 		
 		# the GUI objects are defined later down
 		self.drawUI()
@@ -55,11 +62,12 @@ class insertLink( QtGui.QDialog ):
 		# Search for all App::Parts in all open documents
 		self.allParts = []
 		for doc in App.listDocuments().values():
-			# except this document: we don't want to link to itself
-			if doc != self.activeDoc:
-				parts = doc.findObjects("App::Part")
-				# there might be more than 1 App::Part per document
-				for obj in parts:
+			# there might be more than 1 App::Part per document
+			for obj in doc.findObjects("App::Part"):
+				# we don't want to link to itself to the 'Model' object
+				# other App::Part in the same document are OK 
+				# (even though I don't see the use-case)
+				if obj != self.activeModel:
 					self.allParts.append( obj )
 		
 		# build the list
@@ -86,18 +94,18 @@ class insertLink( QtGui.QDialog ):
 	def onCreateLink(self):
 		# parse the selected items 
 		# TODO : there should only be 1
-		model = []
+		selectedPart = []
 		for selected in self.partList.selectedIndexes():
 			# get the selected part
-			model = self.allParts[ selected.row() ]
+			selectedPart = self.allParts[ selected.row() ]
 		# get the name of the link (as it should appear in the tree)
 		linkName = self.linkNameInput.text()
 		# only create link if there is a Part object and a name
-		if model and linkName:
+		if self.activeModel and selectedPart and linkName:
 			# create the App::Link with the user-provided name
 			createdLink = self.activeDoc.getObject('Model').newObject( 'App::Link', linkName )
-			# assigne the user-selected model to it
-			createdLink.LinkedObject = model
+			# assigne the user-selected selectedPart to it
+			createdLink.LinkedObject = selectedPart
 			# update the link
 			createdLink.recompute()
 			
@@ -134,7 +142,6 @@ class insertLink( QtGui.QDialog ):
     |                 some functions                |
     +-----------------------------------------------+
 	"""
-
 
 
 	def onCancel(self):

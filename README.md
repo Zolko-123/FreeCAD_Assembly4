@@ -67,6 +67,9 @@ This is then a raw interface between FreeCAD `App::Part` objects through the `Ap
 
 ## Release notes
 
+* 2019.10.11 (**version 0.6.3**) :  
+It is now possible to link parts from the same document as the assembly itself, allowing to make 1-file assemblies and still use all the other tools.
+
 * 2019.10.11 (**version 0.6.2**) :  
 Added page for Tutorial 1.  
 Fine-tuned some functions  
