@@ -60,7 +60,9 @@ class insertLink( QtGui.QDialog ):
 		self.drawUI()
 		
 		# Search for all App::Parts in all open documents
+		# Also store the document of the part
 		self.allParts = []
+		self.partsDoc = []
 		for doc in App.listDocuments().values():
 			# there might be more than 1 App::Part per document
 			for obj in doc.findObjects("App::Part"):
@@ -69,7 +71,8 @@ class insertLink( QtGui.QDialog ):
 				# (even though I don't see the use-case)
 				if obj != self.activeModel:
 					self.allParts.append( obj )
-		
+					self.partsDoc.append( doc )
+
 		# build the list
 		for part in self.allParts:
 			newItem = QtGui.QListWidgetItem()
@@ -98,6 +101,7 @@ class insertLink( QtGui.QDialog ):
 		for selected in self.partList.selectedIndexes():
 			# get the selected part
 			selectedPart = self.allParts[ selected.row() ]
+
 		# get the name of the link (as it should appear in the tree)
 		linkName = self.linkNameInput.text()
 		# only create link if there is a Part object and a name
@@ -126,14 +130,19 @@ class insertLink( QtGui.QDialog ):
 		for selected in self.partList.selectedIndexes():
 			# get the selected part
 			part = self.allParts[ selected.row() ]
+			doc  = self.partsDoc[ selected.row() ]
+
 			# if the App::Part has been renamed by the user, we suppose it's important
 			# thus we append the Label to the link's name
 			# this might happen if there are multiple App::Parts in a document
-			appendLabel = ''
-			if part.Name != part.Label:
-				appendLabel = '_'+part.Label
-            # set the text of the link to be made to the document where the part is in
-			self.linkNameInput.setText(part.Document.Name+appendLabel)
+			if doc == self.activeDoc:
+				proposedLinkName = part.Label
+			else:
+				if part.Name == 'Model':
+					proposedLinkName = part.Document.Name
+				else:
+					proposedLinkName = part.Document.Name+'_'+part.Label
+			self.linkNameInput.setText( proposedLinkName )
 
 
 
