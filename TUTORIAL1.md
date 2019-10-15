@@ -66,12 +66,13 @@ Switch to document "_axis_" (by clicking on its tab).
 
 * Switch to _Assembly4_ workbench
 * Select the root Model (remember it's an `App::Prt`)
-* Create a new LCS. This can also be done by right-clicking on the Model in the tree, and in the contextual menu **Create > Create a new LCS**
+* Create a new LCS (**Assembly > New LCS**). This can also be done by right-clicking on the Model in the tree, and in the contextual menu **Create > Create a new LCS**
 * Edit its MapMode in the Placement in its Property View (see inlay in screenshot below on how to activate it)
 * Choose the circle as shown:
 
   ![](Resources/media/LCS_Attachment.png)
 
+* Select the option **Concentric**
 * Click **OK**
 
 * **Note:** ignore the warning:
@@ -95,7 +96,7 @@ If you haven't done so then download the STEP file [`bearing_20x37x9.stp`](https
 
 * Import (**File > Import**) the previously mentioned STEP file _bearing_20x37x9.stp_
 
-**Result:** This will create a bunch of solids in the bearing document, but not in the Model. This is a [documented limitation of `App::Part`](https://www.freecadweb.org/wiki/Std_Part) and there is nothing Assembly4 can do to fix this behaviour. 
+**Result:** This will create a bunch of solids in the bearing document, but not in the Model. This is a [documented limitation of `App::Part`](https://www.freecadweb.org/wiki/Std_Part) and must be dealt-with manually. 
 
 
   ![](Resources/media/Import_bearing.stp.png)
@@ -114,8 +115,9 @@ If you haven't done so then download the STEP file [`bearing_20x37x9.stp`](https
 * In order to place this bearing in the assembly, we will need 2 LCS; each in the center, but each on 1 side. _LCS_0_ **looks** like it is in the center, **but one can never trust a STEP import** so we will create 2 new LCS and place them in the center of the geometry. 
   * Select the Model in the tree view
   * Create a new LCS and leave the default name LCS_1
-  * Create a new LCS and leave the default name LCS_1001
-  * **To summarize:** 2 LCS have been created, LCS_1 and LCS_1001  
+  * Create a new LCS and leave the default name LCS_1
+  * This has created LCS_1001, because an object name must be unique in a document, FreeCAD has renamed automagically LCS_1 to LCS_1001
+  * **To summarize:** 2 LCS have been created, LCS_1 and LCS_1001
   * Now rename LCS_1001 to LCS_2 (right-click and choose Rename)
 
 #### Placing LCS
@@ -151,13 +153,16 @@ If you haven't done so then download the STEP file [`bearing_20x37x9.stp`](https
 * Leave the proposed default name _axis_  
 * Click **Insert part**, it will bring up the _Place Link_ dialog:
 
+
   ![](Resources/media/Place_axis.png)
 
 * Make the same selections as in the screenshot above
+  * in the left panel _Select LCS in Part_ choose **LCS_0**
+  * in the drop-down combo-box _Select part to attach to_ choose **Parent Assembly**
+  * in the right panel _Select LCS in Parent_ choose **LCS_0**  
+  * Click **Show**
 
-* Click **Show**
-
-* This has filled the `Expression Engine` field and an object called _constr_axis_ has appeared in the Constraints group.
+* This has filled the _Expression Engine_ field and an object called `constr_axis` has appeared in the `Constraints` group.
 * Click **OK**
 
 * **Note:** the _axis_ part is now in the _asm_tuto1_ document, including the tree, with all its sub-objects.
@@ -206,7 +211,7 @@ This is easy to correct:
 
 * This will bring up the _Place Link_ dialog: 
   * in the left panel _Select LCS in Part_ choose **LCS_1**
-  * in the drop-down combo-box **Select part to attach to** choose part **bearing_2**
+  * in the drop-down combo-box **Select part to attach to** choose part **bearing_1**
   * in the right panel _Select LCS in Parent_ choose **LCS_2(LCS_1001)**  
     **Note:** When an LCS has been renamed (as we did in the _bearing_ part) this is how it appears.
   * Click **Show**
