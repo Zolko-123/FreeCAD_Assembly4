@@ -130,6 +130,7 @@ If you haven't done so then download the STEP file [`bearing_20x37x9.stp`](https
   ![](Resources/media/Attach_LCS2.png)
 
 * Click **OK**
+
 * Save
 
 **Result:** The part _bearing_ is now ready for assembly
@@ -161,7 +162,7 @@ If you haven't done so then download the STEP file [`bearing_20x37x9.stp`](https
 
 * **Note:** the _axis_ part is now in the _asm_tuto1_ document, including the tree, with all its sub-objects.
 
-* Save 
+
 
 ### Insert bearing 1
 
@@ -238,14 +239,13 @@ We are nearly done.
 
 In real-life, this would be a lead screw with a standard 3-bearings mount, where the 2 bearings facing each other are diagonal contact bearings that can also take thrust. And the 3rd lone bearing is a deep groove ball bearing. In order to not over-constrain the axis, the 3rd bearing mustn't touch the flange of the axis, there must be some room to allow for temperature dilatation compensation AKA thermal expansion. 
 
-This is where the **constr_Feature** comes in.  
-* Select _constr_bearing_3_ in the Model tree
+This is where the **constr_Feature** comes in. In addition to store the rotations used to orient the inserted part, it can also apply a translation of the inserted part relative to the target LCS:  
 
-  ![](Resources/media/constr_bearing_3.png)
+* Select _constr_bearing_3_ in the Model tree
 
 * Open the _MapMode_ of the _AttachmentOffset_ property
 
-  ![](Resources/media/Offset_bearing3.png)
+  ![](Resources/media/constr_bearing_3b.png)
 
 * In the _Z_ field type: **2mm**
 
