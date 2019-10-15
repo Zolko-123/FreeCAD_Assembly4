@@ -1,9 +1,9 @@
 # FreeCAD Assembly 4 / Assembly Without Solver
 FreeCAD add-on for a bare-bone assembly structure, using App::Link  
 
-An Assembly4 model is a standard FreeCAD `App::Part` object, and these can be assembled using the `App::Link` framework included with FreeCAD 0.19. An Asm4 Model can invariably be a stand-alone part, an assembly, a sub-assembly, and any combinations of these.
+An Assembly4 model is a standard FreeCAD `App::Part` object, and can be used with any FreeCAD tool handling `App::Part` objects. An Assembly4 Model can invariably be a stand-alone part, an assembly, a sub-assembly, and any combinations of these.
 
-Any Asm4 Model can contain (by `App::Link`) any other Asm4 Model, and they are placed to each-other by matching their Datum Coordinate Systems (`PartDesign::CoordinateSystem`, called here-after LCS for Local Coordinate System) using the built-in FreeCAD ExpressionEngine. No geometry is used to place and constrain parts relative to each other, thus avoiding a lot of the topological naming problems. 
+Any Assembly4 Model can contain (by `App::Link`) any other Assembly4 Model or any `App::Part`, but an `App::Part` cannot be used with Assembly4 to link by `App::Link` other `App::Part` objects. Parts and linked parts are placed to each-other by matching their Datum Coordinate Systems (`PartDesign::CoordinateSystem`, called here-after LCS for Local Coordinate System) using the built-in FreeCAD ExpressionEngine. No geometry is used to place and constrain parts relative to each other, thus avoiding a lot of the topological naming problems. 
 
 ![](Resources/media/Asm4_wb1.png)
 
