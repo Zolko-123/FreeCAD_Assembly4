@@ -119,6 +119,18 @@ mostly working version
 * 2019.02.18 (**version 0.1**) :  
 initial release of Assembly 4 WB
 
+
+
+## Discussion
+Please offer feedback or connect with the developers in the [dedicated FreeCAD forum thread](https://forum.freecadweb.org/viewtopic.php?f=20&t=34806).
+
+
+
+## Addon Repository
+This addon is hosted on a [GitHub repository](https://github.com/Zolko-123/FreeCAD_Assembly4). 
+
+
+
 ## License
 
 LGPLv2.1 (see [LICENSE](LICENSE))
