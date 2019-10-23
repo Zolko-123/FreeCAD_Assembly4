@@ -23,9 +23,7 @@ Pre-built binaries on the v0.19 development branch can be found [here](https://g
 
 Assembly 4 is available through the FreeCAD Addon Manager (menu Tools > Addon Manager). It is called _Assembly4_ in the Addon Repository.  
 
-[![FreeCAD Addon manager status](https://img.shields.io/badge/FreeCAD%20addon%20manager-available-brightgreen)]
-
-(https://github.com/FreeCAD/FreeCAD-addons)
+[![FreeCAD Addon manager status](https://img.shields.io/badge/FreeCAD%20addon%20manager-available-brightgreen)](https://github.com/FreeCAD/FreeCAD-addons)
 
 **Note:** Restarting FreeCAD is required after installing this Addon.
 
