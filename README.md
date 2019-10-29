@@ -47,6 +47,12 @@ Assembly4 uses a very powerful feature of FreeCAD, the **ExpressionEngine**. Som
 You can find more informations in the detailed [instructions](INSTRUCTIONS.md).
 
 
+## Parts
+
+An Assembly4 assembly is a FreeCAD `App::Part` container, and parts are inserted using `App::Link` links to `App::Part` objects in their original document, no shapes are copied, making assemblies very memory efficient. The original part's document can be in the same file as the assembly or in another file somewhere on disk. 
+
+Since assemblies are also `App::Part` objects, they themselves can be assembled in another assembly, allowing nested multy-layered assemblies. 
+
 
 ## Constraints
 
@@ -67,6 +73,10 @@ This is then a raw interface between FreeCAD `App::Part` objects through the `Ap
 
 
 ## Release notes
+
+* 2019.10.11 (**version 0.6.4**) :  
+Improved assembly in single file  
+Various small fixes
 
 * 2019.10.11 (**version 0.6.3**) :  
 It is now possible to link parts from the same document as the assembly itself, allowing to make 1-file assemblies and still use all the other tools.

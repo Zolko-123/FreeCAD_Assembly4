@@ -193,20 +193,6 @@ class placeDatum( QtGui.QDialog ):
 
 	"""
     +-----------------------------------------------+
-    |   find all the linked parts in the assembly   |
-    +-----------------------------------------------+
-
-	def getAllLinkedParts(self):
-		allLinkedParts = [ ]
-		for obj in self.activeDoc.findObjects("App::Link"):
-			# add it to our list if it's a link to an App::Part
-			if obj.LinkedObject.isDerivedFrom('App::Part'):
-				allLinkedParts.append( obj )
-		return allLinkedParts
-	"""
-
-	"""
-    +-----------------------------------------------+
     |           get all the LCS in a part           |
     +-----------------------------------------------+
 	"""
@@ -220,6 +206,7 @@ class placeDatum( QtGui.QDialog ):
 			if obj.TypeId == 'PartDesign::CoordinateSystem' or obj.TypeId == 'PartDesign::Point':
 				partLCS.append( obj )
 		return partLCS
+
 
 
 	"""
@@ -256,8 +243,6 @@ class placeDatum( QtGui.QDialog ):
 
 
 
-
-
 	"""
     +-----------------------------------------------+
     |  An LCS has been clicked in 1 of the 2 lists  |
@@ -279,6 +264,7 @@ class placeDatum( QtGui.QDialog ):
 		return
 
 
+
 	"""
     +-----------------------------------------------+
     |                     Cancel                    |
@@ -294,6 +280,7 @@ class placeDatum( QtGui.QDialog ):
 		Gui.Selection.clearSelection()
 		Gui.Selection.addSelection( self.activeDoc.Name, 'Model', self.selectedDatum.Name +'.')
 		self.close()
+
 
 
 	"""

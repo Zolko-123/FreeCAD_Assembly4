@@ -29,8 +29,8 @@ class placeLink( QtGui.QDialog ):
 
 
 	def GetResources(self):
-		return {"MenuText": "Edit Placement of a linked Part",
-				"ToolTip": "Move an instance of an external Part",
+		return {"MenuText": "Edit Placement of a Part",
+				"ToolTip": "Move/Attach a Part in the assembly",
 				"Pixmap" : os.path.join( iconPath , 'Place_Link.svg')
 				}
 
@@ -42,8 +42,7 @@ class placeLink( QtGui.QDialog ):
 			if Gui.Selection.getSelection():
 				if Gui.Selection.getSelection()[0].isDerivedFrom('App::Link'):
 					return True
-		else:
-			return False
+		return False
 
 
 	"""
@@ -89,7 +88,11 @@ class placeLink( QtGui.QDialog ):
 					self.asmParts.append( obj )
 					# add to the drop-down combo box with the assembly tree's parts
 					objIcon = obj.LinkedObject.ViewObject.Icon
-					self.parentList.addItem( objIcon, obj.Name, obj)
+					if obj.Name == obj.Label:
+						objText = obj.Name
+					else:
+						objText = obj.Label+' ('+obj.Name+')'
+					self.parentList.addItem( objIcon, objText, obj)
 
 
 		# find all the LCS in the selected link
@@ -137,8 +140,14 @@ class placeLink( QtGui.QDialog ):
 		constrName = ''
 		linkedPart = ''
 		old_linkLCS = ''
+		# if the linked part is in the same document as the assembly:
+		if self.parentAssembly.Document.Name == self.selectedLink.LinkedObject.Document.Name:
+			( old_Parent, old_attLCS, old_linkLCS ) = self.splitExpressionDoc( self.old_EE, self.old_Parent )
+		# if the linked part comes from another document:
+		else:
 		# if the decode is unsuccessful, old_Expression is set to False and the other things are set to 'None'
-		( old_Parent, old_ParentPart, old_attLCS, constrName, linkedPart, old_linkLCS ) = splitExpressionPart( self.old_EE, self.old_Parent )
+			( old_Parent, old_attLCS, old_linkLCS ) = self.splitExpressionLink( self.old_EE, self.old_Parent )
+		#self.expression.setText( old_Parent +'***'+ self.old_Parent )
 
 
 		# find the old LCS in the list of LCS of the linked part...
@@ -156,13 +165,22 @@ class placeLink( QtGui.QDialog ):
 
 
 		# find the oldPart in the part list...
-		oldPart = self.parentList.findText( old_Parent )
-		# if not found
-		if oldPart == -1:
-			self.parentList.setCurrentIndex( 0 )
+		if old_Parent == 'Parent Assembly':
+			parent_found = True
+			parent_index = 1
 		else:
-			self.parentList.setCurrentIndex( oldPart )
-			# this should have triggered self.getPartLCS() to fill the LCS list
+			parent_found = False
+			parent_index = 1
+			for item in self.asmParts[1:]:
+				if item.Name == old_Parent:
+					parent_found = True
+					break
+				else:
+					parent_index = parent_index +1
+		if not parent_found:
+			parent_index = 0
+		self.parentList.setCurrentIndex( parent_index )
+		# this should have triggered self.getPartLCS() to fill the LCS list
 
 
 		# find the oldLCS in the old parent Part (actually the App::Link)...
@@ -183,6 +201,119 @@ class placeLink( QtGui.QDialog ):
 		self.show()
 
 
+
+
+	"""
+    +-----------------------------------------------+
+    |         populate the ExpressionEngine         |
+    |             for a linked App::Part            |
+    +-----------------------------------------------+
+	"""
+	def makeExpressionPart( self, attLink, attPart, attLCS, constrName, linkedPart, linkLCS ):
+		# if everything is defined
+		if attLink and attLCS and constrName and linkedPart and linkLCS:
+			# this is where all the magic is, see:
+			# 
+			# https://forum.freecadweb.org/viewtopic.php?p=278124#p278124
+			#
+			# as of FreeCAD v0.19 the syntax is different:
+			# https://forum.freecadweb.org/viewtopic.php?f=17&t=38974&p=337784#p337784
+			# expr = ParentLink.Placement * ParentPart#LCS.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS.Placement ^ -1
+			# expr = LCS_in_the_assembly.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS.Placement ^ -1
+			expr = attLCS+'.Placement * '+constrName+'.AttachmentOffset * '+linkedPart+'#'+linkLCS+'.Placement ^ -1'
+			# if we're attached to another sister part (and not the Parent Assembly)
+			# we need to take into account the Placement of that Part.
+			if attPart:
+				expr = attLink+'.Placement * '+attPart+'#'+expr
+		else:
+			expr = False
+		return expr
+
+
+
+
+	"""
+    +-----------------------------------------------+
+    |  split the ExpressionEngine of a linked part  |
+    |          to find the old attachment LCS       |
+    |   (in the parent assembly or a sister part)   |
+    |   and the old target LCS in the linked Part   |
+    +-----------------------------------------------+
+	"""
+	# this is the case for a link to a part coming from another document
+	def splitExpressionLink( self, expr, parent ):
+		# expr = ParentLink.Placement * ParentPart#LCS.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
+		bad_EE = ( '', 'None', 'None' )
+		if not expr:
+			return bad_EE
+		if parent == 'Parent Assembly':
+			# we're attached to an LCS in the parent assembly
+			# expr = LCS_in_the_assembly.Placement * constr_Name.AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
+			( attLCS, separator, rest1 ) = expr.partition('.Placement * ')
+			( constrName, separator, rest2 ) = rest1.partition('.AttachmentOffset * ')
+			( linkedPart, separator, rest3 ) = rest2.partition('#')
+			( linkLCS, separator, rest4 ) = rest3.partition('.Placement ^ ')
+			restFinal = rest4[0:2]
+			attLink = parent
+			attPart = 'None'
+			#return ( restFinal, 'None', 'None', 'None', 'None', 'None')
+		else:
+			# we're attached to an LCS in a sister part
+			# expr = ParentLink.Placement * ParentPart#LCS.Placement * constr_Name.AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
+			( attLink,    separator, rest1 ) = expr.partition('.Placement * ')
+			( attPart,    separator, rest2 ) = rest1.partition('#')
+			( attLCS,     separator, rest3 ) = rest2.partition('.Placement * ')
+			( constrName, separator, rest4 ) = rest3.partition('.AttachmentOffset * ')
+			( linkedPart, separator, rest5 ) = rest4.partition('#')
+			( linkLCS,    separator, rest6 ) = rest5.partition('.Placement ^ ')
+			restFinal = rest6[0:2]
+			#return ( restFinal, 'None', 'None', 'None', 'None', 'None')
+		if restFinal=='-1' and attLink==parent :
+			# wow, everything went according to plan
+			# retval = ( expr, attPart, attLCS, constrLink, partLCS )
+			retval = ( attLink, attLCS, linkLCS )
+		else:
+			# rats ! Didn't succeed in decoding the ExpressionEngine.
+			# But still, if the decode is unsuccessful, put some text
+			retval = bad_EE
+		return retval
+
+
+	# this is the case for a link to a part coming from the same document as the assembly
+	def splitExpressionDoc( self, expr, parent ):
+		# expr = ParentLink.Placement * LCS_parent.Placement * constr_linkName.AttachmentOffset * LCS_linkedPart.Placement ^ -1
+		# expr = LCS_model.Placement * constr_linkName.AttachmentOffset * LCS_linkedPart.Placement ^ -1
+		bad_EE = ( '', 'None', 'None' )
+		if not expr:
+			return bad_EE
+		if parent == 'Parent Assembly':
+			# we're attached to an LCS in the parent assembly
+			# expr = LCS_in_the_assembly.Placement * constr_linkName.AttachmentOffset * LCS_linkedPart.Placement ^ -1
+			( attLCS, separator, rest1 ) = expr.partition('.Placement * ')
+			( constrName, separator, rest2 ) = rest1.partition('.AttachmentOffset * ')
+			( linkLCS, separator, rest3 ) = rest2.partition('.Placement ^ ')
+			restFinal = rest3[0:2]
+			attLink = parent
+			attPart = 'None'
+			#return ( restFinal, 'None', 'None', 'None', 'None', 'None')
+		else:
+			# we're attached to an LCS in a sister part
+			# expr = ParentLink.Placement * LCS_parent.Placement * constr_linkName.AttachmentOffset * LCS_linkedPart.Placement ^ -1
+			( attLink,    separator, rest1 ) = expr.partition('.Placement * ')
+			( attLCS,     separator, rest2 ) = rest1.partition('.Placement * ')
+			( constrName, separator, rest3 ) = rest2.partition('.AttachmentOffset * ')
+			( linkLCS,    separator, rest4 ) = rest3.partition('.Placement ^ ')
+			restFinal = rest4[0:2]
+			#return ( restFinal, 'None', 'None', 'None', 'None', 'None')
+		if restFinal=='-1' and attLink==parent :
+			# wow, everything went according to plan
+			# retval = ( expr, attPart, attLCS, constrLink, partLCS )
+			retval = ( attLink, attLCS, linkLCS )
+		else:
+			# rats ! Didn't succeed in decoding the ExpressionEngine.
+			# But still, if the decode is unsuccessful, put some text
+			retval = bad_EE
+		return retval
 
 	"""
     +-----------------------------------------------+
@@ -299,7 +430,7 @@ class placeLink( QtGui.QDialog ):
 			#
 			# expr = ParentLink.Placement * ParentPart#LCS.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
 			# expr = LCS_in_the_assembly.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
-			expr = makeExpressionPart( a_Link, a_Part, a_LCS, c_Name, l_Part, l_LCS )
+			expr = self.makeExpressionPart( a_Link, a_Part, a_LCS, c_Name, l_Part, l_LCS )
 			# this can be skipped when this method becomes stable
 			self.expression.setText( expr )
 			# fill the constraint feature. Create it if it doesn't exist:
@@ -364,17 +495,18 @@ class placeLink( QtGui.QDialog ):
 		# clear the selection in the GUI window
 		Gui.Selection.clearSelection()
 		# the current text in the combo-box is the link's name...
-		parentName = self.parentList.currentText()
-		# partLCS = []
-		# ... or it's 'Parent Assembly' then the parent is the 'Model' root App::Part
-		if parentName =='Parent Assembly':
+		# parentName = self.attLCStable[ self.parentList.currentRow() ].Name
+		# parentName = self.parentList.currentText()
+		# ... or it's 'Parent Assembly' then the parent is the 'Model' root App::Part		
+		if self.parentList.currentText() == 'Parent Assembly':
+			parentName = 'Parent Assembly'
 			parentPart = self.activeDoc.getObject( 'Model' )
 			# we get the LCS directly in the root App::Part 'Model'
 			self.attLCStable = self.getPartLCS( parentPart )
 			self.parentDoc.setText( parentPart.Document.Name )
-		# a sister object is an App::Link
-		# the .LinkedObject is an App::Part
-		else:
+		# if something is selected
+		elif self.parentList.currentIndex() > 1:
+			parentName = self.asmParts[ self.parentList.currentIndex() ].Name
 			parentPart = self.activeDoc.getObject( parentName )
 			if parentPart:
 				# we get the LCS from the linked part
@@ -382,6 +514,10 @@ class placeLink( QtGui.QDialog ):
 				self.parentDoc.setText( parentPart.LinkedObject.Document.Name )
 				# highlight the selected part:
 				Gui.Selection.addSelection( parentPart.Document.Name, 'Model', parentPart.Name+'.' )
+		# something wrong
+		else:
+			return
+		
 		# build the list
 		for lcs in self.attLCStable:
 			newItem = QtGui.QListWidgetItem()
@@ -541,7 +677,8 @@ class placeLink( QtGui.QDialog ):
 		# combobox showing all available App::Link
 		self.parentList = QtGui.QComboBox(self)
 		self.parentList.move(280,50)
-		self.parentList.setMinimumSize(250, 1)
+		self.parentList.setMinimumSize(250, 10)
+		self.parentList.setMaximumSize(250, 50)
 		self.parentList.setToolTip('Choose the part in which the attachment\ncoordinate system is to be found')
 		# the parent assembly is hardcoded, and made the first real element
 		self.parentList.addItem('Select attachment Parent')

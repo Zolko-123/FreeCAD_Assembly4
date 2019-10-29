@@ -37,15 +37,21 @@ class newModel:
 		# check whether there is already Model in the document
 		if not self.checkModel():
 			# create a new App::Part called 'Model'
-			self.activeDoc.Tip = self.activeDoc.addObject('App::Part','Model')
-			self.activeDoc.getObject('Model').newObject('App::DocumentObjectGroup','Constraints')
-			self.activeDoc.getObject('Model').newObject('PartDesign::CoordinateSystem','LCS_0')
+			model = self.activeDoc.addObject('App::Part','Model')
+			model.newObject( 'App::DocumentObjectGroup', 'Constraints' )
+			# model.newObject( 'App::FeaturePython', 'Variables' )
+			lcs0 = model.newObject('PartDesign::CoordinateSystem','LCS_0')
+			lcs0.Support = [(model.getObject('X_Axis'),'')]
+			lcs0.MapMode = 'ObjectXY'
+			lcs0.MapReversed = False
+			model.recompute()
+			self.activeDoc.recompute()
 
 
 	def checkModel(self):
 		# check wheter there is already a Model in the document
 		# we don't check whether it's an App::Part or not
-		# Returns True if there is a Model
+		# Returns True if there is an object called 'Model'
 		if self.activeDoc.getObject('Model'):
 			msgBox = QtGui.QMessageBox()
 			msgBox.setWindowTitle('Warning')
