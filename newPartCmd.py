@@ -35,7 +35,14 @@ class newPart:
 		partName = 'Part'
 		text,ok = QtGui.QInputDialog.getText(None,'Create new Part','Enter new Part name :                                        ', text = partName)
 		if ok and text:
-			App.activeDocument().addObject('App::Part',text)
+			part = App.ActiveDocument.addObject('App::Part',text)
+			lcs0 = part.newObject('PartDesign::CoordinateSystem','LCS_0')
+			lcs0.Support = [(part.Origin.OriginFeatures[0],'')]
+			lcs0.MapMode = 'ObjectXY'
+			lcs0.MapReversed = False
+			part.recompute()
+			App.ActiveDocument.recompute()
+
 
 
 # add the command to the workbench
