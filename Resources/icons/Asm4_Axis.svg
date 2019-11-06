@@ -14,8 +14,8 @@
    height="64px"
    id="svg5821"
    sodipodi:version="0.32"
-   inkscape:version="0.92.3 (2405546, 2018-03-11)"
-   sodipodi:docname="New_Axis.svg"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="PartDesign_Std_Axis_nc1.svg"
    inkscape:output_extension="org.inkscape.output.svg.inkscape"
    version="1.1"
    inkscape:export-filename="/home/normand/Images/Icônes/PartDesign_Std_Plane_nc1.png"
@@ -103,17 +103,17 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="10"
-     inkscape:cx="27.538893"
-     inkscape:cy="34.57919"
+     inkscape:zoom="12.721444"
+     inkscape:cx="23.081174"
+     inkscape:cy="31.434893"
      inkscape:current-layer="g3360-3"
      showgrid="true"
      inkscape:document-units="px"
      inkscape:grid-bbox="true"
-     inkscape:window-width="1854"
-     inkscape:window-height="1050"
-     inkscape:window-x="66"
-     inkscape:window-y="0"
+     inkscape:window-width="1863"
+     inkscape:window-height="1176"
+     inkscape:window-x="57"
+     inkscape:window-y="24"
      inkscape:window-maximized="1"
      inkscape:snap-bbox="false"
      inkscape:snap-nodes="true"
@@ -134,7 +134,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
         <dc:creator>
           <cc:Agent>
             <dc:title>[wmayer]</dc:title>
@@ -180,25 +180,25 @@
          inkscape:export-ydpi="3.2478156"
          transform="translate(-2.96179e-7,2.9614273e-6)">
         <rect
-           style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:none;stroke:#c1b7bb;stroke-width:36.89744186;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate"
+           style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:none;stroke:#a79b9e;stroke-width:36.89744032;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate"
            id="rect3860-36"
            width="266.52176"
            height="266.99686"
-           x="446.95782"
-           y="-1410.9463"
-           transform="matrix(-0.00383337,0.99999265,-0.8660254,-0.5,0,0)" />
+           x="1138.8126"
+           y="-720.62769"
+           transform="matrix(0.86793573,0.49667653,0,-1,0,0)" />
         <rect
            style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:none;stroke:#d6d6d6;stroke-width:15.71166039;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate"
            id="rect3860-3"
            width="267.47815"
            height="265.90598"
-           x="447.92001"
-           y="-1408.1978"
-           transform="matrix(0,1,-0.8660254,-0.5,0,0)"
+           x="1141.3009"
+           y="-714.81689"
+           transform="matrix(0.8660254,0.5,0,-1,0,0)"
            ry="2.5860298" />
         <g
            id="g4162"
-           transform="matrix(-0.5,0.8660254,0.8660254,0.5,641.29544,-323.1287)">
+           transform="translate(0,47.123207)">
           <rect
              transform="matrix(0.8660254,0.5,0,1,0,0)"
              rx="0"

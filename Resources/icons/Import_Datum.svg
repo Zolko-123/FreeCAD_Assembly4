@@ -15,7 +15,7 @@
    id="svg5821"
    sodipodi:version="0.32"
    inkscape:version="0.92.3 (2405546, 2018-03-11)"
-   sodipodi:docname="Datum.svg"
+   sodipodi:docname="Import_Datum.svg"
    inkscape:output_extension="org.inkscape.output.svg.inkscape"
    version="1.1"
    inkscape:export-filename="/home/normand/Images/Icônes/PartDesign_Std_Plane_nc1.png"
@@ -126,16 +126,16 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="10"
-     inkscape:cx="29.20476"
+     inkscape:cx="29.220297"
      inkscape:cy="31.434893"
      inkscape:current-layer="g3360-3"
      showgrid="true"
      inkscape:document-units="px"
      inkscape:grid-bbox="true"
      inkscape:window-width="1498"
-     inkscape:window-height="1162"
-     inkscape:window-x="79"
-     inkscape:window-y="68"
+     inkscape:window-height="1042"
+     inkscape:window-x="38"
+     inkscape:window-y="0"
      inkscape:window-maximized="0"
      inkscape:snap-bbox="false"
      inkscape:snap-nodes="true"
@@ -202,25 +202,25 @@
          inkscape:export-ydpi="3.2478156"
          transform="translate(-2.96179e-7,2.9614273e-6)">
         <g
-           id="g4172-4"
-           transform="rotate(-120,1109.4386,1238.9235)">
+           id="g844"
+           transform="translate(-8.535693,34.61996)">
           <rect
-             transform="matrix(0.86793573,-0.49667653,0,1,0,0)"
-             y="1717.2489"
-             x="1138.8126"
+             transform="matrix(0.86410236,0.50331612,-0.8660254,0.5,0,0)"
+             y="439.8013"
+             x="1719.0315"
              height="266.99686"
              width="266.52176"
-             id="rect3860-36-7"
-             style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:none;stroke:#403c3d;stroke-width:36.89362717;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate" />
+             id="rect3860-36-6"
+             style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:none;stroke:#c1b7bb;stroke-width:36.89744186;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate" />
           <rect
              ry="2.5860298"
-             transform="matrix(0.8660254,-0.5,0,1,0,0)"
-             y="1723.0597"
-             x="1141.3009"
+             transform="matrix(0.8660254,0.5,-0.8660254,0.5,0,0)"
+             y="448.18054"
+             x="1722.7997"
              height="265.90598"
              width="267.47815"
-             id="rect3860-3-4"
-             style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:none;stroke:#897e7e;stroke-width:15.71166039;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate" />
+             id="rect3860-3-1"
+             style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:none;stroke:#d6d6d6;stroke-width:15.71166039;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate" />
         </g>
         <g
            id="g4172"
