@@ -150,9 +150,7 @@ class newHole:
 
 
 	def getSelection(self):
-		# check that we have selected compatible objects
-		# for a normal Datum it's an App::Part
-		# for a Hole it's a circular edge
+		# check that we have selected a circular edge
 		selection = None
 		if App.ActiveDocument:
 			# 1 thing is selected:
@@ -163,7 +161,7 @@ class newHole:
 					edgeObj = edge.SubObjects[0]
 					# if the edge is circular
 					if hasattr(edgeObj,"Curve") and hasattr(edgeObj.Curve,"Center"):
-						# find the App::Part where the solid having this edge is
+						# find the feature on which the edge is located
 						parentObj = Gui.Selection.getSelection()[0]
 						edgeName = edge.SubElementNames[0]
 						selection = ( parentObj, edgeName )

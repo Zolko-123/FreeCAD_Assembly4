@@ -36,14 +36,21 @@ class newModel:
 		self.activeDoc = App.activeDocument()
 		# check whether there is already Model in the document
 		if not self.checkModel():
+			# create a group 'Parts' to hold all parts in the assembly document (if any)
+			if not self.activeDoc.getObject('Parts'):
+				self.activeDoc.addObject( 'App::DocumentObjectGroup', 'Parts' )
 			# create a new App::Part called 'Model'
 			model = self.activeDoc.addObject('App::Part','Model')
-			model.newObject( 'App::DocumentObjectGroup', 'Constraints' )
-			# model.newObject( 'App::FeaturePython', 'Variables' )
+			# add an LCS at the root of the Model, and attach it to the 'Origin'
 			lcs0 = model.newObject('PartDesign::CoordinateSystem','LCS_0')
-			lcs0.Support = [(model.getObject('X_Axis'),'')]
+			lcs0.Support = [(model.Origin.OriginFeatures[0],'')]
 			lcs0.MapMode = 'ObjectXY'
 			lcs0.MapReversed = False
+			# create a group Constraints to store future constraints there
+			model.newObject('App::DocumentObjectGroup','Constraints')
+			# create an object Variables to hold variables to be used in this document
+			model.newObject('App::FeaturePython','Variables')
+			# recompute to get rid of the small overlays
 			model.recompute()
 			self.activeDoc.recompute()
 
@@ -64,4 +71,4 @@ class newModel:
 
 
 # add the command to the workbench
-Gui.addCommand( 'newModelCmd', newModel() )
+Gui.addCommand( 'Asm4_newModel', newModel() )

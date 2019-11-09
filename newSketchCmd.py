@@ -70,5 +70,5 @@ class newSketch:
 
 
 # add the command to the workbench
-Gui.addCommand( 'newSketchCmd', newSketch() )
+Gui.addCommand( 'Asm4_newSketch', newSketch() )
 

@@ -35,15 +35,22 @@ class newPart:
 		partName = 'Part'
 		text,ok = QtGui.QInputDialog.getText(None,'Create new Part','Enter new Part name :                                        ', text = partName)
 		if ok and text:
+			# create Part
 			part = App.ActiveDocument.addObject('App::Part',text)
-			lcs0 = part.newObject('PartDesign::CoordinateSystem','LCS_0')
-			lcs0.Support = [(part.Origin.OriginFeatures[0],'')]
-			lcs0.MapMode = 'ObjectXY'
-			lcs0.MapReversed = False
+			# If the 'Part' group exists, move it there:
+			if App.ActiveDocument.getObject('Parts'):
+				App.ActiveDocument.getObject('Parts').addObject(part)
+			# add an LCS at the root of the Part, and attach it to the 'Origin'
+			# this one starts with 1, because the LCS_0 is for the Model
+			lcs1 = part.newObject('PartDesign::CoordinateSystem','LCS_1')
+			lcs1.Support = [(part.Origin.OriginFeatures[0],'')]
+			lcs1.MapMode = 'ObjectXY'
+			lcs1.MapReversed = False
+			# recompute
 			part.recompute()
 			App.ActiveDocument.recompute()
 
 
 
 # add the command to the workbench
-Gui.addCommand( 'newPartCmd', newPart() )
+Gui.addCommand( 'Asm4_newPart', newPart() )

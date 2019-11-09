@@ -57,7 +57,6 @@ class importDatum( QtGui.QDialog ):
 		# Now we can draw the UI
 		self.drawUI()
 
-
 		# We get all the App::Link parts in the assembly 
 		self.asmParts = []
 		# the first item is "Select linked Part" therefore we add an empty object
@@ -72,6 +71,9 @@ class importDatum( QtGui.QDialog ):
 				self.parentList.addItem( objIcon, obj.Name, obj)
 		# Set the list to the first element
 		self.parentList.setCurrentIndex( 0 )
+
+		# check whether a Datum is already selected:
+		targetDatum = self.getSelection()
 
 
 		# Now we can show the UI
@@ -134,6 +136,22 @@ class importDatum( QtGui.QDialog ):
 		return
 
 
+
+	"""
+    +-----------------------------------------------+
+    |  check if there is already a datum selected   |
+    +-----------------------------------------------+
+	"""
+	def getSelection(self):
+		# if something is selected ...
+		if Gui.Selection.getSelection():
+			selectedObj = Gui.Selection.getSelection()[0]
+			st = selectedObj.TypeId
+			# ... and it's an App::Part:
+			if st=='PartDesign::CoordinateSystem' or st=='PartDesign::Plane' or st=='PartDesign::Line' or st=='PartDesign::Point':
+				return(selectedObj)
+			else:
+				return([])
 
 
 	"""
@@ -311,4 +329,4 @@ class importDatum( QtGui.QDialog ):
     |       add the command to the workbench        |
     +-----------------------------------------------+
 """
-Gui.addCommand( 'importDatumCmd', importDatum() )
+Gui.addCommand( 'Asm4_importDatum', importDatum() )

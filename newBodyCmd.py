@@ -70,4 +70,4 @@ class newBody:
 
 
 # add the command to the workbench
-Gui.addCommand( 'newBodyCmd', newBody() )
+Gui.addCommand( 'Asm4_newBody', newBody() )

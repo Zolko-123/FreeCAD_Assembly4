@@ -24,9 +24,9 @@ class updateAssembly:
 
 	def IsActive(self):
 		if App.ActiveDocument:
-			return(True)
-		else:
-			return(False)
+			if App.ActiveDocument.getObject('Model'):
+				return(True)
+		return(False)
 
 
 
@@ -39,14 +39,15 @@ class updateAssembly:
 		
 		# get the current active document to avoid errors if user changes tab
 		self.activeDoc = App.activeDocument()
-
-		# find all the linked parts in the assembly...
-		for obj in self.activeDoc.findObjects():
+		# find every objects in the assembly...
+		for obj in self.activeDoc.Model.getSubObjects():
 			# ... and update it
-			obj.recompute()
-		# finally uodate the parent assembly
+			objName = obj[0:-1]
+			self.activeDoc.Model.getObject(objName).recompute()
+		# finally uodate the entire document
 		self.activeDoc.Model.recompute()
+		self.activeDoc.recompute()
 
 
 # add the command to the workbench
-Gui.addCommand( 'updateAssemblyCmd', updateAssembly() )
+Gui.addCommand( 'Asm4_updateAssembly', updateAssembly() )

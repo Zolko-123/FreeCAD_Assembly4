@@ -30,7 +30,7 @@ class placeDatum( QtGui.QDialog ):
 	def GetResources(self):
 		return {"MenuText": "Edit Attachment of a Datum object",
 				"ToolTip": "Attach a Datum object to an external Part",
-				"Pixmap" : os.path.join( iconPath , 'Place_AxisCross.svg')
+				"Pixmap" : os.path.join( iconPath , 'Place_Datum.svg')
 				}
 
 
@@ -38,12 +38,28 @@ class placeDatum( QtGui.QDialog ):
 		# is there an active document ?
 		if App.ActiveDocument:
 			# is something selected ?
+			selObj = self.checkSelectionDatum()
+			if selObj != None:
+				return True
+		return False 
+
+
+	def checkSelectionDatum(self):
+		selectedObj = None
+		# check that there is an App::Part called 'Model'
+		# a standard App::Part would also do, but then more error checks are necessary
+		if App.ActiveDocument.getObject('Model') and App.ActiveDocument.getObject('Model').TypeId=='App::Part' :
+		# check that something is selected
 			if Gui.Selection.getSelection():
-				selectedType = Gui.Selection.getSelection()[0].TypeId
-				if selectedType=='PartDesign::CoordinateSystem' or selectedType=='PartDesign::Point':
-					return True
-		else:
-			return False 
+			# set the (first) selected object as global variable
+				selection = Gui.Selection.getSelection()[0]
+				selectedType = selection.TypeId
+				# check that the selected object is a Datum CS or Point type
+				if selectedType=='PartDesign::CoordinateSystem' or selectedType=='PartDesign::Plane' or selectedType=='PartDesign::Line' or selectedType=='PartDesign::Point' :
+					selectedObj = selection
+		# now we should be safe
+		return selectedObj
+	
 
 
 	"""
@@ -57,24 +73,35 @@ class placeDatum( QtGui.QDialog ):
 		self.activeDoc = App.activeDocument()
 
 		# check that we have selected a PartDesign::CoordinateSystem
-		selection = self.checkSelectionLCS()
+		selection = self.checkSelectionDatum()
 		if not selection:
 			self.close()
 		else:
 			self.selectedDatum = selection
 
 
-		# Now we can draw the UI
-		self.drawUI()
-		self.show()
-
-
 		# check if the datum object is already mapped to something
 		# TODO : make a warning and confirmation dialog with "Cancel" and "OK" buttons
 		# TODO : see confirmBox below
 		if self.selectedDatum.MapMode != 'Deactivated':
-			self.selectedDatum.MapMode = 'Deactivated'
+			msgBox = QtGui.QMessageBox()
+			msgBox.setWindowTitle('FreeCAD Warning')
+			msgBox.setIcon(QtGui.QMessageBox.Warning)
+			msgBox.setText("This Datum object is mapped to some geometry.")
+			msgBox.setInformativeText("Attaching-it with Assembly4 will loose this mapping. Are you sure you want to proceed ?")
+			msgBox.setStandardButtons(QtGui.QMessageBox.Cancel | QtGui.QMessageBox.Ok)
+			msgBox.setEscapeButton(QtGui.QMessageBox.Cancel)
+			msgBox.setDefaultButton(QtGui.QMessageBox.Ok)
+			retval = msgBox.exec_()
+			# Cancel = 4194304
+			# Ok = 1024
+			if retval == 4194304:
+				return
 
+
+		# Now we can draw the UI
+		self.drawUI()
+		self.show()
 
 		# We get all the App::Link parts in the assembly 
 		self.asmParts = []
@@ -102,7 +129,7 @@ class placeDatum( QtGui.QDialog ):
 		old_Parent = ''
 		old_ParentPart = ''
 		old_attLCS = ''
-		( old_Parent, old_ParentPart, old_attLCS ) = splitExpressionDatum( self.old_EE )
+		( old_Parent, old_ParentPart, old_attLCS ) = self.splitExpressionDatum( self.old_EE )
 		#self.expression.setText( 'old_Parent = '+ old_Parent )
 
 
@@ -127,17 +154,6 @@ class placeDatum( QtGui.QDialog ):
 			lcs_found = self.attLCSlist.findItems( '('+old_attLCS+')', QtCore.Qt.MatchContains )
 			if lcs_found:
 				self.attLCSlist.setCurrentItem( lcs_found[0] )
-
-
-
-		#self.msgBox = QtGui.QMessageBox()
-		#self.msgBox.setWindowTitle('Warning')
-		#self.msgBox.setIcon(QtGui.QMessageBox.Critical)
-		#self.msgBox.setText("Activated placeLCSCmd")
-		#self.msgBox.exec_()
-		#FreeCAD.activeDocument().Tip = FreeCAD.activeDocument().addObject('App::Part','Model')
-		#FreeCAD.activeDocument().getObject('Model').newObject('App::DocumentObjectGroup','Constraints')
-		#FreeCAD.activeDocument().getObject('Model').newObject('PartDesign::CoordinateSystem','LCS_0')
 
 
 
@@ -177,7 +193,7 @@ class placeDatum( QtGui.QDialog ):
 			# don't forget the last '.' !!!
 			# <<LinkName>>.Placement.multiply( <<LinkName>>.<<LCS.>>.Placement )
 			# expr = '<<'+ a_Part +'>>.Placement.multiply( <<'+ a_Part +'>>.<<'+ a_LCS +'.>>.Placement )'
-			expr = makeExpressionDatum( a_Link, a_Part, a_LCS )
+			expr = self.makeExpressionDatum( a_Link, a_Part, a_LCS )
 			# this can be skipped when this method becomes stable
 			self.expression.setText( expr )
 			# load the built expression into the Expression field of the constraint
@@ -192,9 +208,52 @@ class placeDatum( QtGui.QDialog ):
 
 
 	"""
-    +-----------------------------------------------+
-    |           get all the LCS in a part           |
-    +-----------------------------------------------+
+	+-----------------------------------------------+
+	|         populate the ExpressionEngine         |
+	|               for a Datum object              |
+	|       linked to an LCS in a sister part       |
+	+-----------------------------------------------+
+	"""
+	def makeExpressionDatum( self, attLink, attPart, attLCS ):
+		# check that everything is defined
+		if attLink and attPart and attLCS:
+			# expr = Link.Placement * LinkedPart#LCS.Placement
+			expr = attLink +'.Placement * '+ attPart +'#'+ attLCS +'.Placement'
+		else:
+			expr = False
+		return expr
+
+
+
+	"""
+	+-----------------------------------------------+
+	|           split the ExpressionEngine          |
+	|        of a linked Datum object to find       |
+	|         the old attachment Part and LCS       |
+	+-----------------------------------------------+
+	"""
+	def splitExpressionDatum( self, expr ):
+		# expr = Link.Placement * LinkedPart#LCS.Placement
+		( attLink, separator, rest1 ) = expr.partition('.Placement * ')
+		( attPart, separator, rest2 ) = rest1.partition('#')
+		( attLCS,  separator, rest3 ) = rest2.partition('.')
+		restFinal = rest3[0:9]
+		if restFinal=='Placement':
+			# wow, everything went according to plan
+			retval = ( attLink, attPart, attLCS )
+			#self.expression.setText( attPart +'***'+ attLCS )
+		else:
+			# rats ! But still, if the decode is unsuccessful, put some text
+			retval = ( restFinal, 'None', 'None' )
+		return retval
+
+
+
+
+	"""
+	+-----------------------------------------------+
+	|           get all the LCS in a part           |
+	+-----------------------------------------------+
 	"""
 	def getPartLCS( self, part ):
 		partLCS = [ ]
@@ -210,9 +269,9 @@ class placeDatum( QtGui.QDialog ):
 
 
 	"""
-    +------------------------------------------------+
-    |   fill the LCS list when changing the parent   |
-    +------------------------------------------------+
+	+------------------------------------------------+
+	|   fill the LCS list when changing the parent   |
+	+------------------------------------------------+
 	"""
 	def onParentList(self):
 		# clear the LCS list
@@ -294,44 +353,6 @@ class placeDatum( QtGui.QDialog ):
 		self.close()
 
 
-
-	"""
-    +-----------------------------------------------+
-    |                  confirm Box                  |
-    +-----------------------------------------------+
-	"""
-	def confirmBox(self):
-		self.setWindowTitle('Please confirm')
-		self.setWindowIcon( QtGui.QIcon( os.path.join( iconPath , 'FreeCad.svg' ) ) )
-		self.setMinimumSize(550, 200)
-		self.resize(550,240)
-		self.setModal(False)
-		# make this dialog stay above the others, always visible
-		self.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
-		self.msgLine1 = QtGui.QLabel(self)
-		self.msgLine1.move(10,20)
-		self.msgLine2 = QtGui.QLabel(self)
-		self.msgLine2.move(10,50)
-		self.msgLine3 = QtGui.QLabel(self)
-		self.msgLine3.move(10,100)
-		self.msgLine1.setText( 'The selected Datum object \"'+self.selectedDatum.Name+'\"')
-		self.msgLine2.setText( 'is currently mapped to geometry in the assembly.' )
-		self.msgLine3.setText( 'Are you sure you want to continue ?')
-		# Cancel button
-		self.CancelButton = QtGui.QPushButton('Cancel', self)
-		self.CancelButton.setToolTip("Quit without changes")
-		self.CancelButton.setAutoDefault(False)
-		self.CancelButton.move(10, 150)
-		# OK button
-		self.OKButton = QtGui.QPushButton('OK', self)
-		self.OKButton.setToolTip("Confirm")
-		self.OKButton.setAutoDefault(True)
-		self.OKButton.move(460, 150)
-		self.CancelButton.clicked.connect( self.onCancelConfirm )
-		self.OKButton.clicked.connect( self.onOKConfirm )
-		self.show()
-
-
 	"""
     +-----------------------------------------------+
     |            Cancel the confirmation            |
@@ -368,7 +389,7 @@ class placeDatum( QtGui.QDialog ):
 		#
 		# Selected Link label
 		self.lcsLabel = QtGui.QLabel(self)
-		self.lcsLabel.setText("Selected Datum object :")
+		self.lcsLabel.setText("Selected Datum :")
 		self.lcsLabel.move(10,20)
 		# the name as seen in the tree of the selected link
 		self.lscName = QtGui.QLineEdit(self)
@@ -441,43 +462,6 @@ class placeDatum( QtGui.QDialog ):
 		self.attLCSlist.itemClicked.connect( self.onDatumClicked )
 
 
-	"""
-    +-----------------------------------------------+
-    |                 initial check                 |
-    +-----------------------------------------------+
-	"""
-	def checkSelectionLCS(self):
-		# check that there is an App::Part called 'Model'
-		# a standard App::Part would also do, but then more error checks are necessary
-		if not self.activeDoc.getObject('Model') or not self.activeDoc.getObject('Model').TypeId=='App::Part' :
-			msgBox = QtGui.QMessageBox()
-			msgBox.setWindowTitle('Warning')
-			msgBox.setIcon(QtGui.QMessageBox.Critical)
-			msgBox.setText("This placement is not compatible with this assembly.")
-			msgBox.exec_()
-			return(False)
-		# check that something is selected
-		if not Gui.Selection.getSelection():
-			msgBox = QtGui.QMessageBox()
-			msgBox.setWindowTitle('Warning')
-			msgBox.setIcon(QtGui.QMessageBox.Critical)
-			msgBox.setText("Please select a linked part.")
-			msgBox.exec_()
-			return(False)
-		# set the (first) selected object as global variable
-		selectedObj = Gui.Selection.getSelection()[0]
-		selectedType = selectedObj.TypeId
-		# check that the selected object is a Datum CS or Point type
-		if not (selectedType == 'PartDesign::CoordinateSystem' or selectedType == 'PartDesign::Point'):
-			msgBox = QtGui.QMessageBox()
-			msgBox.setWindowTitle('Warning')
-			msgBox.setIcon(QtGui.QMessageBox.Critical)
-			msgBox.setText("Please select a Datum Point or Coordinate System.")
-			msgBox.exec_()
-			return(False)
-		# now we should be safe
-		return( selectedObj )
-
 
 
 """
@@ -485,4 +469,4 @@ class placeDatum( QtGui.QDialog ):
     |       add the command to the workbench        |
     +-----------------------------------------------+
 """
-Gui.addCommand( 'placeDatumCmd', placeDatum() )
+Gui.addCommand( 'Asm4_placeDatum', placeDatum() )

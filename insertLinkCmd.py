@@ -218,5 +218,5 @@ class insertLink( QtGui.QDialog ):
     |       add the command to the workbench        |
     +-----------------------------------------------+
 """
-Gui.addCommand( 'insertLinkCmd', insertLink() )
+Gui.addCommand( 'Asm4_insertLink', insertLink() )
 

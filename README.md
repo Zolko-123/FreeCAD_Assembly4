@@ -74,6 +74,11 @@ This is then a raw interface between FreeCAD `App::Part` objects through the `Ap
 
 ## Release notes
 
+* 2019.11.05 (**version 0.7.0**) :  
+Support for screws & nuts from the Fasteners workbench  
+Added Variables to the Model  
+The model file format has changed, former assembly models can be opened but must be re-assembled.
+
 * 2019.10.11 (**version 0.6.4**) :  
 Improved assembly in single file  
 Various small fixes

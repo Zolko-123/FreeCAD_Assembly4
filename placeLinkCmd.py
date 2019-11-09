@@ -39,10 +39,24 @@ class placeLink( QtGui.QDialog ):
 		# is there an active document ?
 		if App.ActiveDocument:
 			# is something selected ?
-			if Gui.Selection.getSelection():
-				if Gui.Selection.getSelection()[0].isDerivedFrom('App::Link'):
-					return True
+			selObj = self.GetSelection()
+			if selObj != None:
+				return True
 		return False
+
+
+	def GetSelection(self):
+		# check that there is an App::Part called 'Model'
+		selectedObj = None
+		if not App.ActiveDocument.getObject('Model'):
+			return None
+		if Gui.Selection.getSelection():
+			selObj = Gui.Selection.getSelection()[0]
+			# it's an App::Link
+			if selObj.isDerivedFrom('App::Link'):
+				selectedObj = selObj
+		return selectedObj
+
 
 
 	"""
@@ -55,16 +69,28 @@ class placeLink( QtGui.QDialog ):
 		self.activeDoc = App.activeDocument()
 
 		# check that we have selected an App::Link object
-		selection = self.checkSelection()
+		selection = self.GetSelection()
 		if not selection:
 			self.close()
 		else:
 			self.selectedLink = selection
 
+		# check that the link is an Asm4 link:
+		self.isAsm4EE = False
+		if hasattr(self.selectedLink,'AssemblyType'):
+			if self.selectedLink.AssemblyType == 'Asm4EE':
+				self.isAsm4EE = True
+			else:
+				msgBox = QtGui.QMessageBox()
+				msgBox.setWindowTitle('Warning')
+				msgBox.setIcon(QtGui.QMessageBox.Critical)
+				msgBox.setText("This Link's Assembly Type doesn't correspond to this WorkBench")
+				msgBox.exec_()
+				return
+
 
 		# draw the GUI, objects are defined later down
 		self.drawUI()
-
 
 		# the parent (top-level) assembly is the App::Part called Model (hard-coded)
 		# What would happen if there are 2 App::Part ?
@@ -108,20 +134,15 @@ class placeLink( QtGui.QDialog ):
 			#self.lcsIcon = lcs.ViewObject.Icon
 			self.partLCSlist.addItem(newItem)
 
+		# get the old values
+		if self.isAsm4EE:
+			self.old_AO = self.selectedLink.AttachmentOffset
+			self.old_linkLCS = self.selectedLink.AttachedBy[1:]
+			(self.old_Parent, separator, self.old_parentLCS) = self.selectedLink.AttachedTo.partition('#')
+		else:
+			self.old_AO = []
+			self.old_Parent = ''
 
-		self.old_AO = []
-		self.constrFeature = []
-		self.old_Parent = ''
-		# name of the constraints object for the link
-		self.constrName = constraintPrefix + self.selectedLink.Name
-		# check whether it exists
-		constraint = self.activeDoc.getObject('Constraints').getObject( self.constrName )
-		if constraint:
-			self.constrFeature = constraint
-			# get and store the current AttachmentOffset
-			self.old_AO = self.constrFeature.AttachmentOffset
-			# get and store the current attachment parent
-			self.old_Parent = self.constrFeature.AttachedTo
 
 		self.old_EE = ''
 		# get and store the current expression engine:
@@ -209,9 +230,9 @@ class placeLink( QtGui.QDialog ):
     |             for a linked App::Part            |
     +-----------------------------------------------+
 	"""
-	def makeExpressionPart( self, attLink, attPart, attLCS, constrName, linkedPart, linkLCS ):
+	def makeExpressionPart( self, attLink, attPart, attLCS, linkedPart, linkLCS ):
 		# if everything is defined
-		if attLink and attLCS and constrName and linkedPart and linkLCS:
+		if attLink and attLCS and linkedPart and linkLCS:
 			# this is where all the magic is, see:
 			# 
 			# https://forum.freecadweb.org/viewtopic.php?p=278124#p278124
@@ -220,7 +241,9 @@ class placeLink( QtGui.QDialog ):
 			# https://forum.freecadweb.org/viewtopic.php?f=17&t=38974&p=337784#p337784
 			# expr = ParentLink.Placement * ParentPart#LCS.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS.Placement ^ -1
 			# expr = LCS_in_the_assembly.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS.Placement ^ -1
-			expr = attLCS+'.Placement * '+constrName+'.AttachmentOffset * '+linkedPart+'#'+linkLCS+'.Placement ^ -1'
+			# the AttachmentOffset is now a property of the App::Link
+			# expr = LCS_in_the_assembly.Placement * AttachmentOffset * LinkedPart#LCS.Placement ^ -1
+			expr = attLCS+'.Placement * AttachmentOffset * '+linkedPart+'#'+linkLCS+'.Placement ^ -1'
 			# if we're attached to another sister part (and not the Parent Assembly)
 			# we need to take into account the Placement of that Part.
 			if attPart:
@@ -248,25 +271,23 @@ class placeLink( QtGui.QDialog ):
 			return bad_EE
 		if parent == 'Parent Assembly':
 			# we're attached to an LCS in the parent assembly
-			# expr = LCS_in_the_assembly.Placement * constr_Name.AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
-			( attLCS, separator, rest1 ) = expr.partition('.Placement * ')
-			( constrName, separator, rest2 ) = rest1.partition('.AttachmentOffset * ')
-			( linkedPart, separator, rest3 ) = rest2.partition('#')
-			( linkLCS, separator, rest4 ) = rest3.partition('.Placement ^ ')
-			restFinal = rest4[0:2]
+			# expr = LCS_in_the_assembly.Placement * AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
+			( attLCS, separator, rest1 ) = expr.partition('.Placement * AttachmentOffset * ')
+			( linkedPart, separator, rest2 ) = rest1.partition('#')
+			( linkLCS, separator, rest3 ) = rest2.partition('.Placement ^ ')
+			restFinal = rest3[0:2]
 			attLink = parent
 			attPart = 'None'
 			#return ( restFinal, 'None', 'None', 'None', 'None', 'None')
 		else:
 			# we're attached to an LCS in a sister part
-			# expr = ParentLink.Placement * ParentPart#LCS.Placement * constr_Name.AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
+			# expr = ParentLink.Placement * ParentPart#LCS.Placement * AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
 			( attLink,    separator, rest1 ) = expr.partition('.Placement * ')
 			( attPart,    separator, rest2 ) = rest1.partition('#')
-			( attLCS,     separator, rest3 ) = rest2.partition('.Placement * ')
-			( constrName, separator, rest4 ) = rest3.partition('.AttachmentOffset * ')
-			( linkedPart, separator, rest5 ) = rest4.partition('#')
-			( linkLCS,    separator, rest6 ) = rest5.partition('.Placement ^ ')
-			restFinal = rest6[0:2]
+			( attLCS,     separator, rest3 ) = rest2.partition('.Placement * AttachmentOffset * ')
+			( linkedPart, separator, rest4 ) = rest3.partition('#')
+			( linkLCS,    separator, rest5 ) = rest4.partition('.Placement ^ ')
+			restFinal = rest5[0:2]
 			#return ( restFinal, 'None', 'None', 'None', 'None', 'None')
 		if restFinal=='-1' and attLink==parent :
 			# wow, everything went according to plan
@@ -289,10 +310,9 @@ class placeLink( QtGui.QDialog ):
 		if parent == 'Parent Assembly':
 			# we're attached to an LCS in the parent assembly
 			# expr = LCS_in_the_assembly.Placement * constr_linkName.AttachmentOffset * LCS_linkedPart.Placement ^ -1
-			( attLCS, separator, rest1 ) = expr.partition('.Placement * ')
-			( constrName, separator, rest2 ) = rest1.partition('.AttachmentOffset * ')
-			( linkLCS, separator, rest3 ) = rest2.partition('.Placement ^ ')
-			restFinal = rest3[0:2]
+			( attLCS, separator, rest1 ) = expr.partition('.Placement * AttachmentOffset * ')
+			( linkLCS, separator, rest2 ) = rest1.partition('.Placement ^ ')
+			restFinal = rest2[0:2]
 			attLink = parent
 			attPart = 'None'
 			#return ( restFinal, 'None', 'None', 'None', 'None', 'None')
@@ -300,10 +320,9 @@ class placeLink( QtGui.QDialog ):
 			# we're attached to an LCS in a sister part
 			# expr = ParentLink.Placement * LCS_parent.Placement * constr_linkName.AttachmentOffset * LCS_linkedPart.Placement ^ -1
 			( attLink,    separator, rest1 ) = expr.partition('.Placement * ')
-			( attLCS,     separator, rest2 ) = rest1.partition('.Placement * ')
-			( constrName, separator, rest3 ) = rest2.partition('.AttachmentOffset * ')
-			( linkLCS,    separator, rest4 ) = rest3.partition('.Placement ^ ')
-			restFinal = rest4[0:2]
+			( attLCS,     separator, rest2 ) = rest1.partition('.Placement * AttachmentOffset * ')
+			( linkLCS,    separator, rest3 ) = rest2.partition('.Placement ^ ')
+			restFinal = rest3[0:2]
 			#return ( restFinal, 'None', 'None', 'None', 'None', 'None')
 		if restFinal=='-1' and attLink==parent :
 			# wow, everything went according to plan
@@ -321,52 +340,13 @@ class placeLink( QtGui.QDialog ):
     |            for the App::Link object           |
     +-----------------------------------------------+
 	"""
-	def makeConstrFeature( self ):
-		# get the name of the App::Link
-		linkName = self.selectedLink.Name
-		# the name of the constraint:
-		constrName = constraintPrefix + linkName
-		# if it exists, return the existing constrFeature
-		# TODO : check that it's of the correct type ?
-		if self.activeDoc.getObject('Constraints').getObject( constrName ):
-			return self.activeDoc.getObject('Constraints').getObject( constrName )
-		# if it didn't exist, create it ...
-		constrFeature = self.activeDoc.getObject('Constraints').newObject( 'App::FeaturePython', constrName )
-		#self.expression.setText( constrName +' does not exist, creating' )
-		#self.expression.setText( constrName +' has been created' )
-		# ...and create the property fields
-		#
-		# Store the type of solver to use
-		constrFeature.addProperty( 'App::PropertyString', 'Solver' )
-		constrFeature.Solver = 'ExpressionEngine'
-		# Store the type of the constraint
-		constrFeature.addProperty( 'App::PropertyString', 'ConstraintType' )
-		constrFeature.ConstraintType = 'AttachmentByLCS'
-		# Enabled ?
-		constrFeature.addProperty( 'App::PropertyBool', 'Enabled' )
-		constrFeature.Enabled = True
-		# store the name of the inserted Part's instance
-		constrFeature.addProperty( 'App::PropertyString', 'Instance', 'Attachment' )
-		constrFeature.Instance = linkName
-		# store the name of the LCS in the assembly where the link is attached to
-		constrFeature.addProperty( 'App::PropertyString', 'AttachedByLCS', 'Attachment' )
-		# store the name of the part where the link is attached to
-		constrFeature.addProperty( 'App::PropertyString', 'AttachedTo', 'Attachment' )
-		# store the name of the LCS in the assembly where the link is attached to
-		constrFeature.addProperty( 'App::PropertyString', 'AttachedToLCS', 'Attachment' )
-		# add an App::Placement that will be the offset between attachment and link LCS
-		constrFeature.addProperty( 'App::PropertyPlacement', 'AttachmentOffset', 'Attachment' )
-		# store the name of the App::Link this constraint refers-to
-		constrFeature.addProperty( 'App::PropertyString', 'LinkName', 'Information' )
-		constrFeature.LinkName = linkName
-		# store the name of the linked document (only for information)
-		constrFeature.addProperty( 'App::PropertyString', 'LinkedPart', 'Information' )
-		constrFeature.LinkedPart = self.selectedLink.LinkedObject.Document.Name
-		# store the name of the linked file (only for information)
-		constrFeature.addProperty( 'App::PropertyString', 'LinkedFile', 'Information' )
-		constrFeature.LinkedFile = self.selectedLink.LinkedObject.Document.FileName
-		# return
-		return constrFeature
+	def makeAsm4Properties( self ):
+		if not hasattr(self.selectedLink,'AssemblyType'):
+			self.selectedLink.addProperty( 'App::PropertyString', 'AssemblyType', 'Attachment' ).AssemblyType = 'Asm4EE'
+			self.selectedLink.addProperty( 'App::PropertyString', 'AttachedBy', 'Attachment' )
+			self.selectedLink.addProperty( 'App::PropertyString', 'AttachedTo', 'Attachment' )
+			self.selectedLink.addProperty( 'App::PropertyPlacement', 'AttachmentOffset', 'Attachment' )
+		return
 
 
 
@@ -404,8 +384,6 @@ class placeLink( QtGui.QDialog ):
 
 		# the linked App::Part's name
 		l_Part = self.selectedLink.LinkedObject.Document.Name
-		# the constraint's name:
-		c_Name = self.constrName
 
 		# the LCS's name in the linked part to be used for its attachment
 		# check that something is selected in the QlistWidget
@@ -418,7 +396,7 @@ class placeLink( QtGui.QDialog ):
 
 		# check that all of them have something in
 		# constrName has been checked at the beginning
-		if not ( a_Link and a_LCS and c_Name and l_Part and l_LCS ) :
+		if not ( a_Link and a_LCS and l_Part and l_LCS ):
 			self.expression.setText( 'Problem in selections' )
 		else:
 			# this is where all the magic is, see:
@@ -430,15 +408,14 @@ class placeLink( QtGui.QDialog ):
 			#
 			# expr = ParentLink.Placement * ParentPart#LCS.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
 			# expr = LCS_in_the_assembly.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
-			expr = self.makeExpressionPart( a_Link, a_Part, a_LCS, c_Name, l_Part, l_LCS )
+			expr = self.makeExpressionPart( a_Link, a_Part, a_LCS, l_Part, l_LCS )
 			# this can be skipped when this method becomes stable
 			self.expression.setText( expr )
-			# fill the constraint feature. Create it if it doesn't exist:
-			self.constrFeature = self.makeConstrFeature()
+			# add the Asm4 properties if it's a pure App::Link
+			self.makeAsm4Properties()
 			# store the part where we're attached to in the constraints object
-			self.constrFeature.AttachedByLCS = '#'+l_LCS
-			self.constrFeature.AttachedTo = a_Link
-			self.constrFeature.AttachedToLCS = '#'+a_LCS
+			self.selectedLink.AttachedBy = '#'+l_LCS
+			self.selectedLink.AttachedTo = a_Link+'#'+a_LCS
 			# load the expression into the link's Expression Engine
 			self.selectedLink.setExpression('Placement', expr )
 			# recompute the object to apply the placement:
@@ -571,7 +548,7 @@ class placeLink( QtGui.QDialog ):
 	def onCancel(self):
 		# restore previous values
 		if self.old_AO:
-			self.constrFeature.AttachmentOffset = self.old_AO
+			self.selectedLink.AttachmentOffset = self.old_AO
 		if self.old_EE:
 			self.selectedLink.setExpression( 'Placement', self.old_EE )
 		self.selectedLink.recompute()
@@ -585,8 +562,8 @@ class placeLink( QtGui.QDialog ):
     +-----------------------------------------------+
 	"""
 	def rotAxis( self, plaRotAxis ):
-		constrAO = self.constrFeature.AttachmentOffset
-		self.constrFeature.AttachmentOffset = plaRotAxis.multiply( constrAO )
+		constrAO = self.selectedLink.AttachmentOffset
+		self.selectedLink.AttachmentOffset = plaRotAxis.multiply( constrAO )
 		self.selectedLink.recompute()
 		return
 
@@ -605,6 +582,11 @@ class placeLink( QtGui.QDialog ):
 		self.rotAxis(rotZ)
 		return
 
+	def onReset( self ):
+		newPlacement = App.Placement( App.Vector(0,0,0), App.Rotation( App.Vector(0,0,1), 0.0 ) )
+		self.selectedLink.AttachmentOffset = newPlacement
+		self.selectedLink.recompute()
+		return
 
 
 	"""
@@ -716,21 +698,26 @@ class placeLink( QtGui.QDialog ):
 
 		# Buttons
 		#
+		# Reset button
+		self.ResetButton = QtGui.QPushButton('Reset', self)
+		self.ResetButton.setToolTip("Reset the AttachmentOffset of this Link")
+		self.ResetButton.setAutoDefault(False)
+		self.ResetButton.move(50, 530)
 		# RotX button
 		self.RotXButton = QtGui.QPushButton('Rot X', self)
 		self.RotXButton.setToolTip("Rotate the instance around the X axis by 90deg")
 		self.RotXButton.setAutoDefault(False)
-		self.RotXButton.move(130, 530)
+		self.RotXButton.move(200, 530)
 		# RotY button
 		self.RotYButton = QtGui.QPushButton('Rot Y', self)
 		self.RotYButton.setToolTip("Rotate the instance around the Y axis by 90deg")
 		self.RotYButton.setAutoDefault(False)
-		self.RotYButton.move(230, 530)
+		self.RotYButton.move(300, 530)
 		# RotZ button
 		self.RotZButton = QtGui.QPushButton('Rot Z', self)
 		self.RotZButton.setToolTip("Rotate the instance around the Z axis by 90deg")
 		self.RotZButton.setAutoDefault(False)
-		self.RotZButton.move(330, 530)
+		self.RotZButton.move(400, 530)
 
 		# Cancel button
 		self.CancelButton = QtGui.QPushButton('Cancel', self)
@@ -753,6 +740,7 @@ class placeLink( QtGui.QDialog ):
 		self.parentList.currentIndexChanged.connect( self.onParentList )
 		#self.attLCSlist.itemClicked.connect( self.onLCSclicked )
 		#self.partLCSlist.itemClicked.connect( self.onLCSclicked )
+		self.ResetButton.clicked.connect( self.onReset )
 		self.RotXButton.clicked.connect( self.onRotX )
 		self.RotYButton.clicked.connect( self.onRotY )
 		self.RotZButton.clicked.connect( self.onRotZ)
@@ -767,46 +755,7 @@ class placeLink( QtGui.QDialog ):
     |                 initial check                 |
     +-----------------------------------------------+
 	"""
-	def checkSelection(self):
-		# check that there is an App::Part called 'Model'
-		# a standard App::Part would also do, but then more error checks are necessary
-		if not self.activeDoc.getObject('Model') or not self.activeDoc.getObject('Model').TypeId=='App::Part' :
-			msgBox = QtGui.QMessageBox()
-			msgBox.setWindowTitle('Warning')
-			msgBox.setIcon(QtGui.QMessageBox.Critical)
-			msgBox.setText("This placement is not compatible with this assembly.")
-			msgBox.exec_()
-			return(False)
-		# check that something is selected
-		if not Gui.Selection.getSelection():
-			msgBox = QtGui.QMessageBox()
-			msgBox.setWindowTitle('Warning')
-			msgBox.setIcon(QtGui.QMessageBox.Critical)
-			msgBox.setText("Please select a linked part.")
-			msgBox.exec_()
-			return(False)
-		# we take the first of the selected object(s)
-		selectedObj = Gui.Selection.getSelection()[0]
-		# check that the selected object is of App::Link type
-		if not selectedObj.isDerivedFrom('App::Link'):
-			msgBox = QtGui.QMessageBox()
-			msgBox.setWindowTitle('Warning')
-			msgBox.setIcon(QtGui.QMessageBox.Critical)
-			msgBox.setText("Please select a linked part.")
-			msgBox.exec_()
-			return(False)
-		# check that there is indeed a constraint thing there
-		#constraint = constraintPrefix + selectedObj.Name
-		# should we also check that's it's really an App::FeaturPython type ?
-		#if not self.activeDoc.getObject( constraint ):
-		#	msgBox = QtGui.QMessageBox()
-		#	msgBox.setWindowTitle('Warning')
-		#	msgBox.setIcon(QtGui.QMessageBox.Critical)
-		#	msgBox.setText("There is no constraint for this linked object.")
-		#	msgBox.exec_()
-		#	return( selectedObj )
-		# now we should be safe
-		return( selectedObj )
+
 
 
 
@@ -815,4 +764,4 @@ class placeLink( QtGui.QDialog ):
     |       add the command to the workbench        |
     +-----------------------------------------------+
 """
-Gui.addCommand( 'placeLinkCmd', placeLink() )
+Gui.addCommand( 'Asm4_placeLink', placeLink() )

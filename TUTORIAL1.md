@@ -21,7 +21,7 @@ Download the STEP file [`bearing_20x37x9.stp`](Resources/parts/bearing_20x37x9.s
 
 Buttons in the toolbar are activated with relevant selection. If a button you want to use is inactive, try to change the selection (with the mouse).
 
-![](Resources/media/Toolbar.png)
+![](Resources/media/Asm4_Toolbar.png)
 
 
 These functions are also accessible with the Assembly menu:

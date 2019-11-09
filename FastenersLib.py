@@ -14,9 +14,107 @@ from FastenerBase import FSBaseObject
 
 
 
+
 """
     +-----------------------------------------------+
-    |                  main class                   |
+    |        a class to create all fasteners        |
+    |       from the Fasteners WB (ScrewMaker)      |
+    +-----------------------------------------------+
+    
+	import ScrewMaker
+	sm = ScrewMaker.Instance()
+	screwObj = sm.createFastener('ISO7046', 'M6', '20', 'simple', shapeOnly=False)
+"""
+
+class insertFastener:
+	"My tool object"
+	def __init__(self, fastenerType):
+		self.fastenerType = fastenerType
+		# Screw:
+		if self.fastenerType=='Screw':
+			self.menutext = "Insert Screw"
+			self.tooltip = "Insert a Screw in the Assembly"
+			self.icon = os.path.join( iconPath , 'Asm4_Screw.svg')
+			self.fastenerName = 'Screw'
+		# Nut:
+		elif self.fastenerType=='Nut':
+			self.menutext = "Insert Nut"
+			self.tooltip = "Insert a Nut in the Assembly"
+			self.icon = os.path.join( iconPath , 'Asm4_Nut.svg')
+			self.fastenerName = 'Nut'
+		# Washer:
+		elif self.fastenerType=='Washer':
+			self.menutext = "Insert Washer"
+			self.tooltip = "Insert a Washer in the Assembly"
+			self.icon = os.path.join( iconPath , 'Asm4_Washer.svg')
+			self.fastenerName = 'Washer'
+
+
+	def GetResources(self):
+		return {"MenuText": self.menutext,
+				"ToolTip": self.tooltip,
+				"Pixmap" : self.icon }
+
+
+	def IsActive(self):
+		if App.ActiveDocument:
+			# if there is a Model object in the active document:
+			if App.ActiveDocument.getObject('Model'):
+				return(True)
+		# if there is no reason to be active:
+		return(False)
+
+
+	def Activated(self):
+		# check that we have somewhere to put our stuff
+		self.asmDoc = App.ActiveDocument
+		modelObj = self.checkModel()
+		fastenerName = self.fastenerName+'_1'
+		if modelObj:
+			# this is a pre-made document in the Asm4 library, containing base Fastener objects
+			fastenerDoc = self.getFastenersDoc()
+			newFastener = modelObj.addObject(self.asmDoc.copyObject( fastenerDoc.getObject(self.fastenerType), True ))[0]
+
+			# update the link ...
+			newFastener.recompute()
+
+			# ... and launch the placement of the inserted part
+			Gui.Selection.clearSelection()
+			Gui.Selection.addSelection( self.asmDoc.Name, 'Model', newFastener.Name+'.' )
+			Gui.runCommand( 'Asm4_placeFastener' )
+
+
+
+	def checkModel(self):
+		# of nothing is selected ...
+		if App.ActiveDocument.getObject('Model'):
+			# ... but there is a Model:
+			return App.ActiveDocument.getObject('Model')
+		else:
+			return(False)
+
+
+	def getFastenersDoc(self):
+		# list of all open documents in the sessions
+		docList = App.listDocuments()
+		for doc in docList:
+			# if the Fastener's document is already open
+			if doc == 'Fasteners':
+				fastenersDoc = App.getDocument('Fasteners')
+				return fastenersDoc
+		# if the Fastner document isn't yet open:
+		fastenersDocPath = os.path.join( libPath , 'Fasteners.FCStd')
+		# The document is opened in the background:
+		fastenersDoc = App.openDocument( fastenersDocPath, hidden='True')
+		# and we reset the original document as active:
+		App.setActiveDocument( self.asmDoc.Name )
+		return fastenersDoc
+
+
+
+"""
+    +-----------------------------------------------+
+    |                  placeFastener                |
     +-----------------------------------------------+
 """
 class placeFastener( QtGui.QDialog ):
@@ -30,7 +128,7 @@ class placeFastener( QtGui.QDialog ):
 
 	def GetResources(self):
 		return {"MenuText": "Edit Attachment of a Fastener",
-				"ToolTip": "Attach a Fastener to an external Part",
+				"ToolTip": "Edit Attachment of a Fastener",
 				"Pixmap" : os.path.join( iconPath , 'Asm4_mvFastener.svg')
 				}
 
@@ -217,9 +315,14 @@ class placeFastener( QtGui.QDialog ):
 			self.selectedFastener.AttachedTo = a_Link+'#'+a_LCS
 			# load the built expression into the Expression field of the constraint
 			self.selectedFastener.setExpression( 'Placement', expr )
+			# check the Invert and Offset values
+			self.selectedFastener.invert = self.Invert.isChecked()
+			self.selectedFastener.offset = self.Offset.value()
 			# recompute the object to apply the placement:
 			self.selectedFastener.recompute()
-			# highlight the selected LCS in its new position
+			self.parentAssembly.recompute()
+			self.activeDoc.recompute()
+			# highlight the selected fastener in its new position
 			Gui.Selection.clearSelection()
 			Gui.Selection.addSelection( self.activeDoc.Name, 'Model', self.selectedFastener.Name +'.')
 		return
@@ -328,6 +431,8 @@ class placeFastener( QtGui.QDialog ):
 		self.attLCStable = []
 		# clear the selection in the GUI window
 		Gui.Selection.clearSelection()
+		# keep the fastener selected
+		Gui.Selection.addSelection( self.activeDoc.Name, 'Model', self.selectedFastener.Name+'.')
 		# the current text in the combo-box is the link's name...
 		# parentName = self.attLCStable[ self.parentList.currentRow() ].Name
 		# parentName = self.parentList.currentText()
@@ -372,6 +477,8 @@ class placeFastener( QtGui.QDialog ):
 	def onDatumClicked( self ):
 		# clear the selection in the GUI window
 		Gui.Selection.clearSelection()
+		# keep the fastener selected
+		Gui.Selection.addSelection( self.activeDoc.Name, 'Model', self.selectedFastener.Name+'.')
 		# LCS in the parent
 		if self.attLCSlist.selectedItems():
 			#a_LCS = self.attLCSlist.selectedItems()[0].text()
@@ -421,8 +528,8 @@ class placeFastener( QtGui.QDialog ):
 		# Our main window will be a QDialog
 		self.setWindowTitle('Attach a Fastener')
 		self.setWindowIcon( QtGui.QIcon( os.path.join( iconPath , 'FreeCad.svg' ) ) )
-		self.setMinimumSize(370, 690)
-		self.resize(370,700)
+		self.setMinimumSize(370, 670)
+		self.resize(370,670)
 		self.setModal(False)
 		# make this dialog stay above the others, always visible
 		self.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
@@ -443,10 +550,10 @@ class placeFastener( QtGui.QDialog ):
 		# label
 		self.parentLabel = QtGui.QLabel(self)
 		self.parentLabel.setText("Linked Part :")
-		self.parentLabel.move(10,80)
+		self.parentLabel.move(10,70)
 		# combobox showing all available App::Link
 		self.parentList = QtGui.QComboBox(self)
-		self.parentList.move(10,120)
+		self.parentList.move(10,100)
 		self.parentList.setMinimumSize(350, 1)
 		# initialize with an explanation
 		self.parentList.addItem( 'Select linked Part' )
@@ -454,44 +561,63 @@ class placeFastener( QtGui.QDialog ):
 		# label
 		self.labelRight = QtGui.QLabel(self)
 		self.labelRight.setText("Select LCS in linked Part :")
-		self.labelRight.move(10,180)
+		self.labelRight.move(10,160)
 		# The list of all attachment LCS in the assembly is a QListWidget
 		# it is populated only when the parent combo-box is activated
 		self.attLCSlist = QtGui.QListWidget(self)
-		self.attLCSlist.move(10,220)
-		self.attLCSlist.setMinimumSize(350, 250)
+		self.attLCSlist.move(10,190)
+		self.attLCSlist.setMinimumSize(350, 270)
 
 		# Expression
 		#
 		# expression label
 		self.labelExpression = QtGui.QLabel(self)
 		self.labelExpression.setText("Expression Engine :")
-		self.labelExpression.move(10,500)
+		self.labelExpression.move(10,480)
 		# Create a line that will contain full expression for the expression engine
 		self.expression = QtGui.QLineEdit(self)
 		self.expression.setMinimumSize(350, 0)
-		self.expression.move(10, 540)
+		self.expression.move(10, 510)
+
+		# Invert checkbox
+		self.labelInvert = QtGui.QLabel(self)
+		self.labelInvert.setText('Invert')
+		self.labelInvert.move(20, 570)
+		self.Invert = QtGui.QCheckBox(self)
+		self.Invert.move(90, 575)
+		self.Invert.setChecked( self.selectedFastener.invert )
+		# Offset value
+		self.labelOffset = QtGui.QLabel(self)
+		self.labelOffset.setText('Offset')
+		self.labelOffset.move(180, 570)
+		self.Offset = QtGui.QDoubleSpinBox(self)
+		self.Offset.move(250, 565)
+		self.Offset.setMinimumSize(50,10)
+		self.Offset.setMinimum(-100.00)
+		self.Offset.setMaximum(100.00)
+		self.Offset.setValue( self.selectedFastener.offset )
 
 		# Buttons
 		#
 		# Cancel button
-		self.CancelButton = QtGui.QPushButton('Cancel', self)
+		self.CancelButton = QtGui.QPushButton('Close', self)
 		self.CancelButton.setAutoDefault(False)
-		self.CancelButton.move(10, 650)
+		self.CancelButton.move(10, 630)
 
 		# Apply button
-		self.ApplyButton = QtGui.QPushButton('Apply', self)
+		self.ApplyButton = QtGui.QPushButton('Show', self)
 		self.ApplyButton.setAutoDefault(False)
-		self.ApplyButton.move(150, 650)
+		self.ApplyButton.move(150, 630)
 		self.ApplyButton.setDefault(True)
 
 		# OK button
 		self.OKButton = QtGui.QPushButton('OK', self)
 		self.OKButton.setAutoDefault(False)
-		self.OKButton.move(280, 650)
+		self.OKButton.move(280, 630)
 		self.OKButton.setDefault(True)
 
 		# Actions
+		#self.Invert.stateChanged.connect(self.onInvert)
 		self.CancelButton.clicked.connect(self.onCancel)
 		self.ApplyButton.clicked.connect(self.onApply)
 		self.OKButton.clicked.connect(self.onOK)
@@ -499,39 +625,15 @@ class placeFastener( QtGui.QDialog ):
 		self.attLCSlist.itemClicked.connect( self.onDatumClicked )
 
 
-	"""
-    +-----------------------------------------------+
-    |                 initial check                 |
-    +-----------------------------------------------+
-	"""
-	def checkSelectionLCS(self):
-		# check that something is selected
-		if not Gui.Selection.getSelection():
-			msgBox = QtGui.QMessageBox()
-			msgBox.setWindowTitle('Warning')
-			msgBox.setIcon(QtGui.QMessageBox.Critical)
-			msgBox.setText("Please select a linked part.")
-			msgBox.exec_()
-			return(False)
-		# set the (first) selected object as global variable
-		selectedObj = Gui.Selection.getSelection()[0]
-		selectedType = selectedObj.TypeId
-		# check that the selected object is a Datum CS or Point type
-		if not (selectedType == 'PartDesign::CoordinateSystem' or selectedType == 'PartDesign::Point'):
-			msgBox = QtGui.QMessageBox()
-			msgBox.setWindowTitle('Warning')
-			msgBox.setIcon(QtGui.QMessageBox.Critical)
-			msgBox.setText("Please select a Datum Point or Coordinate System.")
-			msgBox.exec_()
-			return(False)
-		# now we should be safe
-		return( selectedObj )
-
 
 
 """
     +-----------------------------------------------+
-    |       add the command to the workbench        |
+    |       add the commands to the workbench       |
     +-----------------------------------------------+
 """
+Gui.addCommand( 'Asm4_insertScrew', insertFastener('Screw') )
+Gui.addCommand( 'Asm4_insertNut',  insertFastener('Nut') )
+Gui.addCommand( 'Asm4_insertWasher', insertFastener('Washer') )
+
 Gui.addCommand( 'Asm4_placeFastener', placeFastener() )
