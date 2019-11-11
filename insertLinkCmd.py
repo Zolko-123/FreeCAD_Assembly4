@@ -119,7 +119,7 @@ class insertLink( QtGui.QDialog ):
 			# ... and launch the placement of the inserted part
 			Gui.Selection.clearSelection()
 			Gui.Selection.addSelection( self.activeDoc.Name, 'Model', createdLink.Name+'.' )
-			Gui.runCommand( 'placeLinkCmd' )
+			Gui.runCommand( 'Asm4_placeLink' )
 
 		# if still open, close the dialog UI
 		self.close()

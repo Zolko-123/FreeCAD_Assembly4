@@ -101,7 +101,7 @@ class insertFastener:
 			if doc == 'Fasteners':
 				fastenersDoc = App.getDocument('Fasteners')
 				return fastenersDoc
-		# if the Fastsner document isn't yet open:
+		# if the Fastner document isn't yet open:
 		fastenersDocPath = os.path.join( libPath , 'Fasteners.FCStd')
 		# The document is opened in the background:
 		fastenersDoc = App.openDocument( fastenersDocPath, hidden='True')

@@ -167,6 +167,8 @@ class addVariable( QtGui.QDialog ):
 		# the document containing the linked object
 		self.varValue = QtGui.QDoubleSpinBox(self)
 		self.varValue.setMinimumSize(350, 1)
+		self.varValue.setRange( -10000.0, 10000.0 )
+		self.varValue.setValue( 10.0 )
 		self.varValue.move(110,100)
 
 		# Documentation

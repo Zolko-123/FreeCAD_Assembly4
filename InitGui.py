@@ -86,7 +86,7 @@ class Assembly4_WorkBench(Workbench):
         import placeLinkCmd        # places a linked part by snapping LCS (in the Part and in the Assembly)
         import placeDatumCmd       # places an LCS relative to an external file (creates a local attached copy)
         import importDatumCmd      # creates an LCS in assembly and attaches it to an LCS relative to an external file
-        import defineVariablesCmd  # creates an LCS in assembly and attaches it to an LCS relative to an external file
+        import VariablesLib        # creates an LCS in assembly and attaches it to an LCS relative to an external file
         import updateAssemblyCmd   # updates all parts and constraints in the assembly
         
         if self.checkWorkbench('FastenersWorkbench'):
