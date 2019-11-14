@@ -108,7 +108,7 @@ class placeLink( QtGui.QDialog ):
 		# find all the linked parts in the assembly
 		for obj in self.activeDoc.findObjects("App::Link"):
 			# add it to our list if it's a link to an App::Part ...
-			if obj.LinkedObject.isDerivedFrom('App::Part'):
+			if hasattr(obj,'LinkedObject') and obj.LinkedObject.isDerivedFrom('App::Part'):
 				# ... except if it's the selected link itself
 				if obj != self.selectedLink:
 					self.asmParts.append( obj )

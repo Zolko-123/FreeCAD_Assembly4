@@ -129,7 +129,7 @@ class placeDatum( QtGui.QDialog ):
 		old_Parent = ''
 		old_ParentPart = ''
 		old_attLCS = ''
-		( old_Parent, old_ParentPart, old_attLCS ) = self.splitExpressionDatum( self.old_EE )
+		( old_Parent, old_ParentPart, old_attLCS ) = splitExpressionDatum( self.old_EE )
 		#self.expression.setText( 'old_Parent = '+ old_Parent )
 
 
@@ -193,7 +193,7 @@ class placeDatum( QtGui.QDialog ):
 			# don't forget the last '.' !!!
 			# <<LinkName>>.Placement.multiply( <<LinkName>>.<<LCS.>>.Placement )
 			# expr = '<<'+ a_Part +'>>.Placement.multiply( <<'+ a_Part +'>>.<<'+ a_LCS +'.>>.Placement )'
-			expr = self.makeExpressionDatum( a_Link, a_Part, a_LCS )
+			expr = makeExpressionDatum( a_Link, a_Part, a_LCS )
 			# this can be skipped when this method becomes stable
 			self.expression.setText( expr )
 			# load the built expression into the Expression field of the constraint
@@ -204,48 +204,6 @@ class placeDatum( QtGui.QDialog ):
 			Gui.Selection.clearSelection()
 			Gui.Selection.addSelection( self.activeDoc.Name, 'Model', self.selectedDatum.Name +'.')
 		return
-
-
-
-	"""
-	+-----------------------------------------------+
-	|         populate the ExpressionEngine         |
-	|               for a Datum object              |
-	|       linked to an LCS in a sister part       |
-	+-----------------------------------------------+
-	"""
-	def makeExpressionDatum( self, attLink, attPart, attLCS ):
-		# check that everything is defined
-		if attLink and attPart and attLCS:
-			# expr = Link.Placement * LinkedPart#LCS.Placement
-			expr = attLink +'.Placement * '+ attPart +'#'+ attLCS +'.Placement'
-		else:
-			expr = False
-		return expr
-
-
-
-	"""
-	+-----------------------------------------------+
-	|           split the ExpressionEngine          |
-	|        of a linked Datum object to find       |
-	|         the old attachment Part and LCS       |
-	+-----------------------------------------------+
-	"""
-	def splitExpressionDatum( self, expr ):
-		# expr = Link.Placement * LinkedPart#LCS.Placement
-		( attLink, separator, rest1 ) = expr.partition('.Placement * ')
-		( attPart, separator, rest2 ) = rest1.partition('#')
-		( attLCS,  separator, rest3 ) = rest2.partition('.')
-		restFinal = rest3[0:9]
-		if restFinal=='Placement':
-			# wow, everything went according to plan
-			retval = ( attLink, attPart, attLCS )
-			#self.expression.setText( attPart +'***'+ attLCS )
-		else:
-			# rats ! But still, if the decode is unsuccessful, put some text
-			retval = ( restFinal, 'None', 'None' )
-		return retval
 
 
 

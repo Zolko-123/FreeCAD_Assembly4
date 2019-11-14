@@ -74,6 +74,9 @@ This is then a raw interface between FreeCAD `App::Part` objects through the `Ap
 
 ## Release notes
 
+* 2019.11.14 (**version 0.7.2**) :  
+Bug-fix for importDatum  
+
 * 2019.11.11 (**version 0.7.1**) :  
 Bug-fix  
 
