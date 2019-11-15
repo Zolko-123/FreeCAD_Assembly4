@@ -164,8 +164,13 @@ If you haven't done so then download the STEP file [`bearing_20x37x9.stp`](https
 
 * Click **Show**
 
-* This has filled the _Expression Engine_ field and an object called `constr_axis` has appeared in the `Constraints` group.
+* This has filled the _Expression Engine_ field and a new section _Position_ has appeared in the Properties of _axis_ instance with the following properties:
+  * **AssemblyType** : notes which assembly solver should be applied (Asm4EE here)
+  * **AttachedBy** : notes by what coordinate system in the linked part this instance is attached to the assembly, preceded by a #
+  * **AttachedTo** : notes to which parent, and inside that parent to which coordinate system, separated by a #, the instance is attached
+  * **AttachmentOffset** : is an `App::Placement` property that applies an offset between the attachment LCS in the linked part and the target LCS in the assembly.
 
+  
 * Click **OK**
 
 * **Result:** the _axis_ part is now in the _asm_tuto1_ document, including the tree, with all its sub-objects. 
@@ -194,7 +199,7 @@ If you haven't done so then download the STEP file [`bearing_20x37x9.stp`](https
 
 This is easy to correct:
 
-* Click on the _Rot X_ and _Rot Y_ and _Rot Z_ buttons until the bearing is in its correct position and orientation. You can either spend a lot of time thinking about which axis (X-Y-Z) to rotate, or wildly try everything until it fits. The result will be the same:
+* Click on the _Rot X_ and _Rot Y_ and _Rot Z_ buttons until the bearing is in its correct position and orientation. You can either spend time thinking about which axis (X-Y-Z) to rotate, or try everything until it fits. The result will be the same:
 
   ![](Resources/media/Place_bearing1ok.png)
 
@@ -245,15 +250,15 @@ We are nearly done.
 
 ### Offset bearing 3
 
-In real-life, this would be a lead screw with a standard 3-bearings mount, where the 2 bearings facing each other are diagonal contact bearings that can also take thrust. And the 3rd lone bearing is a deep groove ball bearing. In order to not over-constrain the axis, the 3rd bearing mustn't touch the flange of the axis, there must be some room to allow for temperature dilatation compensation AKA thermal expansion. 
+In real-life, this would be a lead screw with a standard 3-bearings mount, where the 2 bearings facing each other are diagonal contact bearings that can also take thrust, and the 3rd lone bearing is a deep groove ball bearing. In order to not over-constrain the axis, the 3rd bearing mustn't touch the flange of the axis, there must be some room to allow for temperature dilatation compensation AKA thermal expansion. 
 
-This is where the **constr_Feature** comes in. In addition to store the rotations used to orient the inserted part, it can also apply a translation of the inserted part relative to the target LCS:  
+This is where the **AttachmentOffset** property of the instance comes in play. In addition to store the rotations used to orient the inserted part, it can also apply a translation of the inserted part relative to the target LCS:  
 
-* Select _constr_bearing_3_ in the Model tree
+* Select the instance _bearing_3_ in the Model tree
 
 * Open the _MapMode_ of the _AttachmentOffset_ property
 
-  ![](Resources/media/constr_bearing_3b.png)
+  ![](Resources/media/AO_bearing_3.png)
 
 * In the _Z_ field type: **2mm**
 

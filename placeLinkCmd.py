@@ -342,10 +342,10 @@ class placeLink( QtGui.QDialog ):
 	"""
 	def makeAsm4Properties( self ):
 		if not hasattr(self.selectedLink,'AssemblyType'):
-			self.selectedLink.addProperty( 'App::PropertyString', 'AssemblyType', 'Attachment' ).AssemblyType = 'Asm4EE'
-			self.selectedLink.addProperty( 'App::PropertyString', 'AttachedBy', 'Attachment' )
-			self.selectedLink.addProperty( 'App::PropertyString', 'AttachedTo', 'Attachment' )
-			self.selectedLink.addProperty( 'App::PropertyPlacement', 'AttachmentOffset', 'Attachment' )
+			self.selectedLink.addProperty( 'App::PropertyString', 'AssemblyType', 'Position' ).AssemblyType = 'Asm4EE'
+			self.selectedLink.addProperty( 'App::PropertyString', 'AttachedBy', 'Position' )
+			self.selectedLink.addProperty( 'App::PropertyString', 'AttachedTo', 'Position' )
+			self.selectedLink.addProperty( 'App::PropertyPlacement', 'AttachmentOffset', 'Position' )
 		return
 
 

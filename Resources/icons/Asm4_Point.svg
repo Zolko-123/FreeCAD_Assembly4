@@ -15,7 +15,7 @@
    id="svg5821"
    sodipodi:version="0.32"
    inkscape:version="0.92.3 (2405546, 2018-03-11)"
-   sodipodi:docname="Asm4_Point.svg"
+   sodipodi:docname="Asm4_Point_orig.svg"
    inkscape:output_extension="org.inkscape.output.svg.inkscape"
    version="1.1"
    inkscape:export-filename="/home/normand/Images/Icônes/PartDesign_Std_Plane_nc1.png"
@@ -115,7 +115,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="10"
-     inkscape:cx="30.879"
+     inkscape:cx="8.479"
      inkscape:cy="38.57919"
      inkscape:current-layer="g3360-3"
      showgrid="true"
@@ -191,7 +191,7 @@
          inkscape:export-ydpi="3.2478156"
          transform="translate(-2.96179e-7,2.9614273e-6)">
         <rect
-           style="fill:none;fill-opacity:1;stroke:#c1b7bb;stroke-width:19.99491692;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;stroke-linejoin:round"
+           style="fill:none;fill-opacity:1;stroke:#a79b9e;stroke-width:19.99491692;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;stroke-linejoin:round"
            id="rect4154"
            width="424.30908"
            height="32.318394"
@@ -210,7 +210,7 @@
            ry="0"
            transform="matrix(0,1,0.86360132,0.50417532,0,0)" />
         <rect
-           style="fill:none;fill-opacity:1;stroke:#c1b7bb;stroke-width:19.99491692;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;stroke-linejoin:round;stroke-linecap:butt"
+           style="fill:none;fill-opacity:1;stroke:#a79b9e;stroke-width:19.99491692;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;stroke-linejoin:round;stroke-linecap:butt"
            id="rect4154-3"
            width="420.79517"
            height="32.588272"
@@ -229,7 +229,7 @@
            ry="0"
            transform="matrix(0.86360132,0.50417532,0,1,0,0)" />
         <rect
-           style="fill:none;fill-opacity:1;stroke:#c1b7bb;stroke-width:19.99752712;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;stroke-linejoin:round"
+           style="fill:none;fill-opacity:1;stroke:#a79b9e;stroke-width:19.99752712;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;stroke-linejoin:round"
            id="rect4154-3-2"
            width="420.79517"
            height="32.588272"
