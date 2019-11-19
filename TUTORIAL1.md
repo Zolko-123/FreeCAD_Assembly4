@@ -160,7 +160,7 @@ If you haven't done so then download the STEP file [`bearing_20x37x9.stp`](https
   * in the left panel _Select LCS in Part_ choose **LCS_0**
   * in the drop-down combo-box _Select part to attach to_ choose **Parent Assembly**
   * in the right panel _Select LCS in Parent_ choose **LCS_0**  
-* **Note:** If you click **Cancel** in the _Place Link_ dialog before clicking **Show** or **OK**, then the linked part will still be in the assembly but without any Placement: in this case we have created a raw `App::Link` interface to the part `axis`. This link can be moved in the assembly by the built-in FreeCAD dragger (**Right Click > Trasform**)
+* **Note:** If you click **Cancel** in the _Place Link_ dialog before clicking **Show** or **OK**, then the linked part will still be in the assembly but without any Placement: in this case we have created a raw `App::Link` interface to the part `axis`. This link can be moved in the assembly by the built-in FreeCAD dragger (**Right Click > Transform**)
 
 * Click **Show**
 
