@@ -88,6 +88,7 @@ class Assembly4_WorkBench(Workbench):
         import importDatumCmd      # creates an LCS in assembly and attaches it to an LCS relative to an external file
         import VariablesLib        # creates an LCS in assembly and attaches it to an LCS relative to an external file
         import updateAssemblyCmd   # updates all parts and constraints in the assembly
+        import newLinkArray        # creates a new array of App::Link
         
         if self.checkWorkbench('FastenersWorkbench'):
             import FastenersLib        # a library to handle fasteners from the FastenersWorkbench
@@ -121,7 +122,8 @@ class Assembly4_WorkBench(Workbench):
                                 "Asm4_placeLink", 
                                 "Asm4_importDatum", 
                                 "Asm4_placeDatum", 
-                                "Asm4_updateAssembly" ]
+                                "Asm4_updateAssembly",
+                                "Asm4_newLinkArray"]
         # commands to appear in the Assembly4 menu 'Assembly'
         self.itemsMenu =      [ "Asm4_newModel",   
                                 "Asm4_newBody", 
@@ -141,7 +143,8 @@ class Assembly4_WorkBench(Workbench):
                                 "Asm4_placeDatum", 
                                 "Asm4_importDatum", 
                                 "Asm4_addVariable", 
-                                "Asm4_updateAssembly" ]
+                                "Asm4_updateAssembly",
+                                "Asm4_newLinkArray"]
         self.appendMenu("&Assembly",self.itemsMenu)
         # commands to appear in the Assembly4 toolbar
         self.itemsToolbar =   [ "Asm4_newModel",   
@@ -155,7 +158,8 @@ class Assembly4_WorkBench(Workbench):
                                 "Asm4_placeDatum", 
                                 "Asm4_importDatum", 
                                 "Asm4_addVariable", 
-                                "Asm4_updateAssembly" ]
+                                "Asm4_updateAssembly",
+                                "Asm4_newLinkArray"]
         self.appendToolbar("Assembly 4",self.itemsToolbar) # leave settings off toolbar
         # commands to appear in the 'Assembly' sub-menu in the contextual menu (right-click)
         self.itemsContextMenu =["Asm4_insertLink", 
