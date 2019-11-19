@@ -41,7 +41,7 @@ class newLinkArray():
                                                       text=arrayName)
                 if ok and text:
                     Draft.makeArray(App.ActiveDocument.getObject(selectObject.Name), App.Vector(1, 0, 0),
-                                    App.Vector(0, 1, 0), 2, 2, useLink=True)
+                                    App.Vector(0, 1, 0), 2, 2, useLink=True, name=text)
 
     def checkPart(self):
         # if something is selected
