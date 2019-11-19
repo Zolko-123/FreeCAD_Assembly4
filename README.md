@@ -74,6 +74,10 @@ This is then a raw interface between FreeCAD `App::Part` objects through the `Ap
 
 ## Release notes
 
+* 2019.11.19 (**version 0.7.3**) :  
+Added linkArray, a wrapper for Draft::LinkArray  
+Fixes for the Fasteners command
+
 * 2019.11.14 (**version 0.7.2**) :  
 Bug-fix for importDatum  
 
