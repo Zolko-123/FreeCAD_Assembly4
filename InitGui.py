@@ -134,6 +134,7 @@ class Assembly4_WorkBench(Workbench):
                                 "Asm4_insertNut", 
                                 "Asm4_insertWasher",
                                 "Asm4_placeFastener", 
+                                "Asm4_newLinkArray",
                                 "Asm4_newSketch", 
                                 "Asm4_newLCS", 
                                 "Asm4_newPlane", 
@@ -143,8 +144,7 @@ class Assembly4_WorkBench(Workbench):
                                 "Asm4_placeDatum", 
                                 "Asm4_importDatum", 
                                 "Asm4_addVariable", 
-                                "Asm4_updateAssembly",
-                                "Asm4_newLinkArray"]
+                                "Asm4_updateAssembly"]
         self.appendMenu("&Assembly",self.itemsMenu)
         # commands to appear in the Assembly4 toolbar
         self.itemsToolbar =   [ "Asm4_newModel",   
@@ -153,13 +153,13 @@ class Assembly4_WorkBench(Workbench):
                                 "Asm4_insertLink", 
                                 "Asm4_placeLink", 
                                 fastenersCmd, 
+                                "Asm4_newLinkArray",
                                 "Asm4_newSketch", 
                                 "Asm4_createDatum", 
                                 "Asm4_placeDatum", 
                                 "Asm4_importDatum", 
                                 "Asm4_addVariable", 
-                                "Asm4_updateAssembly",
-                                "Asm4_newLinkArray"]
+                                "Asm4_updateAssembly"]
         self.appendToolbar("Assembly 4",self.itemsToolbar) # leave settings off toolbar
         # commands to appear in the 'Assembly' sub-menu in the contextual menu (right-click)
         self.itemsContextMenu =["Asm4_insertLink", 

@@ -16,6 +16,28 @@ iconPath = os.path.join( __dir__, 'Resources/icons' )
 libPath = os.path.join( __dir__, 'Resources/library' )
 
 
+import FreeCADGui as Gui
+import FreeCAD as App
+
+
+
+
+"""
+    +-----------------------------------------------+
+    |         check whether a workbench exists      |
+    +-----------------------------------------------+
+"""
+def checkWorkbench( workbench ):
+    # checks whether the specified workbench is installed
+    listWB = Gui.listWorkbenches()
+    hasWB = False
+    for wb in listWB.keys():
+        if wb == workbench:
+            hasWB = True
+    return hasWB
+
+
+
 """
     +-----------------------------------------------+
     |         populate the ExpressionEngine         |

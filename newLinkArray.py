@@ -11,6 +11,12 @@ import Draft
 from libAsm4 import *
 
 
+# see whether the Fasteners Workbench is installed
+if checkWorkbench('FastenersWorkbench'):
+    from FastenerBase import FSBaseObject
+
+
+
 class newLinkArray():
     """Creating a link array from Draft Workbench"""
 
@@ -19,6 +25,7 @@ class newLinkArray():
                 "ToolTip": "Create a new orthogonal or polar array from links",
                 "Pixmap": os.path.join(iconPath, 'Asm4_LinkArray.svg')
                 }
+
 
     def IsActive(self):
         if App.ActiveDocument:
@@ -29,29 +36,47 @@ class newLinkArray():
         else:
             return (False)
 
+
     def Activated(self):
-        # get the current active document
-        partChecked = self.checkPart()
-        if partChecked:
-            selectObject = self.checkPart()
-            if selectObject:
-                # Now is time to create the array
-                arrayName = 'array'
-                text, ok = QtGui.QInputDialog.getText(None, 'Create new Link Array', 'Enter new Link Array name: ',
-                                                      text=arrayName)
-                if ok and text:
-                    Draft.makeArray(App.ActiveDocument.getObject(selectObject.Name), App.Vector(1, 0, 0),
-                                    App.Vector(0, 1, 0), 2, 2, useLink=True, name=text)
+        # get the selected object
+        selectObject = self.checkPart()
+        model = App.ActiveDocument.getObject('Model')
+        # if something valid has been returned:
+        if selectObject:
+            # Now is time to create the array
+            arrayName = 'array_'+selectObject.Name
+            #text, ok = QtGui.QInputDialog.getText(None, 'Create new Link Array', 'Enter new Link Array name: ',
+            #                                        text=arrayName)
+            #if ok and text:
+            #    Draft.makeArray(App.ActiveDocument.getObject(selectObject.Name), App.Vector(1, 0, 0),
+            #                    App.Vector(0, 1, 0), 2, 2, useLink=True, name=text)
+            createdArray = Draft.makeArray(App.ActiveDocument.getObject(selectObject.Name), App.Vector(10, 0, 0),
+                            App.Vector(0, 1, 0), 2, 1, useLink=True, name=arrayName)
+            model.addObject(createdArray)
+            createdArray.recompute()
+            model.recompute()
+            App.ActiveDocument.recompute()
+
+
 
     def checkPart(self):
-        # if something is selected
-        if Gui.Selection.getSelection():
-            selectedObj = Gui.Selection.getSelection()[0]
-            # Only create arrays of links
-            if selectedObj.TypeId == 'App::Link':
-                return selectedObj
-            else:
-                return False
+        selectedObj = None
+        # check that it's an Assembly4 'Model'
+        if App.ActiveDocument.getObject('Model') and App.ActiveDocument.getObject('Model').TypeId=='App::Part':
+            if Gui.Selection.getSelection():
+                selection = Gui.Selection.getSelection()[0]
+                # Only create arrays of links ...
+                if selection.TypeId == 'App::Link':
+                    selectedObj = selection
+                else:
+                    # ... and Ffasteners from the FastenersWorkbench
+                    for selObj in Gui.Selection.getSelectionEx():
+                        obj = selObj.Object
+                        if (hasattr(obj,'Proxy') and isinstance(obj.Proxy, FSBaseObject)):
+                            selectedObj = obj
+        # return what we have found
+        return selectedObj
+
 
 
 # add the command to the workbench
