@@ -74,6 +74,9 @@ This is then a raw interface between FreeCAD `App::Part` objects through the `Ap
 
 ## Release notes
 
+* 2019.11.24 (**version 0.7.4**) :  
+Added Animation command
+
 * 2019.11.19 (**version 0.7.3**) :  
 Added linkArray, a wrapper for Draft::LinkArray  
 Fixes for the Fasteners command

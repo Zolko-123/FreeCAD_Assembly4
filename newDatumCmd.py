@@ -117,6 +117,7 @@ class newDatum:
 class newHole:
 	def GetResources(self):
 		return {"MenuText": "New Hole LCS",
+				"Accel": "Ctrl+H",
 				"ToolTip": "Create a Coordinate System attached to a hole",
 				"Pixmap" : os.path.join( iconPath , 'Asm4_Hole.svg')
 				}
@@ -132,13 +133,13 @@ class newHole:
 
 	def Activated(self):
 		( selectedObj, edge ) = self.getSelection()
-		# loop until exhaustion or we encounter an App::Part
+		# loop until exhaustion or until we encounter an App::Part
 		parentPart = selectedObj
 		while parentPart:
 			if parentPart.TypeId=='App::Part':
 				break
 			parentPart = parentPart.getParentGeoFeatureGroup()
-		# is the solid having the edge is indeed in an App::Part:
+		# if the solid having the edge is indeed in an App::Part
 		if parentPart.TypeId=='App::Part':
 			lcs = parentPart.newObject('PartDesign::CoordinateSystem','Hole')
 			lcs.Support = [( selectedObj, (edge,) )]
