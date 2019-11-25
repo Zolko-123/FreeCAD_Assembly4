@@ -19,7 +19,7 @@ class updateAssembly:
 	def GetResources(self):
 		return {"MenuText": "Solve and Update Assembly",
 				"ToolTip": "Update Assembly",
-				"Pixmap" : os.path.join( iconPath , 'Asm4_Update.svg')
+				"Pixmap" : os.path.join( iconPath , 'Asm4_Solver.svg')
 				}
 
 	def IsActive(self):

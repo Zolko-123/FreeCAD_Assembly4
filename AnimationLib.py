@@ -29,7 +29,7 @@ class animateVariable( QtGui.QDialog ):
     def GetResources(self):
         return {"MenuText": "Animate Assembly",
                 "ToolTip": "Animate Assembly",
-                "Pixmap" : os.path.join( iconPath , 'Asm4_Solver.svg')
+                "Pixmap" : os.path.join( iconPath , 'Asm4_GearsAnimate.svg')
                 }
 
 
