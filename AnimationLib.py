@@ -54,6 +54,8 @@ class animateVariable( QtGui.QDialog ):
 
         # grab the Variables container
         self.Variables = App.ActiveDocument.getObject('Variables')
+        self.Model = App.ActiveDocument.getObject('Model')
+        self.Run = True
 
         # Now we can draw the UI
         self.drawUI()
@@ -87,11 +89,13 @@ class animateVariable( QtGui.QDialog ):
         # basic checks
         if varName:
             varValue = begin
-            while varValue+step <= end:
+            while varValue <= end and self.Run:
                 setattr( self.Variables, varName, varValue )
-                App.ActiveDocument.recompute()
+                #App.ActiveDocument.recompute()
+                App.ActiveDocument.Model.recompute('True')
                 Gui.updateGui()
                 varValue += step
+            self.Run = True
             return
         else:
             return
@@ -103,6 +107,7 @@ class animateVariable( QtGui.QDialog ):
     +-----------------------------------------------+
     """
     def onStop(self):
+        self.Run = False
         return
 
 
