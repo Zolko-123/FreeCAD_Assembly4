@@ -22,7 +22,10 @@ class importDatum( QtGui.QDialog ):
 
     def __init__(self):
         super(importDatum,self).__init__()
-        self.datumTable = [ ]
+        self.datumTypes = ['PartDesign::CoordinateSystem',
+                           'PartDesign::Plane',
+                           'PartDesign::Line',
+                           'PartDesign::Point']
 
 
     def GetResources(self):
@@ -54,7 +57,7 @@ class importDatum( QtGui.QDialog ):
             if selectedObj == model:
                 selection = model
             # if it's a datum object also
-            elif st=='PartDesign::CoordinateSystem' or st=='PartDesign::Plane' or st=='PartDesign::Line' or st=='PartDesign::Point':
+            elif st in self.datumTypes:
                 selection = selectedObj
         return selection
     
@@ -67,25 +70,34 @@ class importDatum( QtGui.QDialog ):
     def Activated(self):
         
         # get the current active document to avoid errors if user changes tab
-        self.activeDoc = App.activeDocument()
+        self.activeDoc = App.ActiveDocument
+        self.parentAssembly = self.activeDoc.Model
+
+        # initialize 
+        self.datumTable = [ ]
+        self.selectedChild = None
 
         # Now we can draw the UI
         self.drawUI()
 
         # We get all the App::Link parts in the assembly 
-        self.asmParts = []
+        self.childrenTable = []
         # the first item is "Select linked Part" therefore we add an empty object
-        self.asmParts.append( [] )
-        # find all the linked parts in the assembly
-        for obj in self.activeDoc.findObjects("App::Link"):
-            if obj.LinkedObject.isDerivedFrom('App::Part'):
-                # add it to our tree table if it's a link to an App::Part ...
-                self.asmParts.append( obj )
-                # ... and add to the drop-down combo box with the assembly tree's parts
-                objIcon = obj.LinkedObject.ViewObject.Icon
-                self.parentList.addItem( objIcon, obj.Name, obj)
+        self.childrenTable.append( [] )
+        # find all the child linked parts in the assembly
+        #for obj in self.activeDoc.findObjects("App::Link"):
+        for objStr in self.parentAssembly.getSubObjects():
+            # the string ends with a . that must be removed
+            obj = self.activeDoc.getObject( objStr[0:-1] )
+            if obj.TypeId == 'App::Link':
+                if obj.LinkedObject.isDerivedFrom('App::Part'):
+                    # add it to our tree table if it's a link to an App::Part ...
+                    self.childrenTable.append( obj )
+                    # ... and add to the drop-down combo box with the assembly tree's parts
+                    objIcon = obj.LinkedObject.ViewObject.Icon
+                    self.childrenList.addItem( objIcon, obj.Name, obj)
         # Set the list to the first element
-        self.parentList.setCurrentIndex( 0 )
+        self.childrenList.setCurrentIndex( 0 )
 
         # check whether a Datum is already selected:
         targetDatum = self.getSelection()
@@ -106,15 +118,15 @@ class importDatum( QtGui.QDialog ):
     """
     def onApply(self):
         # get the name of the part where the datum to be copied is:
-        #linkedPartName = self.parentList.currentText()
+        #linkedPartName = self.childrenList.currentText()
 
         # get the name of the part to attach to:
         # it's either the top level part name ('Model')
         # or the provided link's name.
-        if self.parentList.currentIndex() > 0:
-            parent = self.asmParts[ self.parentList.currentIndex() ]
-            linkName = parent.Name
-            linkedPart = parent.LinkedObject.Document.Name
+        if self.childrenList.currentIndex() > 0:
+            self.selectedChild = self.childrenTable[ self.childrenList.currentIndex() ]
+            linkName = self.selectedChild.Name
+            linkedPart = self.selectedChild.LinkedObject.Document.Name
         else:
             linkName = None
             linkedPart = None
@@ -133,7 +145,7 @@ class importDatum( QtGui.QDialog ):
             self.datumName.setText( 'Please select a Datum object' )
         else:
             # create the Datum
-            if datum.TypeId == 'PartDesign::CoordinateSystem' or datum.TypeId == 'PartDesign::Point':
+            if datum.TypeId in self.datumTypes:
                 #createdLink = self.activeDoc.getObject('Model').newObject( 'App::Link', linkName )
                 createdDatum = App.activeDocument().getObject('Model').newObject( datum.TypeId, setDatumName )
                 self.datumName.setText( '=> ' +createdDatum.Name )
@@ -148,6 +160,8 @@ class importDatum( QtGui.QDialog ):
             createdDatum.recompute()
             # clear the selection in the datum list
             self.datumList.setCurrentRow( -1 )
+        # recompute assembly
+        self.parentAssembly.recompute(True)
         return
 
 
@@ -166,7 +180,7 @@ class importDatum( QtGui.QDialog ):
             # get the proper objects
             # all object names end with a "." , this needs to be removed
             obj = link.getObject( objName[0:-1] )
-            if obj.TypeId == 'PartDesign::CoordinateSystem' or obj.TypeId == 'PartDesign::Point':
+            if obj.TypeId in self.datumTypes:
                 linkDatums.append( obj )
         return linkDatums
 
@@ -184,13 +198,13 @@ class importDatum( QtGui.QDialog ):
         # clear the selection in the GUI window
         Gui.Selection.clearSelection()
         # if something is selected in the linked parts list
-        if self.parentList.currentIndex() > 0:
-            parent = self.asmParts[ self.parentList.currentIndex() ]
+        if self.childrenList.currentIndex() > 0:
+            self.selectedChild = self.childrenTable[ self.childrenList.currentIndex() ]
             # we get all the datum objects from the linked part
-            self.datumTable = self.getLinkDatums( parent.LinkedObject )
-            self.parentDoc.setText( parent.LinkedObject.Document.Name )
+            self.datumTable = self.getLinkDatums( self.selectedChild.LinkedObject )
+            self.parentDoc.setText( self.selectedChild.LinkedObject.Document.Name )
             # highlight the selected part:
-            Gui.Selection.addSelection( parent.Document.Name, 'Model', parent.Name+'.' )
+            Gui.Selection.addSelection( self.selectedChild.Document.Name, 'Model', self.selectedChild.Name+'.' )
         # build the datum objects names list
             for datum in self.datumTable:
                 newItem = QtGui.QListWidgetItem()
@@ -214,9 +228,13 @@ class importDatum( QtGui.QDialog ):
     def onDatumClicked( self ):
         # LCS in the parent
         datum = self.datumTable[ self.datumList.currentRow() ]
+        # clear the selection in the GUI window
+        Gui.Selection.clearSelection()
         #a_LCS = self.datumList.selectedItems()[0].text()
         # pre-fill the Datum name with the Label of the selected Datum
         self.datumName.setText( datum.Label )
+        # highlight the selected datum object:
+        Gui.Selection.addSelection( self.selectedChild.Document.Name, self.selectedChild.Name, datum.Name+'.' )
         return
 
 
@@ -262,11 +280,11 @@ class importDatum( QtGui.QDialog ):
         self.linkLabel.setText("Select a linked Part:")
         self.linkLabel.move(10,20)
         # combobox showing all available App::Link 
-        self.parentList = QtGui.QComboBox(self)
-        self.parentList.move(10,55)
-        self.parentList.setMinimumSize(380, 1)
+        self.childrenList = QtGui.QComboBox(self)
+        self.childrenList.move(10,55)
+        self.childrenList.setMinimumSize(380, 1)
         # initialize with an explanation
-        self.parentList.addItem( 'Please select ...' )
+        self.childrenList.addItem( 'Please select ...' )
 
         # label
         self.parentLabel = QtGui.QLabel(self)
@@ -319,7 +337,7 @@ class importDatum( QtGui.QDialog ):
         self.CancelButton.clicked.connect(self.onCancel)
         self.ApplyButton.clicked.connect(self.onApply)
         #self.OKButton.clicked.connect(self.onOK)
-        self.parentList.currentIndexChanged.connect( self.onParentList )
+        self.childrenList.currentIndexChanged.connect( self.onParentList )
         self.datumList.itemClicked.connect( self.onDatumClicked )
 
 

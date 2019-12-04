@@ -420,6 +420,7 @@ class placeLink( QtGui.QDialog ):
 			self.selectedLink.setExpression('Placement', expr )
 			# recompute the object to apply the placement:
 			self.selectedLink.recompute()
+			self.parentAssembly.recompute(True)
 		return
 
 

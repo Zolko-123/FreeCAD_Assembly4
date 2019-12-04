@@ -22,28 +22,28 @@ class newDatum:
     def __init__(self, datumName):
         self.datumName = datumName
         if self.datumName   == 'Point':
-            self.datumType   = 'Point'
+            self.datumType   = 'PartDesign::Point'
             self.menutext    = "New Point"
             self.tooltip     = "Create a new Datum Point in a Part"
             self.icon        = os.path.join( iconPath , 'Asm4_Point.svg')
             self.datumColor  = (0.00,0.00,0.00)
             self.datumAlpha  = []
         elif self.datumName == 'Axis':
-            self.datumType   = 'Line'
+            self.datumType   = 'PartDesign::Line'
             self.menutext    = "New Axis"
             self.tooltip     = "Create a new Datum Axis in a Part"
             self.icon        = os.path.join( iconPath , 'Asm4_Axis.svg')
             self.datumColor  = (0.00,0.00,0.50)
             self.datumAlpha  = []
         elif self.datumName == 'Plane':
-            self.datumType   = 'Plane'
+            self.datumType   = 'PartDesign::Plane'
             self.menutext    = "New Plane"
             self.tooltip     = "Create a new Datum Plane in a Part"
             self.icon        = os.path.join( iconPath , 'Asm4_Plane.svg')
             self.datumColor  = (0.50,0.50,0.50)
             self.datumAlpha  = 80
         elif self.datumName == 'LCS':
-            self.datumType   = 'CoordinateSystem'
+            self.datumType   = 'PartDesign::CoordinateSystem'
             self.menutext    = "New Coordinate System"
             self.tooltip     = "Create a new Coordinate System in a Part"
             self.icon        = os.path.join( iconPath , 'Asm4_AxisCross.svg')
@@ -106,7 +106,7 @@ class newDatum:
                     'Enter Datum '+self.datumType+' name :                              ', text = datumName)
             if ok and text:
                 # App.activeDocument().getObject('Model').newObject( 'Sketcher::SketchObject', text )
-                createdDatum = partChecked.newObject( 'PartDesign::'+self.datumType, text )
+                createdDatum = partChecked.newObject( self.datumType, text )
                 if self.datumColor:
                     Gui.ActiveDocument.getObject(createdDatum.Name).ShapeColor = self.datumColor
                 if self.datumAlpha:
@@ -168,9 +168,9 @@ class newHole:
         ( selectedObj, edge ) = self.getSelection()
         # loop until exhaustion or until we encounter an App::Part
         parentPart = selectedObj
-        while parentPart:
-            if parentPart.TypeId=='App::Part':
-                break
+        while parentPart and parentPart.TypeId!='App::Part':
+            # get the parent object 
+            # the direct parent might be a Body, but we want the Part containing the Body
             parentPart = parentPart.getParentGeoFeatureGroup()
         # if the solid having the edge is indeed in an App::Part
         if parentPart.TypeId=='App::Part':
