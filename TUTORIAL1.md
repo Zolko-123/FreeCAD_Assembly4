@@ -144,7 +144,9 @@ If you haven't done so then download the STEP file [`bearing_20x37x9.stp`](https
 
 ### Insert axis
 
-* Click on **Insert External part**  
+* Select **Menu > Assembly > Link Eternal Part** , or in the toolbar click on :  
+![](Resources/icons/Link_Part.svg)  
+
 * This will bring up the following dialog:
 
   ![](Resources/media/Insert_axis.png)
