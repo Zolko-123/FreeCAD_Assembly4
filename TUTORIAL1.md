@@ -140,7 +140,7 @@ If you haven't done so then download the STEP file [`bearing_20x37x9.stp`](https
 
 ## Document "asm_tuto1"
 
-* Switch to document *asm_tuto1*
+* Switch to document *asm_tuto1* by selecting its tab in the main window
 
 ### Insert axis
 
