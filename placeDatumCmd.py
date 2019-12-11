@@ -29,7 +29,7 @@ class placeDatum( QtGui.QDialog ):
 
 	def GetResources(self):
 		return {"MenuText": "Edit Attachment of a Datum object",
-				"ToolTip": "Attach a Datum object to an external Part",
+				"ToolTip": "Attach a Datum object in the assembly to a Datum in a linked Part",
 				"Pixmap" : os.path.join( iconPath , 'Place_Datum.svg')
 				}
 

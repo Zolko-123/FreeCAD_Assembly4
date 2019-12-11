@@ -78,7 +78,7 @@ class Assembly4_WorkBench(Workbench):
     def Initialize(self):
         global dropDownCmdGroup
         import newModelCmd         # creates a new App::Part container called 'Model'
-        import newSketchCmd        # creates a new Sketch in 'Model'
+        #import newSketchCmd        # creates a new Sketch in 'Model'
         import newDatumCmd         # creates a new LCS in 'Model'
         import newPartCmd          # creates a new App::Part container called 'Model'
         import newBodyCmd          # creates a new Body in 'Model
@@ -168,6 +168,7 @@ class Assembly4_WorkBench(Workbench):
         self.itemsContextMenu =["Asm4_insertLink", 
                                 "Asm4_placeLink", 
                                 "Asm4_placeFastener", 
+                                "Asm4_importDatum",
                                 "Asm4_placeDatum" ]
         # commands to appear in the 'Create' sub-menu in the contextual menu (right-click)
         self.itemsCreateMenu = ["Asm4_newSketch",  
