@@ -49,6 +49,13 @@ class newDatum:
             self.icon        = os.path.join( iconPath , 'Asm4_AxisCross.svg')
             self.datumColor  = []
             self.datumAlpha  = []
+        elif self.datumName == 'Sketch':
+            self.datumType   = 'Sketcher::SketchObject'
+            self.menutext    = "New Sketch"
+            self.tooltip     = "Create a new Sketch in a Part"
+            self.icon        = os.path.join( iconPath , 'Asm4_Sketch.svg')
+            self.datumColor  = []
+            self.datumAlpha  = []
 
 
     def GetResources(self):
@@ -97,13 +104,17 @@ class newDatum:
     +-----------------------------------------------+
     """
     def Activated(self):
-        # check that we have somewhere to put our stuff
+        # check that we have somewhere to put our stuff (an App::Part or an Asm4 Model
         partChecked = self.checkPart()
-        datumName = self.datumName+'_1'
+        # check whether there is already a similar datum, and increment the instance number 
+        instanceNum = 1
+        while App.ActiveDocument.getObject( self.datumName+'_'+str(instanceNum) ):
+            instanceNum += 1
+        datumName = self.datumName+'_'+str(instanceNum)
         if partChecked:
             # input dialog to ask the user the name of the Sketch:
-            text,ok = QtGui.QInputDialog.getText(None,'Create new Datum '+self.datumType,
-                    'Enter Datum '+self.datumType+' name :                              ', text = datumName)
+            text,ok = QtGui.QInputDialog.getText(None,'Create new '+self.datumName,
+                    'Enter '+self.datumName+' name :                              ', text = datumName)
             if ok and text:
                 # App.activeDocument().getObject('Model').newObject( 'Sketcher::SketchObject', text )
                 createdDatum = partChecked.newObject( self.datumType, text )
@@ -114,7 +125,9 @@ class newDatum:
                 Gui.Selection.clearSelection()
                 # Gui.Selection.addSelection( App.ActiveDocument.Name, 'Model', createdDatum.Name+'.' )
                 Gui.Selection.addSelection( App.ActiveDocument.Name, partChecked.Name, createdDatum.Name+'.' )
-                Gui.runCommand('Part_EditAttachment',0)
+                # Gui.runCommand('Part_EditAttachment',0)
+                Gui.runCommand('Part_EditAttachment')
+                partChecked.recompute(True)
 
 
 
@@ -194,5 +207,6 @@ Gui.addCommand( 'Asm4_newPoint', newDatum('Point') )
 Gui.addCommand( 'Asm4_newAxis',  newDatum('Axis')  )
 Gui.addCommand( 'Asm4_newPlane', newDatum('Plane') )
 Gui.addCommand( 'Asm4_newLCS',   newDatum('LCS')   )
+Gui.addCommand( 'Asm4_newSketch',newDatum('Sketch'))
 Gui.addCommand( 'Asm4_newHole',  newHole()         )
 

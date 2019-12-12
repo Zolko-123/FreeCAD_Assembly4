@@ -74,6 +74,9 @@ This is then a raw interface between FreeCAD `App::Part` objects through the `Ap
 
 ## Release notes
 
+* 2019.12.12 (**version 0.7.6**) :  
+Improved animation and datum import.
+
 * 2019.12.02 (**version 0.7.5**) :  
 Minor (but useful !) refinements for variables and animation.
 

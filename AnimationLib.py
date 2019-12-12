@@ -4,10 +4,12 @@
 # placeDatumCmd.py
 
 
+import time, math, re
+
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
-import Part, math, re
+import Part
 
 from libAsm4 import *
 
@@ -86,19 +88,34 @@ class animateVariable( QtGui.QDialog ):
         begin   = self.minValue.value()
         end     = self.maxValue.value()
         step    = self.stepValue.value()
+        sleep   = self.sleepValue.value()
         # basic checks
         if varName:
-            varValue = begin
-            while varValue <= end and self.Run:
-                setattr( self.Variables, varName, varValue )
-                #App.ActiveDocument.recompute()
-                App.ActiveDocument.Model.recompute('True')
-                Gui.updateGui()
-                varValue += step
-            self.Run = True
-            return
-        else:
-            return
+            # if we go forwards ...
+            if end>begin and step>0:
+                varValue = begin
+                while varValue <= end and self.Run:
+                    setattr( self.Variables, varName, varValue )
+                    #App.ActiveDocument.recompute()
+                    App.ActiveDocument.Model.recompute('True')
+                    Gui.updateGui()
+                    varValue += step
+                    time.sleep(sleep)
+                self.Run = True
+                return
+            # ... or backwards
+            elif end<begin and step<0:
+                varValue = begin
+                while varValue >= end and self.Run:
+                    setattr( self.Variables, varName, varValue )
+                    #App.ActiveDocument.recompute()
+                    App.ActiveDocument.Model.recompute('True')
+                    Gui.updateGui()
+                    varValue += step
+                    time.sleep(sleep)
+                self.Run = True
+                return
+        return
 
 
     """
@@ -150,7 +167,7 @@ class animateVariable( QtGui.QDialog ):
         self.rangeLabel.move(10,85)
         # Minimum
         self.minLabel = QtGui.QLabel(self)
-        self.minLabel.setText("Begin")
+        self.minLabel.setText("Begin :")
         self.minLabel.move(120,65)
         self.minValue = QtGui.QDoubleSpinBox(self)
         self.minValue.move(200,60)
@@ -159,7 +176,7 @@ class animateVariable( QtGui.QDialog ):
         self.minValue.setValue( 0.0 )
         # Maximum
         self.maxLabel = QtGui.QLabel(self)
-        self.maxLabel.setText("End")
+        self.maxLabel.setText("End :")
         self.maxLabel.move(120,105)
         self.maxValue = QtGui.QDoubleSpinBox(self)
         self.maxValue.move(200,100)
@@ -169,7 +186,7 @@ class animateVariable( QtGui.QDialog ):
 
         # Step
         self.stepLabel = QtGui.QLabel(self)
-        self.stepLabel.setText("Step size")
+        self.stepLabel.setText("Step :")
         self.stepLabel.move(10,145)
         self.stepValue = QtGui.QDoubleSpinBox(self)
         self.stepValue.move(200,140)
@@ -179,7 +196,7 @@ class animateVariable( QtGui.QDialog ):
 
         # Sleep
         self.sleepLabel = QtGui.QLabel(self)
-        self.sleepLabel.setText("Sleep (ms)")
+        self.sleepLabel.setText("Sleep (s) :")
         self.sleepLabel.move(10,185)
         self.sleepValue = QtGui.QDoubleSpinBox(self)
         self.sleepValue.move(200,180)
