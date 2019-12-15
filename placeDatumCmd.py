@@ -3,13 +3,14 @@
 #
 # placeDatumCmd.py
 
+import math, re, os
 
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
-import Part, math, re
+import Part
 
-from libAsm4 import *
+import libAsm4 as asm4
 
 
 
@@ -30,7 +31,7 @@ class placeDatum( QtGui.QDialog ):
 	def GetResources(self):
 		return {"MenuText": "Edit Attachment of a Datum object",
 				"ToolTip": "Attach a Datum object in the assembly to a Datum in a linked Part",
-				"Pixmap" : os.path.join( iconPath , 'Place_Datum.svg')
+				"Pixmap" : os.path.join( asm4.iconPath , 'Place_Datum.svg')
 				}
 
 
@@ -129,7 +130,7 @@ class placeDatum( QtGui.QDialog ):
 		old_Parent = ''
 		old_ParentPart = ''
 		old_attLCS = ''
-		( old_Parent, old_ParentPart, old_attLCS ) = splitExpressionDatum( self.old_EE )
+		( old_Parent, old_ParentPart, old_attLCS ) = asm4.splitExpressionDatum( self.old_EE )
 		#self.expression.setText( 'old_Parent = '+ old_Parent )
 
 
@@ -193,7 +194,7 @@ class placeDatum( QtGui.QDialog ):
 			# don't forget the last '.' !!!
 			# <<LinkName>>.Placement.multiply( <<LinkName>>.<<LCS.>>.Placement )
 			# expr = '<<'+ a_Part +'>>.Placement.multiply( <<'+ a_Part +'>>.<<'+ a_LCS +'.>>.Placement )'
-			expr = makeExpressionDatum( a_Link, a_Part, a_LCS )
+			expr = asm4.makeExpressionDatum( a_Link, a_Part, a_LCS )
 			# this can be skipped when this method becomes stable
 			self.expression.setText( expr )
 			# load the built expression into the Expression field of the constraint
@@ -336,7 +337,7 @@ class placeDatum( QtGui.QDialog ):
 	def drawUI(self):
 		# Our main window will be a QDialog
 		self.setWindowTitle('Attach a Coordinate System')
-		self.setWindowIcon( QtGui.QIcon( os.path.join( iconPath , 'FreeCad.svg' ) ) )
+		self.setWindowIcon( QtGui.QIcon( os.path.join( asm4.iconPath , 'FreeCad.svg' ) ) )
 		self.setMinimumSize(370, 570)
 		self.resize(370,570)
 		self.setModal(False)

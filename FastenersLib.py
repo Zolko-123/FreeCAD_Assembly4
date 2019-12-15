@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
 # coding: utf-8
 #
-# placeDatumCmd.py
+# FastenersLib.py
 
+
+
+
+import math, re, os
 
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
-import Part, math, re
-
-from libAsm4 import *
+import Part
 from FastenerBase import FSBaseObject
+
+import libAsm4 as asm4
 
 
 
@@ -34,19 +38,19 @@ class insertFastener:
         if self.fastenerType=='Screw':
             self.menutext = "Insert Screw"
             self.tooltip = "Insert a Screw in the Assembly"
-            self.icon = os.path.join( iconPath , 'Asm4_Screw.svg')
+            self.icon = os.path.join( asm4.iconPath , 'Asm4_Screw.svg')
             self.fastenerName = 'Screw'
         # Nut:
         elif self.fastenerType=='Nut':
             self.menutext = "Insert Nut"
             self.tooltip = "Insert a Nut in the Assembly"
-            self.icon = os.path.join( iconPath , 'Asm4_Nut.svg')
+            self.icon = os.path.join( asm4.iconPath , 'Asm4_Nut.svg')
             self.fastenerName = 'Nut'
         # Washer:
         elif self.fastenerType=='Washer':
             self.menutext = "Insert Washer"
             self.tooltip = "Insert a Washer in the Assembly"
-            self.icon = os.path.join( iconPath , 'Asm4_Washer.svg')
+            self.icon = os.path.join( asm4.iconPath , 'Asm4_Washer.svg')
             self.fastenerName = 'Washer'
 
 
@@ -103,7 +107,7 @@ class insertFastener:
                 fastenersDoc = App.getDocument('Fasteners')
                 return fastenersDoc
         # if the Fastner document isn't yet open:
-        fastenersDocPath = os.path.join( libPath , 'Fasteners.FCStd')
+        fastenersDocPath = os.path.join( asm4.libPath , 'Fasteners.FCStd')
         # The document is opened in the background:
         fastenersDoc = App.openDocument( fastenersDocPath, hidden='True')
         # and we reset the original document as active:
@@ -127,7 +131,7 @@ class placeFastener( QtGui.QDialog ):
     def GetResources(self):
         return {"MenuText": "Edit Attachment of a Fastener",
                 "ToolTip": "Edit Attachment of a Fastener",
-                "Pixmap" : os.path.join( iconPath , 'Asm4_mvFastener.svg')
+                "Pixmap" : os.path.join( asm4.iconPath , 'Asm4_mvFastener.svg')
                 }
 
 
@@ -526,7 +530,7 @@ class placeFastener( QtGui.QDialog ):
     def drawUI(self):
         # Our main window will be a QDialog
         self.setWindowTitle('Attach a Fastener')
-        self.setWindowIcon( QtGui.QIcon( os.path.join( iconPath , 'FreeCad.svg' ) ) )
+        self.setWindowIcon( QtGui.QIcon( os.path.join( asm4.iconPath , 'FreeCad.svg' ) ) )
         self.setMinimumSize(370, 670)
         self.resize(370,670)
         self.setModal(False)

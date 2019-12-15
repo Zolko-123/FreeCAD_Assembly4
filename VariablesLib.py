@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
 # coding: utf-8
 #
-# placeDatumCmd.py
+# VariablesLib.py
 
+
+import math, re, os
 
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
-import Part, math, re
+import Part
 
-from libAsm4 import *
+import libAsm4 as asm4
+
 
 
 
@@ -45,7 +48,7 @@ class addVariable( QtGui.QDialog ):
     def GetResources(self):
         return {"MenuText": "Add Variable",
                 "ToolTip": "Add Variable",
-                "Pixmap" : os.path.join( iconPath , 'Asm4_Variables.svg')
+                "Pixmap" : os.path.join( asm4.iconPath , 'Asm4_Variables.svg')
                 }
 
 
@@ -150,7 +153,7 @@ class addVariable( QtGui.QDialog ):
     def drawUI(self):
         # Our main window will be a QDialog
         self.setWindowTitle('Add Variable')
-        self.setWindowIcon( QtGui.QIcon( os.path.join( iconPath , 'FreeCad.svg' ) ) )
+        self.setWindowIcon( QtGui.QIcon( os.path.join( asm4.iconPath , 'FreeCad.svg' ) ) )
         self.setMinimumSize(470, 330)
         self.resize(470,330)
         self.setModal(False)

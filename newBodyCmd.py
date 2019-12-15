@@ -4,12 +4,17 @@
 # newBodyCmd.py 
 
 
+
+
+import math, re, os
+
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
-import Part, math, re
+import Part
 
-from libAsm4 import *
+import libAsm4 as asm4
+
 
 
 
@@ -20,7 +25,7 @@ class newBody:
 		return {"MenuText": "New Body",
 				"Accel": "Ctrl+B",
 				"ToolTip": "Create a new Body in a Part",
-				"Pixmap" : os.path.join( iconPath , 'Asm4_Body.svg')
+				"Pixmap" : os.path.join( asm4.iconPath , 'Asm4_Body.svg')
 				}
 
 
