@@ -13,7 +13,7 @@ import FreeCAD as App
 import Part
 #from FastenerBase import FSBaseObject
 
-import libAsm4 as asm4
+import libAsm4 as Asm4
 
 
 
@@ -36,15 +36,15 @@ class insertFastener:
 		# Screw:
 		if self.fastenerType=='Screw':
 			self.menutext = "Insert Screw"
-			self.icon = os.path.join( asm4.iconPath , 'Asm4_Screw.svg')
+			self.icon = os.path.join( Asm4.iconPath , 'Asm4_Screw.svg')
 		# Nut:
 		elif self.fastenerType=='Nut':
 			self.menutext = "Insert Nut"
-			self.icon = os.path.join( asm4.iconPath , 'Asm4_Nut.svg')
+			self.icon = os.path.join( Asm4.iconPath , 'Asm4_Nut.svg')
 		# Washer:
 		elif self.fastenerType=='Washer':
 			self.menutext = "Insert Washer"
-			self.icon = os.path.join( asm4.iconPath , 'Asm4_Washer.svg')
+			self.icon = os.path.join( Asm4.iconPath , 'Asm4_Washer.svg')
 
 
 	def GetResources(self):
@@ -80,7 +80,7 @@ class placeFastener( QtGui.QDialog ):
 	def GetResources(self):
 		return {"MenuText": "Edit Attachment of a Fastener",
 				"ToolTip": 'FastenersWorkbench is not installed.\n \nYou can install it with the FreeCAD AddonsManager:\nMenu Tools > Addon Manager > fasteners',
-				"Pixmap" : os.path.join( asm4.iconPath , 'Asm4_mvFastener.svg')
+				"Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_mvFastener.svg')
 				}
 
 

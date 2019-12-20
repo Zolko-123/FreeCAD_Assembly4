@@ -11,7 +11,7 @@ import FreeCADGui as Gui
 import FreeCAD as App
 import Part
 
-import libAsm4 as asm4
+import libAsm4 as Asm4
 
 
 
@@ -21,7 +21,7 @@ class updateAssembly:
 	def GetResources(self):
 		return {"MenuText": "Solve and Update Assembly",
 				"ToolTip": "Update Assembly",
-				"Pixmap" : os.path.join( asm4.iconPath , 'Asm4_Solver.svg')
+				"Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_Solver.svg')
 				}
 
 	def IsActive(self):

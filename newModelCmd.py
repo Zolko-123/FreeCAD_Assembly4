@@ -12,7 +12,7 @@ import FreeCADGui as Gui
 import FreeCAD as App
 import Part
 
-import libAsm4 as asm4
+import libAsm4 as Asm4
 
 
 
@@ -29,7 +29,7 @@ class newModel:
         return {"MenuText": "New Model",
                 "Accel": "Ctrl+M",
                 "ToolTip": "Create a new Assembly4 Model",
-                "Pixmap" : os.path.join( asm4.iconPath , 'Asm4_Model.svg')
+                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_Model.svg')
                 }
 
 
@@ -72,7 +72,7 @@ class newModel:
         # we don't check whether it's an App::Part or not
         # Returns True if there is an object called 'Model'
         if self.activeDoc.getObject('Model'):
-            asm4.warningBox("There is already an Assembly4 Model in this document.")
+            Asm4.warningBox("There is already an Assembly4 Model in this document.")
             return(True)
         else:
             return(False)

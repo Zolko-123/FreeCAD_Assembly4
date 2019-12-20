@@ -11,7 +11,7 @@ import FreeCADGui as Gui
 import FreeCAD as App
 import Part
 
-import libAsm4 as asm4
+import libAsm4 as Asm4
 
 
 
@@ -48,7 +48,7 @@ class addVariable( QtGui.QDialog ):
     def GetResources(self):
         return {"MenuText": "Add Variable",
                 "ToolTip": "Add Variable",
-                "Pixmap" : os.path.join( asm4.iconPath , 'Asm4_Variables.svg')
+                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_Variables.svg')
                 }
 
 
@@ -153,7 +153,7 @@ class addVariable( QtGui.QDialog ):
     def drawUI(self):
         # Our main window will be a QDialog
         self.setWindowTitle('Add Variable')
-        self.setWindowIcon( QtGui.QIcon( os.path.join( asm4.iconPath , 'FreeCad.svg' ) ) )
+        self.setWindowIcon( QtGui.QIcon( os.path.join( Asm4.iconPath , 'FreeCad.svg' ) ) )
         self.setMinimumSize(470, 330)
         self.resize(470,330)
         self.setModal(False)

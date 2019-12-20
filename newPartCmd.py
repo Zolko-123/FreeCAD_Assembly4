@@ -13,7 +13,7 @@ import FreeCADGui as Gui
 import FreeCAD as App
 import Part
 
-import libAsm4 as asm4
+import libAsm4 as Asm4
 
 
 
@@ -25,7 +25,7 @@ class newPart:
 		return {"MenuText": "New Part",
 				"Accel": "Ctrl+P",
 				"ToolTip": "Create a new Part in the document",
-				"Pixmap" : os.path.join( asm4.iconPath , 'Asm4_Part.svg')
+				"Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_Part.svg')
 				}
 
 

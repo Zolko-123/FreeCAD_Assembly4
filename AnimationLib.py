@@ -12,7 +12,7 @@ import FreeCADGui as Gui
 import FreeCAD as App
 import Part
 
-import libAsm4 as asm4
+import libAsm4 as Asm4
 
 
 
@@ -32,7 +32,7 @@ class animateVariable( QtGui.QDialog ):
     def GetResources(self):
         return {"MenuText": "Animate Assembly",
                 "ToolTip": "Animate Assembly",
-                "Pixmap" : os.path.join( asm4.iconPath , 'Asm4_GearsAnimate.svg')
+                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_GearsAnimate.svg')
                 }
 
 
@@ -146,7 +146,7 @@ class animateVariable( QtGui.QDialog ):
     def drawUI(self):
         # Our main window will be a QDialog
         self.setWindowTitle('Animate Assembly')
-        self.setWindowIcon( QtGui.QIcon( os.path.join( asm4.iconPath , 'FreeCad.svg' ) ) )
+        self.setWindowIcon( QtGui.QIcon( os.path.join( Asm4.iconPath , 'FreeCad.svg' ) ) )
         self.setMinimumSize(470, 300)
         self.resize(470,300)
         self.setModal(False)

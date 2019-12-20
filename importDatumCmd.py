@@ -11,7 +11,7 @@ import FreeCADGui as Gui
 import FreeCAD as App
 import Part
 
-import libAsm4 as asm4
+import libAsm4 as Asm4
 
 
 
@@ -34,7 +34,7 @@ class importDatum( QtGui.QDialog ):
     def GetResources(self):
         return {"MenuText": "Import Datum object",
                 "ToolTip": "Imports the selected Datum object from a linked Part into the assembly.\nOnly datum objects at the root of the linked part can be imported",
-                "Pixmap" : os.path.join( asm4.iconPath , 'Import_Datum.svg')
+                "Pixmap" : os.path.join( Asm4.iconPath , 'Import_Datum.svg')
                 }
     
 
@@ -197,7 +197,7 @@ class importDatum( QtGui.QDialog ):
     def drawUI(self):
         # Our main window will be a QDialog
         self.setWindowTitle('Import a Datum object')
-        self.setWindowIcon( QtGui.QIcon( os.path.join( asm4.iconPath , 'FreeCad.svg' ) ) )
+        self.setWindowIcon( QtGui.QIcon( os.path.join( Asm4.iconPath , 'FreeCad.svg' ) ) )
         self.setMinimumSize(470, 350)
         self.resize(470,350)
         self.setModal(False)

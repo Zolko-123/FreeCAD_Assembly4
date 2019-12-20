@@ -13,7 +13,7 @@ import FreeCADGui as Gui
 import FreeCAD as App
 import Part
 
-import libAsm4 as asm4
+import libAsm4 as Asm4
 
 
 
@@ -33,7 +33,7 @@ class insertLink( QtGui.QDialog ):
         return {"MenuText": "Link an external Part",
                 "Accel": "Ctrl+L",
                 "ToolTip": "Insert a link to external Part from another open document",
-                "Pixmap" : os.path.join( asm4.iconPath , 'Link_Part.svg')
+                "Pixmap" : os.path.join( Asm4.iconPath , 'Link_Part.svg')
                 }
 
 
@@ -221,7 +221,7 @@ class insertLink( QtGui.QDialog ):
         # make this dialog stay above the others, always visible
         self.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
         self.setWindowTitle('Insert a Model')
-        self.setWindowIcon( QtGui.QIcon( os.path.join( asm4.iconPath , 'FreeCad.svg' ) ) )
+        self.setWindowIcon( QtGui.QIcon( os.path.join( Asm4.iconPath , 'FreeCad.svg' ) ) )
         self.setMinimumSize(400, 500)
         self.resize(400,500)
         #self.Layout.addWidget(self.GUIwindow)

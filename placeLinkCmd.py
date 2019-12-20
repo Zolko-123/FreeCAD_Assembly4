@@ -11,7 +11,7 @@ import FreeCADGui as Gui
 import FreeCAD as App
 import Part
 
-import libAsm4 as asm4
+import libAsm4 as Asm4
 
 
 
@@ -34,7 +34,7 @@ class placeLink( QtGui.QDialog ):
     def GetResources(self):
         return {"MenuText": "Edit Placement of a Part",
                 "ToolTip": "Move/Attach a Part in the assembly",
-                "Pixmap" : os.path.join( asm4.iconPath , 'Place_Link.svg')
+                "Pixmap" : os.path.join( Asm4.iconPath , 'Place_Link.svg')
                 }
 
 
@@ -84,7 +84,7 @@ class placeLink( QtGui.QDialog ):
             if self.selectedLink.AssemblyType == 'Asm4EE':
                 self.isAsm4EE = True
             else:
-                asm4.warningBox("This Link's assembly type doesn't correspond to this WorkBench")
+                Asm4.warningBox("This Link's assembly type doesn't correspond to this WorkBench")
                 return
 
 
@@ -162,11 +162,11 @@ class placeLink( QtGui.QDialog ):
         old_linkLCS = ''
         # if the linked part is in the same document as the assembly:
         if self.parentAssembly.Document.Name == self.selectedLink.LinkedObject.Document.Name:
-            ( old_Parent, old_attLCS, old_linkLCS ) = asm4.splitExpressionDoc( self.old_EE, self.old_Parent )
+            ( old_Parent, old_attLCS, old_linkLCS ) = Asm4.splitExpressionDoc( self.old_EE, self.old_Parent )
         # if the linked part comes from another document:
         else:
         # if the decode is unsuccessful, old_Expression is set to False and the other things are set to 'None'
-            ( old_Parent, old_attLCS, old_linkLCS ) = asm4.splitExpressionLink( self.old_EE, self.old_Parent )
+            ( old_Parent, old_attLCS, old_linkLCS ) = Asm4.splitExpressionLink( self.old_EE, self.old_Parent )
         #self.expression.setText( old_Parent +'***'+ self.old_Parent )
 
 
@@ -296,7 +296,7 @@ class placeLink( QtGui.QDialog ):
             #
             # expr = ParentLink.Placement * ParentPart#LCS.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
             # expr = LCS_in_the_assembly.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
-            expr = asm4.makeExpressionPart( a_Link, a_Part, a_LCS, l_Part, l_LCS )
+            expr = Asm4.makeExpressionPart( a_Link, a_Part, a_LCS, l_Part, l_LCS )
             # this can be skipped when this method becomes stable
             self.expression.setText( expr )
             # add the Asm4 properties if it's a pure App::Link
@@ -498,7 +498,7 @@ class placeLink( QtGui.QDialog ):
     def drawUI(self):
         # Our main window will be a QDialog
         self.setWindowTitle('Place linked Part')
-        self.setWindowIcon( QtGui.QIcon( os.path.join( asm4.iconPath , 'FreeCad.svg' ) ) )
+        self.setWindowIcon( QtGui.QIcon( os.path.join( Asm4.iconPath , 'FreeCad.svg' ) ) )
         self.setMinimumSize(550, 640)
         self.resize(550,640)
         self.setModal(False)
