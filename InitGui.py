@@ -90,6 +90,7 @@ class Assembly4_WorkBench(Workbench):
         import AnimationLib        # creates an LCS in assembly and attaches it to an LCS relative to an external file
         import updateAssemblyCmd   # updates all parts and constraints in the assembly
         import newLinkArray        # creates a new array of App::Link
+        import HelpCmd             # shows a basic help window
         
         if self.checkWorkbench('FastenersWorkbench'):
             import FastenersLib        # a library to handle fasteners from the FastenersWorkbench
@@ -146,8 +147,10 @@ class Assembly4_WorkBench(Workbench):
                                 "Asm4_importDatum", 
                                 "Asm4_addVariable", 
                                 "Asm4_Animate", 
-                                "Asm4_updateAssembly"]
+                                "Asm4_updateAssembly",
+                                "Asm4_Help"]
         self.appendMenu("&Assembly",self.itemsMenu)
+        self.appendMenu("&Help", ["Asm4_Help"])
         # commands to appear in the Assembly4 toolbar
         self.itemsToolbar =   [ "Asm4_newModel",   
                                 "Asm4_newBody", 
@@ -230,7 +233,7 @@ class Assembly4_WorkBench(Workbench):
 
 
     def ContextMenu(self, recipient):
-        "This is executed whenever the user right-clicks on screen"
+        # This is executed whenever the user right-clicks on screen"
         # "recipient" will be either "view" or "tree"
         self.appendContextMenu( "Assembly", self.itemsContextMenu ) # add commands to the context menu
         self.appendContextMenu( "Create", self.itemsCreateMenu ) # add commands to the context menu
@@ -248,7 +251,9 @@ class Assembly4_WorkBench(Workbench):
     +-----------------------------------------------+
 """
 wb = Assembly4_WorkBench()
+#print("Loading Assembly 4 WorkBench. \xa9 Zoltan Hubert")
 Gui.addWorkbench(wb)
+
 
 
 

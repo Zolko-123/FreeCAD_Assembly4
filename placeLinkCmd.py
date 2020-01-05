@@ -4,12 +4,15 @@
 # placeLinkCmd.py
 
 
+import math, re, os
+
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
-import Part, math, re
+import Part
 
-from libAsm4 import *
+import libAsm4 as Asm4
+
 
 
 
@@ -31,7 +34,7 @@ class placeLink( QtGui.QDialog ):
     def GetResources(self):
         return {"MenuText": "Edit Placement of a Part",
                 "ToolTip": "Move/Attach a Part in the assembly",
-                "Pixmap" : os.path.join( iconPath , 'Place_Link.svg')
+                "Pixmap" : os.path.join( Asm4.iconPath , 'Place_Link.svg')
                 }
 
 
@@ -81,11 +84,7 @@ class placeLink( QtGui.QDialog ):
             if self.selectedLink.AssemblyType == 'Asm4EE':
                 self.isAsm4EE = True
             else:
-                msgBox = QtGui.QMessageBox()
-                msgBox.setWindowTitle('Warning')
-                msgBox.setIcon(QtGui.QMessageBox.Critical)
-                msgBox.setText("This Link's Assembly Type doesn't correspond to this WorkBench")
-                msgBox.exec_()
+                Asm4.warningBox("This Link's assembly type doesn't correspond to this WorkBench")
                 return
 
 
@@ -163,11 +162,11 @@ class placeLink( QtGui.QDialog ):
         old_linkLCS = ''
         # if the linked part is in the same document as the assembly:
         if self.parentAssembly.Document.Name == self.selectedLink.LinkedObject.Document.Name:
-            ( old_Parent, old_attLCS, old_linkLCS ) = self.splitExpressionDoc( self.old_EE, self.old_Parent )
+            ( old_Parent, old_attLCS, old_linkLCS ) = Asm4.splitExpressionDoc( self.old_EE, self.old_Parent )
         # if the linked part comes from another document:
         else:
         # if the decode is unsuccessful, old_Expression is set to False and the other things are set to 'None'
-            ( old_Parent, old_attLCS, old_linkLCS ) = self.splitExpressionLink( self.old_EE, self.old_Parent )
+            ( old_Parent, old_attLCS, old_linkLCS ) = Asm4.splitExpressionLink( self.old_EE, self.old_Parent )
         #self.expression.setText( old_Parent +'***'+ self.old_Parent )
 
 
@@ -222,117 +221,6 @@ class placeLink( QtGui.QDialog ):
         self.show()
 
 
-
-
-    """
-    +-----------------------------------------------+
-    |         populate the ExpressionEngine         |
-    |             for a linked App::Part            |
-    +-----------------------------------------------+
-    """
-    def makeExpressionPart( self, attLink, attPart, attLCS, linkedDoc, linkLCS ):
-        # if everything is defined
-        if attLink and attLCS and linkedDoc and linkLCS:
-            # this is where all the magic is, see:
-            # 
-            # https://forum.freecadweb.org/viewtopic.php?p=278124#p278124
-            #
-            # as of FreeCAD v0.19 the syntax is different:
-            # https://forum.freecadweb.org/viewtopic.php?f=17&t=38974&p=337784#p337784
-            # expr = ParentLink.Placement * ParentPart#LCS.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS.Placement ^ -1
-            # expr = LCS_in_the_assembly.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS.Placement ^ -1
-            # the AttachmentOffset is now a property of the App::Link
-            # expr = LCS_in_the_assembly.Placement * AttachmentOffset * LinkedPart#LCS.Placement ^ -1
-            expr = attLCS+'.Placement * AttachmentOffset * '+linkedDoc+'#'+linkLCS+'.Placement ^ -1'
-            # if we're attached to another sister part (and not the Parent Assembly)
-            # we need to take into account the Placement of that Part.
-            if attPart:
-                expr = attLink+'.Placement * '+attPart+'#'+expr
-        else:
-            expr = False
-        return expr
-
-
-
-
-    """
-    +-----------------------------------------------+
-    |  split the ExpressionEngine of a linked part  |
-    |          to find the old attachment LCS       |
-    |   (in the parent assembly or a sister part)   |
-    |   and the old target LCS in the linked Part   |
-    +-----------------------------------------------+
-    """
-    # this is the case for a link to a part coming from another document
-    def splitExpressionLink( self, expr, parent ):
-        # expr = ParentLink.Placement * ParentPart#LCS.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
-        bad_EE = ( '', 'None', 'None' )
-        if not expr:
-            return bad_EE
-        if parent == 'Parent Assembly':
-            # we're attached to an LCS in the parent assembly
-            # expr = LCS_in_the_assembly.Placement * AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
-            ( attLCS, separator, rest1 ) = expr.partition('.Placement * AttachmentOffset * ')
-            ( linkedDoc, separator, rest2 ) = rest1.partition('#')
-            ( linkLCS, separator, rest3 ) = rest2.partition('.Placement ^ ')
-            restFinal = rest3[0:2]
-            attLink = parent
-            attPart = 'None'
-            #return ( restFinal, 'None', 'None', 'None', 'None', 'None')
-        else:
-            # we're attached to an LCS in a sister part
-            # expr = ParentLink.Placement * ParentPart#LCS.Placement * AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
-            ( attLink,    separator, rest1 ) = expr.partition('.Placement * ')
-            ( attPart,    separator, rest2 ) = rest1.partition('#')
-            ( attLCS,     separator, rest3 ) = rest2.partition('.Placement * AttachmentOffset * ')
-            ( linkedDoc, separator, rest4 ) = rest3.partition('#')
-            ( linkLCS,    separator, rest5 ) = rest4.partition('.Placement ^ ')
-            restFinal = rest5[0:2]
-            #return ( restFinal, 'None', 'None', 'None', 'None', 'None')
-        if restFinal=='-1' and attLink==parent :
-            # wow, everything went according to plan
-            # retval = ( expr, attPart, attLCS, constrLink, partLCS )
-            retval = ( attLink, attLCS, linkLCS )
-        else:
-            # rats ! Didn't succeed in decoding the ExpressionEngine.
-            # But still, if the decode is unsuccessful, put some text
-            retval = bad_EE
-        return retval
-
-
-    # this is the case for a link to a part coming from the same document as the assembly
-    def splitExpressionDoc( self, expr, parent ):
-        # expr = ParentLink.Placement * LCS_parent.Placement * constr_linkName.AttachmentOffset * LCS_linkedPart.Placement ^ -1
-        # expr = LCS_model.Placement * constr_linkName.AttachmentOffset * LCS_linkedPart.Placement ^ -1
-        bad_EE = ( '', 'None', 'None' )
-        if not expr:
-            return bad_EE
-        if parent == 'Parent Assembly':
-            # we're attached to an LCS in the parent assembly
-            # expr = LCS_in_the_assembly.Placement * constr_linkName.AttachmentOffset * LCS_linkedPart.Placement ^ -1
-            ( attLCS, separator, rest1 ) = expr.partition('.Placement * AttachmentOffset * ')
-            ( linkLCS, separator, rest2 ) = rest1.partition('.Placement ^ ')
-            restFinal = rest2[0:2]
-            attLink = parent
-            attPart = 'None'
-            #return ( restFinal, 'None', 'None', 'None', 'None', 'None')
-        else:
-            # we're attached to an LCS in a sister part
-            # expr = ParentLink.Placement * LCS_parent.Placement * constr_linkName.AttachmentOffset * LCS_linkedPart.Placement ^ -1
-            ( attLink,    separator, rest1 ) = expr.partition('.Placement * ')
-            ( attLCS,     separator, rest2 ) = rest1.partition('.Placement * AttachmentOffset * ')
-            ( linkLCS,    separator, rest3 ) = rest2.partition('.Placement ^ ')
-            restFinal = rest3[0:2]
-            #return ( restFinal, 'None', 'None', 'None', 'None', 'None')
-        if restFinal=='-1' and attLink==parent :
-            # wow, everything went according to plan
-            # retval = ( expr, attPart, attLCS, constrLink, partLCS )
-            retval = ( attLink, attLCS, linkLCS )
-        else:
-            # rats ! Didn't succeed in decoding the ExpressionEngine.
-            # But still, if the decode is unsuccessful, put some text
-            retval = bad_EE
-        return retval
 
     """
     +-----------------------------------------------+
@@ -408,7 +296,7 @@ class placeLink( QtGui.QDialog ):
             #
             # expr = ParentLink.Placement * ParentPart#LCS.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
             # expr = LCS_in_the_assembly.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
-            expr = self.makeExpressionPart( a_Link, a_Part, a_LCS, l_Part, l_LCS )
+            expr = Asm4.makeExpressionPart( a_Link, a_Part, a_LCS, l_Part, l_LCS )
             # this can be skipped when this method becomes stable
             self.expression.setText( expr )
             # add the Asm4 properties if it's a pure App::Link
@@ -610,7 +498,7 @@ class placeLink( QtGui.QDialog ):
     def drawUI(self):
         # Our main window will be a QDialog
         self.setWindowTitle('Place linked Part')
-        self.setWindowIcon( QtGui.QIcon( os.path.join( iconPath , 'FreeCad.svg' ) ) )
+        self.setWindowIcon( QtGui.QIcon( os.path.join( Asm4.iconPath , 'FreeCad.svg' ) ) )
         self.setMinimumSize(550, 640)
         self.resize(550,640)
         self.setModal(False)
@@ -748,14 +636,6 @@ class placeLink( QtGui.QDialog ):
         self.CancelButton.clicked.connect(self.onCancel)
         self.ApplyButton.clicked.connect(self.onApply)
         self.OKButton.clicked.connect(self.onOK)
-
-
-
-    """
-    +-----------------------------------------------+
-    |                 initial check                 |
-    +-----------------------------------------------+
-    """
 
 
 

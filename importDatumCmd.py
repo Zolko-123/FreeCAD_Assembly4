@@ -4,12 +4,15 @@
 # placeDatumCmd.py 
 
 
+import math, re, os
+
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
-import Part, math, re
+import Part
 
-from libAsm4 import *
+import libAsm4 as Asm4
+
 
 
 
@@ -31,7 +34,7 @@ class importDatum( QtGui.QDialog ):
     def GetResources(self):
         return {"MenuText": "Import Datum object",
                 "ToolTip": "Imports the selected Datum object from a linked Part into the assembly.\nOnly datum objects at the root of the linked part can be imported",
-                "Pixmap" : os.path.join( iconPath , 'Import_Datum.svg')
+                "Pixmap" : os.path.join( Asm4.iconPath , 'Import_Datum.svg')
                 }
     
 
@@ -194,68 +197,68 @@ class importDatum( QtGui.QDialog ):
     def drawUI(self):
         # Our main window will be a QDialog
         self.setWindowTitle('Import a Datum object')
-        self.setWindowIcon( QtGui.QIcon( os.path.join( iconPath , 'FreeCad.svg' ) ) )
-        self.setMinimumSize(450, 470)
-        self.resize(450,470)
+        self.setWindowIcon( QtGui.QIcon( os.path.join( Asm4.iconPath , 'FreeCad.svg' ) ) )
+        self.setMinimumSize(470, 350)
+        self.resize(470,350)
         self.setModal(False)
         # make this dialog stay above the others, always visible
         self.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
 
         # Datum Object
         self.labelRight = QtGui.QLabel(self)
-        self.labelRight.setText("Datum object to import :")
-        self.labelRight.move(10,20)
+        self.labelRight.setText("Name :")
+        self.labelRight.move(10,25)
         self.datumList = QtGui.QLineEdit(self)
         self.datumList.setReadOnly(True)
-        self.datumList.move(40,50)
-        self.datumList.setMinimumSize(400, 1)
+        self.datumList.move(160,20)
+        self.datumList.setMinimumSize(300, 1)
 
         # Datum Type
         self.labelType = QtGui.QLabel(self)
-        self.labelType.setText("Datum type :")
-        self.labelType.move(10,100)
+        self.labelType.setText("Type :")
+        self.labelType.move(10,65)
         self.datumType = QtGui.QLineEdit(self)
         self.datumType.setReadOnly(True)
-        self.datumType.move(40,130)
-        self.datumType.setMinimumSize(400, 1)
+        self.datumType.move(160,60)
+        self.datumType.setMinimumSize(300, 1)
 
         # Link instance
         self.linkLabel = QtGui.QLabel(self)
-        self.linkLabel.setText("Link instance's name:")
-        self.linkLabel.move(10,180)
+        self.linkLabel.setText("from Link :")
+        self.linkLabel.move(10,105)
         self.linkName = QtGui.QLineEdit(self)
         self.linkName.setReadOnly(True)
-        self.linkName.setMinimumSize(400, 1)
-        self.linkName.move(40,210)
+        self.linkName.setMinimumSize(300, 1)
+        self.linkName.move(160,100)
 
         # Orig Part
         self.partLabel = QtGui.QLabel(self)
-        self.partLabel.setText("Linked Part's origin:")
-        self.partLabel.move(10,260)
+        self.partLabel.setText("linked Part :")
+        self.partLabel.move(10,145)
         self.partName = QtGui.QLineEdit(self)
         self.partName.setReadOnly(True)
-        self.partName.move(40,290)
-        self.partName.setMinimumSize(400, 1)
+        self.partName.move(160,140)
+        self.partName.setMinimumSize(300, 1)
         
         # imported Link name
         self.datumLabel = QtGui.QLabel(self)
         self.datumLabel.setText("Enter the new Datum objects's name:")
-        self.datumLabel.move(10,350)
+        self.datumLabel.move(10,210)
         # the name as seen in the tree of the selected link
         self.datumName = QtGui.QLineEdit(self)
-        self.datumName.setMinimumSize(430, 1)
-        self.datumName.move(10,380)
+        self.datumName.setMinimumSize(370, 1)
+        self.datumName.move(50,240)
 
         # Buttons
         #
         # Cancel button
         self.CancelButton = QtGui.QPushButton('Cancel', self)
         self.CancelButton.setAutoDefault(False)
-        self.CancelButton.move(10, 430)
+        self.CancelButton.move(10, 310)
         # Import button
         self.ImportButton = QtGui.QPushButton('Import', self)
         self.ImportButton.setAutoDefault(False)
-        self.ImportButton.move(360, 430)
+        self.ImportButton.move(380, 310)
         self.ImportButton.setDefault(True)
         # OK button
         #self.OKButton = QtGui.QPushButton('OK', self)

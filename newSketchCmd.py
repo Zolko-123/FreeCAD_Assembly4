@@ -4,12 +4,18 @@
 # newSketchCmd.py 
 
 
+
+
+
+import math, re, os
+
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
-import Part, math, re
+import Part
 
-from libAsm4 import *
+import libAsm4 as Asm4
+
 
 
 
@@ -19,7 +25,7 @@ class newSketch:
     def GetResources(self):
         return {"MenuText": "New Sketch",
                 "ToolTip": "Create a new Sketch in a Part",
-                "Pixmap" : os.path.join( iconPath , 'Asm4_Sketch.svg')
+                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_Sketch.svg')
                 }
 
 

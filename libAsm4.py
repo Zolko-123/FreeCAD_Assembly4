@@ -11,11 +11,12 @@
 """
 
 import os
-__dir__ = os.path.dirname(__file__)
-iconPath = os.path.join( __dir__, 'Resources/icons' )
-libPath = os.path.join( __dir__, 'Resources/library' )
+#__dir__ = os.path.dirname(__file__)
+wbPath   = os.path.dirname(__file__)
+iconPath = os.path.join( wbPath, 'Resources/icons' )
+libPath  = os.path.join( wbPath, 'Resources/library' )
 
-
+from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
 
@@ -36,6 +37,132 @@ def checkWorkbench( workbench ):
             hasWB = True
     return hasWB
 
+
+
+"""
+    +-----------------------------------------------+
+    |           Shows a Warning message box         |
+    +-----------------------------------------------+
+"""
+def warningBox( text ):
+    msgBox = QtGui.QMessageBox()
+    msgBox.setWindowTitle('Warning')
+    msgBox.setIcon(QtGui.QMessageBox.Critical)
+    msgBox.setText("There is already an Assembly4 Model in this document.")
+    msgBox.exec_()
+    return
+
+
+
+"""
+    +-----------------------------------------------+
+    |         populate the ExpressionEngine         |
+    |             for a linked App::Part            |
+    +-----------------------------------------------+
+"""
+def makeExpressionPart( attLink, attPart, attLCS, linkedDoc, linkLCS ):
+    # if everything is defined
+    if attLink and attLCS and linkedDoc and linkLCS:
+        # this is where all the magic is, see:
+        # 
+        # https://forum.freecadweb.org/viewtopic.php?p=278124#p278124
+        #
+        # as of FreeCAD v0.19 the syntax is different:
+        # https://forum.freecadweb.org/viewtopic.php?f=17&t=38974&p=337784#p337784
+        # expr = ParentLink.Placement * ParentPart#LCS.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS.Placement ^ -1
+        # expr = LCS_in_the_assembly.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS.Placement ^ -1
+        # the AttachmentOffset is now a property of the App::Link
+        # expr = LCS_in_the_assembly.Placement * AttachmentOffset * LinkedPart#LCS.Placement ^ -1
+        expr = attLCS+'.Placement * AttachmentOffset * '+linkedDoc+'#'+linkLCS+'.Placement ^ -1'
+        # if we're attached to another sister part (and not the Parent Assembly)
+        # we need to take into account the Placement of that Part.
+        if attPart:
+            expr = attLink+'.Placement * '+attPart+'#'+expr
+    else:
+        expr = False
+    return expr
+
+
+
+
+"""
+    +-----------------------------------------------+
+    |  split the ExpressionEngine of a linked part  |
+    |          to find the old attachment LCS       |
+    |   (in the parent assembly or a sister part)   |
+    |   and the old target LCS in the linked Part   |
+    +-----------------------------------------------+
+"""
+# this is the case for a link to a part coming from another document
+def splitExpressionLink( expr, parent ):
+    # expr = ParentLink.Placement * ParentPart#LCS.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
+    bad_EE = ( '', 'None', 'None' )
+    if not expr:
+        return bad_EE
+    if parent == 'Parent Assembly':
+        # we're attached to an LCS in the parent assembly
+        # expr = LCS_in_the_assembly.Placement * AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
+        ( attLCS, separator, rest1 ) = expr.partition('.Placement * AttachmentOffset * ')
+        ( linkedDoc, separator, rest2 ) = rest1.partition('#')
+        ( linkLCS, separator, rest3 ) = rest2.partition('.Placement ^ ')
+        restFinal = rest3[0:2]
+        attLink = parent
+        attPart = 'None'
+        #return ( restFinal, 'None', 'None', 'None', 'None', 'None')
+    else:
+        # we're attached to an LCS in a sister part
+        # expr = ParentLink.Placement * ParentPart#LCS.Placement * AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
+        ( attLink,    separator, rest1 ) = expr.partition('.Placement * ')
+        ( attPart,    separator, rest2 ) = rest1.partition('#')
+        ( attLCS,     separator, rest3 ) = rest2.partition('.Placement * AttachmentOffset * ')
+        ( linkedDoc, separator, rest4 ) = rest3.partition('#')
+        ( linkLCS,    separator, rest5 ) = rest4.partition('.Placement ^ ')
+        restFinal = rest5[0:2]
+        #return ( restFinal, 'None', 'None', 'None', 'None', 'None')
+    if restFinal=='-1' and attLink==parent :
+        # wow, everything went according to plan
+        # retval = ( expr, attPart, attLCS, constrLink, partLCS )
+        retval = ( attLink, attLCS, linkLCS )
+    else:
+        # rats ! Didn't succeed in decoding the ExpressionEngine.
+        # But still, if the decode is unsuccessful, put some text
+        retval = bad_EE
+    return retval
+
+
+# this is the case for a link to a part coming from the same document as the assembly
+def splitExpressionDoc( expr, parent ):
+    # expr = ParentLink.Placement * LCS_parent.Placement * constr_linkName.AttachmentOffset * LCS_linkedPart.Placement ^ -1
+    # expr = LCS_model.Placement * constr_linkName.AttachmentOffset * LCS_linkedPart.Placement ^ -1
+    bad_EE = ( '', 'None', 'None' )
+    if not expr:
+        return bad_EE
+    if parent == 'Parent Assembly':
+        # we're attached to an LCS in the parent assembly
+        # expr = LCS_in_the_assembly.Placement * constr_linkName.AttachmentOffset * LCS_linkedPart.Placement ^ -1
+        ( attLCS, separator, rest1 ) = expr.partition('.Placement * AttachmentOffset * ')
+        ( linkLCS, separator, rest2 ) = rest1.partition('.Placement ^ ')
+        restFinal = rest2[0:2]
+        attLink = parent
+        attPart = 'None'
+        #return ( restFinal, 'None', 'None', 'None', 'None', 'None')
+    else:
+        # we're attached to an LCS in a sister part
+        # expr = ParentLink.Placement * LCS_parent.Placement * constr_linkName.AttachmentOffset * LCS_linkedPart.Placement ^ -1
+        ( attLink,    separator, rest1 ) = expr.partition('.Placement * ')
+        ( attLCS,     separator, rest2 ) = rest1.partition('.Placement * AttachmentOffset * ')
+        ( linkLCS,    separator, rest3 ) = rest2.partition('.Placement ^ ')
+        restFinal = rest3[0:2]
+        #return ( restFinal, 'None', 'None', 'None', 'None', 'None')
+    if restFinal=='-1' and attLink==parent :
+        # wow, everything went according to plan
+        # retval = ( expr, attPart, attLCS, constrLink, partLCS )
+        retval = ( attLink, attLCS, linkLCS )
+    else:
+        # rats ! Didn't succeed in decoding the ExpressionEngine.
+        # But still, if the decode is unsuccessful, put some text
+        retval = bad_EE
+    return retval
 
 
 """
@@ -77,6 +204,15 @@ def splitExpressionDatum( expr ):
         # rats ! But still, if the decode is unsuccessful, put some text
         retval = ( restFinal, 'None', 'None' )
     return retval
+
+
+
+"""
+    +-----------------------------------------------+
+    |        ExpressionEngine for Fasteners         |
+    +-----------------------------------------------+
+"""
+# is in the FastenersLib.py file
 
 
 

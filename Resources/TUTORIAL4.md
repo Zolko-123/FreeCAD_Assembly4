@@ -6,6 +6,6 @@
 
 An assembly of Lego parts
 
-![](Resources/media/Lego_House+Garden.png)
+![](media/Lego_House+Garden.png)
 
 

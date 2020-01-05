@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
 # coding: utf-8
 #
-# placeDatumCmd.py
+# VariablesLib.py
 
+
+import math, re, os
 
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
-import Part, math, re
+import Part
 
-from libAsm4 import *
+import libAsm4 as Asm4
+
 
 
 
@@ -45,7 +48,7 @@ class addVariable( QtGui.QDialog ):
     def GetResources(self):
         return {"MenuText": "Add Variable",
                 "ToolTip": "Add Variable",
-                "Pixmap" : os.path.join( iconPath , 'Asm4_Variables.svg')
+                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_Variables.svg')
                 }
 
 
@@ -87,9 +90,11 @@ class addVariable( QtGui.QDialog ):
     +-----------------------------------------------+
     """
     def Activated(self):
-
-        # check that we have selected a PartDesign::CoordinateSystem
+        # retriev the Variables object
         self.Variables = App.ActiveDocument.getObject('Variables')
+        # if it doesn't exist then create it (for older Asm4 documents)
+        if not self.Variables:
+            self.Variables =  App.ActiveDocument.getObject('Model').newObject('App::FeaturePython','Variables')
 
         # Now we can draw the UI
         self.drawUI()
@@ -98,10 +103,12 @@ class addVariable( QtGui.QDialog ):
         # get all supported Property types
         for prop in self.Variables.supportedProperties():
             if prop in self.allowedProperties:
-                self.typeList.addItem(prop)
+                # remove the leading 'App::Property' for clarity
+                self.typeList.addItem(prop[13:])
 
         # find the Float property
-        propFloat = self.typeList.findText( 'App::PropertyFloat' )
+        # propFloat = self.typeList.findText( 'App::PropertyFloat' )
+        propFloat = self.typeList.findText( 'Float' )
         # if not found
         if propFloat == -1:
             self.typeList.setCurrentIndex( 0 )
@@ -122,10 +129,11 @@ class addVariable( QtGui.QDialog ):
         varName = self.varName.text()
         if varName:
             # add it to the Variables group of the Variables FeaturePython object
-            var = self.Variables.addProperty( propType, varName, 'Variables' )
+            var = self.Variables.addProperty( 'App::Property'+propType, varName, 'Variables' )
             # if the variable's value is defined and it's a float
             varValue = self.varValue.value()
-            if varValue and propType=='App::PropertyFloat':
+            #if varValue and propType=='App::PropertyFloat':
+            if varValue and propType=='Float':
                 setattr( self.Variables, varName, varValue )
             self.close()
         else:
@@ -150,7 +158,7 @@ class addVariable( QtGui.QDialog ):
     def drawUI(self):
         # Our main window will be a QDialog
         self.setWindowTitle('Add Variable')
-        self.setWindowIcon( QtGui.QIcon( os.path.join( iconPath , 'FreeCad.svg' ) ) )
+        self.setWindowIcon( QtGui.QIcon( os.path.join( Asm4.iconPath , 'FreeCad.svg' ) ) )
         self.setMinimumSize(470, 330)
         self.resize(470,330)
         self.setModal(False)

@@ -1,15 +1,19 @@
 #!/usr/bin/env python3
 # coding: utf-8
 # 
-# newPointCmd.py 
+# newDatumCmd.py 
 
+
+
+import math, re, os
 
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
-import Part, math, re
+import Part
 
-from libAsm4 import *
+import libAsm4 as Asm4
+
 
 
 """
@@ -25,35 +29,35 @@ class newDatum:
             self.datumType   = 'PartDesign::Point'
             self.menutext    = "New Point"
             self.tooltip     = "Create a new Datum Point in a Part"
-            self.icon        = os.path.join( iconPath , 'Asm4_Point.svg')
+            self.icon        = os.path.join( Asm4.iconPath , 'Asm4_Point.svg')
             self.datumColor  = (0.00,0.00,0.00)
             self.datumAlpha  = []
         elif self.datumName == 'Axis':
             self.datumType   = 'PartDesign::Line'
             self.menutext    = "New Axis"
             self.tooltip     = "Create a new Datum Axis in a Part"
-            self.icon        = os.path.join( iconPath , 'Asm4_Axis.svg')
+            self.icon        = os.path.join( Asm4.iconPath , 'Asm4_Axis.svg')
             self.datumColor  = (0.00,0.00,0.50)
             self.datumAlpha  = []
         elif self.datumName == 'Plane':
             self.datumType   = 'PartDesign::Plane'
             self.menutext    = "New Plane"
             self.tooltip     = "Create a new Datum Plane in a Part"
-            self.icon        = os.path.join( iconPath , 'Asm4_Plane.svg')
+            self.icon        = os.path.join( Asm4.iconPath , 'Asm4_Plane.svg')
             self.datumColor  = (0.50,0.50,0.50)
             self.datumAlpha  = 80
         elif self.datumName == 'LCS':
             self.datumType   = 'PartDesign::CoordinateSystem'
             self.menutext    = "New Coordinate System"
             self.tooltip     = "Create a new Coordinate System in a Part"
-            self.icon        = os.path.join( iconPath , 'Asm4_AxisCross.svg')
+            self.icon        = os.path.join( Asm4.iconPath , 'Asm4_AxisCross.svg')
             self.datumColor  = []
             self.datumAlpha  = []
         elif self.datumName == 'Sketch':
             self.datumType   = 'Sketcher::SketchObject'
             self.menutext    = "New Sketch"
             self.tooltip     = "Create a new Sketch in a Part"
-            self.icon        = os.path.join( iconPath , 'Asm4_Sketch.svg')
+            self.icon        = os.path.join( Asm4.iconPath , 'Asm4_Sketch.svg')
             self.datumColor  = []
             self.datumAlpha  = []
 
@@ -118,6 +122,12 @@ class newDatum:
             if ok and text:
                 # App.activeDocument().getObject('Model').newObject( 'Sketcher::SketchObject', text )
                 createdDatum = partChecked.newObject( self.datumType, text )
+                # automatic resizing of datum Plane sucks, so we set it to manual
+                if self.datumType=='PartDesign::Plane':
+                    createdDatum.ResizeMode = 'Manual'
+                    createdDatum.Length = 100
+                    createdDatum.Width = 100
+                # if color or transparency is specified for this datum type
                 if self.datumColor:
                     Gui.ActiveDocument.getObject(createdDatum.Name).ShapeColor = self.datumColor
                 if self.datumAlpha:
@@ -127,7 +137,6 @@ class newDatum:
                 Gui.Selection.addSelection( App.ActiveDocument.Name, partChecked.Name, createdDatum.Name+'.' )
                 # Gui.runCommand('Part_EditAttachment',0)
                 Gui.runCommand('Part_EditAttachment')
-                partChecked.recompute(True)
 
 
 
@@ -141,7 +150,7 @@ class newHole:
         return {"MenuText": "New Hole LCS",
                 "Accel": "Ctrl+H",
                 "ToolTip": "Create a Coordinate System attached to a hole",
-                "Pixmap" : os.path.join( iconPath , 'Asm4_Hole.svg')
+                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_Hole.svg')
                 }
 
 

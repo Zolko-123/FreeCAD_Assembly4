@@ -3,16 +3,18 @@
 #
 # newLinkArray.py
 
+import math, re, os
+
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
 import Draft
 
-from libAsm4 import *
+import libAsm4 as Asm4
 
 
 # see whether the Fasteners Workbench is installed
-if checkWorkbench('FastenersWorkbench'):
+if Asm4.checkWorkbench('FastenersWorkbench'):
     from FastenerBase import FSBaseObject
 
 
@@ -23,7 +25,7 @@ class newLinkArray():
     def GetResources(self):
         return {"MenuText": "New Link Array",
                 "ToolTip": "Create a new orthogonal or polar array from links",
-                "Pixmap": os.path.join(iconPath, 'Asm4_LinkArray.svg')
+                "Pixmap": os.path.join(Asm4.iconPath, 'Asm4_LinkArray.svg')
                 }
 
 
