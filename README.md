@@ -32,11 +32,11 @@ Assembly 4 is available through the FreeCAD Addon Manager (menu Tools > Addon Ma
 
 You can use the [example assemblies](https://github.com/Zolko-123/FreeCAD_Assembly4/tree/master/Examples) to experiment with this workbench's features. Open one _asm_something.fcstd_ file and try out the functions. There are `ReadMe.txt` files in each directory with some explanations. There are tutorials available to lear tu use Assembly4:
 
-* [a quick assembly from scratch](TUTORIAL1.md)
-* [a cinematic assembly reusing existing FreeCAD parts](TUTORIAL2.md)
-* [a multy-layered assembly for advanced users](TUTORIAL3.md)
-* [a Lego assembly](TUTORIAL4.md)
-* [an architectural assembly](TUTORIAL5.md)
+* [a quick assembly from scratch](Resources/TUTORIAL1.md)
+* [a cinematic assembly reusing existing FreeCAD parts](Resources/TUTORIAL2.md)
+* [a multy-layered assembly for advanced users](Resources/TUTORIAL3.md)
+* [a Lego assembly](Resources/TUTORIAL4.md)
+* [an architectural assembly](Resources/TUTORIAL5.md)
 
 
 
@@ -44,7 +44,7 @@ You can use the [example assemblies](https://github.com/Zolko-123/FreeCAD_Assemb
 
 Assembly4 uses a very powerful feature of FreeCAD, the **ExpressionEngine**. Some FreeCAD object's parameters can be entered through mathematical formulae, that are evaluated by this ExpressionEngine. For Assembly4, it's the parameter _`Placement`_ of the inserted _`App::Link`_ object that is calculated, such that 2 LCS - one in the linked part and the one in the assembly - are superimposed. 
 
-You can find more informations in the detailed [instructions](INSTRUCTIONS.md).
+You can find more informations in the detailed [instructions](Resources/INSTRUCTIONS.md).
 
 
 ## Parts
@@ -73,6 +73,12 @@ This is then a raw interface between FreeCAD `App::Part` objects through the `Ap
 
 
 ## Release notes
+
+* 2020.01.06 (**version 0.7.7**) :  
+Moved the turorials to the Resources directory  
+import libAsm4 as Asm4  
+Added a Help command (dummy placeholder)  
+Ported example2 to the latest Asm4 format
 
 * 2019.12.12 (**version 0.7.6**) :  
 Improved animation and datum import.

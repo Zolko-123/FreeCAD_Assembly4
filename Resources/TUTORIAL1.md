@@ -4,7 +4,7 @@
 
 This tutorial will walk you through to build the following assembly:
 
-![](Resources/media/Asm_tuto1_final.png)
+![](media/Asm_tuto1_final.png)
 
 * The axis is designed in FreeCAD with the PartDesign workbench
 * The bearings are imported from a STEP file
@@ -14,19 +14,19 @@ This tutorial will walk you through to build the following assembly:
 
 It is assumed that you have read the [Assembly4 instructions](INSTRUCTIONS.md) and that the Assembly4 workbench has been previously installed. It is also assumed that you have basic knowledge of FreeCAD, especially the _PartDesign_ workbench.
 
-Download the STEP file [`bearing_20x37x9.stp`](Resources/parts/bearing_20x37x9.stp ) (direct link to [`bearing_20x37x9.stp`](https://github.com/Zolko-123/FreeCAD_Assembly4/raw/master/Resources/parts/bearing_20x37x9.stp), right-click and save the file) to your local hard drive. 
+Download the STEP file [`bearing_20x37x9.stp`](parts/bearing_20x37x9.stp ) (direct link to [`bearing_20x37x9.stp`](https://github.com/Zolko-123/FreeCAD_Assembly4/raw/master/Resources/parts/bearing_20x37x9.stp), right-click and save the file) to your local hard drive. 
 
 
 ## Toolbar and Menu
 
 Buttons in the toolbar are activated with relevant selection. If a button you want to use is inactive, try to change the selection (with the mouse).
 
-![](Resources/media/Asm4_Toolbar.png)
+![](media/Asm4_Toolbar.png)
 
 
 These functions are also accessible with the Assembly menu:
 
-![](Resources/media/Asm4_Menu.png)
+![](media/Asm4_Menu.png)
 
 
 ## Create the documents
@@ -56,11 +56,11 @@ Switch to document "_axis_" (by clicking on its tab).
 * Create a new Sketch (should be in the active body). In the Task view, select _XY_Plane_
 * Draw the following sketch:
 
-  ![](Resources/media/Sketch_Axis.png)
+  ![](media/Sketch_Axis.png)
 
 * Make a revolution of the Sketch:
 
-  ![](Resources/media/Sketch_Revolution.png)
+  ![](media/Sketch_Revolution.png)
 
 ### LCS_1
 
@@ -70,7 +70,7 @@ Switch to document "_axis_" (by clicking on its tab).
 * Edit its MapMode in the Placement in its Property View (see inlay in screenshot below on how to activate it)
 * Choose the circle as shown:
 
-  ![](Resources/media/LCS_Attachment.png)
+  ![](media/LCS_Attachment.png)
 
 * Select the option **Concentric**
 * Click **OK**
@@ -99,16 +99,16 @@ If you haven't done so then download the STEP file [`bearing_20x37x9.stp`](https
 **Result:** This will create a bunch of solids in the bearing document, but not in the Model. This is a [documented limitation of `App::Part`](https://www.freecadweb.org/wiki/Std_Part) and must be dealt-with manually. 
 
 
-  ![](Resources/media/Import_bearing.stp.png)
+  ![](media/Import_bearing.stp.png)
 
 * Select within the Model tree, all the imported solids and drag them over the Model (in the tree). **Note** how the cursor changes to a small hand and an arrow appears close to the cursor, meaning that the solids are moved:
 
-  ![](Resources/media/Move_bearingsolids.png)
+  ![](media/Move_bearingsolids.png)
 
 * You can check that the solids have indeed been moved by collapsing the Model tree (with the small triangle) and hoovering over the Model in the tree with the mouse.  
   **Note:** If it didn't work, fix it. If necessary, delete the file _bearing.fcstd_ and begin again.
 
-  ![](Resources/media/Show_bearingmoved.png)
+  ![](media/Show_bearingmoved.png)
 
 ### LCS
 
@@ -123,13 +123,13 @@ If you haven't done so then download the STEP file [`bearing_20x37x9.stp`](https
 #### Placing LCS
 * Now place LCS_1 by selecting _LCS_1_ in the tree, toggle its _MapMode_, select an edge as shown in the screenshot below, and choose the **Concentric** option:
 
-  ![](Resources/media/Attach_LCS1.png)
+  ![](media/Attach_LCS1.png)
 
 * Click **OK**
 
 * Now place LCS_2 by selecting _LCS_2_ in the tree, toggle its _MapMode_, select an edge as shown in the screenshot below, and choose the **Concentric** option:
 
-  ![](Resources/media/Attach_LCS2.png)
+  ![](media/Attach_LCS2.png)
 
 * Click **OK**
 
@@ -145,18 +145,18 @@ If you haven't done so then download the STEP file [`bearing_20x37x9.stp`](https
 ### Insert axis
 
 * Select **Menu > Assembly > Link Eternal Part** , or in the toolbar click on :  
-![](Resources/icons/Link_Part.svg)  
+![](icons/Link_Part.svg)  
 
 * This will bring up the following dialog:
 
-  ![](Resources/media/Insert_axis.png)
+  ![](media/Insert_axis.png)
 
 * Select **axis#Model**  
 * Leave the proposed default name _axis_  
 * Click **Insert part**, it will bring up the _Place Link_ dialog:
 
 
-  ![](Resources/media/Place_axis.png)
+  ![](media/Place_axis.png)
 
 * Make the same selections as in the screenshot above
   * in the left panel _Select LCS in Part_ choose **LCS_0**
@@ -183,7 +183,7 @@ If you haven't done so then download the STEP file [`bearing_20x37x9.stp`](https
 
 * Click on **Insert External part**, select **bearing#Model**
 
-  ![](Resources/media/Insert_bearing1.png)
+  ![](media/Insert_bearing1.png)
 
 * Change the proposed name _bearing_ to _bearing_1_ (we will have 3 bearings)
 
@@ -195,7 +195,7 @@ If you haven't done so then download the STEP file [`bearing_20x37x9.stp`](https
   * in the right panel _Select LCS in Parent_ choose _LCS_0_
   * Click **Show**
 
-  ![](Resources/media/Place_bearing1.png)
+  ![](media/Place_bearing1.png)
 
 **Result:** As you can see, this has placed the bearing but in an awkward orientation. This is normal, and it's due to the different orientations of the LCS during their mapping.  
 
@@ -203,7 +203,7 @@ This is easy to correct:
 
 * Click on the _Rot X_ and _Rot Y_ and _Rot Z_ buttons until the bearing is in its correct position and orientation. You can either spend time thinking about which axis (X-Y-Z) to rotate, or try everything until it fits. The result will be the same:
 
-  ![](Resources/media/Place_bearing1ok.png)
+  ![](media/Place_bearing1ok.png)
 
 * In this case 1 _Rot Y_ was needed. 
 
@@ -226,7 +226,7 @@ This is easy to correct:
     **Note:** When an LCS has been renamed (as we did in the _bearing_ part) this is how it appears.
   * Click **Show**
 
-  ![](Resources/media/Place_bearing2.png)
+  ![](media/Place_bearing2.png)
 
 * **Result:** This time the orientation is correct.  
 * Click **OK**
@@ -244,7 +244,7 @@ This is easy to correct:
   * Click **Show**
   * Orient _bearing_3_ with the buttons _Rot X_ and _Rot Y_ and _Rot Z_ until it is in its correct position
 
-  ![](Resources/media/Place_bearing3.png)
+  ![](media/Place_bearing3.png)
 
 * Click **OK**
 
@@ -260,7 +260,7 @@ This is where the **AttachmentOffset** property of the instance comes in play. I
 
 * Open the _MapMode_ of the _AttachmentOffset_ property
 
-  ![](Resources/media/AO_bearing_3.png)
+  ![](media/AO_bearing_3.png)
 
 * In the _Z_ field type: **2mm**
 
@@ -270,7 +270,7 @@ This is where the **AttachmentOffset** property of the instance comes in play. I
 
 * Save
 
-  ![](Resources/media/Warning_externalfiles.png)
+  ![](media/Warning_externalfiles.png)
 
 * Click **Yes**
 
@@ -291,17 +291,17 @@ This is where the **AttachmentOffset** property of the instance comes in play. I
 
 * Modify the Sketch like in the image below:
 
-  ![](Resources/media/Sketch_Axis_mod.png)
+  ![](media/Sketch_Axis_mod.png)
 
 * Click **Close**
 
 * The assembly has updated, the axis is longer, and all the bearings have followed:
 
-  ![](Resources/media/Asm_tuto1.png)
+  ![](media/Asm_tuto1.png)
 
 By right-clicking on the Body inside axis, you can **Toggle active body** and edit it with _PartDesign_, modifying and adding features, like for example a chamfer:
 
-![](Resources/media/Asm_tuto1_final.png)
+![](media/Asm_tuto1_final.png)
 
 Should it happen that you make modifications in the assembly and some parts didn't respond, right-click on that part and choose in the contextual menu **Recompute object**.  
 
