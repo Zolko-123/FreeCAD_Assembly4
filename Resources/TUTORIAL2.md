@@ -106,18 +106,6 @@ Now we'll draw the sketch. It is important to note that there are many ways to b
 
 **Result:** Our master sketch is finished
 
-Before going any further, we'll check that our sketch is working as expected by animating it:
-
-* Click on the **Animate Assembly** button (or menu **Assembly -> Animate Assembly**)
-* Select the variable _Angle_disk_ 
-* Choose 30 and 390 as _Begin_ and _End_ values
-* Choose 1 as _Step_ and 0 for _Sleep_
-* Click **Run**
-
-![](media/tuto2_animateSketch.png)
-
-**Result:** Check that the lines of the _Sketch_master_ move as expected. If not, something went wrong and you must fix it before going further.
-
 
 ### Create the attachment _LCS_
 
@@ -146,6 +134,20 @@ As a final check before doing the part designs you can animate the master sketch
 * _LCS_0_ for the _base_ part
 * _LCS_disk_ for the _disk_ part
 * _LCS_arm_ for the _arm_ part
+
+### Animate master sketch
+
+Before going any further, we'll check that our sketch is working as expected by animating it:
+
+* Click on the **Animate Assembly** button (or menu **Assembly -> Animate Assembly**)
+* Select the variable _Angle_disk_ 
+* Choose 40 and 400 as _Begin_ and _End_ values
+* Choose 1 as _Step_ and 0 for _Sleep_
+* Click **Run**
+
+![](media/tuto2_animateSketch.png)
+
+**Result:** Check that the lines of the _Sketch_master_ move as expected and that all _LCS_ follow them. If not, something went wrong and you must fix it before going further.
 
 
 ## Parts
