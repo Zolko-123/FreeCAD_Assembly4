@@ -5,7 +5,7 @@
 
 In this tutorial we'll assemble 3 parts inside a single FreeCAD document, and animate the movement using a maseter-sketch:
 
-![](media/asm_Yoke.png)
+![](media/tuto2_final.png)
 
 * the base is fixed and holds 2 axes
 * the disk rotates around one of the axes
@@ -152,18 +152,59 @@ As a final check before doing the part designs you can animate the master sketch
 
 We will now design the 3 parts that build our assembly. In order to avoid confusion, we recommend to hide all other parts than the one you are actively designing. 
 
+We'll do the geometrical design with the PartDesign workbench. It is supposed that you know how to design these parts using FreeCAD, we won't detail the method.
 
 ### Base part
 
+* Hide the parts _disk_ and _arm_, and also hide the assembly _Model_
+* Select the part _base_
+* Create a new Body with the Assembly4 workbench (*not* through the _PartDesign_ workbench)
+* and **Toggle Active Body**
+  * this switches to the _PartDesign_ workbench (that's OK now)
+* Create the following geometry:
+  * set the distance between the 2 pivots to the variable _Disk_pivot_ 
+
+![](media/tuto2_base.png)
+
+
+**Result:** the part _base_ is finished
 
 ### Disk part
+
+* Select the part _disk_
+* Create a new Body 
+* Create a new Body with the Assembly4 workbench (*not* through the _PartDesign_ workbench)
+  * this switches to the _PartDesign_ workbench (that's OK now)
+* Create the following geometry:
+  * set nipple along the X axis at the distance _Disk_pivot_ from the origin
+
+![](media/tuto2_disk.png)
+
+
+**Result:** the part _disk_ is finished
 
 
 ### Arm part
 
+* Select the part _arm_
+* Create a new Body 
+* Create a new Body with the Assembly4 workbench (*not* through the _PartDesign_ workbench)
+  * this switches to the _PartDesign_ workbench (that's OK now)
+* Create the following geometry:
+  * set slot along the X axis with a length _R_disk_ × _2_ 
+  * set the distance of the pivot hole at the distance _Disk_pivot_ from the origin
 
+![](media/tuto2_armLCS.png)
 
+* Switch to the Assembly4 workbench
+* Select the part _arm_
+* Create a new coordinate system, call it _LCS_pivot_
+  * this _LCS_pivot_ must be at the root of the part _arm_ and *not* in the *Body*
+* Attach _LCS_pivot_ the the edge of the circle with the _Concentric_ mode
 
+**Result:** the part _arm_ is finished
+
+Save document.
 
 
 ## Assembly
@@ -176,16 +217,57 @@ The only difference is that, since a FreeCAD document can only contain one Assem
 
 ### Assemble the Base part
 
+* Hide all three parts _base_, _disk_ and _arm_, and show the assembly _Model_
+* Insert the part _base_
+* Attach it's _LCS_1_ to the _LCS_0_ of the assembly
+
+![](media/tuto2_insertBase.png)
+
+**Note:** Since all objects in a FreeCAD document need to have a unique name, the links to the parts we inserted cannot have the same name as the original parts, therefore FreeCAD automatically renamed the link to _base_ as _base_001_. This is another limitation of single documents assemblies.  
+
 
 ### Assemble the Disk part
 
+* Set the variable _Angle_disk_ to 45 for better visualisation
+* Insert the part _disk_
+* Attach it's _LCS_1001_ to the _LCS_disk_ of the assembly
+
+![](media/tuto2_insertDisk.png)
 
 ### Assemble the Arm part
+
+* Insert the part _arm_
+* Attach it's _LCS_pivot_ to the _LCS_arm_ of the assembly
+  * you might need to add a rotation around Z _Rot Z_ to correctly orientate the arm
+
+![](media/tuto2_insertArm.png)
+
+
+### Adjust heights
+
+Since we attached all parts to their respective coordinate systems, they are correctly placed and oriented, but if you look carefully they collide because we didn't care about their heights. This must be adjusted using the link's AttachmentOffset property:
+
+* Select the instance _arm001_
+* Set the z position of the AttachmentOffset property to 10
+
+![](media/tuto2_armHeight.png)
 
 
 ### Animate the assembly
 
+The final step: animate the assembly and check that all parts move as desired:
 
+* Click on the **Animate Assembly** button (or menu **Assembly -> Animate Assembly**)
+* Select the variable _Angle_disk_ 
+* Choose 40 and 400 as _Begin_ and _End_ values
+* Choose 4 as _Step_ and 0 for _Sleep_
+* Click **Run**
+
+![](media/tuto2_animateAssembly.png)
+
+**Note:** You can safely ignore the warning: 
+
+_PartDesign::CoordinateSystem / LCS_pivot: Links go out of the allowed scope_
 
 ## Feedback
 Did this tutorial help you, do you have anything to share? Please open a ticket or mention something in the [dedicated FreeCAD forum thread](https://forum.freecadweb.org/viewtopic.php?f=20&t=34806) pertaining to this tutorial. You can also make a PR with your proposed changes.
