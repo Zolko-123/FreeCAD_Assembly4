@@ -1,4 +1,4 @@
-# FreeCAD Assembly 4 / Assembly Without Solver
+# FreeCAD Assembly 4
 
 
 ## Tutorial 2
@@ -16,7 +16,7 @@ In this tutorial we'll assemble 3 parts inside a single FreeCAD document, and an
 
 ### Prerequisites
 
-It is assumed that you have completed the [1st Assembly4 tutorial](TUTORIAL1.md) and that you have basic knowledge of FreeCAD, especially the _PartDesign_ and _Sketcher_ workbenches.
+It is assumed that you have completed the [1st Assembly4 tutorial](TUTORIAL1.md) and that you have some experience with designing with FreeCAD, especially the _PartDesign_ and _Sketcher_ workbenches.
 
 
 ## Create the document and the parts:
@@ -54,7 +54,7 @@ At first glance, this functional assembly, or top-down design, might seem less i
 We will create variables that drive our assembly. First, create a variable that is the angle of rotation of the disk w.r.t. the base:
 
 * Create a new variable: **Assembly > Add variable**
-* Choose the Type : _Float_
+* Choose the Type : _Float_ (this a decimal floating-point number)
 * Name it: Angle_disk
 * Set default value to 30.00
 * Click **OK**
@@ -77,12 +77,11 @@ We will now create the proper master sketch of our assembly:
 * As Attachment mode select _Object's XY_
 * Click **OK**
 
-**Result:** We have created an empty sketch in the Assembly4 Model and attached it to the X-Y plane of our assembly.
-
-Now we'll draw the sketch. It is important to note that there are many ways to build a master-sketch to represent a given assembly structure, so we suggest you take your time to build a well working master sketch before going into the detailed geometrical design of your parts. In our example, the kinematics is volontarily very simple and thus the master sketch is also very simple:
+**Result:** We have created an empty sketch in the Assembly4 Model and attached it to the X-Y plane of our assembly. Now we'll draw the sketch:
 
 * Right-click on _Sketch_master_ and choose **Edit sketch**. 
 * Draw a first straight line from the origin.
+  * this line represents the rotation orientation of the _disk_ 
 * Create an angle constraint between the line and the X-axis
 * Clicking on the _f(x)_ sign at the edge of the input field pops-up the ExpressionEngine editor
 * Enter _Variables.Angle_disk_ (watch out for the autocompletion)
@@ -95,7 +94,9 @@ Now we'll draw the sketch. It is important to note that there are many ways to b
 **Result:** We have assigned the value of the variable _Angle_disk_ to the angle between this line and the X-axis. 
 
 * In the same way, set the length of the line to _R_disk_
+  * the edge of the line represents the position of the nipple on the _disk_ that slides in the slot of the _arm_
 * Add another line between the edge of this line and the X-axis
+  * this line represents the orientation of the _arm_
 * Set the distance between the edge of this second line and the Y-axis to _Dist_pivot_ 
 
 ![](media/tuto2_sketchFinished.png)
@@ -104,14 +105,17 @@ Now we'll draw the sketch. It is important to note that there are many ways to b
 
 * Close
 
-**Result:** Our master sketch is finished
+**Result:** Our master sketch is finished. 
+
+**Note:** It is important to note that there are many ways to build a master-sketch to represent a given assembly structure, so we suggest you take your time to build a well working master sketch before going into the detailed geometrical design of your parts. In our example, the kinematics is volontarily very simple and thus the master sketch is also very simple. As a general rule, any problem that can be reduced to a 2D geometry can be easily modeled in this way. Some assemblies that are in 3D space can be modeled by a series of master sketches, but there are also some fully 3D setups that cannot, in any way, be modeled like this: a hexapod for example. 
+
 
 
 ### Create the attachment _LCS_
 
-We will now create two LCS to attach the rotating _disk_ and the pendling _arm_. The _base_ will be fixed to the existing _LCS_0_ of the assembly. 
+We will now create two LCS to attach the rotating _disk_ and the pendling _arm_. The _base_ will be fixed to the existing _LCS_0_ of the assembly. These coordinate systems (of type _PartDesign::CoordinateSystem_) are used in the **Assembly4** way to attach links to parts into the assembly.
 
-**Note:** the default coordinate systems of the 3 (empty) parts can be in the way of easy selection, therefore it can be useful to hide all the 3 parts temporarily. When hidden, an object's icon becomes grayed in the Model tree. 
+**Note:** the default coordinate systems of the 3 (empty) parts can be in the way of easy selection, therefore it can be useful to hide all the 3 parts temporarily. When hidden, an object's icon becomes grayed in the Model tree. As a general rule, don't hesitate to show and hide parts as necessary: sometimes it's better to have every-thing visible, sometimes it's better to see a single object.
 
 * Select the Assembly4 Model and create a new Coordinate System : **Assembly -> New Coordinate System**)
 * Call it _LCS_disk_
@@ -160,7 +164,7 @@ We'll do the geometrical design with the PartDesign workbench. It is supposed th
 
 * Hide the parts _disk_ and _arm_, and also hide the assembly _Model_
 * Select the part _base_
-* Create a new Body with the Assembly4 workbench (*not* through the _PartDesign_ workbench)
+* Create a new Body with the Assembly4 workbench (**not** through the _PartDesign_ workbench)
 * and **Toggle Active Body**
   * this switches to the _PartDesign_ workbench (that's OK now)
 * Create the following geometry:
@@ -175,7 +179,7 @@ We'll do the geometrical design with the PartDesign workbench. It is supposed th
 
 * Select the part _disk_
 * Create a new Body 
-* Create a new Body with the Assembly4 workbench (*not* through the _PartDesign_ workbench)
+* Create a new Body with the Assembly4 workbench (**not** through the _PartDesign_ workbench)
   * this switches to the _PartDesign_ workbench (that's OK now)
 * Create the following geometry:
   * set nipple along the X axis at the distance _Disk_pivot_ from the origin
@@ -190,7 +194,7 @@ We'll do the geometrical design with the PartDesign workbench. It is supposed th
 
 * Select the part _arm_
 * Create a new Body 
-* Create a new Body with the Assembly4 workbench (*not* through the _PartDesign_ workbench)
+* Create a new Body with the Assembly4 workbench (**not** through the _PartDesign_ workbench)
   * this switches to the _PartDesign_ workbench (that's OK now)
 * Create the following geometry:
   * set slot along the X axis with a length _R_disk_ × _2_ 
@@ -201,7 +205,7 @@ We'll do the geometrical design with the PartDesign workbench. It is supposed th
 * Switch to the Assembly4 workbench
 * Select the part _arm_
 * Create a new coordinate system, call it _LCS_pivot_
-  * this _LCS_pivot_ must be at the root of the part _arm_ and *not* in the *Body*
+  * this _LCS_pivot_ must be at the root of the part _arm_ and **not** in the **Body**
 * Attach _LCS_pivot_ the the edge of the circle with the _Concentric_ mode
 
 **Result:** the part _arm_ is finished
@@ -270,6 +274,12 @@ The final step: animate the assembly and check that all parts move as desired:
 **Note:** You can safely ignore the warning: 
 
 _PartDesign::CoordinateSystem / LCS_pivot: Links go out of the allowed scope_
+
+
+## Download
+
+You can downlod the FreeCAD document file presented in this tutorial [`here`](../Examples/asm_tuto2.FCStd) .
+
 
 ## Feedback
 Did this tutorial help you, do you have anything to share? Please open a ticket or mention something in the [dedicated FreeCAD forum thread](https://forum.freecadweb.org/viewtopic.php?f=20&t=34806) pertaining to this tutorial. You can also make a PR with your proposed changes.
