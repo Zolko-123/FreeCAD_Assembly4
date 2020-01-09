@@ -182,7 +182,7 @@ We'll do the geometrical design with the PartDesign workbench. It is supposed th
 * Create a new Body with the Assembly4 workbench (**not** through the _PartDesign_ workbench)
   * this switches to the _PartDesign_ workbench (that's OK now)
 * Create the following geometry:
-  * set nipple along the X axis at the distance _Disk_pivot_ from the origin
+  * set nipple along the X axis at the distance _R_disk_ from the origin
 
 ![](media/tuto2_disk.png)
 
