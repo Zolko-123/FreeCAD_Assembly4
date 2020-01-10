@@ -5,7 +5,7 @@
 
 In this tutorial we'll assemble 3 parts inside a single FreeCAD document, and animate the movement using a maseter-sketch:
 
-![](media/tuto2_final.png)
+![](tuto2_final.png)
 
 * the base is fixed and holds 2 axes
 * the disk rotates around one of the axes
@@ -34,7 +34,7 @@ We start with an empty FreeCAD:
 
 **Result:** The document is now ready to be used by Assembly4. 
 
-![](media/tuto2_tree.png)
+![](tuto2_tree.png)
 
 
 
@@ -61,7 +61,7 @@ We will create variables that drive our assembly. First, create a variable that 
 
 Create in the same way 2 other variables for the disk radius (_R_disk_ with value 100.00) and the distance of the arm's pivot (_Dist_pivot_ with value 300.00).
 
-![](media/tuto2_addVariable.png)
+![](tuto2_addVariable.png)
 
 **Result:** We have created numercial variables in the _App::FeaturePython_ object called _Variables_ (see Model tree), that can be used in the _ExpressionEngine_ of any parameter in this the document with: _Variables.Angle_disk_ , _Variables.Dist_pivot_ and _Variables.R_disk_ 
 
@@ -89,7 +89,7 @@ We will now create the proper master sketch of our assembly:
  
 **Note:** the dimension colour has changed from red to orange (depending on your settings)
 
-![](media/tuto2_Angle_disk.png)
+![](tuto2_Angle_disk.png)
 
 **Result:** We have assigned the value of the variable _Angle_disk_ to the angle between this line and the X-axis. 
 
@@ -99,7 +99,7 @@ We will now create the proper master sketch of our assembly:
   * this line represents the orientation of the _arm_
 * Set the distance between the edge of this second line and the Y-axis to _Dist_pivot_ 
 
-![](media/tuto2_sketchFinished.png)
+![](tuto2_sketchFinished.png)
 
 **Note:** if a FreeCAD sketch is fully constrained then the lines change from white to green (depending on your settings). 
 
@@ -125,7 +125,7 @@ We will now create two LCS to attach the rotating _disk_ and the pendling _arm_.
 * Coose _Align O-X-Y_ as attachment mode
 * Click **OK**
 
-![](media/tuto2_lcsDiskEE.png)
+![](tuto2_lcsDiskEE.png)
 
 **Result:** _LCS_disk_ is now oriented along the first line of _Sketch_master_
 
@@ -149,7 +149,7 @@ Before going any further, we'll check that our sketch is working as expected by 
 * Choose 1 as _Step_ and 0 for _Sleep_
 * Click **Run**
 
-![](media/tuto2_animateSketch.png)
+![](tuto2_animateSketch.png)
 
 **Result:** Check that the lines of the _Sketch_master_ move as expected and that all _LCS_ follow them. If not, something went wrong and you must fix it before going further.
 
@@ -163,14 +163,14 @@ We'll do the geometrical design with the PartDesign workbench. It is supposed th
 ### Base part
 
 * Hide the parts _disk_ and _arm_, and also hide the assembly _Model_
-* Select the part _base_
-* Create a new Body with the Assembly4 workbench (**not** through the _PartDesign_ workbench)
-* and **Toggle Active Body**
+* Select the part _base_ in the Model tree
+* Create a new Body with the Assembly4 workbench (**not** through the _PartDesign_ workbench ! Creating a Body with Assembly4 assures you that the Body is placed inside the part that is selected.)
+* Right-click on the neawly created Body and **Toggle Active Body**
   * this switches to the _PartDesign_ workbench (that's OK now)
 * Create the following geometry:
   * set the distance between the 2 pivots to the variable _Disk_pivot_ 
 
-![](media/tuto2_base.png)
+![](tuto2_base.png)
 
 
 **Result:** the part _base_ is finished
@@ -178,13 +178,11 @@ We'll do the geometrical design with the PartDesign workbench. It is supposed th
 ### Disk part
 
 * Select the part _disk_
-* Create a new Body 
-* Create a new Body with the Assembly4 workbench (**not** through the _PartDesign_ workbench)
-  * this switches to the _PartDesign_ workbench (that's OK now)
+* Create a new Body and activate it
 * Create the following geometry:
   * set nipple along the X axis at the distance _R_disk_ from the origin
 
-![](media/tuto2_disk.png)
+![](tuto2_disk.png)
 
 
 **Result:** the part _disk_ is finished
@@ -193,20 +191,22 @@ We'll do the geometrical design with the PartDesign workbench. It is supposed th
 ### Arm part
 
 * Select the part _arm_
-* Create a new Body 
-* Create a new Body with the Assembly4 workbench (**not** through the _PartDesign_ workbench)
-  * this switches to the _PartDesign_ workbench (that's OK now)
+* Create a new Body and activate it
 * Create the following geometry:
   * set slot along the X axis with a length _R_disk_ × _2_ 
   * set the distance of the pivot hole at the distance _Disk_pivot_ from the origin
-
-![](media/tuto2_armLCS.png)
 
 * Switch to the Assembly4 workbench
 * Select the part _arm_
 * Create a new coordinate system, call it _LCS_pivot_
   * this _LCS_pivot_ must be at the root of the part _arm_ and **not** in the **Body**
-* Attach _LCS_pivot_ the the edge of the circle with the _Concentric_ mode
+* Attach _LCS_pivot_ to the original LCS of the part _arm_ (called _LCS_1002_ in our design, this might be different for your model) with the _Object's X Y Z_ mode
+  * set the ExpressionEngine of the X value in the _AttachmentOffset_ to _Disk_pivot_
+* Click **OK**
+
+![](tuto2_armLCS.png)
+
+
 
 **Result:** the part _arm_ is finished
 
@@ -227,7 +227,7 @@ The only difference is that, since a FreeCAD document can only contain one Assem
 * Insert the part _base_
 * Attach it's _LCS_1_ to the _LCS_0_ of the assembly
 
-![](media/tuto2_insertBase.png)
+![](tuto2_insertBase.png)
 
 **Note:** Since all objects in a FreeCAD document need to have a unique name, the links to the parts we inserted cannot have the same name as the original parts, therefore FreeCAD automatically renamed the link to _base_ as _base_001_. This is another limitation of single documents assemblies.  
 
@@ -238,7 +238,7 @@ The only difference is that, since a FreeCAD document can only contain one Assem
 * Insert the part _disk_
 * Attach it's _LCS_1001_ to the _LCS_disk_ of the assembly
 
-![](media/tuto2_insertDisk.png)
+![](tuto2_insertDisk.png)
 
 ### Assemble the Arm part
 
@@ -246,7 +246,7 @@ The only difference is that, since a FreeCAD document can only contain one Assem
 * Attach it's _LCS_pivot_ to the _LCS_arm_ of the assembly
   * you might need to add a rotation around Z _Rot Z_ to correctly orientate the arm
 
-![](media/tuto2_insertArm.png)
+![](tuto2_insertArm.png)
 
 
 ### Adjust heights
@@ -256,7 +256,7 @@ Since we attached all parts to their respective coordinate systems, they are cor
 * Select the instance _arm001_
 * Set the z position of the AttachmentOffset property to 10
 
-![](media/tuto2_armHeight.png)
+![](tuto2_armHeight.png)
 
 
 ### Animate the assembly
@@ -269,16 +269,13 @@ The final step: animate the assembly and check that all parts move as desired:
 * Choose 4 as _Step_ and 0 for _Sleep_
 * Click **Run**
 
-![](media/tuto2_animateAssembly.png)
+![](tuto2_animateAssembly.png)
 
-**Note:** You can safely ignore the warning: 
-
-_PartDesign::CoordinateSystem / LCS_pivot: Links go out of the allowed scope_
 
 
 ## Download
 
-You can downlod the FreeCAD document file presented in this tutorial [`here`](../Examples/asm_tuto2.FCStd) .
+You can downlod the FreeCAD document file presented in this tutorial [`here`](asm_tuto2.FCStd) .
 
 
 ## Feedback
