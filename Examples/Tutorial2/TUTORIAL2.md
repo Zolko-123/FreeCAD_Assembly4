@@ -3,7 +3,7 @@
 
 ## Tutorial 2
 
-In this tutorial we'll assemble 3 parts inside a single FreeCAD document, and animate the movement using a maseter-sketch:
+In this tutorial we'll assemble 3 parts inside a single FreeCAD document, and animate the movement using a master sketch:
 
 ![](tuto2_final.png)
 
@@ -38,15 +38,15 @@ We start with an empty FreeCAD:
 
 
 
-## Master-sketch
+## Master sketch
 
-We will first create the functional structure of the assembly, and only then will we design the parts composing the assembly. The functional structure constist of sketches and datum objects at the root of the assembly, and placed at real functional locations, like rotation axes, planes, fixation points, translation axes ... 
+We will first create the functional structure of the assembly, and only then will we design the parts composing the assembly. The functional structure consists of sketches and datum objects at the root of the assembly, and placed at real functional locations, like rotation axes, planes, fixation points, translation axes ... 
 
-We present here a way of doing an assembly — a _functional_ assembly as opposed to a _geometrical_ assembly — that is based on the real mechanical functions of the assembly, and not on the geometrical features of the parts in the assembly. It is interesting to note that, _in fine_, all assemblies are functional assemblies, but when making a geometrical assembly you somehow reverse-engineer the functions of the geometrical features that the designer of the part has implemented to match the mechanical functions of the part. In other words, if, for example, there is a — _geometrical_ — hole in a part to hold an axis, it's because the designer new that there is going to be a — _functional_ — rotation there, and not because of some lucky magic. 
+We present here a way of doing an assembly — a _functional_ assembly as opposed to a _geometrical_ assembly — that is based on the real mechanical functions of the assembly, and not on the geometrical features of the parts in the assembly. It is interesting to note that, _in fine_, all assemblies are functional assemblies, but when making a geometrical assembly you somehow reverse-engineer the functions of the geometrical features that the designer of the part has implemented to match the mechanical functions of the part. In other words, if, for example, there is a — _geometrical_ — hole in a part to hold an axis, it's because the designer knew that there is going to be a — _functional_ — rotation there, and not because of some lucky magic. 
 
 Such a functional assembly is also called _top-down_ design, as opposed to _bottom-up_ design where you assemble finished parts.
 
-At first glance, this functional assembly, or top-down design, might seem less intuitive than the geometrical assembly that most CAD software propose, but once used to it it is more natural, and also much more robust: if, for example, you define a datum axis for a rotation, you don't need to know the mechanical details of how you will realise the rotation, and you can already assemble your parts around that datum axis. It is therefore possible to split and parallelize the detail design of each part between designers and still be sure that all the parts will come correctly together. 
+At first glance, this functional assembly, or top-down design, might seem less intuitive than the geometrical assembly that most CAD software propose, but once used to it it is more natural, and also much more robust: if, for example, you define a datum axis for a rotation, you don't need to know the mechanical details of how you will realize the rotation, and you can already assemble your parts around that datum axis. It is therefore possible to split and parallelize the detail design of each part between designers and still be sure that all the parts will come correctly together. 
 
 
 ### Variables
@@ -63,7 +63,7 @@ Create in the same way 2 other variables for the disk radius (_R_disk_ with valu
 
 ![](tuto2_addVariable.png)
 
-**Result:** We have created numercial variables in the _App::FeaturePython_ object called _Variables_ (see Model tree), that can be used in the _ExpressionEngine_ of any parameter in this the document with: _Variables.Angle_disk_ , _Variables.Dist_pivot_ and _Variables.R_disk_ 
+**Result:** We have created numercial variables in the _App::FeaturePython_ object called _Variables_ (see Model tree), that can be used in the _ExpressionEngine_ of any parameter in this document with: _Variables.Angle_disk_ , _Variables.Dist_pivot_ and _Variables.R_disk_ 
 
 ### Sketch
 
@@ -107,7 +107,7 @@ We will now create the proper master sketch of our assembly:
 
 **Result:** Our master sketch is finished. 
 
-**Note:** It is important to note that there are many ways to build a master-sketch to represent a given assembly structure, so we suggest you take your time to build a well working master sketch before going into the detailed geometrical design of your parts. In our example, the kinematics is volontarily very simple and thus the master sketch is also very simple. As a general rule, any problem that can be reduced to a 2D geometry can be easily modeled in this way. Some assemblies that are in 3D space can be modeled by a series of master sketches, but there are also some fully 3D setups that cannot, in any way, be modeled like this: a hexapod for example. 
+**Note:** It is important to note that there are many ways to build a master sketch to represent a given assembly structure, so we suggest you take your time to build a well working master sketch before going into the detailed geometrical design of your parts. In our example, the kinematic is voluntarily very simple and thus the master sketch is also very simple. As a general rule, any problem that can be reduced to a 2D geometry can be easily modeled in this way. Some assemblies that are in 3D space can be modeled by a series of master sketches, but there are also some fully 3D setups that cannot, in any way, be modeled like this: a hexapod for example. 
 
 
 
@@ -115,14 +115,14 @@ We will now create the proper master sketch of our assembly:
 
 We will now create two LCS to attach the rotating _disk_ and the pendling _arm_. The _base_ will be fixed to the existing _LCS_0_ of the assembly. These coordinate systems (of type _PartDesign::CoordinateSystem_) are used in the **Assembly4** way to attach links to parts into the assembly.
 
-**Note:** the default coordinate systems of the 3 (empty) parts can be in the way of easy selection, therefore it can be useful to hide all the 3 parts temporarily. When hidden, an object's icon becomes grayed in the Model tree. As a general rule, don't hesitate to show and hide parts as necessary: sometimes it's better to have every-thing visible, sometimes it's better to see a single object.
+**Note:** the default coordinate systems of the 3 (empty) parts can be in the way of easy selection, therefore it can be useful to hide all the 3 parts temporarily. When hidden, an object's icon becomes grayed in the Model tree. As a general rule, don't hesitate to show and hide parts as necessary: sometimes it's better to have everything visible, sometimes it's better to see a single object.
 
 * Select the Assembly4 Model and create a new Coordinate System : **Assembly -> New Coordinate System**)
 * Call it _LCS_disk_
   * this activates the attachment dialog 
 * As first reference select the origin vertex in _Sketch_master_
 * As second reference select the first line in _Sketch_master_
-* Coose _Align O-X-Y_ as attachment mode
+* Choose _Align O-X-Y_ as attachment mode
 * Click **OK**
 
 ![](tuto2_lcsDiskEE.png)
@@ -131,7 +131,7 @@ We will now create two LCS to attach the rotating _disk_ and the pendling _arm_.
 
 We do now the same thing with another coordinate system, call it _LCS_arm_ and attach it to the line in the master sketch representing ... the arm. 
 
-As a final check before doing the part designs you can animate the master sketch and verify that the LCS move as they should. You can also change the values of the variables _Dist_pivot_ and _R_disk_ to check that everything works as expected. Save.
+As a final check before doing the part designs you can animate the master sketch and verify that the LCS move as they should (see next section of this tutorial). You can also change the values of the variables _Dist_pivot_ and _R_disk_ to check that everything works as expected. Save.
 
 **Result:** we have now created 3 coordinate systems placed and oriented as the final 3 parts shall be placed:
 
@@ -158,14 +158,14 @@ Before going any further, we'll check that our sketch is working as expected by 
 
 We will now design the 3 parts that build our assembly. In order to avoid confusion, we recommend to hide all other parts than the one you are actively designing. 
 
-We'll do the geometrical design with the PartDesign workbench. It is supposed that you know how to design these parts using FreeCAD, we won't detail the method.
+We'll do the geometrical design with the PartDesign workbench. It is assumed that you know how to design these parts using FreeCAD, we won't detail the method.
 
 ### Base part
 
 * Hide the parts _disk_ and _arm_, and also hide the assembly _Model_
 * Select the part _base_ in the Model tree
-* Create a new Body with the Assembly4 workbench (**not** through the _PartDesign_ workbench ! Creating a Body with Assembly4 assures you that the Body is placed inside the part that is selected.)
-* Right-click on the neawly created Body and **Toggle Active Body**
+* Create a new Body with the Assembly4 workbench (**not** through the _PartDesign_ workbench ! Creating a Body with Assembly4 assures that the Body is placed inside the part that is selected.)
+* Right-click on the newly created Body and **Toggle Active Body**
   * this switches to the _PartDesign_ workbench (that's OK now)
 * Create the following geometry:
   * set the distance between the 2 pivots to the variable _Disk_pivot_ 
@@ -215,9 +215,9 @@ Save document.
 
 ## Assembly
 
-Now that we have created our master-sketch and designed all our parts, we can assemble them. As usual in Assembly4, the assembly holds (_App::Link_) links to the (_App::Part_) parts, not the parts themselves, even though the parts are in the same document here. Thus, making assemblies with parts in the same document is identical as making assemblies with parts from external documents. Actually, it is possible to mix both methods at will. 
+Now that we have created our master sketch and designed all our parts, we can assemble them. As usual in Assembly4, the assembly holds (_App::Link_) links to the (_App::Part_) parts, not the parts themselves, even though the parts are in the same document here. Thus, making assemblies with parts in the same document is identical as making assemblies with parts from external documents. Actually, it is possible to mix both methods at will. 
 
-The only difference is that, since a FreeCAD document can only contain one Assembly4 Model, only one level assemblies are possible if everything is in the same document. For large assemblies this is a severe limitation, therefore in orther to make nested assemblies — assemblies of sub-assemblies and sub-sub-assemblies — it is mandatory to have several documents. See [tutorial 1](TUTORIAL1.md) for how to make assemblies from external parts. 
+The only difference is that, since a FreeCAD document can only contain one Assembly4 Model, only one level assemblies are possible if everything is in the same document. For large assemblies this is a severe limitation, therefore in order to make nested assemblies — assemblies of sub-assemblies and sub-sub-assemblies — it is mandatory to have several documents. See [tutorial 1](TUTORIAL1.md) for how to make assemblies from external parts. 
 
 
 
@@ -234,7 +234,7 @@ The only difference is that, since a FreeCAD document can only contain one Assem
 
 ### Assemble the Disk part
 
-* Set the variable _Angle_disk_ to 45 for better visualisation
+* Set the variable _Angle_disk_ to 45 for better visualization
 * Insert the part _disk_
 * Attach it's _LCS_1001_ to the _LCS_disk_ of the assembly
 
@@ -275,7 +275,7 @@ The final step: animate the assembly and check that all parts move as desired:
 
 ## Download
 
-You can downlod the FreeCAD document file presented in this tutorial [`here`](asm_tuto2.FCStd) .
+You can download the FreeCAD document file presented in this tutorial [`here`](asm_tuto2.FCStd) .
 
 
 ## Feedback
