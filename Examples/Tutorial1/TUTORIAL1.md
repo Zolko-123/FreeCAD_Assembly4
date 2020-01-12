@@ -14,7 +14,7 @@ This tutorial will walk you through to build the following assembly:
 
 It is assumed that you have read the [Assembly4 instructions](INSTRUCTIONS.md) and that the Assembly4 workbench has been previously installed. It is also assumed that you have basic knowledge of FreeCAD, especially the _PartDesign_ workbench.
 
-Download the STEP file [`bearing_20x37x9.stp`](parts/bearing_20x37x9.stp ) (direct link to [`bearing_20x37x9.stp`](https://github.com/Zolko-123/FreeCAD_Assembly4/raw/master/Resources/parts/bearing_20x37x9.stp), right-click and save the file) to your local hard drive. 
+Download the STEP file [`bearing_20x37x9.stp`](bearing_20x37x9.stp ) (direct link to [`bearing_20x37x9.stp`](https://github.com/Zolko-123/FreeCAD_Assembly4/raw/master/Examples/Tutorial1/bearing_20x37x9.stp), right-click and save the file) to your local hard drive. 
 
 
 ## Toolbar and Menu
