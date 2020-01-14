@@ -1,79 +1,64 @@
-# FreeCAD Assembly Without Solver / Assembly 4
-FreeCAD add-on for a bare-bone assembly structure, using App::Link  
+# FreeCAD Assembly 4 workbench user instructions
 
-Welcome to the FreeCAD_aws wiki! This page tries to explain how to make assemblies using these tools. This project the result of [discussions on the FreeCAD forum](https://forum.freecadweb.org/viewtopic.php?f=20&t=32843).
+These instructions present the intended usage and workflow to assembly design using FreeCAD's Assembly4 workbench. It is intended for all users.
 
-## Prerequisites
 
-**Important Note:** Assembly 4 is **not** compatible with FreeCAD v0.18
-- [x] FreeCAD >= `v0.19.18353`
 
 ## Installation
 
-### Automatic Installation (recommended)
+Assembly4 is available through FreeCAD's [Addon Manager](https://github.com/FreeCAD/FreeCAD-addons/#1-builtin-addon-manager). It is called *Assembly4* in the addon repository. Should this fail, please read the [technical manual](TECHMANUAL.md) for possible solutions.
 
-Assembly 4 is available through the [FreeCAD Addon Manager](https://github.com/FreeCAD/FreeCAD-addons/#1-builtin-addon-manager).
-It is called 'Assembly4' in the Addon Repository.    
+[![FreeCAD Addon manager status](https://img.shields.io/badge/FreeCAD%20addon%20manager-available-brightgreen)](https://github.com/FreeCAD/FreeCAD-addons)
 
-**Note:** Restarting FreeCAD is required after installing this Addon.
+**Important Note:** Assembly 4 is **not** compatible with FreeCAD v0.18, and needs FreeCAD >= `v0.19.18353`
 
-### Manual Installation
+**Important Note:** Assembly 4 is **not** compatible with Assembly2+ and Assembly3.
 
-```bash
-  cd ~/.FreeCAD/Mod  
-  git clone https://github.com/Zolko-123/FreeCAD_Assembly4
-```
-To update the Addon:  
-
-```bash
-  cd ~/.FreeCAD/Mod/FreeCAD_Assembly4/
-  git fetch
-```
-
-**Note:**
-Another method is to download and extract the Github .zip archive. Then move (or link) the directory `A4` into the `~/.FreeCDA/Mod` folder, containing all additional modules.
-
-**Important Note:** Restarting FreeCAD is required after installing this Addon.
-
-## Getting Started
-
-You can use the [example assemblies](https://github.com/Zolko-123/FreeCAD_Assembly4/tree/master/Examples) to experiment with this workbench's features. Open one _asm_something.fcstd_ file and try out the functions. There are `ReadMe.txt` files in each directory with some explanations.
 
 
 ## Principle
 
-Each Assembly4 model is mostly standard FreeCAD `App::Part` object, and these are assembled using the `App::Link` framework included with FreeCAD 0.19. Pre-built binaries on the v0.19 development branch can be found [here](https://github.com/FreeCAD/FreeCAD/releases/tag/0.19_pre)
+We present here a short summary of the inner workings of FreeCAD's Assembly4 workbench. For those interested in more technical details please read the [technical manual](TECHMANUAL.md).
 
-The particularities of the `App::Part` used as Assembly4 Model are the following:
+### Data structure
 
-* they are called 'Model' at creation time  
-* they contain a group called 'Constraints' at the root  
-* they contain a Datum Coordinate System called LCS_0 at the root  
+The very principle of Assembly4 is that `App::Part` objects are linked together using the `App::Link` interface introduced in FreeCAD v0.19. The host parent assembly **and** the included child parts are all `App::Part` type objects. The parts that are linked can be in the same document as the assembly or an extarnal document, invariably.
 
-Any Model can contain (by `App::Link`) any other Model and any FreeCAD `App::Part` and thus make an assembly, but a standard FreeCAD `App::Part` cannot be used by the Assembly4 workbench to include Parts or Models by App::Link. This is a purposfull feature to avoid burdensome error checking: it is supposed that no other usecase would create an `App::Part` called 'Model', _i.e._ that if an `App::Part` is called 'Model' it will conform to these characteristics. A FreeCAD document can contain many `App::Parts`, but only one `App::Part Model`.
+Since a FreeCAD `App::Part` is a container, all objects included in the child part will be included in the parent assembly. To actually insert some geometry, solids or bodies need to be created inside the `App::Part` container and designed using other FreeCAD workbenches.
 
-The `App::Parts` that are to be linked by `App::Link` can be in the same document as the assembly or an extarnal document, invariably. Having the assembly and all its `App::Parts` in the same document can be handy for small 1-level assemblies, but for larger assemblies is is advised to split parts in various documents (files).
+**Please Note:** objects in the same document as the linked part but outside the `App::Part` container will not be inserted. 
 
-Linked parts are placed to each-other by matching their Datum Coordinate Systems (`PartDesign::CoordinateSystem`, called here-after LCS (Local Coordinate System)). There is no need for any geometry to be present to place and constrain parts relative to each other. LCS are used because they are both mechanical objects, since they fix all 6 degrees of freedom in an isostatic way, and mathematical objects that can be easily manipulated by rigorous methods (mainly combination and inversion).
+### Part placements
 
-To actually include some geometry, a body needs to be created, and designed using the PartDesign workbench. To be linked with the previously created model, this body needs to be inside the `App::Part container` called 'Model'.  
+Instances of linked parts are placed in the assembly using their *Placement* property, visible and accessible in their *Property* window. This *Placement* property can be calculated in various ways:
+
+* manually, by setting the parameters in the *Placement* property fields or by using the **Transform** tool (right-click > Transform)
+* by using Assembly4's **Place linked part** tool, which sets an *ExpressionEngine* into the *Placement* property.
+
+When using Assembly4's tool, a local coordinate system in the child part and one in the host parent assembly are matched (superimposed). This is somewhat different from constraints that some other CAD systems use, but once used to it this approach is very powerful.
 
 The result is the following:  
-![](Resources/media/Asm4_wb0.png)
 
-* the part _Bielle_ is placed in the assembly by attaching it's _LCS_0_ to the _LCS_0_ of the parent assembly. 
-* the part _Cuve_ is placed in the assembly by placing its _LCS_0_ on the _LCS_1_ of the part _Bielle_
-* the part _Bague_ is placed in the assembly by placing its _LCS_0_ on the _LCS_0_ of the part _Bielle_
-* the parts _Screw_CHC_1_ and _Screw_CHC_2_ are placed in the assembly by placing their _LCS_0_ on the _LCS_1_ and _LCS_2_ of the part _Cuve_
+![](Resources/media/Asm4_Bielle_Bague.png)
+
+In this example, the instance *Bague* is highlighted:
+
+* the blue circle shows the *Placement* property 
+  * the blue text in the *Value* field indicates that the *Placement* is calculated by the *ExpressionEngine*
+* the red circle shows the properties of this instance:
+  * *Assembly Type* `Asm4EE` indicates that it's an Assembly4 object
+  * *Attached By* `#LCS_O` indicates that the child part's *LCS_0* is the reference to insert the part into the assembly
+  * *Attached To* `Bielle#LCS_O` indicates that this instance is attached to the child instance *Bielle* (this is the name of the child instance in this assembly and not that of the original part !) and in that child it is targetted at _LCS_0_
+  * the *Attachment Offset* property allows to offset the child's attachment LCS w.r.t. the target LCS. In this example, the child instance *Bague* is offset in the Z-direction by -15mm
+
+All Assembly4 children have these 4 properties; these are the first places to check if something in your assembly doesn't behave as expected.
 
 
 
 
 ## Usage
 
-
 Assembly4 commands are accessible from the Assembly meny or the Assembly4 toolbar.
-
 
 ### Menu
 
@@ -90,92 +75,48 @@ These functions are also accessible with the Assembly toolbar:
 ![](Resources/media/Asm4_Toolbar.png)
 
 
-* ![](icons/Asm4_Model.svg) : **New Model** : creates an Assembly4 Model, which is a FreeCAD App::Part called Model and with some extra additions. One document can only contain one Assembly4 Model.
+* ![](Resources/icons/Asm4_Model.svg) : **New Model** : creates an Assembly4 Model, which is a FreeCAD App::Part called Model and with some extra additions. One document can only contain one Assembly4 Model.
 
-* ![](icons/Asm4_Body.svg) : **New Body** : creates FreeCAD PartDesign::Body in an Assembly4 Model or in an App::Part. This Body can then be used with FreeCAD's PartDesign workbench.
+* ![](Resources/icons/Asm4_Body.svg) : **New Body** : creates FreeCAD PartDesign::Body in an Assembly4 Model or in an App::Part. This Body can then be used with FreeCAD's PartDesign workbench.
 
-* ![](icons/Asm4_Part.svg) : **New Part** : creates FreeCAD App::Part in the current document. A document can contain many parts.
+* ![](Resources/icons/Asm4_Part.svg) : **New Part** : creates FreeCAD App::Part in the current document. A document can contain many parts.
 
-* ![](icons/Link_Part.svg) : **Insert an External Part** : creates a FreeCAD App::Link to an App::Part in another document. Only parts from documents already saved to disk can be used. If there are multiple parts in a document, they can be selected individually. A part can be inserted (linked) many times, but each instance must have a unique name in the assembly tree. If a name already attribuated is given again, FreeCAD will automatically give it a unique (and probably un-user-friendly) name.
+* ![](Resources/icons/Link_Part.svg) : **Insert an External Part** : creates a FreeCAD App::Link to an App::Part in another document. Only parts from documents already saved to disk can be used. If there are multiple parts in a document, they can be selected individually. A part can be inserted (linked) many times, but each instance must have a unique name in the assembly tree. If a name already attribuated is given again, FreeCAD will automatically give it a unique (and probably un-user-friendly) name.
 
-* ![](icons/Place_Link.svg) : **Place Link** : this places a linked part in the assembly to its intended position. This attaches an LCS in the linked part to another LCS in the assembly (called target LCS). This target LCS can be either in the assembly itself (in the Model) or in a sister part already linked. In this case, only LCS at the root of the linked part can be used, and not LCS inside a Body (for example) in the linked part.
+* ![](Resources/icons/Place_Link.svg) : **Place Link** : this places a linked part in the assembly to its intended position. This attaches an LCS in the linked part to another LCS in the assembly (called target LCS). This target LCS can be either in the assembly itself (in the Model) or in a sister part already linked. In this case, only LCS at the root of the linked part can be used, and not LCS inside a Body (for example) in the linked part.
 
-* ![](icons/Asm4_Screw.svg) : **Fasteners dropdown** : Allows to insert screws, nuts and washers from the Fasteners Workbench, and allows to attach them to Assembly4 datum objects, primarily coordinate systems (LCS). If the Fasteners Workbench is not installed, these features are disabled. To install the Fasteners Workbench, go to the menu **Tools > Addon Manager > fateners**
+* ![](Resources/icons/Asm4_Screw.svg) : **Fasteners dropdown** : Allows to insert screws, nuts and washers from the Fasteners Workbench, and allows to attach them to Assembly4 datum objects, primarily coordinate systems (LCS). If the Fasteners Workbench is not installed, these features are disabled. To install the Fasteners Workbench, go to the menu **Tools > Addon Manager > fateners**
 
-    * ![](icons/Asm4_Screw.svg) : **Insert Screw** : creates a normed screw from the Fasteners Workbench. The type of screw, diameter and length can be changed in the properties window of the screw.
+    * ![](Resources/icons/Asm4_Screw.svg) : **Insert Screw** : creates a normed screw from the Fasteners Workbench. The type of screw, diameter and length can be changed in the properties window of the screw.
 
-    * ![](icons/Asm4_Nut.svg) : **Insert Nut** : creates a normed nut from the Fasteners Workbench. The type of nut, diameter and length can be changed in the properties window of the nut.
+    * ![](Resources/icons/Asm4_Nut.svg) : **Insert Nut** : creates a normed nut from the Fasteners Workbench. The type of nut, diameter and length can be changed in the properties window of the nut.
 
-    * ![](icons/Asm4_Washer.svg) : **Insert Washer** : creates a normed washer from the Fasteners Workbench. The type of washer and its diameter can be changed in the properties window of the washer.
+    * ![](Resources/icons/Asm4_Washer.svg) : **Insert Washer** : creates a normed washer from the Fasteners Workbench. The type of washer and its diameter can be changed in the properties window of the washer.
 
-    * ![](icons/Asm4_mvFastener.svg) : **Edit attachment of Fastener** : allows to attach an object from the Fasteners Workbench — screw, nut or washer — to a datum object in the assembly or a sister part, in the regular Assembly4 manner.
+    * ![](Resources/icons/Asm4_mvFastener.svg) : **Edit attachment of Fastener** : allows to attach an object from the Fasteners Workbench — screw, nut or washer — to a datum object in the assembly or a sister part, in the regular Assembly4 manner.
 
-* ![](icons/Asm4_Sketch.svg) : **New Sketch** : creates FreeCAD Sketch in an App::Part (and thus also in Assembly4 Models). This Sketch is unattached, to attach it to an object edit its MapMode in its Placement Property
+* ![](Resources/icons/Asm4_Sketch.svg) : **New Sketch** : creates FreeCAD Sketch in an App::Part (and thus also in Assembly4 Models). This Sketch is unattached, to attach it to an object edit its MapMode in its Placement Property
 
-* ![](icons/Asm4_AxisCross.svg) : **New Datum** : this is a drop-down combined menu grouping the creation of all Datum objects:
+* ![](Resources/icons/Asm4_AxisCross.svg) : **New Datum** : this is a drop-down combined menu grouping the creation of all Datum objects:
 
-	* ![](icons/Asm4_AxisCross.svg) : **New LCS** : creates FreeCAD PartDesign::CoordinateSystem in an App::Part (and thus also in Assembly4 Models). This LCS is unattached, to attach it to an object edit its MapMode in its Placement Property
+	* ![](Resources/icons/Asm4_AxisCross.svg) : **New LCS** : creates FreeCAD PartDesign::CoordinateSystem in an App::Part (and thus also in Assembly4 Models). This LCS is unattached, to attach it to an object edit its MapMode in its Placement Property
 
-	* ![](icons/Asm4_Plane.svg) : **New Datum Plane** : creates FreeCAD PartDesign::Plane
+	* ![](Resources/icons/Asm4_Plane.svg) : **New Datum Plane** : creates FreeCAD PartDesign::Plane
 
-	* ![](icons/Asm4_Axis.svg) : **New Datum Axis** : creates FreeCAD PartDesign::Line
+	* ![](Resources/icons/Asm4_Axis.svg) : **New Datum Axis** : creates FreeCAD PartDesign::Line
 
-	* ![](icons/Asm4_Point.svg) : **New Datum Point** : creates FreeCAD PartDesign::Point
+	* ![](Resources/icons/Asm4_Point.svg) : **New Datum Point** : creates FreeCAD PartDesign::Point
 
-	* ![](icons/Asm4_Hole.svg) : **New Hole LCS** : creates FreeCAD PartDesign::CoordinateSystem in an App::Part (and thus also in Assembly4 Models) at the center of te selected circular edge. This is therefore only active when a (single) circular edge is selected. This PartDesign::CoordinateSystem is attached to the center of the circle, and is intended to serve as attachment LCS for fasteners.  This is the combined function of creating an LCS and attaching it (via MapMode) to a circular edge, and is provided to streamline the workflow.
+	* ![](Resources/icons/Asm4_Hole.svg) : **New Hole LCS** : creates FreeCAD PartDesign::CoordinateSystem in an App::Part (and thus also in Assembly4 Models) at the center of te selected circular edge. This is therefore only active when a (single) circular edge is selected. This PartDesign::CoordinateSystem is attached to the center of the circle, and is intended to serve as attachment LCS for fasteners.  This is the combined function of creating an LCS and attaching it (via MapMode) to a circular edge, and is provided to streamline the workflow.
 
-* ![](icons/Place_Datum.svg) : **Place Datum** : this attaches an existing Datum object in the assembly to another existing Datum object in a linked part. Datum objects of different types can be attached. 
+* ![](Resources/icons/Place_Datum.svg) : **Place Datum** : this attaches an existing Datum object in the assembly to another existing Datum object in a linked part. Datum objects of different types can be attached. 
 
-* ![](icons/Import_Datum.svg) : **Import Datum** : this imports an existing Datum object from a linked part into the assembly. Precisely, it creates a Datum in the assembly and attaches it to a datum in a sister part of the same type. By default, the same name is given to the imported Datum object. 
+* ![](Resources/icons/Import_Datum.svg) : **Import Datum** : this imports an existing Datum object from a linked part into the assembly. Precisely, it creates a Datum in the assembly and attaches it to a datum in a sister part of the same type. By default, the same name is given to the imported Datum object. 
 
-* ![](icons/Asm4_Variables.svg) : **Add Variable** : this adds a variable to the `Variables` object in the Model. These variables can be used in any parameter of the document by entering `Variables.Height` or `Variables.Length` (for example). This is especially useful for assemblies built in a single file, where several parts can be built using the same dimensions. Modifying a variable is done in the `Properties` window of the `Variables` object.
+* ![](Resources/icons/Asm4_Variables.svg) : **Add Variable** : this adds a variable to the `Variables` object in the Model. These variables can be used in any parameter of the document by entering `Variables.Height` or `Variables.Length` (for example). This is especially useful for assemblies built in a single file, where several parts can be built using the same dimensions. Modifying a variable is done in the `Properties` window of the `Variables` object.
 
-* ![](icons/Solver.svg) : **Solve constraints and update assembly** : this recomputes all the links and all the placements in the assembly
+* ![](Resources/icons/Solver.svg) : **Solve constraints and update assembly** : this recomputes all the links and all the placements in the assembly
 
-
-
-
-## ExpressionEngine
-
-Assembly4 uses a special and very useful feature of FreeCAD, the **ExpressionEngine**. Some parameters can be entered through mathematical formulae, that are evaluated by this ExpressionEngine. For Assembly4, it's the parameter _`Placement`_ of the inserted _`App::Link`_ object that is calculated, such that 2 LCS - one in the linked part and the one in the assembly - are superimposed. 
-
-In normal use, the ExpressionEngine of an _`App::Link`_ object is hidden, it must be shown as in the following screenshot:
-
-![](Resources/media/asm_EE.png)
-
-### Syntax
-
-The syntax of the ExpressionEngine is the following:
-
-**If the LCS belongs to the parent assembly:**
-
-  `LCS_parent.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS_link.Placement ^ -1`
-
-**If the LCS belongs to a sister part:**
-
-  `ParentLink.Placement * ParentPart#LCS_parent.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS.Placement ^ -1`
-
-* **ParentLink** is the name of the App::Link of the sister part in the assembly
-* **ParentPart** is the name of the App::Part that the previous ParentLink refers-to
-* **LCS_parent** is the LCS in the parent part (can be either the assembly itself or a sister part in the assembly)
-* **constr_LinkName** is a FeaturePython object with a conventional name
-* **LinkedPart** is the App::Part's name that the inserted App::Link refers-to
-* **LCS_link** is the LCS in the linked part
-
-### Constraints
-
-To each part inserted into an assembly is associated an `App::FeaturePython` object, placed in the 'Constraints' group. This object contains information about the placement of the linked object in the assembly. It also contains an `App::Placement`, called '`AttachmentOffset`', which introduces an offset between the LCS in the part and the LCS in the assembly. The main purpose of this offset is to correct bad orientations between the 2 matching LCS. 
-
-
-**Note:** These constraints are not really constraints in the traditional CAD sense, but since `App::FeaturePython` objects are very versatile, they could be expanded to contain real constraints in some (distant) future.
-
-![](Resources/media/Asm4_wb1.png)
-
-_Taking a closer look at the fields contained in an `App::FeaturePython` object associated with the part 'Bague'. The small button under the cursor opens the dialog that allows to edit the parameters of the Attachment Offset_
-
-![](Resources/media/Asm4_wb2.png)
-
-_Dialog that opens when clicking the previous small button, and permitting to edit the parameters of the_ `App::Placement` _called_ 'AttachmentOffset' _in the constraint associated with a link, and allowing relative placement of the link -vs- the attachment LCS_
 
 
 ## Workflow
@@ -218,6 +159,18 @@ Therefore, in order to re-use a coordinate system of a part in an assembly, a co
 ![](Resources/media/Asm4_V4.gif)
 
 ![](Resources/media/Lego_House+Garden.png)
+
+
+
+## Tutorials and Examples
+
+You can use the [example assemblies](https://github.com/Zolko-123/FreeCAD_Assembly4/tree/master/Examples) to experiment with this workbench's features. Open one _asm_something.fcstd_ file and try out the functions. There are `ReadMe.txt` files in each directory with some explanations. There are tutorials available to lear tu use Assembly4:
+
+* [a quick assembly from scratch](Examples/Tutorial1/TUTORIAL1.md)
+* [a cinematic assembly in one file, using a master sketch](Examples/Tutorial2/TUTORIAL2.md)
+* [a multy-layered assembly for advanced users](Resources/TUTORIAL3.md)
+* [a Lego assembly](Resources/TUTORIAL4.md)
+* [an architectural assembly](Resources/TUTORIAL5.md)
 
 
 
