@@ -1,36 +1,40 @@
-# FreeCAD Assembly 4 / Assembly Without Solver
-FreeCAD add-on for a bare-bone assembly structure, using App::Link  
+# FreeCAD Assembly 4 workbench
 
-An Assembly4 model is a standard FreeCAD `App::Part` object, and can be used with any FreeCAD tool handling `App::Part` objects. An Assembly4 Model can invariably be a stand-alone part, an assembly, a sub-assembly, and any combinations of these.
+FreeCAD add-on for an assembly structure between App::Parts using App::Link. 
 
-Any Assembly4 Model can contain (by `App::Link`) any other Assembly4 Model or any `App::Part`, but an `App::Part` cannot be used with Assembly4 to link by `App::Link` other `App::Part` objects. Parts and linked parts are placed to each-other by matching their Datum Coordinate Systems (`PartDesign::CoordinateSystem`, called here-after LCS for Local Coordinate System) using the built-in FreeCAD ExpressionEngine. No geometry is used to place and constrain parts relative to each other, thus avoiding a lot of the topological naming problems. 
+
+
+
+## Overview
+
+The principle of Assembly4 is that `App::Part` objects are linked together into an assembly using the `App::Link` interface introduced in FreeCAD v0.19. The host parent assembly **and** the included child parts are all `App::Part` type objects. The parts that are linked can be in the same document as the assembly or an extarnal document, invariably.
+
+As an Assembly4 model is a standard FreeCAD `App::Part` object, it can be used and manipulated with any FreeCAD tool handling `App::Part` objects. An Assembly4 Model can invariably be a stand-alone part, an assembly, a sub-assembly, and any combinations of these.
+
+Parts and linked parts are placed to each-other in the host parent assembly by matching their Datum Coordinate Systems (`PartDesign::CoordinateSystem` called LCS for Local Coordinate System) using the built-in FreeCAD *ExpressionEngine.* No geometry is used to place and constrain parts relative to each other, thus avoiding a lot of the topological naming problems. 
 
 ![](Resources/media/Asm4_wb1.png)
 
 
-## Prerequisites
 
-**Important Note:** Assembly 4 is **not** compatible with FreeCAD v0.18, needs :
-
-- [x] FreeCAD >= `v0.19.18353`
-
-Pre-built binaries on the v0.19 development branch can be found [here](https://github.com/FreeCAD/FreeCAD/releases/tag/0.19_pre)
 
 
 ## Installation
 
-### Automatic Installation (recommended)
-
-Assembly 4 is available through the FreeCAD Addon Manager (menu Tools > Addon Manager). It is called _Assembly4_ in the Addon Repository.  
-
 [![FreeCAD Addon manager status](https://img.shields.io/badge/FreeCAD%20addon%20manager-available-brightgreen)](https://github.com/FreeCAD/FreeCAD-addons)
 
-**Note:** Restarting FreeCAD is required after installing this Addon.
+### Addon Manager (recommended)
+
+Assembly 4 is available through the FreeCAD Addon Manager (menu **Tools > Addon Manager**). It is called _Assembly4_ in the Addon Repository.  
+
+**Important Note:** Assembly 4 is **not** compatible with FreeCAD v0.18 and before, needs FreeCAD >= `v0.19.18353` . Pre-built binaries on the v0.19 development branch can be found [here](https://github.com/FreeCAD/FreeCAD/releases/tag/0.19_pre)
+
+
 
 
 ## Getting Started
 
-You can use the [example assemblies](https://github.com/Zolko-123/FreeCAD_Assembly4/tree/master/Examples) to experiment with this workbench's features. Open one _asm_something.fcstd_ file and try out the functions. There are `ReadMe.txt` files in each directory with some explanations. There are tutorials available to lear tu use Assembly4:
+You can get more information in the [user instructions](INSTRUCTIONS.md), the [technical manual](TECHMANUAL.md), and you can use the provided [example assemblies](https://github.com/Zolko-123/FreeCAD_Assembly4/tree/master/Examples) to experiment with this workbench's features. There are also online tutorials :
 
 * [a quick assembly from scratch](Examples/Tutorial1/TUTORIAL1.md)
 * [a cinematic assembly in one file, using a master sketch](Examples/Tutorial2/TUTORIAL2.md)
@@ -38,37 +42,6 @@ You can use the [example assemblies](https://github.com/Zolko-123/FreeCAD_Assemb
 * [a Lego assembly](Resources/TUTORIAL4.md)
 * [an architectural assembly](Resources/TUTORIAL5.md)
 
-
-
-## Principle
-
-Assembly4 uses a very powerful feature of FreeCAD, the **ExpressionEngine**. Some FreeCAD object's parameters can be entered through mathematical formulae, that are evaluated by this ExpressionEngine. For Assembly4, it's the parameter _`Placement`_ of the inserted _`App::Link`_ object that is calculated, such that 2 LCS - one in the linked part and the one in the assembly - are superimposed. 
-
-You can find more informations in the detailed [instructions](INSTRUCTIONS.md).
-
-
-## Parts
-
-An Assembly4 assembly is a FreeCAD `App::Part` container, and parts are inserted using `App::Link` links to `App::Part` objects in their original document, no shapes are copied, making assemblies very memory efficient. The original part's document can be in the same file as the assembly or in another file somewhere on disk. 
-
-Since assemblies are also `App::Part` objects, they themselves can be assembled in another assembly, allowing nested multy-layered assemblies. 
-
-
-## Constraints
-
-To each part inserted into an assembly is associated constraint, which is an `App::FeaturePython` object in Assembly4, placed in the '_Constraints_' group at the root of the assembly. This constraint object contains information about the placement of the linked object in the assembly. 
-
-At the time of this writing, there is only 1 type of constraint in Assembly4 : matching of LCS between 2 objects. It is foreseen in the future to extend the available types of constraints.
-
-Each constraint contains an `App::Placement` property, called '`AttachmentOffset`', which introduces an offset between the attachment LCS in the part and the target LCS in the assembly. This allows 
-
-
-
-## Free Placement
-
-It is also possible to insert a part into an assembly without any constraint and without using the ExpressionEngine. In this case the inserted part (its `App::Link` really) can be moved manually by the built-in FreeCAD dragger. Right-click on the link in the Model tree, and in the contextual menu choose _Transform_ . It is also possible to manually edit the inserted link's _Placement_ property.
-
-This is then a raw interface between FreeCAD `App::Part` objects through the `App::Link` functionality.
 
 
 
