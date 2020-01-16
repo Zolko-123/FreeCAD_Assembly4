@@ -92,19 +92,22 @@ class Assembly4_WorkBench(Workbench):
         import newLinkArray        # creates a new array of App::Link
         import HelpCmd             # shows a basic help window
         
-        if self.checkWorkbench('FastenersWorkbench'):
-            import FastenersLib        # a library to handle fasteners from the FastenersWorkbench
-            fastenersCmd = 'Asm4_Fasteners'
-        else:
-            import FastenersDummy      # a dummy library if the FastenersWorkbench is not installed
-            fastenersCmd = 'Asm4_insertScrew'
-
-        
+        # defines the drop-down button for Fasteners:
         insertFastenerList = [  'Asm4_insertScrew', 
                                 'Asm4_insertNut', 
                                 'Asm4_insertWasher', 
                                 'Asm4_placeFastener' ]
         Gui.addCommand( 'Asm4_Fasteners', dropDownCmdGroup( insertFastenerList, 'Insert Fastener'))
+        # check whether the Fasteners workbench is installed
+        if self.checkWorkbench('FastenersWorkbench'):
+            # a library to handle fasteners from the FastenersWorkbench
+            import FastenersLib
+            fastenersCmd = 'Asm4_Fasteners'
+        else:
+            # a dummy library if the FastenersWorkbench is not installed
+            import FastenersDummy
+            fastenersCmd = 'Asm4_insertScrew'
+
         # defines the drop-down button for Datum objects
         createDatumList = [     'Asm4_newLCS', 
                                 'Asm4_newPlane', 
@@ -112,6 +115,7 @@ class Assembly4_WorkBench(Workbench):
                                 'Asm4_newPoint', 
                                 'Asm4_newHole' ]
         Gui.addCommand( 'Asm4_createDatum', dropDownCmdGroup( createDatumList, 'Create Datum Object'))
+
         # list of all commands (use ?)
         self.listCmd =        [ "Asm4_newModel",   
                                 "Asm4_newBody", 
@@ -147,9 +151,9 @@ class Assembly4_WorkBench(Workbench):
                                 "Asm4_importDatum", 
                                 "Asm4_addVariable", 
                                 "Asm4_Animate", 
-                                "Asm4_updateAssembly",
-                                "Asm4_Help"]
+                                "Asm4_updateAssembly"]
         self.appendMenu("&Assembly",self.itemsMenu)
+        # append the Asm4_Help command to the standard FreeCAD Help menu
         self.appendMenu("&Help", ["Asm4_Help"])
         # commands to appear in the Assembly4 toolbar
         self.itemsToolbar =   [ "Asm4_newModel",   
@@ -189,7 +193,6 @@ class Assembly4_WorkBench(Workbench):
         #self.appendMenu(["&Edit","DynamicData"],self.list) # appends a submenu to an existing menu
 
 
-
     """
     +-----------------------------------------------+
     |               helper functions                |
@@ -205,13 +208,13 @@ class Assembly4_WorkBench(Workbench):
         return hasWB
 
 
-
     """
     +-----------------------------------------------+
     |          Standard necessary functions         |
     +-----------------------------------------------+
     """
     def Activated(self):
+        """
         from PySide import QtGui, QtCore
         "This function is executed when the workbench is activated"
         # Set the drop-down button for the Configurations in text mode 
@@ -224,6 +227,7 @@ class Assembly4_WorkBench(Workbench):
                 for button in toolbar.children():
                     if button.isWidgetType() and button.text()=='Configurations':
                         button.setToolButtonStyle( QtCore.Qt.ToolButtonTextOnly )
+        """
         return
 
 
@@ -251,7 +255,6 @@ class Assembly4_WorkBench(Workbench):
     +-----------------------------------------------+
 """
 wb = Assembly4_WorkBench()
-#print("Loading Assembly 4 WorkBench. \xa9 Zoltan Hubert")
 Gui.addWorkbench(wb)
 
 
