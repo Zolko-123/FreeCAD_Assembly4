@@ -58,56 +58,56 @@ All Assembly4 children have these 4 properties; these are the first places to ch
 
 ## Usage
 
-Assembly4 commands are accessible from the Assembly meny or the Assembly4 toolbar.
-
-### Menu
-
-Commands in the menu and the toolbar are activated with relevant selection. If a command you want to use is inactive try to change the selection (with the mouse).
-
-![](Resources/media/Asm4_Menu.png)
+Assembly4 commands are accessible from the Assembly menu or the Assembly4 toolbar.
 
 
 ### Toolbar
 
-These functions are also accessible with the Assembly toolbar:
-
+Commands are activated with relevant selection. If a command is inactive (grayed oit) it's because something is selected to which that function doesn't apply.
 
 ![](Resources/media/Asm4_Toolbar.png)
 
+### Menu
 
-* ![](Resources/icons/Asm4_Model.svg) : **New Model** : creates an Assembly4 Model, which is a FreeCAD App::Part called Model and with some extra additions. One document can only contain one Assembly4 Model.
+These functions are also accessible from the Assembly menu:
 
-* ![](Resources/icons/Asm4_Body.svg) : **New Body** : creates FreeCAD PartDesign::Body in an Assembly4 Model or in an App::Part. This Body can then be used with FreeCAD's PartDesign workbench.
+![](Resources/media/Asm4_Menu.png)
 
-* ![](Resources/icons/Asm4_Part.svg) : **New Part** : creates FreeCAD App::Part in the current document. A document can contain many parts.
+### Assembly4 commands
 
-* ![](Resources/icons/Link_Part.svg) : **Insert an External Part** : creates a FreeCAD App::Link to an App::Part in another document. Only parts from documents already saved to disk can be used. If there are multiple parts in a document, they can be selected individually. A part can be inserted (linked) many times, but each instance must have a unique name in the assembly tree. If a name already attribuated is given again, FreeCAD will automatically give it a unique (and probably un-user-friendly) name.
+* ![](Resources/icons/Asm4_Model.svg) : **New Model** : creates an Assembly4 *Model*, which is a FreeCAD `App::Part` called *Model* and with some extra additions. This can be used to design a stand-alone part or be the container for an assembly. One document can only contain one Assembly4 Model.
 
-* ![](Resources/icons/Place_Link.svg) : **Place Link** : this places a linked part in the assembly to its intended position. This attaches an LCS in the linked part to another LCS in the assembly (called target LCS). This target LCS can be either in the assembly itself (in the Model) or in a sister part already linked. In this case, only LCS at the root of the linked part can be used, and not LCS inside a Body (for example) in the linked part.
+* ![](Resources/icons/Asm4_Body.svg) : **New Body** : creates FreeCAD `PartDesign::Body` in the selected `App::Part`. This Body can then be used with FreeCAD's PartDesign workbench. If you create such a `PartDesign::Body` with the PartDesign workbench, it will be placed at the root of the document, outside any `App::Part`.
 
-* ![](Resources/icons/Asm4_Screw.svg) : **Fasteners dropdown** : Allows to insert screws, nuts and washers from the Fasteners Workbench, and allows to attach them to Assembly4 datum objects, primarily coordinate systems (LCS). If the Fasteners Workbench is not installed, these features are disabled. To install the Fasteners Workbench, go to the menu **Tools > Addon Manager > fateners**
+* ![](Resources/icons/Asm4_Part.svg) : **New Part** : creates FreeCAD `App::Part` in the current document and allows to give it a name. A document can contain many parts.
 
-    * ![](Resources/icons/Asm4_Screw.svg) : **Insert Screw** : creates a normed screw from the Fasteners Workbench. The type of screw, diameter and length can be changed in the properties window of the screw.
+* ![](Resources/icons/Link_Part.svg) : **Link to a Part** : creates a FreeCAD `App::Link` to an `App::Part`. Only parts from documents already open in the session and saved to disk can be used. If there are multiple parts in a document, they can be selected individually. A part can be inserted (linked) many times, but each instance must have a unique name in the assembly tree. If a name already attribuated is given again, FreeCAD will automatically give it a unique (and probably un-user-friendly) name.
 
-    * ![](Resources/icons/Asm4_Nut.svg) : **Insert Nut** : creates a normed nut from the Fasteners Workbench. The type of nut, diameter and length can be changed in the properties window of the nut.
+* ![](Resources/icons/Place_Link.svg) : **Place Link** : this positions the child instance of a linked part in the current host assembly. This attaches an LCS in the linked part to a target LCS in the assembly. This target LCS can be either in the assembly itself (in the *Model*) or in a sister part already linked. In this case, it is important to note that only LCS at the root of the linked part can be used.
 
-    * ![](Resources/icons/Asm4_Washer.svg) : **Insert Washer** : creates a normed washer from the Fasteners Workbench. The type of washer and its diameter can be changed in the properties window of the washer.
+* ![](Resources/icons/Asm4_Screw.svg) : **Fasteners dropdown** : Allows to insert industry standard screws, nuts and washers from the **Fasteners Workbench** library, and allows to attach them to Assembly4 datum objects, primarily coordinate systems (LCS). These features are only available if the the Fasteners Workbench is installed. The Fasteners Workbench can be installed like Assembly4 through FreeCAD's addon manager: menu **Tools > Addon Manager > fasteners**
+
+    * ![](Resources/icons/Asm4_Screw.svg) : **Insert Screw** : creates a normed screw from the Fasteners Workbench. The type of screw, diameter and length can be changed in the properties window of the screw after creation.
+
+    * ![](Resources/icons/Asm4_Nut.svg) : **Insert Nut** : creates a normed nut from the Fasteners Workbench. The type of nut, diameter and length can be changed in the properties window of the nut after creation.
+
+    * ![](Resources/icons/Asm4_Washer.svg) : **Insert Washer** : creates a normed washer from the Fasteners Workbench. The type of washer and its diameter can be changed in the properties window of the washer after creation.
 
     * ![](Resources/icons/Asm4_mvFastener.svg) : **Edit attachment of Fastener** : allows to attach an object from the Fasteners Workbench — screw, nut or washer — to a datum object in the assembly or a sister part, in the regular Assembly4 manner.
 
-* ![](Resources/icons/Asm4_Sketch.svg) : **New Sketch** : creates FreeCAD Sketch in an App::Part (and thus also in Assembly4 Models). This Sketch is unattached, to attach it to an object edit its MapMode in its Placement Property
+* ![](Resources/icons/Asm4_Sketch.svg) : **New Sketch** : creates FreeCAD Sketch in an `App::Part` (and thus also in Assembly4 Models). After creation the attachment dialog opens and allows to attach this Sketch.
 
 * ![](Resources/icons/Asm4_AxisCross.svg) : **New Datum** : this is a drop-down combined menu grouping the creation of all Datum objects:
 
-	* ![](Resources/icons/Asm4_AxisCross.svg) : **New LCS** : creates FreeCAD PartDesign::CoordinateSystem in an App::Part (and thus also in Assembly4 Models). This LCS is unattached, to attach it to an object edit its MapMode in its Placement Property
+	* ![](Resources/icons/Asm4_AxisCross.svg) : **New LCS** : creates `PartDesign::CoordinateSystem` in an `App::Part` (and thus also in Assembly4 Models). This LCS is unattached, to attach it to an object edit its MapMode in its Placement Property
 
-	* ![](Resources/icons/Asm4_Plane.svg) : **New Datum Plane** : creates FreeCAD PartDesign::Plane
+	* ![](Resources/icons/Asm4_Plane.svg) : **New Datum Plane** : creates a datum `PartDesign::Plane`
 
-	* ![](Resources/icons/Asm4_Axis.svg) : **New Datum Axis** : creates FreeCAD PartDesign::Line
+	* ![](Resources/icons/Asm4_Axis.svg) : **New Datum Axis** : creates a datum `PartDesign::Line`
 
-	* ![](Resources/icons/Asm4_Point.svg) : **New Datum Point** : creates FreeCAD PartDesign::Point
+	* ![](Resources/icons/Asm4_Point.svg) : **New Datum Point** : creates a datum `PartDesign::Point`
 
-	* ![](Resources/icons/Asm4_Hole.svg) : **New Hole LCS** : creates FreeCAD PartDesign::CoordinateSystem in an App::Part (and thus also in Assembly4 Models) at the center of te selected circular edge. This is therefore only active when a (single) circular edge is selected. This PartDesign::CoordinateSystem is attached to the center of the circle, and is intended to serve as attachment LCS for fasteners.  This is the combined function of creating an LCS and attaching it (via MapMode) to a circular edge, and is provided to streamline the workflow.
+	* ![](Resources/icons/Asm4_Hole.svg) : **New Hole LCS** : creates datum `PartDesign::CoordinateSystem` in an `App::Part` (and thus also in Assembly4 Models) at the center of te selected circular edge. This is therefore only active when a (single) circular edge is selected. This `PartDesign::CoordinateSystem` is attached to the center of the circle, and is intended to serve as attachment LCS for fasteners.  This is the combined function of creating an LCS and attaching it (via MapMode) to a circular edge, and is provided to streamline the workflow.
 
 * ![](Resources/icons/Place_Datum.svg) : **Place Datum** : this attaches an existing Datum object in the assembly to another existing Datum object in a linked part. Datum objects of different types can be attached. 
 
@@ -115,11 +115,18 @@ These functions are also accessible with the Assembly toolbar:
 
 * ![](Resources/icons/Asm4_Variables.svg) : **Add Variable** : this adds a variable to the `Variables` object in the Model. These variables can be used in any parameter of the document by entering `Variables.Height` or `Variables.Length` (for example). This is especially useful for assemblies built in a single file, where several parts can be built using the same dimensions. Modifying a variable is done in the `Properties` window of the `Variables` object.
 
-* ![](Resources/icons/Solver.svg) : **Solve constraints and update assembly** : this recomputes all the links and all the placements in the assembly
+* ![](Resources/icons/Asm4_GearsAnimate.svg) : **Animate Assembly** : allows to select one of the variables from the `Variables` object and sweep it between two values. All parameters of the assembly that are set by this variable will be updated. 
+
+* ![](Resources/icons/Asm4_Solver.svg) : **Solve constraints and update assembly** : this recomputes all the links and all the placements in the assembly
 
 
 
 ## Workflow
+
+Some general purpose 3D CAD systems propose a workflow based on finished parts that are assembled into an assembly, and their position in that assembly is determined by constraints imposed on geometrical features present in the parts: holes, edges, faces... While this is quite easy to understand for beginners, it poses some limits on advanced users who need to modify the parts that are already inserted into an assembly. For example, if a part is placed using some geometrical feature, and that feature is later modified during the design process, the assembly solver might not be able to find the original constraint because the geometrical feature on which it was based has disappeared, and will throw an error. This can be a very difficult problem to solve, and is due to the dreaded *topological naming* issue. 
+
+Therefore, this is not the workflow used in Assembly 4, and instead Assembly 4 uses the principle of a **master sketch** : at the root of the assembly, *i.e.* in the Assembly 4 *Model*, one — or more — sketches are drawn that represent the "skeleton" of the assembly. This skeleton matches the functionalities of the assembly, and holds elements such as points and lines at characteristical positions of the assembly: rotational axes, fixation points, translation axes, beam directions... Furthermore, local coordinate systems — technically these are `PartDesign::CoordinateSystem` type objects and are called **LCS** in Assembly 4 — are placed on these characteristical points. The same principle — local coordinate systems are created in characteristical locations — is also applied in the design process of parts. Thus, the local coordinate systems in the parts can be matched to local coordinate systems in the assembly, guaranteeing that the part is positioned in the assembly at its intended position.
+
 
 
 ### Part
