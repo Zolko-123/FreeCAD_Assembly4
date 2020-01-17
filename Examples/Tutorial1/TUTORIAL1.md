@@ -145,7 +145,8 @@ If you haven't done so already, download the STEP file [`bearing_20x37x9.stp`](h
 ### Insert axis
 
 * Select **Assembly > Link an external Part** , or in the toolbar click on :
-![](icons/Link_Part.svg)
+
+![](../../Resources/icons/Link_Part.svg)
 
 * This will bring up the following dialog:
 
