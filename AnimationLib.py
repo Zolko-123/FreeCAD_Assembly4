@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 # coding: utf-8
 #
-# placeDatumCmd.py
+# LGPL
+# Copyright HUBERT Zoltán
+#
+# AnimationLib.py
 
 
 
@@ -64,24 +67,37 @@ class animateVariable( QtGui.QDialog ):
         self.drawUI()
         self.show()
 
-        # select the variables that are in the "Variables" group
+        # select the Float variables that are in the "Variables" group
         for prop in self.Variables.PropertiesList:
-            if self.Variables.getGroupOfProperty(prop) == 'Variables':
-                self.varList.addItem(prop)
+            if self.Variables.getGroupOfProperty(prop)=='Variables' :
+                if self.Variables.getTypeIdOfProperty(prop)=='App::PropertyFloat' :
+                    self.varList.addItem(prop)
+
+
+
+    """
+    +------------------------------------------------+
+    |  fill default values when selecting a variable |
+    +------------------------------------------------+
+    """
+    def onSelectVar(self):
+        # the currently selected variable
+        selectedVar = self.varList.currentText()
+        # if it's indeed a property in the Variables object (one never knows)
+        if selectedVar in self.Variables.PropertiesList:
+            # get its value
+            selectedVarValue = self.Variables.getPropertyByName(selectedVar)
+            # initialise the Begin and End values with it
+            self.minValue.setValue(selectedVarValue)
+            self.maxValue.setValue(selectedVarValue)
+        return
+
 
 
     """
     +-----------------------------------------------+
     |                     Run                       |
     +-----------------------------------------------+
-    vars = App.ActiveDocument.getObject('Variables')
-    step = 2
-    for angle in range( 0, 720+step, step ):
-        vars.Angle_rot = angle
-        App.ActiveDocument.recompute()
-        FreeCADGui.updateGui()
-
-
     """
     def onRun(self):
         # the selected variable
@@ -222,10 +238,10 @@ class animateVariable( QtGui.QDialog ):
         self.OKButton.setDefault(True)
 
         # Actions
+        self.varList.currentIndexChanged.connect( self.onSelectVar )
         self.CloseButton.clicked.connect(self.onClose)
         self.StopButton.clicked.connect(self.onStop)
         self.OKButton.clicked.connect(self.onRun)
-
 
 
 
