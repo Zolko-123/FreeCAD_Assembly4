@@ -47,6 +47,10 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 ## Release notes
 
+* 2020.01.18 (**version 0.7.8**) :  
+added "release attachments" button  
+various small fixes
+
 * 2020.01.06 (**version 0.7.7**) :  
 Moved the turorials to the Resources directory  
 import libAsm4 as Asm4  

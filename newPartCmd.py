@@ -19,41 +19,40 @@ import libAsm4 as Asm4
 
 
 class newPart:
-	"My tool object"
 
-	def GetResources(self):
-		return {"MenuText": "New Part",
-				"Accel": "Ctrl+P",
-				"ToolTip": "Create a new Part in the document",
-				"Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_Part.svg')
-				}
+    def GetResources(self):
+        return {"MenuText": "New Part",
+                "ToolTip": "Create a new Part in the document",
+                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_Part.svg')
+                }
 
 
-	def IsActive(self):
-		if App.ActiveDocument:
-			return(True)
-		else:
-			return(False)
+    def IsActive(self):
+        if App.ActiveDocument:
+            return(True)
+        else:
+            return(False)
 
 
-	def Activated(self):
-		partName = 'Part'
-		text,ok = QtGui.QInputDialog.getText(None,'Create new Part','Enter new Part name :                                        ', text = partName)
-		if ok and text:
-			# create Part
-			part = App.ActiveDocument.addObject('App::Part',text)
-			# If the 'Part' group exists, move it there:
-			if App.ActiveDocument.getObject('Parts'):
-				App.ActiveDocument.getObject('Parts').addObject(part)
-			# add an LCS at the root of the Part, and attach it to the 'Origin'
-			# this one starts with 1, because the LCS_0 is for the Model
-			lcs1 = part.newObject('PartDesign::CoordinateSystem','LCS_1')
-			lcs1.Support = [(part.Origin.OriginFeatures[0],'')]
-			lcs1.MapMode = 'ObjectXY'
-			lcs1.MapReversed = False
-			# recompute
-			part.recompute()
-			App.ActiveDocument.recompute()
+    def Activated(self):
+        partName = 'Part'
+        text,ok = QtGui.QInputDialog.getText(None,'Create new Part','Enter new Part name :                                        ', text = partName)
+        if ok and text:
+            # create Part
+            part = App.ActiveDocument.addObject('App::Part',text)
+            # If the 'Part' group exists, move it there:
+            partsGroup = App.ActiveDocument.getObject('Parts')
+            if partsGroup and partsGroup.TypeId=='App::DocumentObjectGroup' :
+                App.ActiveDocument.getObject('Parts').addObject(part)
+            # add an LCS at the root of the Part, and attach it to the 'Origin'
+            # this one starts with 1, because the LCS_0 is for the Model
+            lcs0 = part.newObject('PartDesign::CoordinateSystem','LCS_0')
+            lcs0.Support = [(part.Origin.OriginFeatures[0],'')]
+            lcs0.MapMode = 'ObjectXY'
+            lcs0.MapReversed = False
+            # recompute
+            part.recompute()
+            App.ActiveDocument.recompute()
 
 
 
