@@ -180,11 +180,11 @@ class Assembly4_WorkBench(Workbench):
                                 "Asm4_placeLink", 
                                 "Asm4_placeFastener", 
                                 "Asm4_importDatum",
-                                "Asm4_placeDatum" ]
+                                "Asm4_placeDatum",
+                                "Asm4_releaseAttachment"] 
         # commands to appear in the 'Create' sub-menu in the contextual menu (right-click)
         self.itemsCreateMenu = ["Asm4_newSketch",  
                                 "Asm4_newBody", 
-                                "Asm4_addVariable", 
                                 "Asm4_newLCS", 
                                 "Asm4_newAxis", 
                                 "Asm4_newPlane", 
@@ -246,6 +246,7 @@ class Assembly4_WorkBench(Workbench):
         self.appendContextMenu( "", ["Asm4_gotoDocument"] ) # add commands to the context menu
         self.appendContextMenu( "Assembly", self.itemsContextMenu ) # add commands to the context menu
         self.appendContextMenu( "Create", self.itemsCreateMenu ) # add commands to the context menu
+        self.appendContextMenu( "", "Separator")
 
  
     def GetClassName(self): 
