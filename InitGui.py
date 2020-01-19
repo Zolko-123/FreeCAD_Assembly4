@@ -86,10 +86,12 @@ class Assembly4_WorkBench(Workbench):
         import placeLinkCmd        # places a linked part by snapping LCS (in the Part and in the Assembly)
         import placeDatumCmd       # places an LCS relative to an external file (creates a local attached copy)
         import importDatumCmd      # creates an LCS in assembly and attaches it to an LCS relative to an external file
+        import releaseAttachmentCmd# creates an LCS in assembly and attaches it to an LCS relative to an external file
         import VariablesLib        # creates an LCS in assembly and attaches it to an LCS relative to an external file
         import AnimationLib        # creates an LCS in assembly and attaches it to an LCS relative to an external file
         import updateAssemblyCmd   # updates all parts and constraints in the assembly
         import newLinkArray        # creates a new array of App::Link
+        import gotoDocumentCmd     # opens the documentof the selected App::Link
         import HelpCmd             # shows a basic help window
         
         # defines the drop-down button for Fasteners:
@@ -136,11 +138,11 @@ class Assembly4_WorkBench(Workbench):
                                 "Asm4_newPart", 
                                 "Asm4_insertLink", 
                                 "Asm4_placeLink", 
+                                "Asm4_releaseAttachment", 
                                 "Asm4_insertScrew", 
                                 "Asm4_insertNut", 
                                 "Asm4_insertWasher",
                                 "Asm4_placeFastener", 
-                                "Asm4_newLinkArray",
                                 "Asm4_newSketch", 
                                 "Asm4_newLCS", 
                                 "Asm4_newPlane", 
@@ -149,6 +151,7 @@ class Assembly4_WorkBench(Workbench):
                                 "Asm4_newHole", 
                                 "Asm4_placeDatum", 
                                 "Asm4_importDatum", 
+                                "Asm4_newLinkArray",
                                 "Asm4_addVariable", 
                                 "Asm4_Animate", 
                                 "Asm4_updateAssembly"]
@@ -161,18 +164,20 @@ class Assembly4_WorkBench(Workbench):
                                 "Asm4_newPart", 
                                 "Asm4_insertLink", 
                                 "Asm4_placeLink", 
+                                "Asm4_releaseAttachment", 
                                 fastenersCmd, 
-                                "Asm4_newLinkArray",
                                 "Asm4_newSketch", 
                                 "Asm4_createDatum", 
                                 "Asm4_placeDatum", 
                                 "Asm4_importDatum", 
+                                "Asm4_newLinkArray",
                                 "Asm4_addVariable", 
                                 "Asm4_Animate", 
                                 "Asm4_updateAssembly"]
         self.appendToolbar("Assembly 4",self.itemsToolbar) # leave settings off toolbar
         # commands to appear in the 'Assembly' sub-menu in the contextual menu (right-click)
-        self.itemsContextMenu =["Asm4_insertLink", 
+        self.itemsContextMenu =["Asm4_gotoDocument",
+                                "Asm4_insertLink", 
                                 "Asm4_placeLink", 
                                 "Asm4_placeFastener", 
                                 "Asm4_importDatum",
@@ -189,7 +194,7 @@ class Assembly4_WorkBench(Workbench):
                                 "Asm4_insertScrew", 
                                 "Asm4_insertNut", 
                                 "Asm4_insertWasher"]
-
+        
         #self.appendMenu(["&Edit","DynamicData"],self.list) # appends a submenu to an existing menu
 
 

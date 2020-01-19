@@ -47,11 +47,13 @@ class newModel:
         if not self.checkModel():
             # create a group 'Parts' to hold all parts in the assembly document (if any)
             if not self.activeDoc.getObject('Parts'):
-                self.activeDoc.addObject( 'App::DocumentObjectGroup', 'Parts' )
+                partsGroup = self.activeDoc.addObject( 'App::DocumentObjectGroup', 'Parts' )
             # create a new App::Part called 'Model'
             model = self.activeDoc.addObject('App::Part','Model')
+            # set the type as a "proof" that it's an Assembly4 Model
+            model.Type='Assembly4 Model'
             # add an LCS at the root of the Model, and attach it to the 'Origin'
-            lcs0 = model.newObject('PartDesign::CoordinateSystem','LCS_0')
+            lcs0 = model.newObject('PartDesign::CoordinateSystem','LCS_Origin')
             lcs0.Support = [(model.Origin.OriginFeatures[0],'')]
             lcs0.MapMode = 'ObjectXY'
             lcs0.MapReversed = False
@@ -62,6 +64,10 @@ class newModel:
             # create a Configuration property
             model.addProperty('App::PropertyEnumeration', 'Configuration', 'Parameters')
             model.Configuration = ['Default']
+            # move existing parts to the Parts group
+            for obj in self.activeDoc.Objects:
+                if obj.TypeId=='App::Part' and obj.Name!='Model':
+                    partsGroup.addObject(obj)
             # recompute to get rid of the small overlays
             model.recompute()
             self.activeDoc.recompute()

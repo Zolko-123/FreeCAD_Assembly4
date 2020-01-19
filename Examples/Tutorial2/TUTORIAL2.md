@@ -168,7 +168,7 @@ We'll do the geometrical design with the PartDesign workbench. It is assumed tha
 * Right-click on the newly created Body and **Toggle Active Body**
   * this switches to the _PartDesign_ workbench (that's OK now)
 * Create the following geometry:
-  * set the distance between the 2 pivots to the variable _Disk_pivot_ 
+  * set the distance between the 2 pivots to the variable _Dist_pivot_ 
 
 ![](tuto2_base.png)
 
@@ -194,14 +194,14 @@ We'll do the geometrical design with the PartDesign workbench. It is assumed tha
 * Create a new Body and activate it
 * Create the following geometry:
   * set slot along the X axis with a length _R_disk_ × _2_ 
-  * set the distance of the pivot hole at the distance _Disk_pivot_ from the origin
+  * set the distance of the pivot hole at the distance _Dist_pivot_ from the origin
 
 * Switch to the Assembly4 workbench
 * Select the part _arm_
 * Create a new coordinate system, call it _LCS_pivot_
   * this _LCS_pivot_ must be at the root of the part _arm_ and **not** in the **Body**
 * Attach _LCS_pivot_ to the original LCS of the part _arm_ (called _LCS_1002_ in our design, this might be different for your model) with the _Object's X Y Z_ mode
-  * set the ExpressionEngine of the X value in the _AttachmentOffset_ to _Disk_pivot_
+  * set the ExpressionEngine of the X value in the _AttachmentOffset_ to _Dist_pivot_
 * Click **OK**
 
 ![](tuto2_armLCS.png)
