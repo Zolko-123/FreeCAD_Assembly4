@@ -176,8 +176,7 @@ class Assembly4_WorkBench(Workbench):
                                 "Asm4_updateAssembly"]
         self.appendToolbar("Assembly 4",self.itemsToolbar) # leave settings off toolbar
         # commands to appear in the 'Assembly' sub-menu in the contextual menu (right-click)
-        self.itemsContextMenu =["Asm4_gotoDocument",
-                                "Asm4_insertLink", 
+        self.itemsContextMenu =["Asm4_insertLink", 
                                 "Asm4_placeLink", 
                                 "Asm4_placeFastener", 
                                 "Asm4_importDatum",
@@ -244,6 +243,7 @@ class Assembly4_WorkBench(Workbench):
     def ContextMenu(self, recipient):
         # This is executed whenever the user right-clicks on screen"
         # "recipient" will be either "view" or "tree"
+        self.appendContextMenu( "", ["Asm4_gotoDocument"] ) # add commands to the context menu
         self.appendContextMenu( "Assembly", self.itemsContextMenu ) # add commands to the context menu
         self.appendContextMenu( "Create", self.itemsCreateMenu ) # add commands to the context menu
 
