@@ -46,9 +46,9 @@ def checkWorkbench( workbench ):
 """
 def warningBox( text ):
     msgBox = QtGui.QMessageBox()
-    msgBox.setWindowTitle('Warning')
-    msgBox.setIcon(QtGui.QMessageBox.Critical)
-    msgBox.setText("There is already an Assembly4 Model in this document.")
+    msgBox.setWindowTitle( 'Warning' )
+    msgBox.setIcon( QtGui.QMessageBox.Critical )
+    msgBox.setText( text )
     msgBox.exec_()
     return
 
