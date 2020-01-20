@@ -81,7 +81,7 @@ class placeLink( QtGui.QDialog ):
         # check that the link is an Asm4 link:
         self.isAsm4EE = False
         if hasattr(self.selectedLink,'AssemblyType'):
-            if self.selectedLink.AssemblyType == 'Asm4EE':
+            if self.selectedLink.AssemblyType == 'Asm4EE' or self.selectedLink.AssemblyType == '' :
                 self.isAsm4EE = True
             else:
                 Asm4.warningBox("This Link's assembly type doesn't correspond to this WorkBench")
