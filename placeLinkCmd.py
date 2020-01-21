@@ -105,19 +105,23 @@ class placeLink( QtGui.QDialog ):
         self.parentList.addItem( parentIcon, 'Parent Assembly', self.parentAssembly )
 
         # find all the linked parts in the assembly
-        for obj in self.activeDoc.findObjects("App::Link"):
-            # add it to our list if it's a link to an App::Part ...
-            if hasattr(obj,'LinkedObject') and obj.LinkedObject.isDerivedFrom('App::Part'):
-                # ... except if it's the selected link itself
-                if obj != self.selectedLink:
-                    self.asmParts.append( obj )
-                    # add to the drop-down combo box with the assembly tree's parts
-                    objIcon = obj.LinkedObject.ViewObject.Icon
-                    if obj.Name == obj.Label:
-                        objText = obj.Name
-                    else:
-                        objText = obj.Label+' ('+obj.Name+')'
-                    self.parentList.addItem( objIcon, objText, obj)
+        # for obj in self.activeDoc.findObjects("App::Link"):
+        for objName in self.parentAssembly.getSubObjects():
+            # remove the trailing .
+            obj = self.activeDoc.getObject(objName[0:-1])
+            if obj.TypeId=='App::Link':
+                # add it to our list if it's a link to an App::Part ...
+                if hasattr(obj.LinkedObject,'isDerivedFrom') and obj.LinkedObject.isDerivedFrom('App::Part'):
+                    # ... except if it's the selected link itself
+                    if obj != self.selectedLink:
+                        self.asmParts.append( obj )
+                        # add to the drop-down combo box with the assembly tree's parts
+                        objIcon = obj.LinkedObject.ViewObject.Icon
+                        if obj.Name == obj.Label:
+                            objText = obj.Name
+                        else:
+                            objText = obj.Label+' ('+obj.Name+')'
+                        self.parentList.addItem( objIcon, objText, obj)
 
 
         # find all the LCS in the selected link
