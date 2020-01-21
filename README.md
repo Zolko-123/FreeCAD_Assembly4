@@ -47,6 +47,9 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 ## Release notes
 
+* 2020.01.21 (**version 0.7.10**) :  
+bug-fix to not fall for random criss-cross linking of objects  
+
 * 2020.01.20 (**version 0.7.9**) :  
 (silly) bug-fix  
 
