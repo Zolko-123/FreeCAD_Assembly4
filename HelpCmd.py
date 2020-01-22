@@ -39,9 +39,7 @@ class Asm4Help( QtGui.QDialog ):
     def IsActive(self):
         # is there an active document ?
         if App.ActiveDocument:
-            # check that it's an Assembly4 'Model'
-            if App.ActiveDocument.getObject('Model') and App.ActiveDocument.getObject('Model').TypeId=='App::Part':
-                return True
+            return True
         return False 
 
 
@@ -70,24 +68,37 @@ class Asm4Help( QtGui.QDialog ):
         # Our main window will be a QDialog
         self.setWindowTitle('Help for FreeCAD and Assembly4')
         self.setWindowIcon( QtGui.QIcon( os.path.join( Asm4.iconPath , 'FreeCad.svg' ) ) )
-        self.setMinimumSize(600, 500)
+        self.setMinimumSize(600, 550)
         self.resize(600,500)
         self.setModal(False)
         # make this dialog stay above the others, always visible
         self.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
 
-        # Variable Type
-        self.helpText = QtGui.QTextBrowser(self)
-        self.helpText.move(10,25)
-        self.helpText.setMinimumSize(580, 400)
-        self.helpText.setSearchPaths( [os.path.join( Asm4.wbPath, 'Resources' )] )
-        self.helpText.setSource( 'Asm4_Help.html' )
-        #self.helpText.setText("Help Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\n \nSed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?")
+        # Version info
+        versionPath = os.path.join( Asm4.wbPath, 'VERSION' )
+        versionFile = open(versionPath,"r")
+        Asm4version = versionFile.readlines()[1]
+        FCmajor = App.ConfigGet('ExeVersion')
+        FCminor = App.ConfigGet('BuildRevision')
+        FCversion = FCmajor+'-'+FCminor
+        self.versionFC = QtGui.QLabel(self)
+        self.versionFC.setText("FreeCAD version : "+FCversion)
+        self.versionFC.move(10,20)
+        self.versionAsm4 = QtGui.QLabel(self)
+        self.versionAsm4.setText("Assembly4 version : "+Asm4version)
+        self.versionAsm4.move(10,50)
+
+        # Help text
+        self.helpSource = QtGui.QTextBrowser(self)
+        self.helpSource.move(10,90)
+        self.helpSource.setMinimumSize(580, 400)
+        self.helpSource.setSearchPaths( [os.path.join( Asm4.wbPath, 'Resources' )] )
+        self.helpSource.setSource( 'Asm4_Help.html' )
 
         # OK button
         self.OKButton = QtGui.QPushButton('OK', self)
         self.OKButton.setAutoDefault(True)
-        self.OKButton.move(500, 450)
+        self.OKButton.move(510, 510)
         self.OKButton.setDefault(True)
 
         # Actions
