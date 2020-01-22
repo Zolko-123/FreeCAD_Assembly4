@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-FreeCAD add-on for an assembly structure between App::Parts using App::Link. 
+Current version:  0.7.11, 2020-01-22
 
 
 
@@ -46,6 +46,9 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 
 ## Release notes
+
+* 2020.01.22 (**version 0.7.11**) :  
+Added version info to the Help dialog  
 
 * 2020.01.21 (**version 0.7.10**) :  
 bug-fix to not fall for random criss-cross linking of objects  
