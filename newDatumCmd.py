@@ -60,6 +60,7 @@ class newDatum:
             self.icon        = os.path.join( Asm4.iconPath , 'Asm4_Sketch.svg')
             self.datumColor  = []
             self.datumAlpha  = []
+        self.datumTypes = ['PartDesign::Point','PartDesign::Line','PartDesign::Plane','PartDesign::CoordinateSystem']
 
 
     def GetResources(self):
@@ -70,35 +71,25 @@ class newDatum:
 
     def IsActive(self):
         if App.ActiveDocument:
-            # is something selected ?
-            if Gui.Selection.getSelection():
-                # This command adds a new Sketch only to App::Part objects ...
-                if Gui.Selection.getSelection()[0].TypeId == ('App::Part'):
-                    return(True)
-                else:
-                    return(False)
-            # ... or if there is a Model object in the active document:
-            elif App.ActiveDocument.getObject('Model'):
+            # is something correct selected ?
+            if self.checkSelection():
                 return(True)
-            # 
-            else:
-                return(False)
-        else:
-            return(False)
+        return(False)
 
 
-    def checkPart(self):
+    def checkSelection(self):
         # if something is selected ...
         if Gui.Selection.getSelection():
             selectedObj = Gui.Selection.getSelection()[0]
-            # ... and it's an App::Part:
-            if selectedObj.TypeId == 'App::Part':
+            # ... and it's an App::Part or an datum object
+            if selectedObj.TypeId == 'App::Part' or selectedObj.TypeId in self.datumTypes:
                 return(selectedObj)
         # or of nothing is selected ...
-        if App.ActiveDocument.getObject('Model'):
+        elif App.ActiveDocument.getObject('Model'):
             # ... but there is a Model:
             return App.ActiveDocument.getObject('Model')
-        return False
+        # if we're here it's because we didn't find a good reason to not be here
+        return None
 
 
 
@@ -108,8 +99,19 @@ class newDatum:
     +-----------------------------------------------+
     """
     def Activated(self):
-        # check that we have somewhere to put our stuff (an App::Part or an Asm4 Model
-        partChecked = self.checkPart()
+        # check that we have somewhere to put our stuff (an App::Part or an Asm4 Model)
+        selectedObj = self.checkSelection()
+        if selectedObj.TypeId=='App::Part':
+            partChecked = selectedObj
+        # if a datum object is selected we try to find the parent App::Part
+        elif selectedObj.TypeId in self.datumTypes:
+            parent = selectedObj.getParentGeoFeatureGroup()
+            if parent.TypeId=='App::Part':
+                partChecked = parent
+        # something went wrong
+        else:
+            Asm4.warningBox("I can't create a "+self.datumType+" with the current selections")
+            
         # check whether there is already a similar datum, and increment the instance number 
         instanceNum = 1
         while App.ActiveDocument.getObject( self.datumName+'_'+str(instanceNum) ):
@@ -181,6 +183,7 @@ class newHole:
         return selection
 
 
+
     """
     +-----------------------------------------------+
     |                 the real stuff                |
@@ -203,7 +206,6 @@ class newHole:
             lcs.ViewObject.Zoom = 0.5
             lcs.recompute()
             parentPart.recompute()
-
 
 
 
