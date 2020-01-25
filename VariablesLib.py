@@ -43,6 +43,8 @@ class addVariable( QtGui.QDialog ):
                                     'App::PropertyPlacement',
                                     'App::PropertyColor',
                                     'App::PropertyFile']
+        self.drawUI()
+
 
 
     def GetResources(self):
@@ -96,8 +98,10 @@ class addVariable( QtGui.QDialog ):
         if not self.Variables:
             self.Variables =  App.ActiveDocument.getObject('Model').newObject('App::FeaturePython','Variables')
 
-        # Now we can draw the UI
-        self.drawUI()
+        # (re-)initialise the UI
+        self.varName.setText('')
+        self.varValue.setValue( 10.0 )
+        self.description.setText('')
         self.show()
 
         # get all supported Property types
@@ -129,7 +133,7 @@ class addVariable( QtGui.QDialog ):
         varName = self.varName.text()
         if varName:
             # add it to the Variables group of the Variables FeaturePython object
-            var = self.Variables.addProperty( 'App::Property'+propType, varName, 'Variables' )
+            var = self.Variables.addProperty( 'App::Property'+propType, varName, 'Variables', self.description.toPlainText() )
             # if the variable's value is defined and it's a float
             varValue = self.varValue.value()
             #if varValue and propType=='App::PropertyFloat':
@@ -137,7 +141,7 @@ class addVariable( QtGui.QDialog ):
                 setattr( self.Variables, varName, varValue )
             self.close()
         else:
-            return
+            self.close()
 
 
     """
@@ -165,62 +169,48 @@ class addVariable( QtGui.QDialog ):
         # make this dialog stay above the others, always visible
         self.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
 
-        # Variable Type
-        self.typeLabel = QtGui.QLabel(self)
-        self.typeLabel.setText("Type")
-        self.typeLabel.move(10,25)
-        # combobox showing all available App::PropertyType
+
+        # Define the fields for the form ( label + widget )
+        self.formLayout = QtGui.QFormLayout(self)
+        # Variable Type, combobox showing all available App::PropertyType
         self.typeList = QtGui.QComboBox(self)
-        self.typeList.move(110,20)
-        self.typeList.setMinimumSize(350, 1)
-
+        self.formLayout.addRow(QtGui.QLabel('Type'),self.typeList)
         # Variable Name
-        self.nameLabel = QtGui.QLabel(self)
-        self.nameLabel.setText("Name")
-        self.nameLabel.move(10,65)
-        # the document containing the linked object
         self.varName = QtGui.QLineEdit(self)
-        self.varName.setMinimumSize(350, 1)
-        self.varName.move(110,60)
-
+        self.formLayout.addRow(QtGui.QLabel('Name'),self.varName)
         # Variable Value
-        self.valueLabel = QtGui.QLabel(self)
-        self.valueLabel.setText("Value")
-        self.valueLabel.move(10,105)
-        # the document containing the linked object
         self.varValue = QtGui.QDoubleSpinBox(self)
-        self.varValue.setMinimumSize(350, 1)
-        self.varValue.setRange( -10000.0, 10000.0 )
-        self.varValue.setValue( 10.0 )
-        self.varValue.move(110,100)
-
+        self.formLayout.addRow(QtGui.QLabel('Value'),self.varValue)
         # Documentation
-        self.docLabel = QtGui.QLabel(self)
-        self.docLabel.setText("Document")
-        self.docLabel.move(10,145)
-        # Create a line that will contain full expression for the expression engine
-        self.expression = QtGui.QLineEdit(self)
-        self.expression.setMinimumSize(350, 100)
-        self.expression.move(110, 140)
+        self.description = QtGui.QTextEdit(self)
+        self.formLayout.addRow(QtGui.QLabel('Description'),self.description)
+        # apply the layout
+        self.formWidget = QtGui.QWidget(self)
+        self.formWidget.setLayout(self.formLayout)
 
         # Buttons
         #
         # Cancel button
+        #self.CancelButton = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Cancel)
         self.CancelButton = QtGui.QPushButton('Cancel', self)
-        self.CancelButton.setAutoDefault(False)
-        self.CancelButton.move(10, 290)
-
-        # OK button
-        self.OKButton = QtGui.QPushButton('OK', self)
-        self.OKButton.setAutoDefault(True)
-        self.OKButton.move(380, 290)
-        self.OKButton.setDefault(True)
-
-        # Actions
         self.CancelButton.clicked.connect(self.onCancel)
-        self.OKButton.clicked.connect(self.onOK)
-
-
+        # OK button
+        self.OkButton = QtGui.QPushButton('OK', self)
+        self.OkButton.setDefault(True)
+        self.OkButton.clicked.connect(self.onOK)
+        # the button layout
+        self.buttonLayout = QtGui.QHBoxLayout(self)
+        self.buttonLayout.addWidget(self.CancelButton)
+        self.buttonLayout.addStretch()
+        self.buttonLayout.addWidget(self.OkButton)
+        self.buttonRow = QtGui.QWidget(self)
+        self.buttonRow.setLayout(self.buttonLayout)
+        
+        # the layout for the main window is vertical (top to down)
+        self.mainLayout = QtGui.QVBoxLayout(self)
+        self.mainLayout.addWidget(self.formWidget)
+        self.mainLayout.addWidget(self.buttonRow)
+        self.setLayout(self.mainLayout)
 
 
 """
