@@ -23,4 +23,4 @@
 #  
 ###################################################################################
 
-print("Loading Assembly 4 WorkBench. \xa9 Zoltan Hubert")
+print("Loading Assembly4 WorkBench")

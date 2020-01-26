@@ -75,7 +75,7 @@ Linked parts are placed to each-other by matching their Datum Coordinate Systems
 To actually include some geometry, a body needs to be created, and designed using the PartDesign workbench. To be linked with the previously created model, this body needs to be inside the `App::Part container` called 'Model'.  
 
 The result is the following:  
-![](Resources/media/Asm4_wb0.png)
+![](Resources/media/Asm4_Bielle_tree_arrows.png)
 
 * the part _Bielle_ is placed in the assembly by attaching it's _LCS_0_ to the _LCS_0_ of the parent assembly. 
 * the part _Cuve_ is placed in the assembly by placing its _LCS_0_ on the _LCS_1_ of the part _Bielle_
@@ -185,11 +185,11 @@ To each part inserted into an assembly is associated an `App::FeaturePython` obj
 
 **Note:** These constraints are not really constraints in the traditional CAD sense, but since `App::FeaturePython` objects are very versatile, they could be expanded to contain real constraints in some (distant) future.
 
-![](Resources/media/Asm4_wb1.png)
+![](Resources/media/Asm4_wb5.png)
 
 _Taking a closer look at the fields contained in an `App::FeaturePython` object associated with the part 'Bague'. The small button under the cursor opens the dialog that allows to edit the parameters of the Attachment Offset_
 
-![](Resources/media/Asm4_wb2.png)
+![](Resources/media/Asm4_AttachmentOffset.png)
 
 _Dialog that opens when clicking the previous small button, and permitting to edit the parameters of the_ `App::Placement` _called_ 'AttachmentOffset' _in the constraint associated with a link, and allowing relative placement of the link -vs- the attachment LCS_
 
@@ -231,7 +231,7 @@ coordinate system inside a linked part cannot be used to attach the assembly to 
 
 Therefore, in order to re-use a coordinate system of a part in an assembly, a coordinate system must be created at the root of the 'Model', and the placement of this coordinate system must be 'copied' over from the coordinate system that the user wants to use. This is done by inserting a coordinate system and using the 'Place LCS' command, which allows to select a linked part in the assembly and one of it's coordinate systems: the 2 coordinate systems — the one at the root of 'Model' and the one in the linked part — will always be superimposed, even if the linked part is modified, allowing the placement of the assembly in a higher level assembly using a linked part as reference. It sounds more complicated than it actually is.
 
-![](Resources/media/Asm4_V4.gif)
+![](Resources/media/Asm4_V4.png)
 
 ![](Resources/media/Lego_House+Garden.png)
 
