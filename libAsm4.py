@@ -25,6 +25,32 @@ import FreeCAD as App
 
 """
     +-----------------------------------------------+
+    |      Create default Assembly4 properties      |
+    +-----------------------------------------------+
+"""
+def makeAsmProperties( obj, reset=False ):
+    # property AssemblyType
+    if not hasattr(obj,'AssemblyType'):
+        obj.addProperty( 'App::PropertyString', 'AssemblyType', 'Assembly' )
+    # property AttachedBy
+    if not hasattr(obj,'AttachedBy'):
+        obj.addProperty( 'App::PropertyString', 'AttachedBy', 'Assembly' )
+    # property AttachedTo
+    if not hasattr(obj,'AttachedTo'):
+        obj.addProperty( 'App::PropertyString', 'AttachedTo', 'Assembly' )
+    # property AttachmentOffset
+    if not hasattr(obj,'AttachmentOffset'):
+        obj.addProperty( 'App::PropertyPlacement', 'AttachmentOffset', 'Assembly' )
+    if reset:
+        obj.AssemblyType = ''
+        obj.AttachedBy = ''
+        obj.AttachedTo = ''
+        obj.AttachmentOffset = App.Placement()
+    return
+
+
+"""
+    +-----------------------------------------------+
     |         check whether a workbench exists      |
     +-----------------------------------------------+
 """
@@ -46,11 +72,42 @@ def checkWorkbench( workbench ):
 """
 def warningBox( text ):
     msgBox = QtGui.QMessageBox()
-    msgBox.setWindowTitle( 'Warning' )
+    msgBox.setWindowTitle( 'FreeCAD Warning' )
     msgBox.setIcon( QtGui.QMessageBox.Critical )
     msgBox.setText( text )
     msgBox.exec_()
     return
+
+
+def confirmBox( text ):
+    msgBox = QtGui.QMessageBox()
+    msgBox.setWindowTitle('FreeCAD Warning')
+    msgBox.setIcon(QtGui.QMessageBox.Warning)
+    msgBox.setText(text)
+    msgBox.setInformativeText('Are you sure you want to proceed ?')
+    msgBox.setStandardButtons(QtGui.QMessageBox.Cancel | QtGui.QMessageBox.Ok)
+    msgBox.setEscapeButton(QtGui.QMessageBox.Cancel)
+    msgBox.setDefaultButton(QtGui.QMessageBox.Ok)
+    retval = msgBox.exec_()
+    # Cancel = 4194304
+    # Ok = 1024
+    if retval == 1024:
+        # user confirmed
+        return True
+    # anything else than OK
+    return False
+
+
+
+"""
+    +-----------------------------------------------+
+    |         the 3 base rotation Placements        |
+    +-----------------------------------------------+
+"""
+rotX = App.Placement( App.Vector(0,0,0), App.Rotation( App.Vector(1,0,0), 90. ) )
+rotY = App.Placement( App.Vector(0,0,0), App.Rotation( App.Vector(0,1,0), 90. ) )
+rotZ = App.Placement( App.Vector(0,0,0), App.Rotation( App.Vector(0,0,1), 90. ) )
+
 
 
 
@@ -176,7 +233,7 @@ def makeExpressionDatum( attLink, attPart, attLCS ):
     # check that everything is defined
     if attLink and attPart and attLCS:
         # expr = Link.Placement * LinkedPart#LCS.Placement
-        expr = attLink +'.Placement * '+ attPart +'#'+ attLCS +'.Placement'
+        expr = attLink +'.Placement * '+ attPart +'#'+ attLCS +'.Placement * AttachmentOffset'
     else:
         expr = False
     return expr

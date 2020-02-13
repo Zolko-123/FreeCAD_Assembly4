@@ -27,8 +27,10 @@ class insertLink( QtGui.QDialog ):
 
     def __init__(self):
         super(insertLink,self).__init__()
+        # the GUI objects are defined later down
+        self.drawUI()
 
-        
+
     def GetResources(self):
         return {"MenuText": "Link an external Part",
                 "Accel": "Ctrl+L",
@@ -68,6 +70,12 @@ class insertLink( QtGui.QDialog ):
     """
     def Activated(self):
         # This function is executed when the command is activated
+
+        # initialise stuff
+        self.partList.clear()
+        self.linkNameInput.clear()
+        self.allParts = []
+        self.partsDoc = []
         
         # get the current active document to avoid errors if user changes tab
         self.activeDoc = App.ActiveDocument
@@ -84,13 +92,8 @@ class insertLink( QtGui.QDialog ):
         else:
             self.origLink = None
         
-        # the GUI objects are defined later down
-        self.drawUI()
-        
         # Search for all App::Parts in all open documents
         # Also store the document of the part
-        self.allParts = []
-        self.partsDoc = []
         for doc in App.listDocuments().values():
             # there might be more than 1 App::Part per document
             for obj in doc.findObjects("App::Part"):
@@ -217,49 +220,42 @@ class insertLink( QtGui.QDialog ):
     def drawUI(self):
 
         # Our main window is a QDialog
-        self.setModal(False)
         # make this dialog stay above the others, always visible
         self.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
-        self.setWindowTitle('Insert a Model')
+        self.setModal(False)
+        self.setWindowTitle('Insert a Part')
         self.setWindowIcon( QtGui.QIcon( os.path.join( Asm4.iconPath , 'FreeCad.svg' ) ) )
         self.setMinimumSize(400, 500)
         self.resize(400,500)
-        #self.Layout.addWidget(self.GUIwindow)
 
-        # label
-        self.labelMain = QtGui.QLabel(self)
-        self.labelMain.setText("Select Part to be inserted :")
-        self.labelMain.move(10,20)
-        #self.Layout.addWidget(self.labelMain)
-        
-        # label
-        self.labelLink = QtGui.QLabel(self)
-        self.labelLink.setText("Enter a Name for the link :\n(Must be unique in the Model tree)")
-        self.labelLink.move(10,350)
-
-        # Create a line that will contain the name of the link (in the tree)
-        self.linkNameInput = QtGui.QLineEdit(self)
-        self.linkNameInput.setMinimumSize(380, 0)
-        self.linkNameInput.move(10, 400)
-    
+        # Define the individual widgets
         # The part list is a QListWidget
         self.partList = QtGui.QListWidget(self)
-        self.partList.move(10,50)
-        self.partList.setMinimumSize(380, 280)
-
+        # Create a line that will contain the name of the link (in the tree)
+        self.linkNameInput = QtGui.QLineEdit(self)
         # Cancel button
-        self.CancelButton = QtGui.QPushButton('Cancel', self)
-        self.CancelButton.setAutoDefault(False)
-        self.CancelButton.move(10, 460)
+        self.cancelButton = QtGui.QPushButton('Cancel', self)
+        # Insert Link button
+        self.insertButton = QtGui.QPushButton('Insert', self)
+        self.insertButton.setDefault(True)
 
-        # create Link button
-        self.createLinkButton = QtGui.QPushButton('Insert part', self)
-        self.createLinkButton.move(285, 460)
-        self.createLinkButton.setDefault(True)
+        # Place the widgets with layouts
+        self.mainLayout = QtGui.QVBoxLayout(self)
+        self.mainLayout.addWidget(QtGui.QLabel("Select Part to be inserted :"))
+        self.mainLayout.addWidget(self.partList)
+        self.mainLayout.addWidget(QtGui.QLabel("Enter a Name for the link :\n(Must be unique in the Model tree)"))
+        self.mainLayout.addWidget(self.linkNameInput)
+        self.mainLayout.addWidget(QtGui.QLabel(' '))
+        self.buttonsLayout = QtGui.QHBoxLayout(self)
+        self.buttonsLayout.addWidget(self.cancelButton)
+        self.buttonsLayout.addStretch()
+        self.buttonsLayout.addWidget(self.insertButton)
+        self.mainLayout.addLayout(self.buttonsLayout)
+        self.setLayout(self.mainLayout)
 
         # Actions
-        self.CancelButton.clicked.connect(self.onCancel)
-        self.createLinkButton.clicked.connect(self.onCreateLink)
+        self.cancelButton.clicked.connect(self.onCancel)
+        self.insertButton.clicked.connect(self.onCreateLink)
         self.partList.itemClicked.connect( self.onItemClicked)
 
 

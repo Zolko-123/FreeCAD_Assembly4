@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 ###################################################################################
 #
-#  dynamicdatawb_locator.py
-#  
-#  Copyright 2018 Mark Ganson <TheMarkster> mwganson at gmail
+#  asm4wb_locator.py
 #  
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by

@@ -99,9 +99,10 @@ class addVariable( QtGui.QDialog ):
             self.Variables =  App.ActiveDocument.getObject('Model').newObject('App::FeaturePython','Variables')
 
         # (re-)initialise the UI
-        self.varName.setText('')
+        self.typeList.clear()
+        self.varName.clear()
         self.varValue.setValue( 10.0 )
-        self.description.setText('')
+        self.description.clear()
         self.show()
 
         # get all supported Property types
@@ -161,14 +162,15 @@ class addVariable( QtGui.QDialog ):
     """
     def drawUI(self):
         # Our main window will be a QDialog
-        self.setWindowTitle('Add Variable')
-        self.setWindowIcon( QtGui.QIcon( os.path.join( Asm4.iconPath , 'FreeCad.svg' ) ) )
-        self.setMinimumSize(470, 330)
-        self.resize(470,330)
-        self.setModal(False)
         # make this dialog stay above the others, always visible
         self.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
-
+        self.setWindowTitle('Add Variable')
+        self.setWindowIcon( QtGui.QIcon( os.path.join( Asm4.iconPath , 'FreeCad.svg' ) ) )
+        self.setMinimumSize(470, 300)
+        self.resize(470,300)
+        self.setModal(False)
+        # the layout for the main window is vertical (top to down)
+        self.mainLayout = QtGui.QVBoxLayout(self)
 
         # Define the fields for the form ( label + widget )
         self.formLayout = QtGui.QFormLayout(self)
@@ -180,37 +182,35 @@ class addVariable( QtGui.QDialog ):
         self.formLayout.addRow(QtGui.QLabel('Name'),self.varName)
         # Variable Value
         self.varValue = QtGui.QDoubleSpinBox(self)
+        self.varValue.setRange( -1000000.0, 1000000.0 )
         self.formLayout.addRow(QtGui.QLabel('Value'),self.varValue)
         # Documentation
         self.description = QtGui.QTextEdit(self)
         self.formLayout.addRow(QtGui.QLabel('Description'),self.description)
         # apply the layout
-        self.formWidget = QtGui.QWidget(self)
-        self.formWidget.setLayout(self.formLayout)
+        self.mainLayout.addLayout(self.formLayout)
+        self.mainLayout.addStretch()
 
         # Buttons
-        #
+        self.buttonLayout = QtGui.QHBoxLayout(self)
         # Cancel button
-        #self.CancelButton = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Cancel)
         self.CancelButton = QtGui.QPushButton('Cancel', self)
-        self.CancelButton.clicked.connect(self.onCancel)
         # OK button
         self.OkButton = QtGui.QPushButton('OK', self)
         self.OkButton.setDefault(True)
-        self.OkButton.clicked.connect(self.onOK)
         # the button layout
-        self.buttonLayout = QtGui.QHBoxLayout(self)
         self.buttonLayout.addWidget(self.CancelButton)
         self.buttonLayout.addStretch()
         self.buttonLayout.addWidget(self.OkButton)
-        self.buttonRow = QtGui.QWidget(self)
-        self.buttonRow.setLayout(self.buttonLayout)
-        
-        # the layout for the main window is vertical (top to down)
-        self.mainLayout = QtGui.QVBoxLayout(self)
-        self.mainLayout.addWidget(self.formWidget)
-        self.mainLayout.addWidget(self.buttonRow)
+        self.mainLayout.addLayout(self.buttonLayout)
+
+        # finally, apply the layout to the main window
         self.setLayout(self.mainLayout)
+
+        # Actions
+        self.CancelButton.clicked.connect(self.onCancel)
+        self.OkButton.clicked.connect(self.onOK)
+
 
 
 """

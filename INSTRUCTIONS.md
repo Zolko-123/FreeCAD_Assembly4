@@ -26,7 +26,7 @@ The very principle of Assembly4 is that `App::Part` objects are linked together 
 
 Since a FreeCAD `App::Part` is a container, all objects included in the child part will be included in the parent assembly. To actually insert some geometry, solids or bodies need to be created inside the `App::Part` container and designed using other FreeCAD workbenches.
 
-**Please Note:** objects in the same document as the linked part but outside the `App::Part` container will not be inserted. 
+**Please Note:** objects in the same document as the linked part but outside the `App::Part` container will not be inserted. The *PartDesign* workbench doesn't produce **Parts**, it produces **Bodies**. It is entirely possible to use Parts made with the *Part* workbench with Assembly4, but if you want to use Bodies made with the PartDesign WB you need first to create a Part and move the Body into that Part.
 
 ### Part placements
 

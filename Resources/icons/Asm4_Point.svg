@@ -15,7 +15,7 @@
    id="svg5821"
    sodipodi:version="0.32"
    inkscape:version="0.92.3 (2405546, 2018-03-11)"
-   sodipodi:docname="Asm4_Point_orig.svg"
+   sodipodi:docname="Asm4_Point.svg"
    inkscape:output_extension="org.inkscape.output.svg.inkscape"
    version="1.1"
    inkscape:export-filename="/home/normand/Images/Icônes/PartDesign_Std_Plane_nc1.png"
@@ -115,8 +115,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="10"
-     inkscape:cx="8.479"
-     inkscape:cy="38.57919"
+     inkscape:cx="28.577409"
+     inkscape:cy="38.453757"
      inkscape:current-layer="g3360-3"
      showgrid="true"
      inkscape:document-units="px"
@@ -191,12 +191,12 @@
          inkscape:export-ydpi="3.2478156"
          transform="translate(-2.96179e-7,2.9614273e-6)">
         <rect
-           style="fill:none;fill-opacity:1;stroke:#a79b9e;stroke-width:19.99491692;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;stroke-linejoin:round"
+           style="fill:none;fill-opacity:1;stroke:#a79b9e;stroke-width:19.99491692;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
            id="rect4154"
            width="424.30908"
            height="32.318394"
-           x="383.89774"
-           y="1222.4313"
+           x="358.2897"
+           y="1273.2233"
            ry="0"
            rx="0"
            transform="matrix(0,1,0.86360132,0.50417532,0,0)" />
@@ -205,17 +205,17 @@
            id="rect4156"
            width="418.2963"
            height="27.184877"
-           x="386.90402"
-           y="1225.401"
+           x="361.29599"
+           y="1276.193"
            ry="0"
            transform="matrix(0,1,0.86360132,0.50417532,0,0)" />
         <rect
-           style="fill:none;fill-opacity:1;stroke:#a79b9e;stroke-width:19.99491692;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;stroke-linejoin:round;stroke-linecap:butt"
+           style="fill:none;fill-opacity:1;stroke:#a79b9e;stroke-width:19.99491692;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
            id="rect4154-3"
            width="420.79517"
            height="32.588272"
-           x="1019.2772"
-           y="586.07007"
+           x="1070.0692"
+           y="560.46204"
            ry="0"
            rx="0"
            transform="matrix(0.86360132,0.50417532,0,1,0,0)" />
@@ -224,17 +224,17 @@
            id="rect4156-5"
            width="414.83218"
            height="27.41189"
-           x="1022.2585"
-           y="589.06464"
+           x="1073.0505"
+           y="563.4566"
            ry="0"
            transform="matrix(0.86360132,0.50417532,0,1,0,0)" />
         <rect
-           style="fill:none;fill-opacity:1;stroke:#a79b9e;stroke-width:19.99752712;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;stroke-linejoin:round"
+           style="fill:none;fill-opacity:1;stroke:#a79b9e;stroke-width:19.99752617;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
            id="rect4154-3-2"
            width="420.79517"
            height="32.588272"
-           x="1021.7347"
-           y="-1866.2782"
+           x="1072.5267"
+           y="-1891.8862"
            ry="0"
            rx="0"
            transform="matrix(0.86360132,-0.50417532,0,-1,0,0)" />
@@ -243,15 +243,15 @@
            id="rect4156-5-9"
            width="414.83218"
            height="27.41189"
-           x="1024.7161"
-           y="-1863.2836"
+           x="1075.5081"
+           y="-1888.8916"
            ry="0"
            transform="matrix(0.86360132,-0.50417532,0,-1,0,0)" />
         <path
            inkscape:connector-curvature="0"
            style="fill:#473f3f;fill-opacity:1;stroke:#2d2d2d;stroke-width:21.34043694;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
            id="path4250-7-3-2-5-7"
-           d="m 1045.9702,1203.2808 a 32.189251,31.833114 89.999928 1 1 48.3572,41.8755 32.189251,31.833114 89.999928 0 1 -48.3572,-41.8755 z" />
+           d="m 1089.8341,1203.2808 a 32.189251,31.833114 89.999928 1 1 48.3572,41.8755 32.189251,31.833114 89.999928 0 1 -48.3572,-41.8755 z" />
       </g>
     </g>
   </g>

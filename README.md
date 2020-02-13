@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version:  0.7.12, 2020-01-25
+Current version:  0.8.0, 2020-02-13
 
 
 
@@ -41,7 +41,7 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 * [a quick assembly from scratch](https://github.com/Zolko-123/FreeCAD_Examples/blob/master/Asm4_Tutorial1/README.md)
 * [a cinematic assembly in one file, using a master sketch](https://github.com/Zolko-123/FreeCAD_Examples/blob/master/Asm4_Tutorial2/README.md)
 * [a Lego assembly](https://github.com/Zolko-123/FreeCAD_Examples/blob/master/Asm4_Tutorial3/README.md)
-
+* [Some examples to play with](https://github.com/Zolko-123/FreeCAD_Examples)
 
 
 
@@ -50,6 +50,13 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 
 ## Release notes
+
+
+* 2020.02.13 (**version 0.8.0**) :  
+All dialogs are now resizable  
+Various bugfixes  
+Made the Asm4 properties of all objects homogenous  
+Moved examples and tutorials to dedicated repository (some users ran into trouble for updating the WB because they had modified the local files)  
 
 * 2020.01.25 (**version 0.7.12**) :  
 Refined datum and variables creation  

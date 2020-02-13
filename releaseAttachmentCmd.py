@@ -80,6 +80,8 @@ class releaseAttachment:
             objText = objLabel
         else:
             objText = objLabel+' ('+objName+')'
+        confirmText = 'This command will release all attachments on '+objText+' and set it to manual positioning in its current location.'
+        """
         msgBox = QtGui.QMessageBox()
         msgBox.setWindowTitle('FreeCAD Warning')
         msgBox.setIcon(QtGui.QMessageBox.Warning)
@@ -92,6 +94,8 @@ class releaseAttachment:
         # Cancel = 4194304
         # Ok = 1024
         if retval == 4194304:
+        """
+        if not Asm4.confirmBox(confirmText):
             # don't do anything
             return
 
@@ -122,7 +126,7 @@ class releaseAttachment:
             if hasattr(selectedObj,'AttachmentOffset'):
                 selectedObj.AttachmentOffset = App.Placement()
             else:
-                selectedObj.addProperty( 'App::PropertyPlacement', 'AttachmentOffset', 'Attachment' ).AttachedTo = App.Placement()
+                selectedObj.addProperty( 'App::PropertyPlacement', 'AttachmentOffset', 'Attachment' ).AttachmentOffset = App.Placement()
         # a datum object
         elif objType=='PartDesign::CoordinateSystem' or objType=='PartDesign::Plane' or objType=='PartDesign::Line' or objType=='PartDesign::Point' :
             # unset the MapMode; this actually keeps the MapMode parameters intact, 
