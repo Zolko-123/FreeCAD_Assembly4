@@ -8,12 +8,11 @@
 
 
 
-import math, re, os, time
+import os, time
 
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
-import Part
 
 import libAsm4 as Asm4
 
@@ -30,6 +29,8 @@ class animateVariable( QtGui.QDialog ):
 
     def __init__(self):
         super(animateVariable,self).__init__()
+        self.drawUI()
+
 
 
     def GetResources(self):
@@ -64,10 +65,10 @@ class animateVariable( QtGui.QDialog ):
         self.Run = True
 
         # Now we can draw the UI
-        self.drawUI()
         self.show()
 
         # select the Float variables that are in the "Variables" group
+        self.varList.clear()
         for prop in self.Variables.PropertiesList:
             if self.Variables.getGroupOfProperty(prop)=='Variables' :
                 if self.Variables.getTypeIdOfProperty(prop)=='App::PropertyFloat' :
@@ -118,8 +119,6 @@ class animateVariable( QtGui.QDialog ):
                     Gui.updateGui()
                     varValue += step
                     time.sleep(sleep)
-                self.Run = True
-                return
             # ... or backwards
             elif end<begin and step<0:
                 varValue = begin
@@ -130,8 +129,7 @@ class animateVariable( QtGui.QDialog ):
                     Gui.updateGui()
                     varValue += step
                     time.sleep(sleep)
-                self.Run = True
-                return
+        self.Run = True
         return
 
 
@@ -151,6 +149,7 @@ class animateVariable( QtGui.QDialog ):
     +-----------------------------------------------+
     """
     def onClose(self):
+        self.Run = False
         self.close()
 
 
@@ -161,87 +160,68 @@ class animateVariable( QtGui.QDialog ):
     """
     def drawUI(self):
         # Our main window will be a QDialog
+        # make this dialog stay above the others, always visible
+        self.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
         self.setWindowTitle('Animate Assembly')
         self.setWindowIcon( QtGui.QIcon( os.path.join( Asm4.iconPath , 'FreeCad.svg' ) ) )
         self.setMinimumSize(470, 300)
         self.resize(470,300)
         self.setModal(False)
-        # make this dialog stay above the others, always visible
-        self.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
+        # set main window widgets
+        self.mainLayout = QtGui.QVBoxLayout(self)
 
+        # Define the fields for the form ( label + widget )
+        self.formLayout = QtGui.QFormLayout(self)
         # select Variable
-        self.varLabel = QtGui.QLabel(self)
-        self.varLabel.setText("Select Variable")
-        self.varLabel.move(10,25)
-        # combobox showing all available variables
         self.varList = QtGui.QComboBox(self)
-        self.varList.move(200,20)
-        self.varList.setMinimumSize(260, 1)
-
-        # Range
-        self.rangeLabel = QtGui.QLabel(self)
-        self.rangeLabel.setText("Range")
-        self.rangeLabel.move(10,85)
-        # Minimum
-        self.minLabel = QtGui.QLabel(self)
-        self.minLabel.setText("Begin :")
-        self.minLabel.move(120,65)
+        self.formLayout.addRow(QtGui.QLabel('Select Variable'),self.varList)
+        # Range Minimum
         self.minValue = QtGui.QDoubleSpinBox(self)
-        self.minValue.move(200,60)
-        self.minValue.setMinimumSize(260, 1)
-        self.minValue.setRange( -1000.0, 1000.0 )
-        self.minValue.setValue( 0.0 )
+        self.minValue.setRange( -1000000.0, 1000000.0 )
+        self.formLayout.addRow(QtGui.QLabel('Range Begin'),self.minValue)
         # Maximum
-        self.maxLabel = QtGui.QLabel(self)
-        self.maxLabel.setText("End :")
-        self.maxLabel.move(120,105)
         self.maxValue = QtGui.QDoubleSpinBox(self)
-        self.maxValue.move(200,100)
-        self.maxValue.setMinimumSize(260, 1)
-        self.maxValue.setRange( -1000.0, 1000.0 )
-        self.maxValue.setValue( 10.0 )
-
+        self.maxValue.setRange( -1000000.0, 1000000.0 )
+        self.formLayout.addRow(QtGui.QLabel('Range End'),self.maxValue)
         # Step
-        self.stepLabel = QtGui.QLabel(self)
-        self.stepLabel.setText("Step :")
-        self.stepLabel.move(10,145)
         self.stepValue = QtGui.QDoubleSpinBox(self)
-        self.stepValue.move(200,140)
-        self.stepValue.setMinimumSize(260, 1)
-        self.stepValue.setRange( -100.0, 100.0 )
+        self.stepValue.setRange( -10000.0, 10000.0 )
         self.stepValue.setValue( 1.0 )
-
+        self.formLayout.addRow(QtGui.QLabel('Step'),self.stepValue)
         # Sleep
-        self.sleepLabel = QtGui.QLabel(self)
-        self.sleepLabel.setText("Sleep (s) :")
-        self.sleepLabel.move(10,185)
         self.sleepValue = QtGui.QDoubleSpinBox(self)
-        self.sleepValue.move(200,180)
-        self.sleepValue.setMinimumSize(260, 1)
-        self.sleepValue.setRange( 0.0, 100.0 )
+        self.sleepValue.setRange( 0.0, 10.0 )
         self.sleepValue.setValue( 0.0 )
+        self.formLayout.addRow(QtGui.QLabel('Sleep (s)'),self.sleepValue)
+        # apply the layout
+        self.mainLayout.addLayout(self.formLayout)
+        self.mainLayout.addStretch()
 
-        # Buttons
-        #
-        # Cancel button
+        # the button row definition
+        self.buttonLayout = QtGui.QHBoxLayout(self)
+        # Close button
         self.CloseButton = QtGui.QPushButton('Close', self)
-        self.CloseButton.setAutoDefault(False)
-        self.CloseButton.move(10, 260)
+        self.buttonLayout.addWidget(self.CloseButton)
+        self.buttonLayout.addStretch()
         # Stop button
         self.StopButton = QtGui.QPushButton('Stop', self)
-        self.StopButton.setAutoDefault(False)
-        self.StopButton.move(190, 260)
-        # OK button
-        self.OKButton = QtGui.QPushButton('Run', self)
-        self.OKButton.setAutoDefault(True)
-        self.OKButton.move(380, 260)
-        self.OKButton.setDefault(True)
+        self.buttonLayout.addWidget(self.StopButton)
+        self.buttonLayout.addStretch()
+        # Run button
+        self.RunButton = QtGui.QPushButton('Run', self)
+        self.RunButton.setDefault(True)
+        self.buttonLayout.addWidget(self.RunButton)
+        # add buttons to layout
+        self.mainLayout.addLayout(self.buttonLayout)
+
+        # finally, apply the layout to the main window
+        self.setLayout(self.mainLayout)
 
         # Actions
         self.varList.currentIndexChanged.connect( self.onSelectVar )
         self.CloseButton.clicked.connect(self.onClose)
         self.StopButton.clicked.connect(self.onStop)
-        self.OKButton.clicked.connect(self.onRun)
+        self.RunButton.clicked.connect(self.onRun)
 
 
 

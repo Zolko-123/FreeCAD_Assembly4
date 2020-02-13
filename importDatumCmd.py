@@ -25,6 +25,7 @@ class importDatum( QtGui.QDialog ):
 
     def __init__(self):
         super(importDatum,self).__init__()
+        self.drawUI()
         self.datumTypes = ['PartDesign::CoordinateSystem',
                            'PartDesign::Plane',
                            'PartDesign::Line',
@@ -77,14 +78,12 @@ class importDatum( QtGui.QDialog ):
         self.parentAssembly = self.activeDoc.Model
 
         # initialize 
+        self.initUI()
         self.datumTable = [ ]
         self.selectedChild = None
-
-        # Now we can draw the UI
-        self.drawUI()
-
-        # We get all the App::Link parts in the assembly 
         self.childrenTable = []
+ 
+        # We get all the App::Link parts in the assembly 
         # find all the child linked parts in the assembly
         for objStr in self.parentAssembly.getSubObjects():
             # the string ends with a . that must be removed
@@ -101,12 +100,12 @@ class importDatum( QtGui.QDialog ):
         self.targetLink = self.activeDoc.getObject( targetLinkName )
         # If the selected datum is at the root of the link. Else we don't consider it
         if dot =='.' and self.targetLink in self.childrenTable:
-            self.datumList.setText( self.labelName(self.targetDatum) )
+            self.datumOrig.setText( self.labelName(self.targetDatum) )
             self.datumType.setText( self.targetDatum.TypeId )
             self.linkName.setText(  self.labelName(self.targetLink) )
             docName = self.targetLink.LinkedObject.Document.Name+'#'
             self.partName.setText(  docName + self.labelName(self.targetLink.LinkedObject))
-            self.datumName.setText(  self.targetDatum.Label )
+            self.datumName.setText( self.targetDatum.Label )
         else:
             # something fishy, abort
             msgBox = QtGui.QMessageBox()
@@ -154,12 +153,12 @@ class importDatum( QtGui.QDialog ):
             # build the expression for the ExpressionEngine
             # if the linked part is in the same docmument as the assembly
             if self.activeDoc == self.targetLink.LinkedObject.Document:
-                expr = linkName +'.Placement * '+ datum.Name +'.Placement'
+                expr = linkName +'.Placement * '+ datum.Name +'.Placement * AttachmentOffset'
             # if the linked part is in another document
             else:
                 # it's the App.Document, not the App::Part that must be set before the #
                 # expr = linkName +'.Placement * '+ linkedPart +'#'+ datum.Name +'.Placement'
-                expr = linkName +'.Placement * '+ linkedDoc +'#'+ datum.Name +'.Placement'
+                expr = linkName +'.Placement * '+ linkedDoc +'#'+ datum.Name +'.Placement * AttachmentOffset'
             # load the built expression into the Expression field of the datum created in the assembly
             self.activeDoc.getObject( createdDatum.Name ).setExpression( 'Placement', expr )
             # recompute the object to apply the placement:
@@ -194,84 +193,71 @@ class importDatum( QtGui.QDialog ):
     |     defines the UI, only static elements      |
     +-----------------------------------------------+
     """
+    def initUI(self):
+        self.datumOrig.clear()
+        self.datumType.clear()
+        self.linkName.clear()
+        self.partName.clear()
+        self.datumName.clear()
+    
+    
+    
     def drawUI(self):
         # Our main window will be a QDialog
         self.setWindowTitle('Import a Datum object')
-        self.setWindowIcon( QtGui.QIcon( os.path.join( Asm4.iconPath , 'FreeCad.svg' ) ) )
-        self.setMinimumSize(470, 350)
-        self.resize(470,350)
-        self.setModal(False)
-        # make this dialog stay above the others, always visible
         self.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
+        self.setWindowIcon( QtGui.QIcon( os.path.join( Asm4.iconPath , 'FreeCad.svg' ) ) )
+        self.setMinimumSize(550, 350)
+        self.setModal(False)
+        self.mainLayout = QtGui.QVBoxLayout(self)
 
-        # Datum Object
-        self.labelRight = QtGui.QLabel(self)
-        self.labelRight.setText("Name :")
-        self.labelRight.move(10,25)
-        self.datumList = QtGui.QLineEdit(self)
-        self.datumList.setReadOnly(True)
-        self.datumList.move(160,20)
-        self.datumList.setMinimumSize(300, 1)
-
+        # Define the fields for the form ( label + widget )
+        self.formLayout = QtGui.QFormLayout(self)
         # Datum Type
-        self.labelType = QtGui.QLabel(self)
-        self.labelType.setText("Type :")
-        self.labelType.move(10,65)
         self.datumType = QtGui.QLineEdit(self)
         self.datumType.setReadOnly(True)
-        self.datumType.move(160,60)
-        self.datumType.setMinimumSize(300, 1)
-
+        self.formLayout.addRow(QtGui.QLabel('Datum Type'),self.datumType)
+        # Datum Object
+        self.datumOrig = QtGui.QLineEdit(self)
+        self.datumOrig.setReadOnly(True)
+        self.formLayout.addRow(QtGui.QLabel('Orig. Datum'),self.datumOrig)
         # Link instance
-        self.linkLabel = QtGui.QLabel(self)
-        self.linkLabel.setText("from Link :")
-        self.linkLabel.move(10,105)
         self.linkName = QtGui.QLineEdit(self)
         self.linkName.setReadOnly(True)
-        self.linkName.setMinimumSize(300, 1)
-        self.linkName.move(160,100)
-
+        self.formLayout.addRow(QtGui.QLabel('Orig. Instance'),self.linkName)
         # Orig Part
-        self.partLabel = QtGui.QLabel(self)
-        self.partLabel.setText("linked Part :")
-        self.partLabel.move(10,145)
         self.partName = QtGui.QLineEdit(self)
         self.partName.setReadOnly(True)
-        self.partName.move(160,140)
-        self.partName.setMinimumSize(300, 1)
+        self.formLayout.addRow(QtGui.QLabel('Orig. Doc#Part'),self.partName)
+        # apply the layout
+        self.mainLayout.addLayout(self.formLayout)
         
-        # imported Link name
-        self.datumLabel = QtGui.QLabel(self)
-        self.datumLabel.setText("Enter the new Datum objects's name:")
-        self.datumLabel.move(10,210)
+        # empty line
+        self.mainLayout.addWidget(QtGui.QLabel(' '))
         # the name as seen in the tree of the selected link
         self.datumName = QtGui.QLineEdit(self)
-        self.datumName.setMinimumSize(370, 1)
-        self.datumName.move(50,240)
+        self.mainLayout.addWidget(QtGui.QLabel("Enter the imported Datum's name :"))
+        self.mainLayout.addWidget(self.datumName)
 
-        # Buttons
-        #
         # Cancel button
         self.CancelButton = QtGui.QPushButton('Cancel', self)
-        self.CancelButton.setAutoDefault(False)
-        self.CancelButton.move(10, 310)
         # Import button
         self.ImportButton = QtGui.QPushButton('Import', self)
-        self.ImportButton.setAutoDefault(False)
-        self.ImportButton.move(380, 310)
         self.ImportButton.setDefault(True)
-        # OK button
-        #self.OKButton = QtGui.QPushButton('OK', self)
-        #self.OKButton.setAutoDefault(False)
-        #self.OKButton.move(310, 450)
-        #self.OKButton.setDefault(True)
+        # the button row definition
+        self.buttonLayout = QtGui.QHBoxLayout(self)
+        self.buttonLayout.addWidget(self.CancelButton)
+        self.buttonLayout.addStretch()
+        self.buttonLayout.addWidget(self.ImportButton)
+        self.mainLayout.addStretch()
+        self.mainLayout.addLayout(self.buttonLayout)
+
+        # set main window widgets
+        self.setLayout(self.mainLayout)
 
         # Actions
         self.CancelButton.clicked.connect(self.onCancel)
         self.ImportButton.clicked.connect(self.onOK)
-        #self.OKButton.clicked.connect(self.onOK)
-        #self.childrenList.currentIndexChanged.connect( self.onParentList )
-        #self.datumList.itemClicked.connect( self.onDatumClicked )
 
 
 

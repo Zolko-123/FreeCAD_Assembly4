@@ -164,12 +164,11 @@ class Assembly4_WorkBench(Workbench):
                                 "Asm4_newPart", 
                                 "Asm4_insertLink", 
                                 "Asm4_placeLink", 
-                                "Asm4_releaseAttachment", 
                                 fastenersCmd, 
                                 "Asm4_newSketch", 
                                 "Asm4_createDatum", 
-                                "Asm4_placeDatum", 
                                 "Asm4_importDatum", 
+                                "Asm4_placeDatum", 
                                 "Asm4_newLinkArray",
                                 "Asm4_addVariable", 
                                 "Asm4_Animate", 
@@ -180,8 +179,7 @@ class Assembly4_WorkBench(Workbench):
                                 "Asm4_placeLink", 
                                 "Asm4_placeFastener", 
                                 "Asm4_importDatum",
-                                "Asm4_placeDatum",
-                                "Asm4_releaseAttachment"] 
+                                "Asm4_placeDatum"] 
         # commands to appear in the 'Create' sub-menu in the contextual menu (right-click)
         self.itemsCreateMenu = ["Asm4_newSketch",  
                                 "Asm4_newBody", 

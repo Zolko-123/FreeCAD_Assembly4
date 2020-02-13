@@ -27,8 +27,9 @@ class placeLink( QtGui.QDialog ):
 
     def __init__(self):
         super(placeLink,self).__init__()
-        self.selectedLink = []
-        self.attLCStable = []
+        # draw the GUI, objects are defined later down
+        self.drawUI()
+
 
 
     def GetResources(self):
@@ -70,8 +71,13 @@ class placeLink( QtGui.QDialog ):
     def Activated(self):
         # get the current active document to avoid errors if user changes tab
         self.activeDoc = App.activeDocument()
+        # the parent (top-level) assembly is the App::Part called Model (hard-coded)
+        self.parentAssembly = self.activeDoc.Model
+
+        self.attLCStable = []
 
         # check that we have selected an App::Link object
+        self.selectedLink = []
         selection = self.GetSelection()
         if not selection:
             self.close()
@@ -87,22 +93,9 @@ class placeLink( QtGui.QDialog ):
                 Asm4.warningBox("This Link's assembly type doesn't correspond to this WorkBench")
                 return
 
-
-        # draw the GUI, objects are defined later down
-        self.drawUI()
-
-        # the parent (top-level) assembly is the App::Part called Model (hard-coded)
-        # What would happen if there are 2 App::Part ?
-        self.parentAssembly = self.activeDoc.Model
-        # Initialize the assembly tree with the Parrent Assembly as first element
-        # all the parts in the assembly, except the selected link
-        self.asmParts = []
-        # the first item is "Select attachment Parent" therefore we add an empty object
-        self.asmParts.append( [] )
-        self.asmParts.append( self.parentAssembly )
-        # Add it as first element to the drop-down combo-box
-        parentIcon = self.parentAssembly.ViewObject.Icon
-        self.parentList.addItem( parentIcon, 'Parent Assembly', self.parentAssembly )
+        # initialize the UI with the current data
+        self.initUI()
+        # now self.parentList and self.parentTable are available
 
         # find all the linked parts in the assembly
         # for obj in self.activeDoc.findObjects("App::Link"):
@@ -114,7 +107,7 @@ class placeLink( QtGui.QDialog ):
                 if hasattr(obj.LinkedObject,'isDerivedFrom') and obj.LinkedObject.isDerivedFrom('App::Part'):
                     # ... except if it's the selected link itself
                     if obj != self.selectedLink:
-                        self.asmParts.append( obj )
+                        self.parentTable.append( obj )
                         # add to the drop-down combo box with the assembly tree's parts
                         objIcon = obj.LinkedObject.ViewObject.Icon
                         if obj.Name == obj.Label:
@@ -127,8 +120,10 @@ class placeLink( QtGui.QDialog ):
         # find all the LCS in the selected link
         self.partLCStable = self.getPartLCS( self.selectedLink.LinkedObject )
         # build the list
+        self.partLCSlist.clear()
         for lcs in self.partLCStable:
             newItem = QtGui.QListWidgetItem()
+            newItem.setIcon( lcs.ViewObject.Icon )
             if lcs.Name == lcs.Label:
                 newItem.setText( lcs.Name )
             else:
@@ -136,6 +131,7 @@ class placeLink( QtGui.QDialog ):
             #newItem.setIcon( lcs.ViewObject.Icon )
             #self.lcsIcon = lcs.ViewObject.Icon
             self.partLCSlist.addItem(newItem)
+
 
         # get the old values
         if self.isAsm4EE:
@@ -195,7 +191,7 @@ class placeLink( QtGui.QDialog ):
         else:
             parent_found = False
             parent_index = 1
-            for item in self.asmParts[1:]:
+            for item in self.parentTable[1:]:
                 if item.Name == old_Parent:
                     parent_found = True
                     break
@@ -208,7 +204,6 @@ class placeLink( QtGui.QDialog ):
 
 
         # find the oldLCS in the old parent Part (actually the App::Link)...
-        #self.oldLCS = self.attLCSlist.findItems( self.old_attLCS, QtCore.Qt.CaseSensitive )
         lcs_found = []
         lcs_found = self.attLCSlist.findItems( old_attLCS, QtCore.Qt.MatchExactly )
         if lcs_found:
@@ -228,51 +223,32 @@ class placeLink( QtGui.QDialog ):
 
     """
     +-----------------------------------------------+
-    |           create the constr_LinkName          |
-    |            for the App::Link object           |
-    +-----------------------------------------------+
-    """
-    def makeAsm4Properties( self ):
-        if not hasattr(self.selectedLink,'AssemblyType'):
-            self.selectedLink.addProperty( 'App::PropertyString', 'AssemblyType', 'Attachment' ).AssemblyType = 'Asm4EE'
-            self.selectedLink.addProperty( 'App::PropertyString', 'AttachedBy', 'Attachment' )
-            self.selectedLink.addProperty( 'App::PropertyString', 'AttachedTo', 'Attachment' )
-            self.selectedLink.addProperty( 'App::PropertyPlacement', 'AttachmentOffset', 'Attachment' )
-        return
-
-
-
-    """
-    +-----------------------------------------------+
     | check that all necessary things are selected, |
     |   populate the expression with the selected   |
     |    elements, put them into the constraint     |
     |   and trigger the recomputation of the part   |
     +-----------------------------------------------+
     """
-    def onApply( self ):
+    def Apply( self ):
         # get the instance to attach to:
         # it's either the top level assembly or a sister App::Link
         if self.parentList.currentText() == 'Parent Assembly':
             a_Link = 'Parent Assembly'
             a_Part = None
         elif self.parentList.currentIndex() > 1:
-            parent = self.asmParts[ self.parentList.currentIndex() ]
+            parent = self.parentTable[ self.parentList.currentIndex() ]
             a_Link = parent.Name
             a_Part = parent.LinkedObject.Document.Name
         else:
             a_Link = None
             a_Part = None
 
-
         # the attachment LCS's name in the parent
         # check that something is selected in the QlistWidget
         if self.attLCSlist.selectedItems():
-            #a_LCS = self.attLCSlist.selectedItems()[0].text()
             a_LCS = self.attLCStable[ self.attLCSlist.currentRow() ].Name
         else:
             a_LCS = None
-
 
         # the linked App::Part's name
         l_Part = self.selectedLink.LinkedObject.Document.Name
@@ -304,8 +280,9 @@ class placeLink( QtGui.QDialog ):
             # this can be skipped when this method becomes stable
             self.expression.setText( expr )
             # add the Asm4 properties if it's a pure App::Link
-            self.makeAsm4Properties()
+            Asm4.makeAsmProperties(self.selectedLink)
             # store the part where we're attached to in the constraints object
+            self.selectedLink.AssemblyType = 'Asm4EE'
             self.selectedLink.AttachedBy = '#'+l_LCS
             self.selectedLink.AttachedTo = a_Link+'#'+a_LCS
             # load the expression into the link's Expression Engine
@@ -314,6 +291,60 @@ class placeLink( QtGui.QDialog ):
             self.selectedLink.recompute()
             self.parentAssembly.recompute(True)
         return
+
+
+    """
+    +-----------------------------------------------+
+    |    insert instance free of any attachment     |
+    +-----------------------------------------------+
+    """
+    def freeInsert(self):
+        # ask for confirmation before resetting everything
+        linkName  = self.selectedLink.Name
+        linkLabel = self.selectedLink.Label
+        if linkName==linkName:
+            linkText = linkName
+        else:
+            linkText = linkName+' ('+linkName+')'
+        # see whether the ExpressionEngine field is filled
+        if self.selectedLink.ExpressionEngine :
+            # if yes, then ask for confirmation
+            confirmed = Asm4.confirmBox('This command will release all attachments on '+linkText+' and set it to manual positioning in its current location.')
+            # if not, then it's useless to bother the user
+        else:
+            confirmed = True
+        if confirmed:
+            # unset the ExpressionEngine for the Placement
+            self.selectedLink.setExpression('Placement', None)
+            # reset the assembly properties
+            Asm4.makeAsmProperties( self.selectedLink, reset=True )
+            """
+            # property AssemblyType
+            if hasattr(self.selectedLink,'AssemblyType'):
+                self.selectedLink.AssemblyType = ''
+            else:
+                self.selectedLink.addProperty( 'App::PropertyString', 'AssemblyType', 'Attachment' ).AssemblyType = ''
+            # property AttachedBy
+            if hasattr(self.selectedLink,'AttachedBy'):
+                self.selectedLink.AttachedBy = ''
+            else:
+                self.selectedLink.addProperty( 'App::PropertyString', 'AttachedBy', 'Attachment' ).AttachedBy = ''
+            # property AttachedTo
+            if hasattr(self.selectedLink,'AttachedTo'):
+                self.selectedLink.AttachedTo = ''
+            else:
+                self.selectedLink.addProperty( 'App::PropertyString', 'AttachedTo', 'Attachment' ).AttachedTo = ''
+            # property AttachmentOffset
+            if hasattr(self.selectedLink,'AttachmentOffset'):
+                self.selectedLink.AttachmentOffset = App.Placement()
+            else:
+                self.selectedLink.addProperty( 'App::PropertyPlacement', 'AttachmentOffset', 'Attachment' ).AttachmentOffset = App.Placement()
+            """
+            # finish
+            self.close()
+        else:
+            return
+
 
 
 
@@ -358,30 +389,36 @@ class placeLink( QtGui.QDialog ):
     |   fill the LCS list when changing the parent   |
     +------------------------------------------------+
     """
-    def onParentList(self):
+    def onParentSelected(self):
         # clear the LCS list
         self.attLCSlist.clear()
         self.attLCStable = []
         # clear the selection in the GUI window
         Gui.Selection.clearSelection()
         # the current text in the combo-box is the link's name...
-        # parentName = self.attLCStable[ self.parentList.currentRow() ].Name
-        # parentName = self.parentList.currentText()
-        # ... or it's 'Parent Assembly' then the parent is the 'Model' root App::Part		
+        # ... or it's 'Parent Assembly' then the parent is the 'Model' root App::Part
         if self.parentList.currentText() == 'Parent Assembly':
             parentName = 'Parent Assembly'
-            parentPart = self.activeDoc.getObject( 'Model' )
+            parentPart = self.parentAssembly
             # we get the LCS directly in the root App::Part 'Model'
             self.attLCStable = self.getPartLCS( parentPart )
-            self.parentDoc.setText( parentPart.Document.Name )
+            self.parentDoc.setText( parentPart.Document.Name+'#'+parentPart.Name )
         # if something is selected
         elif self.parentList.currentIndex() > 1:
-            parentName = self.asmParts[ self.parentList.currentIndex() ].Name
+            parentName = self.parentTable[ self.parentList.currentIndex() ].Name
             parentPart = self.activeDoc.getObject( parentName )
             if parentPart:
                 # we get the LCS from the linked part
                 self.attLCStable = self.getPartLCS( parentPart.LinkedObject )
-                self.parentDoc.setText( parentPart.LinkedObject.Document.Name )
+                # linked part & doc
+                dText = ''
+                if parentPart.LinkedObject.Document != self.activeDoc :
+                    dText = parentPart.LinkedObject.Document.Name +'#'
+                # if the linked part has been renamed by the user, keep the label and add (.Name)
+                pText = parentPart.LinkedObject.Label
+                if parentPart.LinkedObject.Name != parentPart.LinkedObject.Label:
+                    pText = pText+' ('+parentPart.LinkedObject.Name+')'
+                self.parentDoc.setText( dText + pText )
                 # highlight the selected part:
                 Gui.Selection.addSelection( parentPart.Document.Name, 'Model', parentPart.Name+'.' )
         # something wrong
@@ -398,36 +435,6 @@ class placeLink( QtGui.QDialog ):
             newItem.setIcon( lcs.ViewObject.Icon )
             self.attLCSlist.addItem( newItem )
             #self.attLCStable.append(lcs)
-        return
-
-
-
-    """
-    +-----------------------------------------------+
-    |  An LCS has been clicked in 1 of the 2 lists  |
-    |              We highlight both LCS            |
-    +-----------------------------------------------+
-    """
-    def onLCSclicked( self ):
-        # clear the selection in the GUI window
-        Gui.Selection.clearSelection()
-        # LCS of the linked part
-        if self.partLCSlist.selectedItems():
-            #p_LCS = self.partLCSlist.selectedItems()[0].text()
-            p_LCS = self.partLCStable[ self.partLCSlist.currentRow() ].Name
-            Gui.Selection.addSelection( self.activeDoc.Name, 'Model', self.selectedLink.Name+'.'+p_LCS+'.')
-        # LCS in the parent
-        if self.attLCSlist.selectedItems():
-            #a_LCS = self.attLCSlist.selectedItems()[0].text()
-            a_LCS = self.attLCStable[ self.attLCSlist.currentRow() ].Name
-            # get the part where the selected LCS is
-            a_Part = self.parentList.currentText()
-            # parent assembly and sister part need a different treatment
-            if a_Part == 'Parent Assembly':
-                linkDot = ''
-            else:
-                linkDot = a_Part+'.'
-            Gui.Selection.addSelection( self.activeDoc.Name, 'Model', linkDot+a_LCS+'.')
         return
 
 
@@ -458,28 +465,20 @@ class placeLink( QtGui.QDialog ):
         constrAO = self.selectedLink.AttachmentOffset
         self.selectedLink.AttachmentOffset = plaRotAxis.multiply( constrAO )
         self.selectedLink.recompute()
-        return
 
     def onRotX(self):
-        rotX = App.Placement( App.Vector(0,0,0), App.Rotation( App.Vector(1,0,0), 90. ) )
-        self.rotAxis(rotX)
-        return
+        self.rotAxis(Asm4.rotX)
 
     def onRotY(self):
-        rotY = App.Placement( App.Vector(0,0,0), App.Rotation( App.Vector(0,1,0), 90. ) )
-        self.rotAxis(rotY)
-        return
+        self.rotAxis(Asm4.rotY)
 
     def onRotZ(self):
-        rotZ = App.Placement( App.Vector(0,0,0), App.Rotation( App.Vector(0,0,1), 90. ) )
-        self.rotAxis(rotZ)
-        return
+        self.rotAxis(Asm4.rotZ)
 
     def onReset( self ):
         newPlacement = App.Placement( App.Vector(0,0,0), App.Rotation( App.Vector(0,0,1), 0.0 ) )
         self.selectedLink.AttachmentOffset = newPlacement
         self.selectedLink.recompute()
-        return
 
 
     """
@@ -489,8 +488,43 @@ class placeLink( QtGui.QDialog ):
     +-----------------------------------------------+
     """
     def onOK(self):
-        self.onApply()
+        self.Apply()
         self.close()
+
+
+
+    """
+    +-----------------------------------------------+
+    |     initialize the UI for the selected link   |
+    +-----------------------------------------------+
+    """
+    def initUI(self):
+        # clear the parent name (if any)
+        self.parentDoc.clear()
+        # the selected link's name 
+        lName = self.selectedLink.Label
+        if self.selectedLink.Name != self.selectedLink.Label:
+            lName = lName + ' ('+self.selectedLink.Name+')'
+        self.linkName.setText( lName )
+        # linked part & doc
+        dText = ''
+        if self.selectedLink.LinkedObject.Document != self.activeDoc :
+            dText = self.selectedLink.LinkedObject.Document.Name +'#'
+        # if the linked part has been renamed by the user, keep the label and add (.Name)
+        pText = self.selectedLink.LinkedObject.Label
+        if self.selectedLink.LinkedObject.Name != self.selectedLink.LinkedObject.Label:
+            pText = pText+' ('+self.selectedLink.LinkedObject.Name+')'
+        self.linkedDoc.setText( dText + pText )
+        # Initialize the assembly tree with the Parrent Assembly as first element
+        # clear the available parents combo box
+        self.parentList.clear()
+        self.parentList.addItem('Please choose')
+        parentIcon = self.parentAssembly.ViewObject.Icon
+        self.parentList.addItem( parentIcon, 'Parent Assembly', self.parentAssembly )
+        # all the parts in the assembly
+        self.parentTable = []
+        self.parentTable.append( [] )
+        self.parentTable.append( self.parentAssembly )
 
 
 
@@ -509,139 +543,134 @@ class placeLink( QtGui.QDialog ):
         # make this dialog stay above the others, always visible
         self.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
 
-        # Part, Left side
+        # the layout for the main window is vertical (top to down)
+        self.mainLayout = QtGui.QVBoxLayout(self)
+        # with 2 columns
+        self.columnsLayout = QtGui.QHBoxLayout(self)
+        self.leftLayout = QtGui.QVBoxLayout(self)
+        self.rightLayout = QtGui.QVBoxLayout(self)
+        
+        # Part, left side
         #
-        # Selected Link label
-        self.linkLabel = QtGui.QLabel(self)
-        self.linkLabel.setText("Selected Link :")
-        self.linkLabel.move(10,20)
-        # the name as seen in the tree of the selected link
+        # Selected Link (the name as seen in the tree of the selected link)
+        self.leftLayout.addWidget(QtGui.QLabel("Selected Link :"))
         self.linkName = QtGui.QLineEdit(self)
         self.linkName.setReadOnly(True)
-        self.linkName.setText( self.selectedLink.Name )
         self.linkName.setMinimumSize(200, 1)
-        self.linkName.move(35,50)
+        self.leftLayout.addWidget(self.linkName)
 
-        # label
-        self.linkedLabel = QtGui.QLabel(self)
-        self.linkedLabel.setText("Linked Document :")
-        self.linkedLabel.move(10,90)
-        # the document containing the linked object
+        # the document containing the linked part
+        # if the linked part is in the same document as the assembly Model
+        self.leftLayout.addWidget(QtGui.QLabel("Linked Part :"))
         self.linkedDoc = QtGui.QLineEdit(self)
         self.linkedDoc.setReadOnly(True)
-        self.linkedDoc.setText( self.selectedLink.LinkedObject.Document.Name )
         self.linkedDoc.setMinimumSize(200, 1)
-        self.linkedDoc.move(35,120)
+        self.leftLayout.addWidget(self.linkedDoc)
 
-        # label
-        self.labelLeft = QtGui.QLabel(self)
-        self.labelLeft.setText("Select LCS in Part :")
-        self.labelLeft.move(10,160)
         # The list of all LCS in the part is a QListWidget
+        self.leftLayout.addWidget(QtGui.QLabel("Select LCS in Part :"))
         self.partLCSlist = QtGui.QListWidget(self)
-        self.partLCSlist.move(10,190)
         self.partLCSlist.setMinimumSize(100, 250)
         self.partLCSlist.setToolTip('Select a coordinate system from the list')
+        self.leftLayout.addWidget(self.partLCSlist)
 
         # Assembly, Right side
         #
-        # label
-        self.slectedLabel = QtGui.QLabel(self)
-        self.slectedLabel.setText("Select Part to attach to:")
-        self.slectedLabel.move(280,20)
         # combobox showing all available App::Link
+        self.rightLayout.addWidget(QtGui.QLabel("Select Parent to attach to :"))
         self.parentList = QtGui.QComboBox(self)
-        self.parentList.move(280,50)
         self.parentList.setMinimumSize(250, 10)
-        self.parentList.setMaximumSize(250, 50)
         self.parentList.setToolTip('Choose the part in which the attachment\ncoordinate system is to be found')
         # the parent assembly is hardcoded, and made the first real element
-        self.parentList.addItem('Select attachment Parent')
+        self.rightLayout.addWidget(self.parentList)
 
-        # label
-        self.parentLabel = QtGui.QLabel(self)
-        self.parentLabel.setText("Parent Document :")
-        self.parentLabel.move(280,90)
         # the document containing the linked object
+        self.rightLayout.addWidget(QtGui.QLabel("Parent Part :"))
         self.parentDoc = QtGui.QLineEdit(self)
         self.parentDoc.setReadOnly(True)
         self.parentDoc.setMinimumSize(200, 1)
-        self.parentDoc.move(305,120)
-        # label
-        self.labelRight = QtGui.QLabel(self)
-        self.labelRight.setText("Select LCS in Parent :")
-        self.labelRight.move(280,160)
+        self.rightLayout.addWidget(self.parentDoc)
         # The list of all attachment LCS in the assembly is a QListWidget
         # it is populated only when the parent combo-box is activated
+        self.rightLayout.addWidget(QtGui.QLabel("Select LCS in Parent :"))
         self.attLCSlist = QtGui.QListWidget(self)
-        self.attLCSlist.move(280,190)
         self.attLCSlist.setMinimumSize(250, 250)
         self.attLCSlist.setToolTip('Select a coordinate system from the list')
+        self.rightLayout.addWidget(self.attLCSlist)
 
-        # Expression
-        #
-        # expression label
-        self.labelExpression = QtGui.QLabel(self)
-        self.labelExpression.setText("Expression Engine :")
-        self.labelExpression.move(10,450)
+        # add the 2 columns
+        self.columnsLayout.addLayout(self.leftLayout)
+        self.columnsLayout.addLayout(self.rightLayout)
+        self.mainLayout.addLayout(self.columnsLayout)
+
         # Create a line that will contain full expression for the expression engine
         self.expression = QtGui.QLineEdit(self)
         self.expression.setMinimumSize(530, 0)
-        self.expression.move(10, 480)
+        self.mainLayout.addWidget(QtGui.QLabel("Expression Engine :"))
+        self.mainLayout.addWidget(self.expression)
 
-        # Buttons
+        # Rot Buttons
+        self.rotButtonsLayout = QtGui.QHBoxLayout(self)
         #
         # Reset button
-        self.ResetButton = QtGui.QPushButton('Reset', self)
-        self.ResetButton.setToolTip("Reset the AttachmentOffset of this Link")
-        self.ResetButton.setAutoDefault(False)
-        self.ResetButton.move(50, 530)
+        # self.ResetButton = QtGui.QPushButton('Reset', self)
+        # self.ResetButton.setToolTip("Reset the AttachmentOffset of this Link")
         # RotX button
         self.RotXButton = QtGui.QPushButton('Rot X', self)
         self.RotXButton.setToolTip("Rotate the instance around the X axis by 90deg")
-        self.RotXButton.setAutoDefault(False)
-        self.RotXButton.move(200, 530)
         # RotY button
         self.RotYButton = QtGui.QPushButton('Rot Y', self)
         self.RotYButton.setToolTip("Rotate the instance around the Y axis by 90deg")
-        self.RotYButton.setAutoDefault(False)
-        self.RotYButton.move(300, 530)
         # RotZ button
         self.RotZButton = QtGui.QPushButton('Rot Z', self)
         self.RotZButton.setToolTip("Rotate the instance around the Z axis by 90deg")
-        self.RotZButton.setAutoDefault(False)
-        self.RotZButton.move(400, 530)
+        # add the buttons
+        self.rotButtonsLayout.addStretch()
+        self.rotButtonsLayout.addWidget(self.RotXButton)
+        self.rotButtonsLayout.addWidget(self.RotYButton)
+        self.rotButtonsLayout.addWidget(self.RotZButton)
+        self.rotButtonsLayout.addStretch()
+        self.mainLayout.addLayout(self.rotButtonsLayout)
 
+
+        # OK Buttons
+        self.OkButtonsLayout = QtGui.QHBoxLayout(self)
+        #
         # Cancel button
         self.CancelButton = QtGui.QPushButton('Cancel', self)
         self.CancelButton.setToolTip("Restore initial parameters and close dialog")
-        self.CancelButton.setAutoDefault(False)
-        self.CancelButton.move(10, 600)
-        # Apply button
-        self.ApplyButton = QtGui.QPushButton('Show', self)
-        self.ApplyButton.setToolTip("Previsualise the instance's placement \nwith the chosen parameters")
-        self.ApplyButton.setAutoDefault(False)
-        self.ApplyButton.move(230, 600)
-        self.ApplyButton.setDefault(True)
+        # Free Insert button
+        self.FreeButton = QtGui.QPushButton('Free Insert', self)
+        self.FreeButton.setToolTip("Insert the linked part into the assembly with manual placement. \nTo move the part right-click on its name and select \"Transform\"")
         # OK button
-        self.OKButton = QtGui.QPushButton('OK', self)
-        self.OKButton.setToolTip("Apply current parameters and close dialog")
-        self.OKButton.setAutoDefault(False)
-        self.OKButton.move(460, 600)
+        self.OkButton = QtGui.QPushButton('OK', self)
+        self.OkButton.setToolTip("Apply current parameters and close dialog")
+        self.OkButton.setDefault(True)
+        # position the buttons
+        self.OkButtonsLayout.addWidget(self.CancelButton)
+        self.OkButtonsLayout.addStretch()
+        self.OkButtonsLayout.addWidget(self.FreeButton)
+        self.OkButtonsLayout.addStretch()
+        self.OkButtonsLayout.addWidget(self.OkButton)
+        self.mainLayout.addWidget(QtGui.QLabel(' '))
+        self.mainLayout.addLayout(self.OkButtonsLayout)
 
         # Actions
-        self.parentList.currentIndexChanged.connect( self.onParentList )
-        #self.attLCSlist.itemClicked.connect( self.onLCSclicked )
-        #self.partLCSlist.itemClicked.connect( self.onLCSclicked )
-        self.ResetButton.clicked.connect( self.onReset )
+        self.parentList.currentIndexChanged.connect( self.onParentSelected )
+        self.attLCSlist.itemClicked.connect( self.Apply )
+        #self.attLCSlist.currentItemChanged.connect( self.Apply )
+        self.partLCSlist.itemClicked.connect( self.Apply )
+        #self.partLCSlist.currentItemChanged.connect( self.Apply )
+        #self.ResetButton.clicked.connect( self.onReset )
         self.RotXButton.clicked.connect( self.onRotX )
         self.RotYButton.clicked.connect( self.onRotY )
         self.RotZButton.clicked.connect( self.onRotZ)
         self.CancelButton.clicked.connect(self.onCancel)
-        self.ApplyButton.clicked.connect(self.onApply)
-        self.OKButton.clicked.connect(self.onOK)
+        self.FreeButton.clicked.connect(self.freeInsert)
+        self.OkButton.clicked.connect(self.onOK)
 
-
+        # apply the layout to the main window
+        self.setLayout(self.mainLayout)
 
 
 """

@@ -125,7 +125,8 @@ class placeFastener( QtGui.QDialog ):
 
     def __init__(self):
         super(placeFastener,self).__init__()
-        self.selectedFastener = []
+        self.drawUI()
+
 
 
     def GetResources(self):
@@ -180,6 +181,7 @@ class placeFastener( QtGui.QDialog ):
         self.parentAssembly = self.activeDoc.Model
 
         # check that we have selected a PartDesign::CoordinateSystem
+        self.selectedFastener = []
         selection = self.GetSelection()
         if selection == None:
             self.close()
@@ -188,10 +190,11 @@ class placeFastener( QtGui.QDialog ):
 
         # check that the fastener is an Asm4 fastener
         if not hasattr(self.selectedFastener,'AssemblyType'):
-            self.msgNotAsm4()
-            return(False)
-        elif not self.selectedFastener.AssemblyType=='Asm4EE':
-            self.msgNotAsm4()
+            Asm4.makeAsmProperties(self.selectedFastener)
+        asmType = self.selectedFastener.AssemblyType
+        # we only deal with Asm4 or empty types
+        if asmType!='Asm4EE' and asmType!='':
+            Asm4.warningBox("This doesn't seem to be an Assembly4 Fastener")
             return(False)
 
         # check where the fastener was attached to
@@ -207,7 +210,7 @@ class placeFastener( QtGui.QDialog ):
                     self.old_EE = expr
 
         # Now we can draw the UI
-        self.drawUI()
+        self.initUI()
         self.show()
 
         # decode the old ExpressionEngine
@@ -309,6 +312,8 @@ class placeFastener( QtGui.QDialog ):
             # this can be skipped when this method becomes stable
             self.expression.setText( expr )
             # indicate the this fastener has been placed with the Assembly4 workbench
+            if not hasattr(self.selectedFastener,'AssemblyType'):
+                Asm4.makeAsmProperties(self.selectedFastener)
             self.selectedFastener.AssemblyType = 'Asm4EE'
             # the fastener is attached by its Origin, no extra LCS
             self.selectedFastener.AttachedBy = 'Origin'
@@ -494,8 +499,40 @@ class placeFastener( QtGui.QDialog ):
             else:
                 linkDot = a_Part+'.'
             Gui.Selection.addSelection( self.activeDoc.Name, 'Model', linkDot+a_LCS+'.')
-        return
+        # show the resulting placement
+        self.onApply()
 
+
+    """
+    +-----------------------------------------------+
+    |    insert instance free of any attachment     |
+    +-----------------------------------------------+
+    """
+    def freeInsert(self):
+        # ask for confirmation before resetting everything
+        fName  = self.selectedFastener.Name
+        fLabel = self.selectedFastener.Label
+        if fName==fName:
+            fText = fName
+        else:
+            fText = fName+' ('+fName+')'
+        # see whether the ExpressionEngine field is filled
+        if self.old_EE :
+            # if yes, then ask for confirmation
+            confirmed = Asm4.confirmBox('This command will release all attachments on '+fText+' and set it to manual positioning in its current location.')
+            # if not, then it's useless to bother the user
+        else:
+            confirmed = True
+        if confirmed:
+            # unset the ExpressionEngine for the Placement
+            # self.selectedFastener.setExpression( 'Placement', expr )
+            self.selectedFastener.setExpression('Placement', None)
+            # reset the assembly properties
+            Asm4.makeAsmProperties(self.selectedFastener)
+            # finish
+            self.close()
+        else:
+            return
 
 
     """
@@ -521,6 +558,17 @@ class placeFastener( QtGui.QDialog ):
 
 
 
+    def initUI(self):
+        # fill it in the GUI
+        self.fastenerName.setText( self.selectedFastener.Label )
+        self.parentList.clear()
+        self.parentList.addItem( 'Select parent Part' )
+        self.attLCSlist.clear()
+        self.expression.clear()
+        self.Invert.setChecked( self.selectedFastener.invert )
+        self.Offset.setValue( self.selectedFastener.offset )
+
+
 
     """
     +-----------------------------------------------+
@@ -529,103 +577,74 @@ class placeFastener( QtGui.QDialog ):
     """
     def drawUI(self):
         # Our main window will be a QDialog
-        self.setWindowTitle('Attach a Fastener')
-        self.setWindowIcon( QtGui.QIcon( os.path.join( Asm4.iconPath , 'FreeCad.svg' ) ) )
-        self.setMinimumSize(370, 670)
-        self.resize(370,670)
-        self.setModal(False)
         # make this dialog stay above the others, always visible
         self.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
+        self.setWindowTitle('Attach a Fastener')
+        self.setWindowIcon( QtGui.QIcon( os.path.join( Asm4.iconPath , 'FreeCad.svg' ) ) )
+        self.setMinimumSize(470, 570)
+        self.resize(470,570)
+        self.setModal(False)
 
-        # Part, Left side
-        #
-        # Selected Link label
-        self.lcsLabel = QtGui.QLabel(self)
-        self.lcsLabel.setText("Fastener :")
-        self.lcsLabel.move(10,20)
         # the name as seen in the tree of the selected link
-        self.lscName = QtGui.QLineEdit(self)
-        self.lscName.setReadOnly(True)
-        self.lscName.setText( self.selectedFastener.Label )
-        self.lscName.setMinimumSize(240, 1)
-        self.lscName.move(120,18)
-
-        # label
-        self.parentLabel = QtGui.QLabel(self)
-        self.parentLabel.setText("Linked Part :")
-        self.parentLabel.move(10,70)
+        self.fastenerName = QtGui.QLineEdit(self)
+        self.fastenerName.setReadOnly(True)
         # combobox showing all available App::Link
         self.parentList = QtGui.QComboBox(self)
-        self.parentList.move(10,100)
-        self.parentList.setMinimumSize(350, 1)
-        # initialize with an explanation
-        self.parentList.addItem( 'Select linked Part' )
-
-        # label
-        self.labelRight = QtGui.QLabel(self)
-        self.labelRight.setText("Select LCS in linked Part :")
-        self.labelRight.move(10,160)
         # The list of all attachment LCS in the assembly is a QListWidget
         # it is populated only when the parent combo-box is activated
         self.attLCSlist = QtGui.QListWidget(self)
-        self.attLCSlist.move(10,190)
-        self.attLCSlist.setMinimumSize(350, 270)
-
-        # Expression
-        #
-        # expression label
-        self.labelExpression = QtGui.QLabel(self)
-        self.labelExpression.setText("Expression Engine :")
-        self.labelExpression.move(10,480)
-        # Create a line that will contain full expression for the expression engine
+        # Expression Engine
         self.expression = QtGui.QLineEdit(self)
-        self.expression.setMinimumSize(350, 0)
-        self.expression.move(10, 510)
-
-        # Invert checkbox
-        self.labelInvert = QtGui.QLabel(self)
-        self.labelInvert.setText('Invert')
-        self.labelInvert.move(20, 570)
+        # Invert ?
         self.Invert = QtGui.QCheckBox(self)
-        self.Invert.move(90, 575)
-        self.Invert.setChecked( self.selectedFastener.invert )
         # Offset value
-        self.labelOffset = QtGui.QLabel(self)
-        self.labelOffset.setText('Offset')
-        self.labelOffset.move(180, 570)
         self.Offset = QtGui.QDoubleSpinBox(self)
-        self.Offset.move(250, 565)
-        self.Offset.setMinimumSize(50,10)
         self.Offset.setMinimum(-100.00)
         self.Offset.setMaximum(100.00)
-        self.Offset.setValue( self.selectedFastener.offset )
-
-        # Buttons
-        #
         # Cancel button
         self.CancelButton = QtGui.QPushButton('Close', self)
-        self.CancelButton.setAutoDefault(False)
-        self.CancelButton.move(10, 630)
-
-        # Apply button
-        self.ApplyButton = QtGui.QPushButton('Show', self)
-        self.ApplyButton.setAutoDefault(False)
-        self.ApplyButton.move(150, 630)
-        self.ApplyButton.setDefault(True)
-
+        # Free Insert button
+        self.FreeButton = QtGui.QPushButton('Free Insert', self)
+        self.FreeButton.setToolTip("Insert the fastener into the assembly with manual placement. \nTo move it right-click on its name in the tree and select \"Transform\"")
         # OK button
-        self.OKButton = QtGui.QPushButton('OK', self)
-        self.OKButton.setAutoDefault(False)
-        self.OKButton.move(280, 630)
-        self.OKButton.setDefault(True)
+        self.OkButton = QtGui.QPushButton('OK', self)
+        self.OkButton.setDefault(True)
+
+        # Build the window layout
+        self.mainLayout = QtGui.QVBoxLayout(self)
+        self.formLayout = QtGui.QFormLayout(self)
+        self.formLayout.addRow(QtGui.QLabel('Fastener :'),self.fastenerName)
+        self.formLayout.addRow(QtGui.QLabel('Attached to :'),self.parentList)
+        self.mainLayout.addLayout(self.formLayout)
+        self.mainLayout.addWidget(QtGui.QLabel("Select attachment LCS in parent Part :"))
+        self.mainLayout.addWidget(self.attLCSlist)
+        self.mainLayout.addWidget(QtGui.QLabel("Expression Engine :"))
+        self.mainLayout.addWidget(self.expression)
+        self.InvertOffset = QtGui.QHBoxLayout(self)
+        self.InvertOffset.addWidget(QtGui.QLabel('Invert'))
+        self.InvertOffset.addWidget(self.Invert)
+        self.InvertOffset.addStretch()
+        self.InvertOffset.addWidget(QtGui.QLabel('Offset'))
+        self.InvertOffset.addWidget(self.Offset)
+        self.mainLayout.addLayout(self.InvertOffset)
+        self.buttonsLayout = QtGui.QHBoxLayout(self)
+        self.buttonsLayout.addWidget(self.CancelButton)
+        self.buttonsLayout.addStretch()
+        self.buttonsLayout.addWidget(self.FreeButton)
+        self.buttonsLayout.addStretch()
+        self.buttonsLayout.addWidget(self.OkButton)
+        self.mainLayout.addWidget(QtGui.QLabel(' '))
+        self.mainLayout.addLayout(self.buttonsLayout)
 
         # Actions
         #self.Invert.stateChanged.connect(self.onInvert)
         self.CancelButton.clicked.connect(self.onCancel)
-        self.ApplyButton.clicked.connect(self.onApply)
-        self.OKButton.clicked.connect(self.onOK)
+        self.OkButton.clicked.connect(self.onOK)
         self.parentList.currentIndexChanged.connect( self.onParentList )
         self.attLCSlist.itemClicked.connect( self.onDatumClicked )
+        self.Invert.clicked.connect(self.onApply)
+        self.Offset.valueChanged.connect(self.onApply)
+        self.FreeButton.clicked.connect(self.freeInsert)
 
 
 

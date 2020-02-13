@@ -26,7 +26,7 @@ The very principle of Assembly4 is that `App::Part` objects are linked together 
 
 Since a FreeCAD `App::Part` is a container, all objects included in the child part will be included in the parent assembly. To actually insert some geometry, solids or bodies need to be created inside the `App::Part` container and designed using other FreeCAD workbenches.
 
-**Please Note:** objects in the same document as the linked part but outside the `App::Part` container will not be inserted. 
+**Please Note:** objects in the same document as the linked part but outside the `App::Part` container will not be inserted. The *PartDesign* workbench doesn't produce **Parts**, it produces **Bodies**. It is entirely possible to use Parts made with the *Part* workbench with Assembly4, but if you want to use Bodies made with the PartDesign WB you need first to create a Part and move the Body into that Part.
 
 ### Part placements
 
@@ -171,13 +171,11 @@ Therefore, in order to re-use a coordinate system of a part in an assembly, a co
 
 ## Tutorials and Examples
 
-You can use the [example assemblies](https://github.com/Zolko-123/FreeCAD_Assembly4/tree/master/Examples) to experiment with this workbench's features. Open one _asm_something.fcstd_ file and try out the functions. There are `ReadMe.txt` files in each directory with some explanations. There are tutorials available to lear tu use Assembly4:
+You can use the [example assemblies](https://github.com/Zolko-123/FreeCAD_Examples) to experiment with this workbench's features. Open one _asm_something.fcstd_ file and try out the functions. There are `ReadMe.txt` files in each directory with some explanations. There are tutorials available to lear tu use Assembly4:
 
-* [a quick assembly from scratch](Examples/Tutorial1/TUTORIAL1.md)
-* [a cinematic assembly in one file, using a master sketch](Examples/Tutorial2/TUTORIAL2.md)
-* [a multy-layered assembly for advanced users](Resources/TUTORIAL3.md)
-* [a Lego assembly](Resources/TUTORIAL4.md)
-* [an architectural assembly](Resources/TUTORIAL5.md)
+* [a quick assembly from scratch](https://github.com/Zolko-123/FreeCAD_Examples/blob/master/Asm4_Tutorial1/README.md)
+* [a cinematic assembly in one file, using a master sketch](https://github.com/Zolko-123/FreeCAD_Examples/blob/master/Asm4_Tutorial2/README.md)
+* [a Lego assembly](https://github.com/Zolko-123/FreeCAD_Examples/tree/master/Asm4_Tutorial3)
 
 
 

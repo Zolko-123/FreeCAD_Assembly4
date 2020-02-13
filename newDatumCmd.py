@@ -5,12 +5,11 @@
 
 
 
-import math, re, os
+import os
 
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
-import Part
 
 import libAsm4 as Asm4
 
@@ -134,11 +133,10 @@ class newDatum:
                     Gui.ActiveDocument.getObject(createdDatum.Name).ShapeColor = self.datumColor
                 if self.datumAlpha:
                     Gui.ActiveDocument.getObject(createdDatum.Name).Transparency = self.datumAlpha
+                # highlight the created datum object
                 Gui.Selection.clearSelection()
-                # Gui.Selection.addSelection( App.ActiveDocument.Name, 'Model', createdDatum.Name+'.' )
                 Gui.Selection.addSelection( App.ActiveDocument.Name, partChecked.Name, createdDatum.Name+'.' )
-                # Gui.runCommand('Part_EditAttachment',0)
-                Gui.runCommand('Part_EditAttachment')
+
 
 
 
