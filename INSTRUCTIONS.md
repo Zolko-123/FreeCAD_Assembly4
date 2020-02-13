@@ -173,11 +173,10 @@ Therefore, in order to re-use a coordinate system of a part in an assembly, a co
 
 You can use the [example assemblies](https://github.com/Zolko-123/FreeCAD_Assembly4/tree/master/Examples) to experiment with this workbench's features. Open one _asm_something.fcstd_ file and try out the functions. There are `ReadMe.txt` files in each directory with some explanations. There are tutorials available to lear tu use Assembly4:
 
-* [a quick assembly from scratch](Examples/Tutorial1/TUTORIAL1.md)
-* [a cinematic assembly in one file, using a master sketch](Examples/Tutorial2/TUTORIAL2.md)
-* [a multy-layered assembly for advanced users](Resources/TUTORIAL3.md)
-* [a Lego assembly](Resources/TUTORIAL4.md)
-* [an architectural assembly](Resources/TUTORIAL5.md)
+* [a quick assembly from scratch](https://github.com/Zolko-123/FreeCAD_Examples/blob/master/Asm4_Tutorial1/README.md)
+* [a cinematic assembly in one file, using a master sketch](https://github.com/Zolko-123/FreeCAD_Examples/blob/master/Asm4_Tutorial2/README.md)
+* [a Lego assembly](https://github.com/Zolko-123/FreeCAD_Examples/tree/master/Asm4_Tutorial3)
+
 
 
 
