@@ -7,7 +7,7 @@ Current version:  0.8.0, 2020-02-13
 
 ## Overview
 
-The principle of Assembly4 is that `App::Part` objects are linked together into an assembly using the `App::Link` interface introduced in FreeCAD v0.19. The host parent assembly **and** the included child parts are all `App::Part` type objects. The parts that are linked can be in the same document as the assembly or an extarnal document, invariably.
+The principle of Assembly4 is that `App::Part` objects are linked together into an assembly using the `App::Link` interface introduced in FreeCAD v0.19. The host parent assembly **and** the included child parts are all `App::Part` type objects. The parts that are linked can be in the same document as the assembly or an external document, invariably.
 
 As an Assembly4 model is a standard FreeCAD `App::Part` object, it can be used and manipulated with any FreeCAD tool handling `App::Part` objects. An Assembly4 Model can invariably be a stand-alone part, an assembly, a sub-assembly, and any combinations of these.
 
@@ -55,7 +55,7 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 * 2020.02.13 (**version 0.8.0**) :  
 All dialogs are now resizable  
 Various bugfixes  
-Made the Asm4 properties of all objects homogenous  
+Made the Asm4 properties of all objects homogeneous  
 Moved examples and tutorials to dedicated repository (some users ran into trouble for updating the WB because they had modified the local files)  
 
 * 2020.01.25 (**version 0.7.12**) :  

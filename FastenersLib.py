@@ -227,7 +227,7 @@ class placeFastener( QtGui.QDialog ):
         self.asmParts = []
         # the first item is "Select linked Part" therefore we add an empty object
         self.asmParts.append( [] )
-        # We alse add the parent assembly
+        # We also add the parent assembly
         self.asmParts.append( self.parentAssembly )
         # Add it as first element to the drop-down combo-box
         parentIcon = self.parentAssembly.ViewObject.Icon

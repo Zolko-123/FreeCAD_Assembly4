@@ -258,7 +258,7 @@ class placeDatum( QtGui.QDialog ):
         # clear the selection in the GUI window
         Gui.Selection.clearSelection()
         # the current selection in the combo-box list gives the index 
-        # of the currently selected link, whoose name is in the table
+        # of the currently selected link, whose name is in the table
         #parentName = self.parentList.currentText()
         #parentLink = self.activeDoc.getObject( parentName )
         # if something is selected
