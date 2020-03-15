@@ -92,7 +92,7 @@ class addVariable( QtGui.QDialog ):
     +-----------------------------------------------+
     """
     def Activated(self):
-        # retriev the Variables object
+        # retrieve the Variables object
         self.Variables = App.ActiveDocument.getObject('Variables')
         # if it doesn't exist then create it (for older Asm4 documents)
         if not self.Variables:

@@ -74,7 +74,7 @@ class newModel:
 
 
     def checkModel(self):
-        # check wheter there is already a Model in the document
+        # check whether there is already a Model in the document
         # we don't check whether it's an App::Part or not
         # Returns True if there is an object called 'Model'
         if self.activeDoc.getObject('Model'):

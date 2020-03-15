@@ -484,7 +484,7 @@ class placeLink( QtGui.QDialog ):
         # if the linked part has been renamed by the user, keep the label and add (.Name)
         pText = Asm4.nameLabel(self.selectedLink.LinkedObject)
         self.linkedDoc.setText( dText + pText )
-        # Initialize the assembly tree with the Parrent Assembly as first element
+        # Initialize the assembly tree with the Parent Assembly as first element
         # clear the available parents combo box
         self.parentList.clear()
         self.parentList.addItem('Please choose')

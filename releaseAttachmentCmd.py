@@ -102,7 +102,7 @@ class releaseAttachment:
         # the root Assembly4 Model
         model = App.ActiveDocument.getObject('Model')
 
-        # handle oject types differently
+        # handle object types differently
         # an App::Link
         if objType == 'App::Link':
             # unset the ExpressionEngine for the Placement
