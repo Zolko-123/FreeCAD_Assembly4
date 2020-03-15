@@ -164,7 +164,7 @@ class insertLink( QtGui.QDialog ):
         if self.asmModel and selectedPart and linkName:
             # create the App::Link with the user-provided name
             createdLink = self.activeDoc.getObject('Model').newObject( 'App::Link', linkName )
-            # assigne the user-selected selectedPart to it
+            # assign the user-selected selectedPart to it
             createdLink.LinkedObject = selectedPart
             # If the name was already chosen, and a UID was generated:
             if createdLink.Name != linkName:

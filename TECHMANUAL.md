@@ -29,7 +29,7 @@ Another method is to download and extract the Github [FreeCAD_Assembly4-master.z
 
 ## Principle
 
-The very principle of Assembly4 is that `App::Part` objects are linked together using the `App::Link` interface introduced in FreeCAD v0.19. The host parent assembly **and** the included child parts are all `App::Part` type objects. The parts that are linked can be in the same document as the assembly or an extarnal document, invariably. Since a FreeCAD `App::Part` is a container, all objects included in the child part will be included in the parent assembly.
+The very principle of Assembly4 is that `App::Part` objects are linked together using the `App::Link` interface introduced in FreeCAD v0.19. The host parent assembly **and** the included child parts are all `App::Part` type objects. The parts that are linked can be in the same document as the assembly or an external document, invariably. Since a FreeCAD `App::Part` is a container, all objects included in the child part will be included in the parent assembly.
 
 Even though an Assembly4 assembly is a FreeCAD `App::Part` type object, it has some particularities:
 
@@ -88,7 +88,7 @@ The result is the following:
 ## Usage
 
 
-Assembly4 commands are accessible from the Assembly meny or the Assembly4 toolbar.
+Assembly4 commands are accessible from the Assembly menu or the Assembly4 toolbar.
 
 
 ### Menu
@@ -138,7 +138,7 @@ These functions are also accessible with the Assembly toolbar:
 
 	* ![](Resources/icons/Asm4_Point.svg) : **New Datum Point** : creates FreeCAD PartDesign::Point
 
-	* ![](Resources/icons/Asm4_Hole.svg) : **New Hole LCS** : creates FreeCAD PartDesign::CoordinateSystem in an App::Part (and thus also in Assembly4 Models) at the center of te selected circular edge. This is therefore only active when a (single) circular edge is selected. This PartDesign::CoordinateSystem is attached to the center of the circle, and is intended to serve as attachment LCS for fasteners.  This is the combined function of creating an LCS and attaching it (via MapMode) to a circular edge, and is provided to streamline the workflow.
+	* ![](Resources/icons/Asm4_Hole.svg) : **New Hole LCS** : creates FreeCAD PartDesign::CoordinateSystem in an App::Part (and thus also in Assembly4 Models) at the center of the selected circular edge. This is therefore only active when a (single) circular edge is selected. This PartDesign::CoordinateSystem is attached to the center of the circle, and is intended to serve as attachment LCS for fasteners.  This is the combined function of creating an LCS and attaching it (via MapMode) to a circular edge, and is provided to streamline the workflow.
 
 * ![](Resources/icons/Place_Datum.svg) : **Place Datum** : this attaches an existing Datum object in the assembly to another existing Datum object in a linked part. Datum objects of different types can be attached. 
 
