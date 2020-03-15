@@ -515,7 +515,7 @@ class placeLink( QtGui.QDialog ):
         if self.selectedLink.LinkedObject.Name != self.selectedLink.LinkedObject.Label:
             pText = pText+' ('+self.selectedLink.LinkedObject.Name+')'
         self.linkedDoc.setText( dText + pText )
-        # Initialize the assembly tree with the Parrent Assembly as first element
+        # Initialize the assembly tree with the Parent Assembly as first element
         # clear the available parents combo box
         self.parentList.clear()
         self.parentList.addItem('Please choose')
