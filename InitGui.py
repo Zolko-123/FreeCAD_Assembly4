@@ -61,7 +61,7 @@ class dropDownCmdGroup:
     |            Initialize the workbench           |
     +-----------------------------------------------+
 """
-class Assembly4_WorkBench(Workbench):
+class Assembly4Workbench(Workbench):
  
     global main_Assembly4WB_Icon
 
@@ -241,6 +241,7 @@ class Assembly4_WorkBench(Workbench):
     def ContextMenu(self, recipient):
         # This is executed whenever the user right-clicks on screen"
         # "recipient" will be either "view" or "tree"
+        self.appendContextMenu( "", "Separator")
         self.appendContextMenu( "", ["Asm4_gotoDocument"] ) # add commands to the context menu
         self.appendContextMenu( "Assembly", self.itemsContextMenu ) # add commands to the context menu
         self.appendContextMenu( "Create", self.itemsCreateMenu ) # add commands to the context menu
@@ -258,10 +259,8 @@ class Assembly4_WorkBench(Workbench):
     |          actually make the workbench          |
     +-----------------------------------------------+
 """
-wb = Assembly4_WorkBench()
+wb = Assembly4Workbench()
 Gui.addWorkbench(wb)
-
-
 
 
 

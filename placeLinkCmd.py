@@ -110,10 +110,7 @@ class placeLink( QtGui.QDialog ):
                         self.parentTable.append( obj )
                         # add to the drop-down combo box with the assembly tree's parts
                         objIcon = obj.LinkedObject.ViewObject.Icon
-                        if obj.Name == obj.Label:
-                            objText = obj.Name
-                        else:
-                            objText = obj.Label+' ('+obj.Name+')'
+                        objText = Asm4.nameLabel(obj)
                         self.parentList.addItem( objIcon, objText, obj)
 
 
@@ -123,13 +120,8 @@ class placeLink( QtGui.QDialog ):
         self.partLCSlist.clear()
         for lcs in self.partLCStable:
             newItem = QtGui.QListWidgetItem()
+            newItem.setText(Asm4.nameLabel(lcs))
             newItem.setIcon( lcs.ViewObject.Icon )
-            if lcs.Name == lcs.Label:
-                newItem.setText( lcs.Name )
-            else:
-                newItem.setText( lcs.Label + ' (' +lcs.Name+ ')' )
-            #newItem.setIcon( lcs.ViewObject.Icon )
-            #self.lcsIcon = lcs.ViewObject.Icon
             self.partLCSlist.addItem(newItem)
 
 
@@ -145,13 +137,9 @@ class placeLink( QtGui.QDialog ):
 
         self.old_EE = ''
         # get and store the current expression engine:
-        old_EE = self.selectedLink.ExpressionEngine
-        if old_EE:
-            ( pla, self.old_EE ) = old_EE[0]
-
+        self.old_EE = Asm4.placementEE(self.selectedLink.ExpressionEngine)
         # for debugging, use this field to print text
-        #self.expression.setText( self.old_attPart )
-
+        #self.expression.setText( self.old_EE )
 
         # decode the old ExpressionEngine
         old_Parent = ''
@@ -160,28 +148,19 @@ class placeLink( QtGui.QDialog ):
         constrName = ''
         linkedDoc = ''
         old_linkLCS = ''
-        # if the linked part is in the same document as the assembly:
-        if self.parentAssembly.Document.Name == self.selectedLink.LinkedObject.Document.Name:
-            ( old_Parent, old_attLCS, old_linkLCS ) = Asm4.splitExpressionDoc( self.old_EE, self.old_Parent )
-        # if the linked part comes from another document:
-        else:
         # if the decode is unsuccessful, old_Expression is set to False and the other things are set to 'None'
-            ( old_Parent, old_attLCS, old_linkLCS ) = Asm4.splitExpressionLink( self.old_EE, self.old_Parent )
+        ( old_Parent, old_attLCS, old_linkLCS ) = Asm4.splitExpressionLink( self.old_EE, self.old_Parent )
         #self.expression.setText( old_Parent +'***'+ self.old_Parent )
 
 
         # find the old LCS in the list of LCS of the linked part...
         # MatchExactly, MatchContains, MatchEndsWith ...
-        lcs_found = []
         lcs_found = self.partLCSlist.findItems( old_linkLCS, QtCore.Qt.MatchExactly )
+        if not lcs_found:
+            lcs_found = self.partLCSlist.findItems( old_linkLCS+' (', QtCore.Qt.MatchStartsWith )
         if lcs_found:
             # ... and select it
             self.partLCSlist.setCurrentItem( lcs_found[0] )
-        else:
-            # may-be it was renamed, see if we can find it as (name)
-            lcs_found = self.partLCSlist.findItems( '('+old_linkLCS+')', QtCore.Qt.MatchContains )
-            if lcs_found:
-                self.partLCSlist.setCurrentItem( lcs_found[0] )
 
 
         # find the oldPart in the part list...
@@ -202,18 +181,14 @@ class placeLink( QtGui.QDialog ):
         self.parentList.setCurrentIndex( parent_index )
         # this should have triggered self.getPartLCS() to fill the LCS list
 
-
-        # find the oldLCS in the old parent Part (actually the App::Link)...
-        lcs_found = []
+        # find the old attachment Datum in the list of the Datums in the linked part...
         lcs_found = self.attLCSlist.findItems( old_attLCS, QtCore.Qt.MatchExactly )
+        if not lcs_found:
+            lcs_found = self.attLCSlist.findItems( old_attLCS+' (', QtCore.Qt.MatchStartsWith )
         if lcs_found:
             # ... and select it
             self.attLCSlist.setCurrentItem( lcs_found[0] )
-        else:
-            # may-be it was renamed, see if we can find it as (name)
-            lcs_found = self.attLCSlist.findItems( '('+old_attLCS+')', QtCore.Qt.MatchContains )
-            if lcs_found:
-                self.attLCSlist.setCurrentItem( lcs_found[0] )
+
 
 
         # the widget is shown and not executed to allow it to stay on top
@@ -340,6 +315,8 @@ class placeLink( QtGui.QDialog ):
             else:
                 self.selectedLink.addProperty( 'App::PropertyPlacement', 'AttachmentOffset', 'Attachment' ).AttachmentOffset = App.Placement()
             """
+            Gui.Selection.clearSelection()
+            Gui.Selection.addSelection( self.activeDoc.Name, 'Model', self.selectedLink.Name+'.' )
             # finish
             self.close()
         else:
@@ -390,11 +367,10 @@ class placeLink( QtGui.QDialog ):
     +------------------------------------------------+
     """
     def onParentSelected(self):
-        # clear the LCS list
-        self.attLCSlist.clear()
-        self.attLCStable = []
         # clear the selection in the GUI window
         Gui.Selection.clearSelection()
+        # build the LCS table
+        self.attLCStable = []
         # the current text in the combo-box is the link's name...
         # ... or it's 'Parent Assembly' then the parent is the 'Model' root App::Part
         if self.parentList.currentText() == 'Parent Assembly':
@@ -402,7 +378,7 @@ class placeLink( QtGui.QDialog ):
             parentPart = self.parentAssembly
             # we get the LCS directly in the root App::Part 'Model'
             self.attLCStable = self.getPartLCS( parentPart )
-            self.parentDoc.setText( parentPart.Document.Name+'#'+parentPart.Name )
+            self.parentDoc.setText( parentPart.Document.Name+'#'+Asm4.nameLabel(parentPart) )
         # if something is selected
         elif self.parentList.currentIndex() > 1:
             parentName = self.parentTable[ self.parentList.currentIndex() ].Name
@@ -414,10 +390,8 @@ class placeLink( QtGui.QDialog ):
                 dText = ''
                 if parentPart.LinkedObject.Document != self.activeDoc :
                     dText = parentPart.LinkedObject.Document.Name +'#'
-                # if the linked part has been renamed by the user, keep the label and add (.Name)
-                pText = parentPart.LinkedObject.Label
-                if parentPart.LinkedObject.Name != parentPart.LinkedObject.Label:
-                    pText = pText+' ('+parentPart.LinkedObject.Name+')'
+                # if the linked part has been renamed by the user
+                pText = Asm4.nameLabel( parentPart.LinkedObject )
                 self.parentDoc.setText( dText + pText )
                 # highlight the selected part:
                 Gui.Selection.addSelection( parentPart.Document.Name, 'Model', parentPart.Name+'.' )
@@ -426,12 +400,10 @@ class placeLink( QtGui.QDialog ):
             return
         
         # build the list
+        self.attLCSlist.clear()
         for lcs in self.attLCStable:
             newItem = QtGui.QListWidgetItem()
-            if lcs.Name == lcs.Label:
-                newItem.setText( lcs.Name )
-            else:
-                newItem.setText( lcs.Label + ' (' +lcs.Name+ ')' )
+            newItem.setText(Asm4.nameLabel(lcs))
             newItem.setIcon( lcs.ViewObject.Icon )
             self.attLCSlist.addItem( newItem )
             #self.attLCStable.append(lcs)
@@ -439,20 +411,6 @@ class placeLink( QtGui.QDialog ):
 
 
 
-    """
-    +-----------------------------------------------+
-    |                     Cancel                    |
-    |           restores the previous values        |
-    +-----------------------------------------------+
-    """
-    def onCancel(self):
-        # restore previous values
-        if self.old_AO:
-            self.selectedLink.AttachmentOffset = self.old_AO
-        if self.old_EE:
-            self.selectedLink.setExpression( 'Placement', self.old_EE )
-        self.selectedLink.recompute()
-        self.close()
 
 
 
@@ -481,6 +439,7 @@ class placeLink( QtGui.QDialog ):
         self.selectedLink.recompute()
 
 
+
     """
     +-----------------------------------------------+
     |                      OK                       |
@@ -489,8 +448,20 @@ class placeLink( QtGui.QDialog ):
     """
     def onOK(self):
         self.Apply()
+        Gui.Selection.clearSelection()
+        Gui.Selection.addSelection( self.activeDoc.Name, 'Model', self.selectedLink.Name+'.' )
         self.close()
 
+
+    def onCancel(self):
+        # restore previous values
+        if self.old_AO:
+            self.selectedLink.AttachmentOffset = self.old_AO
+        if self.old_EE:
+            self.selectedLink.setExpression( 'Placement', self.old_EE )
+        self.selectedLink.recompute()
+        Gui.Selection.clearSelection()
+        self.close()
 
 
     """
@@ -501,19 +472,17 @@ class placeLink( QtGui.QDialog ):
     def initUI(self):
         # clear the parent name (if any)
         self.parentDoc.clear()
+        self.expression.clear()
+        self.partLCSlist.clear()
+        self.attLCSlist.clear()
         # the selected link's name 
-        lName = self.selectedLink.Label
-        if self.selectedLink.Name != self.selectedLink.Label:
-            lName = lName + ' ('+self.selectedLink.Name+')'
-        self.linkName.setText( lName )
+        self.linkName.setText( Asm4.nameLabel(self.selectedLink) )
         # linked part & doc
         dText = ''
         if self.selectedLink.LinkedObject.Document != self.activeDoc :
             dText = self.selectedLink.LinkedObject.Document.Name +'#'
         # if the linked part has been renamed by the user, keep the label and add (.Name)
-        pText = self.selectedLink.LinkedObject.Label
-        if self.selectedLink.LinkedObject.Name != self.selectedLink.LinkedObject.Label:
-            pText = pText+' ('+self.selectedLink.LinkedObject.Name+')'
+        pText = Asm4.nameLabel(self.selectedLink.LinkedObject)
         self.linkedDoc.setText( dText + pText )
         # Initialize the assembly tree with the Parent Assembly as first element
         # clear the available parents combo box

@@ -121,6 +121,7 @@ class insertLink( QtGui.QDialog ):
             # try to find the original part of the selected link
             # MatchExactly, MatchContains, MatchEndsWith, MatchStartsWith ...
             origPartText = origPart.Document.Name +"#"+ origPart.Label
+            # if Label!=Name then the string still starts with Label
             partFound = self.partList.findItems( origPartText, QtCore.Qt.MatchStartsWith )
             if partFound:
                 self.partList.setCurrentItem(partFound[0])
@@ -129,13 +130,15 @@ class insertLink( QtGui.QDialog ):
                 # if the last character is a number, we increment this number
                 lastChar = origName[-1]
                 if lastChar.isnumeric():
-                    origInstanceNum = int(lastChar)
-                    proposedLinkName = origName[:-1]+str(origInstanceNum+1)
+                    rootName = origName[:-1]
+                    instanceNum = int(lastChar)
+                    while App.ActiveDocument.getObject( rootName+str(instanceNum) ):
+                        instanceNum += 1
+                    proposedLinkName = rootName+str(instanceNum)
                 # else we append a _2 to the original name (Label)
                 else:
                     proposedLinkName = origName+'_2'
                 self.linkNameInput.setText( proposedLinkName )
-
 
         # show the UI
         self.show()
@@ -163,6 +166,10 @@ class insertLink( QtGui.QDialog ):
             createdLink = self.activeDoc.getObject('Model').newObject( 'App::Link', linkName )
             # assign the user-selected selectedPart to it
             createdLink.LinkedObject = selectedPart
+            # If the name was already chosen, and a UID was generated:
+            if createdLink.Name != linkName:
+                # we try to set the label to the chosen name
+                createdLink.Label = linkName
             # update the link
             createdLink.recompute()
             
