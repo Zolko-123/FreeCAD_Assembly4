@@ -4,7 +4,7 @@
 # placeDatumCmd.py 
 
 
-import math, re, os
+import os
 
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
@@ -59,12 +59,6 @@ class importDatum( QtGui.QDialog ):
         return None
     
     
-    def labelName( self, obj ):
-        if obj.Name==obj.Label:
-            return(obj.Label)
-        else:
-            return(obj.Label+' ('+obj.Name+')')
-
 
     """  
     +-----------------------------------------------+
@@ -100,11 +94,14 @@ class importDatum( QtGui.QDialog ):
         self.targetLink = self.activeDoc.getObject( targetLinkName )
         # If the selected datum is at the root of the link. Else we don't consider it
         if dot =='.' and self.targetLink in self.childrenTable:
-            self.datumOrig.setText( self.labelName(self.targetDatum) )
             self.datumType.setText( self.targetDatum.TypeId )
-            self.linkName.setText(  self.labelName(self.targetLink) )
             docName = self.targetLink.LinkedObject.Document.Name+'#'
-            self.partName.setText(  docName + self.labelName(self.targetLink.LinkedObject))
+            #self.datumOrig.setText( self.labelName(self.targetDatum) )
+            #self.linkName.setText(  self.labelName(self.targetLink) )
+            #self.partName.setText(  docName + self.labelName(self.targetLink.LinkedObject))
+            self.datumOrig.setText( Asm4.nameLabel(self.targetDatum) )
+            self.linkName.setText(  Asm4.nameLabel(self.targetLink) )
+            self.partName.setText(  docName + Asm4.nameLabel(self.targetLink.LinkedObject))
             self.datumName.setText( self.targetDatum.Label )
         else:
             # something fishy, abort
@@ -207,7 +204,7 @@ class importDatum( QtGui.QDialog ):
         self.setWindowTitle('Import a Datum object')
         self.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
         self.setWindowIcon( QtGui.QIcon( os.path.join( Asm4.iconPath , 'FreeCad.svg' ) ) )
-        self.setMinimumSize(550, 350)
+        self.setMinimumWidth(470)
         self.setModal(False)
         self.mainLayout = QtGui.QVBoxLayout(self)
 

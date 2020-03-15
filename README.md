@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version:  0.8.0, 2020-02-13
+Current version:  0.8.1, 2020-03-15
 
 
 
@@ -51,6 +51,9 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 ## Release notes
 
+* 2020.03.15 (**version 0.8.1**) :  
+Added slider for animation  
+Reversed Document#Label (Name) to Document#Name (Label)  
 
 * 2020.02.13 (**version 0.8.0**) :  
 All dialogs are now resizable  

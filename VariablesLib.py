@@ -166,7 +166,7 @@ class addVariable( QtGui.QDialog ):
         self.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
         self.setWindowTitle('Add Variable')
         self.setWindowIcon( QtGui.QIcon( os.path.join( Asm4.iconPath , 'FreeCad.svg' ) ) )
-        self.setMinimumSize(470, 300)
+        self.setMinimumWidth(470)
         self.resize(470,300)
         self.setModal(False)
         # the layout for the main window is vertical (top to down)

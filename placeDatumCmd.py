@@ -97,15 +97,6 @@ class placeDatum( QtGui.QDialog ):
         # now self.parentList and self.parentTable are available
 
         # find all the linked parts in the assembly
-        """
-        for obj in self.activeDoc.findObjects("App::Link"):
-            if obj.LinkedObject.isDerivedFrom('App::Part'):
-                # add it to our tree table if it's a link to an App::Part ...
-                self.parentTable.append( obj )
-                # ... and add to the drop-down combo box with the assembly tree's parts
-                objIcon = obj.LinkedObject.ViewObject.Icon
-                self.parentList.addItem( objIcon, obj.Name, obj)
-        """
         for objName in self.parentAssembly.getSubObjects():
             # remove the trailing .
             obj = self.activeDoc.getObject(objName[0:-1])
@@ -115,16 +106,12 @@ class placeDatum( QtGui.QDialog ):
                     self.parentTable.append( obj )
                     # add to the drop-down combo box with the assembly tree's parts
                     objIcon = obj.LinkedObject.ViewObject.Icon
-                    objText = obj.Label
-                    if obj.Name != obj.Label:
-                        objText += ' ('+obj.Name+')'
+                    objText = Asm4.nameLabel(obj)
                     self.parentList.addItem( objIcon, objText, obj)
 
-        # get and store the current expression engine:
-        self.old_EE = ''
-        old_EE = self.selectedDatum.ExpressionEngine
-        if old_EE:
-            ( pla, self.old_EE ) = old_EE[0]
+        # get and store the Placement's current ExpressionEngine:
+        self.old_EE = Asm4.placementEE(self.selectedDatum.ExpressionEngine)
+        #self.expression.setText(self.old_EE)
 
         # decode the old ExpressionEngine
         # if the decode is unsuccessful, old_Expression is set to False
@@ -133,7 +120,7 @@ class placeDatum( QtGui.QDialog ):
         old_ParentPart = ''
         old_attLCS = ''
         ( old_Parent, old_ParentPart, old_attLCS ) = Asm4.splitExpressionDatum( self.old_EE )
-        #self.expression.setText( 'old_Parent = '+ old_Parent )
+        self.expression.setText( self.old_EE + ' => old_Parent = '+ old_Parent )
 
 
         # find the oldPart in the current part list...
@@ -161,16 +148,13 @@ class placeDatum( QtGui.QDialog ):
 
 
         # find the old attachment Datum in the list of the Datums in the linked part...
-        lcs_found = []
+        # lcs_found = []
         lcs_found = self.attLCSlist.findItems( old_attLCS, QtCore.Qt.MatchExactly )
+        if not lcs_found:
+            lcs_found = self.attLCSlist.findItems( old_attLCS+' (', QtCore.Qt.MatchContains )
         if lcs_found:
             # ... and select it
             self.attLCSlist.setCurrentItem( lcs_found[0] )
-        else:
-            # may-be it was renamed, see if we can find it as (name)
-            lcs_found = self.attLCSlist.findItems( '('+old_attLCS+')', QtCore.Qt.MatchContains )
-            if lcs_found:
-                self.attLCSlist.setCurrentItem( lcs_found[0] )
 
 
 
@@ -273,31 +257,19 @@ class placeDatum( QtGui.QDialog ):
                 if parentLink.LinkedObject.Document != self.activeDoc :
                     dText = parentLink.LinkedObject.Document.Name +'#'
                 # if the linked part has been renamed by the user, keep the label and add (.Name)
-                pText = parentLink.LinkedObject.Label
-                if parentLink.LinkedObject.Name != parentLink.LinkedObject.Label:
-                    pText = pText+' ('+parentLink.LinkedObject.Name+')'
+                #pText = parentLink.LinkedObject.Label
+                pText = Asm4.nameLabel( parentLink.LinkedObject )
                 self.parentDoc.setText( dText + pText )
                 # highlight the selected part:
                 Gui.Selection.addSelection( parentLink.Document.Name, 'Model', parentLink.Name+'.' )
         # something wrong
         else:
             return
-        """
-        if parentLink:
-            # we get the LCS from the linked part
-            self.attLCStable = self.getPartLCS( parentLink.LinkedObject )
-            self.parentDoc.setText( parentLink.LinkedObject.Document.Name )
-            # highlight the selected part:
-            Gui.Selection.addSelection( parentLink.Document.Name, 'Model', parentLink.Name+'.' )
-        """
         # build the list
         for lcs in self.attLCStable:
             newItem = QtGui.QListWidgetItem()
             # if the LCS has been renamed, we show both the label and the (name)
-            if lcs.Name == lcs.Label:
-                newItem.setText( lcs.Name )
-            else:
-                newItem.setText( lcs.Label + ' (' +lcs.Name+ ')' )
+            newItem.setText( Asm4.nameLabel(lcs) )
             newItem.setIcon( lcs.ViewObject.Icon )
             self.attLCSlist.addItem( newItem )
         self.onApply()
@@ -383,7 +355,7 @@ class placeDatum( QtGui.QDialog ):
     +-----------------------------------------------+
     """
     def initUI(self):
-        self.lscName.setText( self.selectedDatum.Name )
+        self.lscName.setText( Asm4.nameLabel(self.selectedDatum) )
         self.parentDoc.clear()
         self.attLCSlist.clear()
         self.expression.clear()
@@ -481,7 +453,7 @@ class placeDatum( QtGui.QDialog ):
 
         # Actions
         self.parentList.currentIndexChanged.connect( self.onParentSelected )
-        self.attLCSlist.currentItemChanged.connect( self.onDatumSelected )
+        #self.attLCSlist.currentItemChanged.connect( self.onDatumSelected )
         self.attLCSlist.itemClicked.connect( self.onDatumSelected )
         self.CancelButton.clicked.connect(self.onCancel)
         self.OkButton.clicked.connect(self.onOK)

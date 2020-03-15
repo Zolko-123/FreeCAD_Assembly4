@@ -109,28 +109,60 @@ class animateVariable( QtGui.QDialog ):
         sleep   = self.sleepValue.value()
         # basic checks
         if varName:
+            varValue = begin
             # if we go forwards ...
             if end>begin and step>0:
-                varValue = begin
                 while varValue <= end and self.Run:
                     setattr( self.Variables, varName, varValue )
-                    #App.ActiveDocument.recompute()
+                    self.slider.setValue(varValue)
                     App.ActiveDocument.Model.recompute('True')
                     Gui.updateGui()
                     varValue += step
                     time.sleep(sleep)
             # ... or backwards
             elif end<begin and step<0:
-                varValue = begin
                 while varValue >= end and self.Run:
                     setattr( self.Variables, varName, varValue )
-                    #App.ActiveDocument.recompute()
+                    self.slider.setValue(varValue)
                     App.ActiveDocument.Model.recompute('True')
                     Gui.updateGui()
                     varValue += step
                     time.sleep(sleep)
         self.Run = True
         return
+
+
+
+    """
+    +-----------------------------------------------+
+    |                   Slider                      |
+    +-----------------------------------------------+
+    """
+    def sliderMoved(self):
+        self.Run = False
+        varName = self.varList.currentText()
+        varValue = self.slider.value()
+        setattr( self.Variables, varName, varValue )
+        App.ActiveDocument.Model.recompute('True')
+        Gui.updateGui()
+        return
+
+
+    def onValuesChanged(self):
+        self.sliderMinValue.setText( str(self.minValue.value()) )
+        self.sliderMaxValue.setText( str(self.maxValue.value()) )
+        self.slider.setRange( self.minValue.value(), self.maxValue.value() )
+        self.slider.setSingleStep( self.stepValue.value() )
+        return
+
+
+    def stepMinus(self):
+        return
+
+
+    def stepPlus(self):
+        return
+
 
 
     """
@@ -164,8 +196,7 @@ class animateVariable( QtGui.QDialog ):
         self.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
         self.setWindowTitle('Animate Assembly')
         self.setWindowIcon( QtGui.QIcon( os.path.join( Asm4.iconPath , 'FreeCad.svg' ) ) )
-        self.setMinimumSize(470, 300)
-        self.resize(470,300)
+        self.setMinimumWidth(470)
         self.setModal(False)
         # set main window widgets
         self.mainLayout = QtGui.QVBoxLayout(self)
@@ -195,8 +226,27 @@ class animateVariable( QtGui.QDialog ):
         self.formLayout.addRow(QtGui.QLabel('Sleep (s)'),self.sleepValue)
         # apply the layout
         self.mainLayout.addLayout(self.formLayout)
-        self.mainLayout.addStretch()
+        self.mainLayout.addWidget(QtGui.QLabel())
 
+        # slider
+        self.sliderLayout = QtGui.QHBoxLayout(self)
+        self.slider = QtGui.QSlider()
+        self.slider.setOrientation(QtCore.Qt.Orientation.Horizontal)
+        self.slider.setRange(0, 10)
+        self.slider.setTickInterval(0)
+        self.sliderMinValue = QtGui.QLabel('Min')
+        self.sliderMaxValue = QtGui.QLabel('Max')        
+        #self.stepLeft  = QtGui.QPushButton('<', self)
+        #self.stepRight = QtGui.QPushButton('>', self)
+        #self.sliderLayout.addWidget(self.stepLeft)
+        self.sliderLayout.addWidget(self.sliderMinValue)
+        self.sliderLayout.addWidget(self.slider)
+        self.sliderLayout.addWidget(self.sliderMaxValue)
+        #self.sliderLayout.addWidget(self.stepRight)
+        self.mainLayout.addLayout(self.sliderLayout)
+
+        self.mainLayout.addWidget(QtGui.QLabel())
+        self.mainLayout.addStretch()
         # the button row definition
         self.buttonLayout = QtGui.QHBoxLayout(self)
         # Close button
@@ -219,9 +269,15 @@ class animateVariable( QtGui.QDialog ):
 
         # Actions
         self.varList.currentIndexChanged.connect( self.onSelectVar )
+        self.slider.sliderMoved.connect(self.sliderMoved)
         self.CloseButton.clicked.connect(self.onClose)
         self.StopButton.clicked.connect(self.onStop)
         self.RunButton.clicked.connect(self.onRun)
+        self.minValue.valueChanged.connect( self.onValuesChanged )
+        self.maxValue.valueChanged.connect( self.onValuesChanged )
+        self.stepValue.valueChanged.connect( self.onValuesChanged )
+        #self.stepLeft.clicked.connect(self.stepMinus)
+        #self.stepRight.clicked.connect(self.stepPlus)
 
 
 
