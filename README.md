@@ -1,5 +1,5 @@
 # FreeCAD Assembly 4 workbench
-[![Total alerts](https://img.shields.io/lgtm/alerts/g/Zolko-123/FreeCAD_Assembly4.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Zolko-123/FreeCAD_Assembly4/alerts/) [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/Zolko-123/FreeCAD_Assembly4.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Zolko-123/FreeCAD_Assembly4/context:python)  
+
 Current version:  0.8.1, 2020-03-15
 
 
