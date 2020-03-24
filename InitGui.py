@@ -131,7 +131,8 @@ class Assembly4Workbench(Workbench):
                                 "Asm4_importDatum", 
                                 "Asm4_placeDatum", 
                                 "Asm4_updateAssembly",
-                                "Asm4_newLinkArray"]
+                                "Asm4_newLinkArray",
+                                "Asm4_OrthoArray"]
         # commands to appear in the Assembly4 menu 'Assembly'
         self.itemsMenu =      [ "Asm4_newModel",   
                                 "Asm4_newBody", 
@@ -152,6 +153,7 @@ class Assembly4Workbench(Workbench):
                                 "Asm4_placeDatum", 
                                 "Asm4_importDatum", 
                                 "Asm4_newLinkArray",
+                                "Asm4_OrthoArray",
                                 "Asm4_addVariable", 
                                 "Asm4_Animate", 
                                 "Asm4_updateAssembly"]
@@ -170,6 +172,7 @@ class Assembly4Workbench(Workbench):
                                 "Asm4_importDatum", 
                                 "Asm4_placeDatum", 
                                 "Asm4_newLinkArray",
+                                "Asm4_OrthoArray",
                                 "Asm4_addVariable", 
                                 "Asm4_Animate", 
                                 "Asm4_updateAssembly"]
