@@ -56,7 +56,7 @@ class newLinkArray():
             #    Draft.makeArray(App.ActiveDocument.getObject(selectObject.Name), App.Vector(1, 0, 0),
             #                    App.Vector(0, 1, 0), 2, 2, useLink=True, name=text)
             createdArray = Draft.makeArray(App.ActiveDocument.getObject(selectObject.Name), App.Vector(10, 0, 0),
-                            App.Vector(0, 1, 0), 2, 1, useLink=True, name=arrayName)
+                            App.Vector(0, 1, 0), 2, 1, use_link=True, name=arrayName)
             model.addObject(createdArray)
             createdArray.recompute()
             model.recompute()
