@@ -230,6 +230,7 @@ class Assembly4Workbench(Workbench):
                                 "Asm4_placeDatum", 
                                 "Asm4_importDatum", 
                                 "Asm4_newLinkArray",
+                                "Asm4_OrthoArray",
                                 "Asm4_addVariable", 
                                 "Asm4_Animate", 
                                 "Asm4_updateAssembly"]
@@ -251,6 +252,7 @@ class Assembly4Workbench(Workbench):
                                 "Asm4_placeDatum", 
                                 "Separator",
                                 "Asm4_newLinkArray",
+                                "Asm4_OrthoArray",
                                 "Asm4_addVariable", 
                                 "Asm4_Animate", 
                                 "Asm4_updateAssembly"]
