@@ -69,9 +69,12 @@ Commands are activated with relevant selection. If a command is inactive (grayed
 
 ### Menu
 
-These functions are also accessible from the Assembly menu:
+<details>
+  <summary>These functions are also accessible from the Assembly menu:</summary> 
 
 ![](Resources/media/Asm4_Menu.png)
+
+</details>
 
 ### Assembly4 commands
 

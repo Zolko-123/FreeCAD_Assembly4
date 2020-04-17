@@ -82,9 +82,10 @@ class importDatum( QtGui.QDialog ):
         for objStr in self.parentAssembly.getSubObjects():
             # the string ends with a . that must be removed
             obj = self.activeDoc.getObject( objStr[0:-1] )
-            if obj.TypeId == 'App::Link' and obj.LinkedObject.isDerivedFrom('App::Part'):
-                # add it to our tree table if it's a link to an App::Part ...
-                self.childrenTable.append( obj )
+            if obj.TypeId == 'App::Link' and hasattr(obj.LinkedObject,'isDerivedFrom'):
+                if  obj.LinkedObject.isDerivedFrom('App::Part') or obj.LinkedObject.isDerivedFrom('PartDesign::Body'):
+                    # add it to our tree table if it's a link to an App::Part ...
+                    self.childrenTable.append( obj )
 
         # check whether a Datum is already selected:
         self.targetDatum = self.getSelection()

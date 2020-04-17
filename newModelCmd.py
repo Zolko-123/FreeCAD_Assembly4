@@ -64,10 +64,17 @@ class newModel:
             # create a Configuration property
             model.addProperty('App::PropertyEnumeration', 'Configuration', 'Parameters')
             model.Configuration = ['Default']
-            # move existing parts to the Parts group
+            # move existing parts at the document root to the Parts group
+            # not nested inside other parts, to keep hierarchy
             for obj in self.activeDoc.Objects:
-                if obj.TypeId=='App::Part' and obj.Name!='Model':
+                if obj.TypeId=='App::Part' and obj.Name!='Model' and obj.getParentGeoFeatureGroup()==None:
                     partsGroup.addObject(obj)
+            # move existing bodies at the document root to the Parts group
+            # not nested inside other parts, to keep hierarchy
+            for obj in self.activeDoc.Objects:
+                if obj.TypeId=='PartDesign::Body' and obj.getParentGeoFeatureGroup()==None:
+                    partsGroup.addObject(obj)
+
             # recompute to get rid of the small overlays
             model.recompute()
             self.activeDoc.recompute()

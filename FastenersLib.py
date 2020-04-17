@@ -232,14 +232,20 @@ class placeFastener( QtGui.QDialog ):
         # Add it as first element to the drop-down combo-box
         parentIcon = self.parentAssembly.ViewObject.Icon
         self.parentList.addItem( parentIcon, 'Parent Assembly', self.parentAssembly )
+
         # find all the linked parts in the assembly
-        for obj in self.activeDoc.findObjects("App::Link"):
-            if obj.LinkedObject.isDerivedFrom('App::Part'):
-                # add it to our tree table if it's a link to an App::Part ...
-                self.asmParts.append( obj )
-                # ... and add to the drop-down combo box with the assembly tree's parts
-                objIcon = obj.LinkedObject.ViewObject.Icon
-                self.parentList.addItem( objIcon, obj.Name, obj)
+        for objStr in self.parentAssembly.getSubObjects():
+            # the string ends with a . that must be removed
+            obj = self.activeDoc.getObject( objStr[0:-1] )
+            if obj.TypeId == 'App::Link' and hasattr(obj.LinkedObject,'isDerivedFrom'):
+                #for obj in self.activeDoc.findObjects("App::Link"):
+                #if hasattr(obj.LinkedObject,'isDerivedFrom'):
+                if obj.LinkedObject.isDerivedFrom('App::Part') or obj.LinkedObject.isDerivedFrom('PartDesign::Body'):
+                    # add it to our tree table if it's a link to an App::Part ...
+                    self.asmParts.append( obj )
+                    # ... and add to the drop-down combo box with the assembly tree's parts
+                    objIcon = obj.LinkedObject.ViewObject.Icon
+                    self.parentList.addItem( objIcon, obj.Name, obj)
 
         # find the oldPart in the part list...
         parent_index = 1
@@ -412,17 +418,17 @@ class placeFastener( QtGui.QDialog ):
 
     """
     +-----------------------------------------------+
-    |           get all the LCS in a part           |
+    |      get all the LCS and Axes in a Part       |
     +-----------------------------------------------+
     """
     def getPartLCS( self, part ):
         partLCS = [ ]
         # parse all objects in the part (they return strings)
-        for objName in part.getSubObjects():
+        for objName in part.getSubObjects(1):
             # get the proper objects
             # all object names end with a "." , this needs to be removed
             obj = part.getObject( objName[0:-1] )
-            if obj.TypeId == 'PartDesign::CoordinateSystem' or obj.TypeId == 'PartDesign::Point':
+            if obj.TypeId == 'PartDesign::CoordinateSystem' or obj.TypeId == 'PartDesign::Line':
                 partLCS.append( obj )
         return partLCS
 

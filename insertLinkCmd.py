@@ -32,9 +32,9 @@ class insertLink( QtGui.QDialog ):
 
 
     def GetResources(self):
-        return {"MenuText": "Link an external Part",
+        return {"MenuText": "Link a Part",
                 "Accel": "Ctrl+L",
-                "ToolTip": "Insert a link to external Part from another open document",
+                "ToolTip": "Insert a link to a Part",
                 "Pixmap" : os.path.join( Asm4.iconPath , 'Link_Part.svg')
                 }
 
@@ -87,20 +87,25 @@ class insertLink( QtGui.QDialog ):
         
         # if an App::Link is selected, we'll ducplicate it
         selObj = self.getSelection()
+        self.origLink = None
         if selObj.isDerivedFrom('App::Link'):
-            self.origLink = selObj
-        else:
-            self.origLink = None
+            selType = selObj.LinkedObject.TypeId
+            if selType=='App::Part' or selType=='PartDesign::Body':
+                self.origLink = selObj
         
-        # Search for all App::Parts in all open documents
+        # Search for all App::Parts and PartDesign::Body in all open documents
         # Also store the document of the part
         for doc in App.listDocuments().values():
-            # there might be more than 1 App::Part per document
             for obj in doc.findObjects("App::Part"):
                 # we don't want to link to itself to the 'Model' object
                 # other App::Part in the same document are OK 
-                # (even though I don't see the use-case)
-                if obj != self.asmModel:
+                # but only those at top level (not nested inside other containers)
+                if obj != self.asmModel and obj.getParentGeoFeatureGroup()==None:
+                    self.allParts.append( obj )
+                    self.partsDoc.append( doc )
+            for obj in doc.findObjects("PartDesign::Body"):
+                # but only those at top level (not nested inside other containers)
+                if obj.getParentGeoFeatureGroup()==None:
                     self.allParts.append( obj )
                     self.partsDoc.append( doc )
 

@@ -17,13 +17,32 @@ import libAsm4 as Asm4
 
 
 
-
+"""
+    +-----------------------------------------------+
+    |    a class to create all container objects    |
+    |         App::Part or PartDesign::Body         |
+    +-----------------------------------------------+
+"""
 class newPart:
 
+    def __init__(self, partName):
+        self.partName = partName
+        if self.partName    == 'Part':
+            self.partType    = 'App::Part'
+            self.menutext    = "New Part"
+            self.tooltip     = "Create a new Part"
+            self.icon        = os.path.join( Asm4.iconPath , 'Asm4_Part.svg')
+        elif self.partName  == 'Body':
+            self.partType    = 'PartDesign::Body'
+            self.menutext    = "New Body"
+            self.tooltip     = "Create a new Body"
+            self.icon        = os.path.join( Asm4.iconPath , 'Asm4_Body.svg')
+
+
     def GetResources(self):
-        return {"MenuText": "New Part",
-                "ToolTip": "Create a new Part in the document",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_Part.svg')
+        return {"MenuText"   : self.menutext,
+                "ToolTip"    : self.tooltip,
+                "Pixmap"     : self.icon 
                 }
 
 
@@ -35,21 +54,20 @@ class newPart:
 
 
     def Activated(self):
-        partName = 'Part'
-        text,ok = QtGui.QInputDialog.getText(None,'Create new Part','Enter new Part name :                                        ', text = partName)
+        #partName = 'Part'
+        text,ok = QtGui.QInputDialog.getText(None, self.tooltip, 'Enter new '+self.partName+' name :                                        ', text = self.partName)
         if ok and text:
             # create Part
-            part = App.ActiveDocument.addObject('App::Part',text)
-            # If the 'Part' group exists, move it there:
-            partsGroup = App.ActiveDocument.getObject('Parts')
-            if partsGroup and partsGroup.TypeId=='App::DocumentObjectGroup' :
-                App.ActiveDocument.getObject('Parts').addObject(part)
+            part = App.ActiveDocument.addObject(self.partType,text)
             # add an LCS at the root of the Part, and attach it to the 'Origin'
-            # this one starts with 1, because the LCS_0 is for the Model
             lcs0 = part.newObject('PartDesign::CoordinateSystem','LCS_0')
             lcs0.Support = [(part.Origin.OriginFeatures[0],'')]
             lcs0.MapMode = 'ObjectXY'
             lcs0.MapReversed = False
+            # If the 'Part' group exists, move it there:
+            partsGroup = App.ActiveDocument.getObject('Parts')
+            if partsGroup and partsGroup.TypeId=='App::DocumentObjectGroup' :
+                App.ActiveDocument.getObject('Parts').addObject(part)
             # recompute
             part.recompute()
             App.ActiveDocument.recompute()
@@ -57,4 +75,5 @@ class newPart:
 
 
 # add the command to the workbench
-Gui.addCommand( 'Asm4_newPart', newPart() )
+Gui.addCommand( 'Asm4_newPart', newPart('Part') )
+Gui.addCommand( 'Asm4_newBody', newPart('Body') )
