@@ -1,15 +1,15 @@
 # FreeCAD Assembly 4 workbench
 
-Current version:  0.8.1, 2020-03-15
+Current version 0.9.0, 2020-04-17
 
 
 
 
 ## Overview
 
-The principle of Assembly4 is that `App::Part` objects are linked together into an assembly using the `App::Link` interface introduced in FreeCAD v0.19. The host parent assembly **and** the included child parts are all `App::Part` type objects. The parts that are linked can be in the same document as the assembly or an external document, invariably.
+This assembly workbench allows to integrate into a single container under a single coordinate system other FreeCAD objects and place them relative to the assembly and to each-other. The principle of Assembly4 is that `App::Part` and `PartDesign::Body` container objects are linked into a host parent assembly called _Model_ and of type `App::Part` using the `App::Link` interface introduced in FreeCAD v0.19. The parts that are linked can invariably be in the same document as the assembly or an external document.
 
-As an Assembly4 model is a standard FreeCAD `App::Part` object, it can be used and manipulated with any FreeCAD tool handling `App::Part` objects. An Assembly4 Model can invariably be a stand-alone part, an assembly, a sub-assembly, and any combinations of these.
+As an Assembly4 model is a standard FreeCAD `App::Part` object, it can be used and manipulated with any FreeCAD tool handling `App::Part` objects. In particular, it can be inserted into another Assembly4 _Model_ to create nested assemblies. It can also contain solids and datum objects. An Assembly4 _Model_ can be a stand-alone part, an assembly, a sub-assembly, and any combinations of these.
 
 Parts and linked parts are placed to each-other in the host parent assembly by matching their Datum Coordinate Systems (`PartDesign::CoordinateSystem` called LCS for Local Coordinate System) using the built-in FreeCAD *ExpressionEngine.* No geometry is used to place and constrain parts relative to each other, thus avoiding a lot of the topological naming problems. 
 
@@ -17,7 +17,9 @@ Parts and linked parts are placed to each-other in the host parent assembly by m
 ![](Resources/media/Asm4_wb1.png)
 
 
-**Please Note:** objects in the same document as the linked part but outside the `App::Part` container will **not** be inserted. The *PartDesign* workbench doesn't produce **Parts**, it produces **Bodies**. It is entirely possible to use Parts made with the *Part* workbench with Assembly4, but if you want to use Bodies made with the *PartDesign* workbench you need first to create a Part and move the Body into that Part.
+**Please Note:** objects in the same document as the linked part but outside the `App::Part` container will **not** be inserted.
+
+**Please Note:** only _Part_ and _Body_ containers at the root of a document can be inserted. Objects inside containers cannot be used directly by Assembly 4. 
 
 
 
@@ -50,6 +52,9 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 
 ## Release notes
+
+* 2020.04.15 (**0.9.0**) :  
+PartDesign::Body can be directly imported (linked), no need to wrap them in App::Part container  
 
 * 2020.03.15 (**version 0.8.1**) :  
 Added slider for animation  

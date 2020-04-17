@@ -49,7 +49,7 @@ class newDatum:
             self.datumType   = 'PartDesign::CoordinateSystem'
             self.menutext    = "New Coordinate System"
             self.tooltip     = "Create a new Coordinate System in a Part"
-            self.icon        = os.path.join( Asm4.iconPath , 'Asm4_AxisCross.svg')
+            self.icon        = os.path.join( Asm4.iconPath , 'Asm4_CoordinateSystem.svg')
             self.datumColor  = []
             self.datumAlpha  = []
         elif self.datumName == 'Sketch':
@@ -81,7 +81,7 @@ class newDatum:
         if Gui.Selection.getSelection():
             selectedObj = Gui.Selection.getSelection()[0]
             # ... and it's an App::Part or an datum object
-            if selectedObj.TypeId == 'App::Part' or selectedObj.TypeId in self.datumTypes:
+            if selectedObj.TypeId=='App::Part' or selectedObj.TypeId=='PartDesign::Body'or selectedObj.TypeId in self.datumTypes:
                 return(selectedObj)
         # or of nothing is selected ...
         elif App.ActiveDocument.getObject('Model'):
@@ -98,14 +98,14 @@ class newDatum:
     +-----------------------------------------------+
     """
     def Activated(self):
-        # check that we have somewhere to put our stuff (an App::Part or an Asm4 Model)
+        # check that we have somewhere to put our stuff (an App::Part or PartDesign::Body or Asm4 Model)
         selectedObj = self.checkSelection()
-        if selectedObj.TypeId=='App::Part':
+        if selectedObj.TypeId=='App::Part' or selectedObj.TypeId=='PartDesign::Body':
             partChecked = selectedObj
-        # if a datum object is selected we try to find the parent App::Part
+        # if a datum object is selected we try to find the parent App::Part or PartDesign::Body
         elif selectedObj.TypeId in self.datumTypes:
             parent = selectedObj.getParentGeoFeatureGroup()
-            if parent.TypeId=='App::Part':
+            if parent.TypeId=='App::Part' or parent.TypeId=='PartDesign::Body':
                 partChecked = parent
         # something went wrong
         else:
@@ -147,12 +147,10 @@ class newDatum:
 """
 class newHole:
     def GetResources(self):
-        return {"MenuText": "New Hole LCS",
-                "Accel": "Ctrl+H",
-                "ToolTip": "Create a Coordinate System attached to a hole",
+        return {"MenuText": "New Hole Axis",
+                "ToolTip": "Create a Datum Axis attached to a hole",
                 "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_Hole.svg')
                 }
-
 
     def IsActive(self):
         selection = self.getSelection()
@@ -160,7 +158,6 @@ class newHole:
             return False
         else:
             return True
-
 
     def getSelection(self):
         # check that we have selected a circular edge
@@ -173,14 +170,12 @@ class newHole:
                 if len(edge.SubObjects) == 1:
                     edgeObj = edge.SubObjects[0]
                     # if the edge is circular
-                    if hasattr(edgeObj,"Curve") and hasattr(edgeObj.Curve,"Center"):
+                    if hasattr(edgeObj,"Curve") and hasattr(edgeObj.Curve,"centerOfCurvature"):
                         # find the feature on which the edge is located
                         parentObj = Gui.Selection.getSelection()[0]
                         edgeName = edge.SubElementNames[0]
                         selection = ( parentObj, edgeName )
         return selection
-
-
 
     """
     +-----------------------------------------------+
@@ -189,20 +184,22 @@ class newHole:
     """
     def Activated(self):
         ( selectedObj, edge ) = self.getSelection()
-        # loop until exhaustion or until we encounter an App::Part
-        parentPart = selectedObj
-        while parentPart and parentPart.TypeId!='App::Part':
-            # get the parent object 
-            # the direct parent might be a Body, but we want the Part containing the Body
-            parentPart = parentPart.getParentGeoFeatureGroup()
+        parentPart = selectedObj.getParentGeoFeatureGroup()
         # if the solid having the edge is indeed in an App::Part
-        if parentPart.TypeId=='App::Part':
-            lcs = parentPart.newObject('PartDesign::CoordinateSystem','Hole')
-            lcs.Support = [( selectedObj, (edge,) )]
-            lcs.MapMode = 'Concentric'
-            lcs.MapReversed = False
-            lcs.ViewObject.Zoom = 0.5
-            lcs.recompute()
+        if parentPart and (parentPart.TypeId=='App::Part' or parentPart.TypeId=='PartDesign::Body'):
+            # check whether there is already a similar datum, and increment the instance number 
+            instanceNum = 1
+            while App.ActiveDocument.getObject( 'HoleAxis_'+str(instanceNum) ):
+                instanceNum += 1
+            axis = parentPart.newObject('PartDesign::Line','HoleAxis_'+str(instanceNum))
+            axis.Support = [( selectedObj, (edge,) )]
+            axis.MapMode = 'AxisOfCurvature'
+            axis.MapReversed = False
+            axis.ResizeMode = 'Manual'
+            axis.Length = 40
+            Gui.ActiveDocument.getObject(axis.Name).ShapeColor = (0.0,1.0,1.0)
+            Gui.ActiveDocument.getObject(axis.Name).Transparency = 0
+            axis.recompute()
             parentPart.recompute()
 
 

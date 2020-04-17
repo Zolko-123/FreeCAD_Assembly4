@@ -31,7 +31,6 @@ class placeLink( QtGui.QDialog ):
         self.drawUI()
 
 
-
     def GetResources(self):
         return {"MenuText": "Edit Placement of a Part",
                 "ToolTip": "Move/Attach a Part in the assembly",
@@ -98,14 +97,12 @@ class placeLink( QtGui.QDialog ):
         # now self.parentList and self.parentTable are available
 
         # find all the linked parts in the assembly
-        # for obj in self.activeDoc.findObjects("App::Link"):
         for objName in self.parentAssembly.getSubObjects():
             # remove the trailing .
             obj = self.activeDoc.getObject(objName[0:-1])
-            if obj.TypeId=='App::Link':
-                # add it to our list if it's a link to an App::Part ...
-                if hasattr(obj.LinkedObject,'isDerivedFrom') and obj.LinkedObject.isDerivedFrom('App::Part'):
-                    # ... except if it's the selected link itself
+            if obj.TypeId=='App::Link' and hasattr(obj.LinkedObject,'isDerivedFrom'):
+                if obj.LinkedObject.isDerivedFrom('App::Part') or obj.LinkedObject.isDerivedFrom('PartDesign::Body'):
+                # ... except if it's the selected link itself
                     if obj != self.selectedLink:
                         self.parentTable.append( obj )
                         # add to the drop-down combo box with the assembly tree's parts
@@ -334,7 +331,7 @@ class placeLink( QtGui.QDialog ):
         allLinkedParts = []
         for obj in self.activeDoc.findObjects("App::Link"):
             # add it to our list if it's a link to an App::Part ...
-            if obj.LinkedObject.isDerivedFrom('App::Part'):
+            if obj.LinkedObject.isDerivedFrom('App::Part')or obj.LinkedObject.isDerivedFrom('PartDesign::Body'):
                 # ... except if it's the selected link itself, because
                 # we don't want to place the new link relative to itself !
                 if obj != self.selectedLink:
@@ -351,7 +348,7 @@ class placeLink( QtGui.QDialog ):
     def getPartLCS( self, part ):
         partLCS = [ ]
         # parse all objects in the part (they return strings)
-        for objName in part.getSubObjects():
+        for objName in part.getSubObjects(1):
             # get the proper objects
             # all object names end with a "." , this needs to be removed
             obj = part.getObject( objName[0:-1] )

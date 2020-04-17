@@ -50,7 +50,7 @@ class addVariable( QtGui.QDialog ):
     def GetResources(self):
         return {"MenuText": "Add Variable",
                 "ToolTip": "Add Variable",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_Variables.svg')
+                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_addVariable.svg')
                 }
 
 

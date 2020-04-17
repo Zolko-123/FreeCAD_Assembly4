@@ -81,7 +81,7 @@ class Assembly4Workbench(Workbench):
         #import newSketchCmd        # creates a new Sketch in 'Model'
         import newDatumCmd         # creates a new LCS in 'Model'
         import newPartCmd          # creates a new App::Part container called 'Model'
-        import newBodyCmd          # creates a new Body in 'Model
+        #import newBodyCmd          # creates a new Body in 'Model
         import insertLinkCmd       # inserts an App::Link to a 'Model' in another file
         import placeLinkCmd        # places a linked part by snapping LCS (in the Part and in the Assembly)
         import placeDatumCmd       # places an LCS relative to an external file (creates a local attached copy)
@@ -94,6 +94,19 @@ class Assembly4Workbench(Workbench):
         import gotoDocumentCmd     # opens the documentof the selected App::Link
         import HelpCmd             # shows a basic help window
         
+        # create the toolbars and menus, nearly empty, to decide about their position
+        self.appendToolbar("Assembly",["Asm4_newModel"])
+        # self.appendToolbar("Design",["Asm4_newPart"])
+        # self.appendMenu("&Design",["Asm4_newPart"])
+        self.appendMenu("&Assembly",["Asm4_newModel"])
+        self.appendMenu("&Help", ["Asm4_Help"])
+
+
+        """
+    +-----------------------------------------------+
+    |                    DropDowns                  |
+    +-----------------------------------------------+
+        """
         # defines the drop-down button for Fasteners:
         insertFastenerList = [  'Asm4_insertScrew', 
                                 'Asm4_insertNut', 
@@ -118,24 +131,89 @@ class Assembly4Workbench(Workbench):
                                 'Asm4_newHole' ]
         Gui.addCommand( 'Asm4_createDatum', dropDownCmdGroup( createDatumList, 'Create Datum Object'))
 
-        # list of all commands (use ?)
-        self.listCmd =        [ "Asm4_newModel",   
-                                "Asm4_newBody", 
-                                "Asm4_newPart", 
+
+        # defines the drop-down button for boolean operations
+        compBooleanList = [     "Part_Fuse", 
+                                "Part_Common",
+                                "Part_Cut", 
+                                "Part_XOR",
+                                "Part_Common", 
+                                "Part_Slice", 
+                                "Part_SliceApart", 
+                                "Part_BooleanFragments",
+                                "Part_Boolean" ]
+        Gui.addCommand( 'Asm4_compBoolean', dropDownCmdGroup( compBooleanList, 'Boolean Operations'))
+
+
+
+        """
+    +-----------------------------------------------+
+    |                    Design                     |
+    +-----------------------------------------------+
+        """
+        # commands to appear in the menu 'Design'
+        self.itemsDesignMenu = ["Part_Import",
+                                "Part_Primitives",
+                                "Part_SimpleCopy",
+                                "Part_TransformedCopy",
+                                "Separator",
+                                "Asm4_createDatum",
                                 "Asm4_newSketch", 
-                                "Asm4_newLCS", 
-                                "Asm4_newPlane", 
-                                "Asm4_newPoint", 
-                                "Asm4_insertLink", 
-                                "Asm4_placeLink", 
-                                "Asm4_importDatum", 
-                                "Asm4_placeDatum", 
-                                "Asm4_updateAssembly",
-                                "Asm4_newLinkArray"]
+                                "Part_EditAttachment", 
+                                "Separator",
+                                "Part_Extrude", 
+                                "Part_Revolve", 
+                                "Part_Loft", 
+                                "Part_Sweep", 
+                                "Part_RuledSurface", 
+                                "Asm4_compBoolean",
+                                "Separator",
+                                "Part_Fillet", 
+                                "Part_Chamfer", 
+                                "Part_Mirror", 
+                                "Part_Offset", 
+                                "Part_Offset2D", 
+                                "Part_Section", 
+                                "Part_CrossSections", 
+                                "Part_Thickness", 
+                                "Part_CompJoinFeatures", 
+                                "Separator",
+                                "Part_ShapeInfo", 
+                                "Part_Defeaturing", 
+                                "Part_CheckGeometry", 
+                                "Part_RefineShape" ]
+        # self.appendMenu("&Design",self.itemsDesignMenu)
+        
+        # commands to appear in the Design toolbar
+        self.itemsDesignToolbar = [ "Asm4_createDatum",
+                                "Asm4_newSketch", 
+                                "Part_EditAttachment",
+                                "Separator",
+                                "Part_Extrude", 
+                                "Part_Revolve", 
+                                "Part_Loft", 
+                                "Part_Sweep", 
+                                "Part_RuledSurface", 
+                                "Part_Fillet", 
+                                "Part_Chamfer", 
+                                "Separator",
+                                "Part_Section",
+                                "Part_CrossSections", 
+                                "Part_Mirror", 
+                                "Part_CompOffset", 
+                                "Asm4_compBoolean"]
+        # self.appendToolbar("Design",self.itemsDesignToolbar) # leave settings off toolbar
+
+
+        """
+    +-----------------------------------------------+
+    |                      Assembly                 |
+    +-----------------------------------------------+
+        """
         # commands to appear in the Assembly4 menu 'Assembly'
-        self.itemsMenu =      [ "Asm4_newModel",   
+        self.itemsAssemblyMenu = [ "Asm4_newPart", 
                                 "Asm4_newBody", 
-                                "Asm4_newPart", 
+                                "Part_Import",
                                 "Asm4_insertLink", 
                                 "Asm4_placeLink", 
                                 "Asm4_releaseAttachment", 
@@ -155,25 +233,35 @@ class Assembly4Workbench(Workbench):
                                 "Asm4_addVariable", 
                                 "Asm4_Animate", 
                                 "Asm4_updateAssembly"]
-        self.appendMenu("&Assembly",self.itemsMenu)
-        # append the Asm4_Help command to the standard FreeCAD Help menu
-        self.appendMenu("&Help", ["Asm4_Help"])
+        self.appendMenu("&Assembly",self.itemsAssemblyMenu)
         # commands to appear in the Assembly4 toolbar
-        self.itemsToolbar =   [ "Asm4_newModel",   
+        self.itemsAssemblyToolbar = [ "Asm4_newPart", 
                                 "Asm4_newBody", 
-                                "Asm4_newPart", 
                                 "Asm4_insertLink", 
                                 "Asm4_placeLink", 
                                 fastenersCmd, 
+                                "Separator",
                                 "Asm4_newSketch", 
-                                "Asm4_createDatum", 
+                                'Asm4_newLCS', 
+                                'Asm4_newPlane', 
+                                'Asm4_newAxis', 
+                                'Asm4_newPoint', 
+                                "Asm4_newHole", 
                                 "Asm4_importDatum", 
                                 "Asm4_placeDatum", 
+                                "Separator",
                                 "Asm4_newLinkArray",
                                 "Asm4_addVariable", 
                                 "Asm4_Animate", 
                                 "Asm4_updateAssembly"]
-        self.appendToolbar("Assembly 4",self.itemsToolbar) # leave settings off toolbar
+        self.appendToolbar("Assembly",self.itemsAssemblyToolbar) # leave settings off toolbar
+
+
+        """
+    +-----------------------------------------------+
+    |                Contextual Menus               |
+    +-----------------------------------------------+
+        """
         # commands to appear in the 'Assembly' sub-menu in the contextual menu (right-click)
         self.itemsContextMenu =["Asm4_insertLink", 
                                 "Asm4_placeLink", 
@@ -192,8 +280,6 @@ class Assembly4Workbench(Workbench):
                                 "Asm4_insertNut", 
                                 "Asm4_insertWasher"]
         
-        #self.appendMenu(["&Edit","DynamicData"],self.list) # appends a submenu to an existing menu
-
 
     """
     +-----------------------------------------------+
@@ -261,7 +347,6 @@ class Assembly4Workbench(Workbench):
 """
 wb = Assembly4Workbench()
 Gui.addWorkbench(wb)
-
 
 
 
