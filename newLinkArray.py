@@ -84,6 +84,15 @@ class newLinkArray():
 # add the command to the workbench
 Gui.addCommand('Asm4_newLinkArray', newLinkArray())
 
+import DraftGui
+import WorkingPlane
+import draftguitools.gui_snapper as gui_snapper
+
+if not hasattr(Gui, "Snapper"):
+    Gui.Snapper = gui_snapper.Snapper()
+
+if not hasattr(App, "DraftWorkingPlane"):
+    App.DraftWorkingPlane = WorkingPlane.plane()
 
 import draftguitools.gui_circulararray
 import draftguitools.gui_polararray
