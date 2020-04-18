@@ -232,6 +232,7 @@ class Assembly4Workbench(Workbench):
                                 "Asm4_newLinkArray",
                                 "Asm4_OrthoArray",
                                 "Asm4_PolarArray",
+                                "Asm4_CircularArray",
                                 "Asm4_addVariable", 
                                 "Asm4_Animate", 
                                 "Asm4_updateAssembly"]
@@ -255,6 +256,7 @@ class Assembly4Workbench(Workbench):
                                 "Asm4_newLinkArray",
                                 "Asm4_OrthoArray",
                                 "Asm4_PolarArray",
+                                "Asm4_CircularArray",
                                 "Asm4_addVariable", 
                                 "Asm4_Animate", 
                                 "Asm4_updateAssembly"]
