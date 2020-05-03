@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.9.0, 2020-04-17
+Current version 0.9.1, 2020-05-03
 
 
 
@@ -52,6 +52,9 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 
 ## Release notes
+
+* 2020.05.03 (**0.9.1**) :  
+Bugfixes  
 
 * 2020.04.15 (**0.9.0**) :  
 PartDesign::Body can be directly imported (linked), no need to wrap them in App::Part container  
