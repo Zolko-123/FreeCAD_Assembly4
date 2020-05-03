@@ -24,6 +24,9 @@ class newDatum:
     "My tool object"
     def __init__(self, datumName):
         self.datumName = datumName
+        # recognised types
+        self.datumTypes = ['PartDesign::Point','PartDesign::Line','PartDesign::Plane','PartDesign::CoordinateSystem']
+        self.containers = [ 'App::Part', 'PartDesign::Body' ]
         if self.datumName   == 'Point':
             self.datumType   = 'PartDesign::Point'
             self.menutext    = "New Point"
@@ -59,7 +62,6 @@ class newDatum:
             self.icon        = os.path.join( Asm4.iconPath , 'Asm4_Sketch.svg')
             self.datumColor  = []
             self.datumAlpha  = []
-        self.datumTypes = ['PartDesign::Point','PartDesign::Line','PartDesign::Plane','PartDesign::CoordinateSystem']
 
 
     def GetResources(self):
@@ -98,15 +100,17 @@ class newDatum:
     +-----------------------------------------------+
     """
     def Activated(self):
-        # check that we have somewhere to put our stuff (an App::Part or PartDesign::Body or Asm4 Model)
+        # check that we have somewhere to put our stuff
         selectedObj = self.checkSelection()
-        if selectedObj.TypeId=='App::Part' or selectedObj.TypeId=='PartDesign::Body':
-            partChecked = selectedObj
-        # if a datum object is selected we try to find the parent App::Part or PartDesign::Body
+        
+        # check whether we have selected a container
+        if selectedObj.TypeId in self.containers:
+            parentContainer = selectedObj
+        # if a datum object is selected we try to find the parent container
         elif selectedObj.TypeId in self.datumTypes:
             parent = selectedObj.getParentGeoFeatureGroup()
-            if parent.TypeId=='App::Part' or parent.TypeId=='PartDesign::Body':
-                partChecked = parent
+            if parent.TypeId in self.containers:
+                parentContainer = parent
         # something went wrong
         else:
             Asm4.warningBox("I can't create a "+self.datumType+" with the current selections")
@@ -116,13 +120,13 @@ class newDatum:
         while App.ActiveDocument.getObject( self.datumName+'_'+str(instanceNum) ):
             instanceNum += 1
         datumName = self.datumName+'_'+str(instanceNum)
-        if partChecked:
+        if parentContainer:
             # input dialog to ask the user the name of the Sketch:
             text,ok = QtGui.QInputDialog.getText(None,'Create new '+self.datumName,
-                    'Enter '+self.datumName+' name :                              ', text = datumName)
+                    'Enter '+self.datumName+' name :'+' '*40, text = datumName)
             if ok and text:
                 # App.activeDocument().getObject('Model').newObject( 'Sketcher::SketchObject', text )
-                createdDatum = partChecked.newObject( self.datumType, text )
+                createdDatum = parentContainer.newObject( self.datumType, text )
                 # automatic resizing of datum Plane sucks, so we set it to manual
                 if self.datumType=='PartDesign::Plane':
                     createdDatum.ResizeMode = 'Manual'
@@ -135,7 +139,7 @@ class newDatum:
                     Gui.ActiveDocument.getObject(createdDatum.Name).Transparency = self.datumAlpha
                 # highlight the created datum object
                 Gui.Selection.clearSelection()
-                Gui.Selection.addSelection( App.ActiveDocument.Name, partChecked.Name, createdDatum.Name+'.' )
+                Gui.Selection.addSelection( App.ActiveDocument.Name, parentContainer.Name, createdDatum.Name+'.' )
 
 
 

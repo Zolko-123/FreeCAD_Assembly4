@@ -90,7 +90,8 @@ class Assembly4Workbench(Workbench):
         import VariablesLib        # creates an LCS in assembly and attaches it to an LCS relative to an external file
         import AnimationLib        # creates an LCS in assembly and attaches it to an LCS relative to an external file
         import updateAssemblyCmd   # updates all parts and constraints in the assembly
-        import newLinkArray        # creates a new array of App::Link
+        #import newLinkArray        # creates a new array of App::Link
+        #import makeLinkArray        # creates a new array of App::Link
         import gotoDocumentCmd     # opens the documentof the selected App::Link
         import HelpCmd             # shows a basic help window
         
@@ -229,7 +230,7 @@ class Assembly4Workbench(Workbench):
                                 "Asm4_newHole", 
                                 "Asm4_placeDatum", 
                                 "Asm4_importDatum", 
-                                "Asm4_newLinkArray",
+                                #"Asm4_makeLinkArray",
                                 "Asm4_addVariable", 
                                 "Asm4_Animate", 
                                 "Asm4_updateAssembly"]
@@ -250,7 +251,7 @@ class Assembly4Workbench(Workbench):
                                 "Asm4_importDatum", 
                                 "Asm4_placeDatum", 
                                 "Separator",
-                                "Asm4_newLinkArray",
+                                #"Asm4_makeLinkArray",
                                 "Asm4_addVariable", 
                                 "Asm4_Animate", 
                                 "Asm4_updateAssembly"]
@@ -278,7 +279,9 @@ class Assembly4Workbench(Workbench):
                                 "Asm4_newHole", 
                                 "Asm4_insertScrew", 
                                 "Asm4_insertNut", 
-                                "Asm4_insertWasher"]
+                                "Asm4_insertWasher",
+                                #"Asm4_makeLinkArray"
+                                ]
         
 
     """
