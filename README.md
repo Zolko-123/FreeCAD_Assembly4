@@ -1,7 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.9.1, 2020-05-03
-
+Current version 0.9.2, 2020-05-08
 
 
 
@@ -52,6 +51,9 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 
 ## Release notes
+
+* 2020.05.08 (**0.9.2**) :  
+The UI windows are now in the Task Panel.  
 
 * 2020.05.03 (**0.9.1**) :  
 Bugfixes  

@@ -67,6 +67,24 @@ def checkWorkbench( workbench ):
 
 """
     +-----------------------------------------------+
+    |           get the next instance's name         |
+    +-----------------------------------------------+
+"""
+def nextInstance( name ):
+    # if there is no such name, return the original
+    if not App.ActiveDocument.getObject(name):
+        return name
+    # there is already one, we increment
+    else:
+        instanceNum = 2
+        while App.ActiveDocument.getObject( name+'_'+str(instanceNum) ):
+            instanceNum += 1
+        return name+'_'+str(instanceNum)
+
+
+
+"""
+    +-----------------------------------------------+
     |          return the ExpressionEngine          |
     |           of the Placement property           |
     +-----------------------------------------------+
@@ -272,30 +290,37 @@ def makeExpressionDatum( attLink, attPart, attLCS ):
     +-----------------------------------------------+
 """
 def splitExpressionDatum( expr ):
-    # Look for a # to see whether the linked part is in the same document
-    # expr = Link.Placement * LinkedPart#LCS.Placement * AttachmentOffset
-    # expr = Link.Placement * LCS.Placement * AttachmentOffset
-    if '#' in expr:
-        # the linked part is in another document
+    retval = ( expr, 'None', 'None' )
+    # expr is empty
+    if not expr:
+        return retval
+    restFinal = ''
+    attLink = ''
+    if expr:
+        # Look for a # to see whether the linked part is in the same document
         # expr = Link.Placement * LinkedPart#LCS.Placement * AttachmentOffset
-        ( attLink, separator, rest1 ) = expr.partition('.Placement * ')
-        ( attPart, separator, rest2 ) = rest1.partition('#')
-        ( attLCS,  separator, rest3 ) = rest2.partition('.Placement * ')
-        restFinal = rest3[0:16]
-    else:
-        # the linked part is in the same document
         # expr = Link.Placement * LCS.Placement * AttachmentOffset
-        ( attLink, separator, rest1 ) =  expr.partition('.Placement * ')
-        ( attLCS,  separator, rest2 ) = rest1.partition('.Placement * ')
-        restFinal = rest2[0:16]
-        attPart = 'unimportant'
-    if restFinal=='AttachmentOffset':
-        # wow, everything went according to plan
-        retval = ( attLink, attPart, attLCS )
-        #self.expression.setText( attPart +'***'+ attLCS )
-    else:
-        # rats ! But still, if the decode is unsuccessful, put some text
-        retval = ( restFinal, 'None', 'None' )
+        if '#' in expr:
+            # the linked part is in another document
+            # expr = Link.Placement * LinkedPart#LCS.Placement * AttachmentOffset
+            ( attLink, separator, rest1 ) = expr.partition('.Placement * ')
+            ( attPart, separator, rest2 ) = rest1.partition('#')
+            ( attLCS,  separator, rest3 ) = rest2.partition('.Placement * ')
+            restFinal = rest3[0:16]
+        else:
+            # the linked part is in the same document
+            # expr = Link.Placement * LCS.Placement * AttachmentOffset
+            ( attLink, separator, rest1 ) =  expr.partition('.Placement * ')
+            ( attLCS,  separator, rest2 ) = rest1.partition('.Placement * ')
+            restFinal = rest2[0:16]
+            attPart = 'unimportant'
+        if restFinal=='AttachmentOffset':
+            # wow, everything went according to plan
+            retval = ( attLink, attPart, attLCS )
+            #self.expression.setText( attPart +'***'+ attLCS )
+        else:
+            # rats ! But still, if the decode is unsuccessful, put some text
+            retval = ( restFinal, 'None', 'None' )
     return retval
 
 

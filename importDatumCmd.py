@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # coding: utf-8
 # 
-# placeDatumCmd.py 
+# importDatumCmd.py 
 
 
 import os
@@ -9,7 +9,7 @@ import os
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
-import Part
+from FreeCAD import Console as FCC
 
 import libAsm4 as Asm4
 
@@ -18,106 +18,127 @@ import libAsm4 as Asm4
 
 """
     +-----------------------------------------------+
-    |                  main class                   |
+    |               Helper functions                |
     +-----------------------------------------------+
 """
-class importDatum( QtGui.QDialog ):
+def getSelection():
+    # check that there is an App::Part called 'Model'
+    if not App.ActiveDocument.getObject('Model'):
+        return None
+    # if something is selected ...
+    if len(Gui.Selection.getSelection())==1:
+        selectedObj = Gui.Selection.getSelection()[0]
+        # if it's a datum object we return it
+        if selectedObj.TypeId in datumTypes:
+            return selectedObj            
+    return None
 
-    def __init__(self):
-        super(importDatum,self).__init__()
-        self.drawUI()
-        self.datumTypes = ['PartDesign::CoordinateSystem',
+
+# Types of objects to import
+datumTypes = ['PartDesign::CoordinateSystem',
                            'PartDesign::Plane',
                            'PartDesign::Line',
                            'PartDesign::Point']
 
 
+# icon to show in the Menu, toolbar and widget window
+iconFile = os.path.join( Asm4.iconPath , 'Import_Datum.svg')
+
+
+    
+"""
+    +-----------------------------------------------+
+    |                  The command                  |
+    +-----------------------------------------------+
+"""
+class importDatumCmd():
+    def __init__(self):
+        super(importDatumCmd,self).__init__()
+
     def GetResources(self):
         return {"MenuText": "Import Datum object",
                 "ToolTip": "Imports the selected Datum object from a linked Part into the assembly.\nOnly datum objects at the root of the linked part can be imported",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Import_Datum.svg')
+                "Pixmap" : iconFile
                 }
-    
 
     def IsActive(self):
-        if App.ActiveDocument:
-            if self.getSelection():
-                return True
+        if App.ActiveDocument and getSelection():
+            return True
         return False
 
-
-    def getSelection(self):
-        # check that there is an App::Part called 'Model'
-        if not App.ActiveDocument.getObject('Model'):
-            return None
-        # if something is selected ...
-        if len(Gui.Selection.getSelection())==1:
-            selectedObj = Gui.Selection.getSelection()[0]
-            # if it's a datum object we return it
-            if selectedObj.TypeId in self.datumTypes:
-                return selectedObj
-        return None
-    
-    
-
-    """  
-    +-----------------------------------------------+
-    |                 the real stuff                |
-    +-----------------------------------------------+
-    """
     def Activated(self):
-        
+        # Before calling the UI, we make some checks:
+
+        # We get all the App::Link parts in the assembly 
+        parentAssembly = App.ActiveDocument.Model
+        childrenTable = []
+        for objStr in parentAssembly.getSubObjects():
+            # the string ends with a . that must be removed
+            obj = App.ActiveDocument.getObject( objStr[0:-1] )
+            if obj.TypeId == 'App::Link' and hasattr(obj.LinkedObject,'isDerivedFrom'):
+                if  obj.LinkedObject.isDerivedFrom('App::Part') or obj.LinkedObject.isDerivedFrom('PartDesign::Body'):
+                    # add it to our tree table if it's a link to an App::Part ...
+                    childrenTable.append( obj )
+
+        targetDatum = getSelection()
+        # this returns the selection hierarchy in the form 'linkName.datumName.'
+        selectionTree = Gui.Selection.getSelectionEx("", 0)[0].SubElementNames[0]
+        (targetLinkName, sel, dot) = selectionTree.partition('.'+targetDatum.Name)
+        targetLink = App.ActiveDocument.getObject( targetLinkName )
+        # If the selected datum is at the root of the link. Else we don't consider it
+        if dot =='.' and targetLink in childrenTable:
+            Gui.Control.showDialog( importDatumUI() )
+        else:
+            # something fishy, abort
+            FCC.PrintWarning('The selected datum object cannot be imported into this assembly\n')
+            return
+
+
+
+"""
+    +-----------------------------------------------+
+    |    The UI and functions in the Task panel     |
+    +-----------------------------------------------+
+"""
+class importDatumUI():
+    def __init__(self):
+        self.base = QtGui.QWidget()
+        self.form = self.base        
+        self.form.setWindowIcon(QtGui.QIcon( iconFile ))
+        self.form.setWindowTitle('Import a Datum object into the Assembly')
+
         # get the current active document to avoid errors if user changes tab
         self.activeDoc = App.ActiveDocument
         self.parentAssembly = self.activeDoc.Model
 
-        # initialize 
-        self.initUI()
-        self.datumTable = [ ]
-        self.selectedChild = None
-        self.childrenTable = []
- 
-        # We get all the App::Link parts in the assembly 
-        # find all the child linked parts in the assembly
-        for objStr in self.parentAssembly.getSubObjects():
-            # the string ends with a . that must be removed
-            obj = self.activeDoc.getObject( objStr[0:-1] )
-            if obj.TypeId == 'App::Link' and hasattr(obj.LinkedObject,'isDerivedFrom'):
-                if  obj.LinkedObject.isDerivedFrom('App::Part') or obj.LinkedObject.isDerivedFrom('PartDesign::Body'):
-                    # add it to our tree table if it's a link to an App::Part ...
-                    self.childrenTable.append( obj )
-
-        # check whether a Datum is already selected:
-        self.targetDatum = self.getSelection()
-        # this returns the selection hierarchy in the form 'linkName.datumName.'
+        # this has been checked before calling
+        self.targetDatum = getSelection()
         selectionTree = Gui.Selection.getSelectionEx("", 0)[0].SubElementNames[0]
         (targetLinkName, sel, dot) = selectionTree.partition('.'+self.targetDatum.Name)
         self.targetLink = self.activeDoc.getObject( targetLinkName )
-        # If the selected datum is at the root of the link. Else we don't consider it
-        if dot =='.' and self.targetLink in self.childrenTable:
-            self.datumType.setText( self.targetDatum.TypeId )
-            docName = self.targetLink.LinkedObject.Document.Name+'#'
-            #self.datumOrig.setText( self.labelName(self.targetDatum) )
-            #self.linkName.setText(  self.labelName(self.targetLink) )
-            #self.partName.setText(  docName + self.labelName(self.targetLink.LinkedObject))
-            self.datumOrig.setText( Asm4.nameLabel(self.targetDatum) )
-            self.linkName.setText(  Asm4.nameLabel(self.targetLink) )
-            self.partName.setText(  docName + Asm4.nameLabel(self.targetLink.LinkedObject))
-            self.datumName.setText( self.targetDatum.Label )
-        else:
-            # something fishy, abort
-            msgBox = QtGui.QMessageBox()
-            msgBox.setWindowTitle('FreeCAD Warning')
-            msgBox.setIcon(QtGui.QMessageBox.Warning)
-            msgBox.setText("The selected datum object cannot be imported into this assembly")
-            msgBox.exec_()
-            # Cancel = 4194304
-            # Ok = 1024
-            return
 
-        # Now we can show the UI
-        self.show()
+        # make and initialize UI
+        self.drawUI()
+        self.initUI()
 
+
+    # this is the end ...
+    def finish(self):
+        Gui.Control.closeDialog()
+
+    # standard FreeCAD Task panel buttons
+    def getStandardButtons(self):
+        return int(QtGui.QDialogButtonBox.Cancel
+                   | QtGui.QDialogButtonBox.Ok)
+
+    # OK
+    def accept(self):
+        self.onApply()
+        self.finish()
+
+    # Cancel
+    def reject(self):
+        self.finish()
 
 
 
@@ -166,96 +187,52 @@ class importDatum( QtGui.QDialog ):
         return
 
 
-    """
-    +-----------------------------------------------+
-    |                     Cancel                    |
-    +-----------------------------------------------+
-    """
-    def onCancel(self):
-        self.close()
-
-
-    """
-    +-----------------------------------------------+
-    |                      OK                       |
-    |               accept and close                |
-    +-----------------------------------------------+
-    """
-    def onOK(self):
-        self.onApply()
-        self.close()
-
-
-    """
-    +-----------------------------------------------+
-    |     defines the UI, only static elements      |
-    +-----------------------------------------------+
-    """
     def initUI(self):
-        self.datumOrig.clear()
-        self.datumType.clear()
-        self.linkName.clear()
-        self.partName.clear()
-        self.datumName.clear()
+        docName = self.targetLink.LinkedObject.Document.Name+'#'
+        self.datumOrig.setText( Asm4.nameLabel(self.targetDatum) )
+        self.datumType.setText( self.targetDatum.TypeId )
+        self.linkName.setText(  Asm4.nameLabel(self.targetLink) )
+        self.partName.setText(  docName + Asm4.nameLabel(self.targetLink.LinkedObject))
+        self.datumName.setText( self.targetDatum.Label )
+
+
     
-    
-    
+    # defines the UI, only static elements
     def drawUI(self):
-        # Our main window will be a QDialog
-        self.setWindowTitle('Import a Datum object')
-        self.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
-        self.setWindowIcon( QtGui.QIcon( os.path.join( Asm4.iconPath , 'FreeCad.svg' ) ) )
-        self.setMinimumWidth(470)
-        self.setModal(False)
-        self.mainLayout = QtGui.QVBoxLayout(self)
+        # Our main layoyt will be vertical
+        self.mainLayout = QtGui.QVBoxLayout(self.form)
 
         # Define the fields for the form ( label + widget )
-        self.formLayout = QtGui.QFormLayout(self)
+        self.formLayout = QtGui.QFormLayout()
         # Datum Type
-        self.datumType = QtGui.QLineEdit(self)
+        self.datumType = QtGui.QLineEdit()
         self.datumType.setReadOnly(True)
         self.formLayout.addRow(QtGui.QLabel('Datum Type'),self.datumType)
         # Datum Object
-        self.datumOrig = QtGui.QLineEdit(self)
+        self.datumOrig = QtGui.QLineEdit()
         self.datumOrig.setReadOnly(True)
         self.formLayout.addRow(QtGui.QLabel('Orig. Datum'),self.datumOrig)
         # Link instance
-        self.linkName = QtGui.QLineEdit(self)
+        self.linkName = QtGui.QLineEdit()
         self.linkName.setReadOnly(True)
         self.formLayout.addRow(QtGui.QLabel('Orig. Instance'),self.linkName)
         # Orig Part
-        self.partName = QtGui.QLineEdit(self)
+        self.partName = QtGui.QLineEdit()
         self.partName.setReadOnly(True)
         self.formLayout.addRow(QtGui.QLabel('Orig. Doc#Part'),self.partName)
         # apply the layout
         self.mainLayout.addLayout(self.formLayout)
         
         # empty line
-        self.mainLayout.addWidget(QtGui.QLabel(' '))
+        self.mainLayout.addWidget(QtGui.QLabel())
         # the name as seen in the tree of the selected link
-        self.datumName = QtGui.QLineEdit(self)
+        self.datumName = QtGui.QLineEdit()
         self.mainLayout.addWidget(QtGui.QLabel("Enter the imported Datum's name :"))
         self.mainLayout.addWidget(self.datumName)
 
-        # Cancel button
-        self.CancelButton = QtGui.QPushButton('Cancel', self)
-        # Import button
-        self.ImportButton = QtGui.QPushButton('Import', self)
-        self.ImportButton.setDefault(True)
-        # the button row definition
-        self.buttonLayout = QtGui.QHBoxLayout(self)
-        self.buttonLayout.addWidget(self.CancelButton)
-        self.buttonLayout.addStretch()
-        self.buttonLayout.addWidget(self.ImportButton)
-        self.mainLayout.addStretch()
-        self.mainLayout.addLayout(self.buttonLayout)
-
         # set main window widgets
-        self.setLayout(self.mainLayout)
+        self.form.setLayout(self.mainLayout)
 
-        # Actions
-        self.CancelButton.clicked.connect(self.onCancel)
-        self.ImportButton.clicked.connect(self.onOK)
 
 
 
@@ -264,4 +241,4 @@ class importDatum( QtGui.QDialog ):
     |       add the command to the workbench        |
     +-----------------------------------------------+
 """
-Gui.addCommand( 'Asm4_importDatum', importDatum() )
+Gui.addCommand( 'Asm4_importDatum', importDatumCmd() )
