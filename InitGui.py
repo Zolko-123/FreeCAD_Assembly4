@@ -94,6 +94,7 @@ class Assembly4Workbench(Workbench):
         #import makeLinkArray        # creates a new array of App::Link
         import gotoDocumentCmd     # opens the documentof the selected App::Link
         import HelpCmd             # shows a basic help window
+        import showCommand         # shows a 
         
         # create the toolbars and menus, nearly empty, to decide about their position
         self.appendToolbar("Assembly",["Asm4_newModel"])
@@ -111,18 +112,17 @@ class Assembly4Workbench(Workbench):
         # defines the drop-down button for Fasteners:
         insertFastenerList = [  'Asm4_insertScrew', 
                                 'Asm4_insertNut', 
-                                'Asm4_insertWasher', 
-                                'Asm4_placeFastener' ]
+                                'Asm4_insertWasher' ]
         Gui.addCommand( 'Asm4_Fasteners', dropDownCmdGroup( insertFastenerList, 'Insert Fastener'))
         # check whether the Fasteners workbench is installed
         if self.checkWorkbench('FastenersWorkbench'):
             # a library to handle fasteners from the FastenersWorkbench
             import FastenersLib
-            fastenersCmd = 'Asm4_Fasteners'
+            FastenersDropDown = 'Asm4_Fasteners'
         else:
             # a dummy library if the FastenersWorkbench is not installed
             import FastenersDummy
-            fastenersCmd = 'Asm4_insertScrew'
+            FastenersDropDown = 'Asm4_insertScrew'
 
         # defines the drop-down button for Datum objects
         createDatumList = [     'Asm4_newLCS', 
@@ -239,8 +239,7 @@ class Assembly4Workbench(Workbench):
         self.itemsAssemblyToolbar = [ "Asm4_newPart", 
                                 "Asm4_newBody", 
                                 "Asm4_insertLink", 
-                                "Asm4_placeLink", 
-                                fastenersCmd, 
+                                FastenersDropDown, 
                                 "Separator",
                                 "Asm4_newSketch", 
                                 'Asm4_newLCS', 
@@ -249,11 +248,14 @@ class Assembly4Workbench(Workbench):
                                 'Asm4_newPoint', 
                                 "Asm4_newHole", 
                                 "Asm4_importDatum", 
+                                "Separator",
+                                "Asm4_placeLink", 
+                                'Asm4_placeFastener',
                                 "Asm4_placeDatum", 
                                 "Separator",
                                 #"Asm4_makeLinkArray",
                                 "Asm4_addVariable", 
-                                "Asm4_Animate", 
+                                "Asm4_Animate",
                                 "Asm4_updateAssembly"]
         self.appendToolbar("Assembly",self.itemsAssemblyToolbar) # leave settings off toolbar
 

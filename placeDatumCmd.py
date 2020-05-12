@@ -8,66 +8,92 @@ import os
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
+from FreeCAD import Console as FCC
 
 import libAsm4 as Asm4
 
 
 
+
 """
     +-----------------------------------------------+
-    |                  main class                   |
+    |               Helper functions                |
     +-----------------------------------------------+
 """
-class placeDatum( QtGui.QDialog ):
-    "My tool object"
+def getSelection():    
+    selectedObj = None
+    # check that there is an App::Part called 'Model'
+    if App.ActiveDocument.getObject('Model') and App.ActiveDocument.getObject('Model').TypeId=='App::Part' :
+        # check that something is selected
+        if len(Gui.Selection.getSelection())==1:
+            selection = Gui.Selection.getSelection()[0]
+            if selection.TypeId in datumTypes:
+                selectedObj = selection
+    # now we should be safe
+    return selectedObj
 
 
+# Types of objects to import
+datumTypes = ['PartDesign::CoordinateSystem',
+                           'PartDesign::Plane',
+                           'PartDesign::Line',
+                           'PartDesign::Point']
+
+
+# icon to show in the Menu, toolbar and widget window
+iconFile = os.path.join( Asm4.iconPath , 'Place_Datum.svg')
+
+
+
+"""
+    +-----------------------------------------------+
+    |                  The command                  |
+    +-----------------------------------------------+
+"""
+class placeDatumCmd():
     def __init__(self):
-        super(placeDatum,self).__init__()
-        self.drawUI()
-
+        super(placeDatumCmd,self).__init__()
 
     def GetResources(self):
-        return {"MenuText": "Edit Attachment of a Datum object",
+        return {"MenuText": "Edit Placement of a Datum object",
                 "ToolTip": "Attach a Datum object in the assembly to a Datum in a linked Part",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Place_Datum.svg')
+                "Pixmap" : iconFile
                 }
 
-
     def IsActive(self):
-        # is there an active document ?
-        if App.ActiveDocument:
-            # is something selected ?
-            selObj = self.checkSelectionDatum()
-            if selObj != None:
-                return True
-        return False 
+        if App.ActiveDocument and getSelection():
+            return True
+        return False
 
-
-    def checkSelectionDatum(self):
-        selectedObj = None
-        # check that there is an App::Part called 'Model'
-        # a standard App::Part would also do, but then more error checks are necessary
-        if App.ActiveDocument.getObject('Model') and App.ActiveDocument.getObject('Model').TypeId=='App::Part' :
-        # check that something is selected
-            if Gui.Selection.getSelection():
-            # set the (first) selected object as global variable
-                selection = Gui.Selection.getSelection()[0]
-                selectedType = selection.TypeId
-                # check that the selected object is a Datum CS or Point type
-                if selectedType=='PartDesign::CoordinateSystem' or selectedType=='PartDesign::Plane' or selectedType=='PartDesign::Line' or selectedType=='PartDesign::Point' :
-                    selectedObj = selection
-        # now we should be safe
-        return selectedObj
-    
-
-
-    """
-    +-----------------------------------------------+
-    |                 the real stuff                |
-    +-----------------------------------------------+
-    """
     def Activated(self):
+        selectedDatum = getSelection()
+        # check if the datum object is already mapped to something
+        if selectedDatum.MapMode != 'Deactivated':
+            message = 'This datum object \"'+selectedDatum.Label+'\" is mapped to some geometry. Attaching-it with Assembly4 will loose this mapping.'
+            if Asm4.confirmBox(message):
+                # unset MappingMode
+                selectedDatum.Support = None
+                selectedDatum.MapMode = 'Deactivated'
+                Gui.Control.showDialog( placeDatumUI() )
+            else:
+                # don't do anything and ...
+                return
+        else:
+            Gui.Control.showDialog( placeDatumUI() )
+
+
+
+"""
+    +-----------------------------------------------+
+    |    The UI and functions in the Task panel     |
+    +-----------------------------------------------+
+"""
+class placeDatumUI():
+    def __init__(self):
+        self.base = QtGui.QWidget()
+        self.form = self.base        
+        self.form.setWindowIcon(QtGui.QIcon( iconFile ))
+        self.form.setWindowTitle('Place a Datum object in the assembly')
 
         # get the current active document to avoid errors if user changes tab
         self.activeDoc = App.activeDocument()
@@ -75,24 +101,10 @@ class placeDatum( QtGui.QDialog ):
         self.parentAssembly = self.activeDoc.Model
 
         # check that we have selected a PartDesign::CoordinateSystem
-        self.selectedDatum = []
-        selection = self.checkSelectionDatum()
-        if not selection:
-            self.close()
-        else:
-            self.selectedDatum = selection
-
-        # check if the datum object is already mapped to something
-        if self.selectedDatum.MapMode != 'Deactivated':
-            message = 'This datum object \"'+self.selectedDatum.Label+'\" is mapped to some geometry. Attaching-it with Assembly4 will loose this mapping.'
-            if Asm4.confirmBox(message):
-                # unset MappingMode
-                self.selectedDatum.MapMode = 'Deactivated'
-            else:
-                # don't do anything and ...
-                return
-
+        self.selectedDatum = getSelection()
+  
         # Now we can draw the UI
+        self.drawUI()
         self.initUI()
         # now self.parentList and self.parentTable are available
 
@@ -102,16 +114,19 @@ class placeDatum( QtGui.QDialog ):
             obj = self.activeDoc.getObject(objName[0:-1])
             if obj.TypeId=='App::Link':
                 # add it to our list if it's a link to an App::Part ...
-                if hasattr(obj.LinkedObject,'isDerivedFrom') and obj.LinkedObject.isDerivedFrom('App::Part'):
-                    self.parentTable.append( obj )
-                    # add to the drop-down combo box with the assembly tree's parts
-                    objIcon = obj.LinkedObject.ViewObject.Icon
-                    objText = Asm4.nameLabel(obj)
-                    self.parentList.addItem( objIcon, objText, obj)
+                if hasattr(obj.LinkedObject,'isDerivedFrom'):
+                    linkedObj = obj.LinkedObject
+                    if linkedObj.isDerivedFrom('App::Part') or linkedObj.isDerivedFrom('PartDesign::Body'):
+                        # add to the object table holding the objects ...
+                        self.parentTable.append( obj )
+                        # ... and add to the drop-down combo box with the assembly tree's parts
+                        objIcon = obj.LinkedObject.ViewObject.Icon
+                        objText = Asm4.nameLabel(obj)
+                        self.parentList.addItem( objIcon, objText, obj)
 
+        self.old_EE = ' '
         # get and store the Placement's current ExpressionEngine:
         self.old_EE = Asm4.placementEE(self.selectedDatum.ExpressionEngine)
-        #self.expression.setText(self.old_EE)
 
         # decode the old ExpressionEngine
         # if the decode is unsuccessful, old_Expression is set to False
@@ -120,11 +135,8 @@ class placeDatum( QtGui.QDialog ):
         old_ParentPart = ''
         old_attLCS = ''
         ( old_Parent, old_ParentPart, old_attLCS ) = Asm4.splitExpressionDatum( self.old_EE )
-        self.expression.setText( self.old_EE + ' => old_Parent = '+ old_Parent )
-
 
         # find the oldPart in the current part list...
-        """
         oldPart = self.parentList.findText( old_Parent )
         # if not found
         if oldPart == -1:
@@ -132,7 +144,7 @@ class placeDatum( QtGui.QDialog ):
             self.parentList.setCurrentIndex( 0 )
         else:
             self.parentList.setCurrentIndex( oldPart )
-        """
+
         parent_found = False
         parent_index = 1
         for item in self.parentTable[1:]:
@@ -155,6 +167,53 @@ class placeDatum( QtGui.QDialog ):
         if lcs_found:
             # ... and select it
             self.attLCSlist.setCurrentItem( lcs_found[0] )
+
+
+    # this is the end ...
+    def finish(self):
+        Gui.Control.closeDialog()
+
+    # standard FreeCAD Task panel buttons
+    def getStandardButtons(self):
+        return int(QtGui.QDialogButtonBox.Cancel
+                   | QtGui.QDialogButtonBox.Ok
+                   | QtGui.QDialogButtonBox.Ignore)
+
+    # Ignore
+    def clicked(self, bt):
+        if bt == QtGui.QDialogButtonBox.Ignore:
+            # ask for confirmation before resetting everything
+            msgName = Asm4.nameLabel(self.selectedDatum)
+            # see whether the ExpressionEngine field is filled
+            if self.selectedDatum.ExpressionEngine :
+                # if yes, then ask for confirmation
+                confirmed = Asm4.confirmBox('This command will release all attachments on '+msgName+' and set it to manual positioning in its current location.')
+                # if not, then it's useless to bother the user
+            else:
+                confirmed = True
+            if confirmed:
+                self.selectedDatum.setExpression('Placement', None)
+            self.finish()
+
+    # OK
+    def accept(self):
+        self.onApply()
+        if self.selectedDatum:
+            self.selectedDatum.ViewObject.ShowLabel = False
+        self.finish()
+
+    # Cancel
+    def reject(self):
+        # restore previous expression if it existed
+        if self.old_EE != None:
+            self.selectedDatum.setExpression('Placement', self.old_EE )
+        if self.selectedDatum:
+            self.selectedDatum.ViewObject.ShowLabel = False
+        self.selectedDatum.recompute()
+        # highlight the selected LCS in its new position
+        Gui.Selection.clearSelection()
+        Gui.Selection.addSelection( self.activeDoc.Name, 'Model', self.selectedDatum.Name +'.')
+        self.finish()
 
 
 
@@ -188,16 +247,14 @@ class placeDatum( QtGui.QDialog ):
         # check that all of them have something in
         # constrName has been checked at the beginning
         if not a_Part :
-            self.expression.setText( 'Problem in selections (no a_Part)' )
+            FCC.PrintWarning("Problem in selections (no a_Part)\n")
         elif not a_LCS :
-            self.expression.setText( 'Problem in selections (no a_LCS)' )
+            FCC.PrintWarning("Problem in selections (no a_LCS)\n")
         else:
             # don't forget the last '.' !!!
             # <<LinkName>>.Placement.multiply( <<LinkName>>.<<LCS.>>.Placement )
             # expr = '<<'+ a_Part +'>>.Placement.multiply( <<'+ a_Part +'>>.<<'+ a_LCS +'.>>.Placement )'
             expr = Asm4.makeExpressionDatum( a_Link, a_Part, a_LCS )
-            # this can be skipped when this method becomes stable
-            self.expression.setText( expr )
             # load the built expression into the Expression field of the constraint
             self.activeDoc.getObject( self.selectedDatum.Name ).setExpression( 'Placement', expr )
             # recompute the object to apply the placement:
@@ -210,78 +267,56 @@ class placeDatum( QtGui.QDialog ):
         return
 
 
-
-
-    """
-    +-----------------------------------------------+
-    |           get all the LCS in a part           |
-    +-----------------------------------------------+
-    """
+    # get all datums in a part
     def getPartLCS( self, part ):
         partLCS = [ ]
         # parse all objects in the part (they return strings)
-        for objName in part.getSubObjects():
+        for objName in part.getSubObjects(1):
             # get the proper objects
             # all object names end with a "." , this needs to be removed
             obj = part.getObject( objName[0:-1] )
-            if obj.TypeId == 'PartDesign::CoordinateSystem' or obj.TypeId == 'PartDesign::Point':
+            if obj.TypeId in datumTypes:
                 partLCS.append( obj )
         return partLCS
 
 
-
-    """
-    +------------------------------------------------+
-    |   fill the LCS list when changing the parent   |
-    +------------------------------------------------+
-    """
+    # fill the LCS list when changing the parent
     def onParentSelected(self):
-        # clear the LCS list
-        self.attLCSlist.clear()
-        self.attLCStable = []
         # clear the selection in the GUI window
         Gui.Selection.clearSelection()
-        # the current selection in the combo-box list gives the index 
-        # of the currently selected link, whose name is in the table
-        #parentName = self.parentList.currentText()
-        #parentLink = self.activeDoc.getObject( parentName )
-        # if something is selected
+        # build the LCS table
+        self.attLCStable = []
+        # the current text in the combo-box is the link's name...
         if self.parentList.currentIndex() > 0:
             parentName = self.parentTable[ self.parentList.currentIndex() ].Name
-            parentLink = self.activeDoc.getObject( parentName )
-            if parentLink:
+            parentPart = self.activeDoc.getObject( parentName )
+            if parentPart:
                 # we get the LCS from the linked part
-                self.attLCStable = self.getPartLCS( parentLink.LinkedObject )
+                self.attLCStable = self.getPartLCS( parentPart.LinkedObject )
                 # linked part & doc
-                dText = ''
-                if parentLink.LinkedObject.Document != self.activeDoc :
-                    dText = parentLink.LinkedObject.Document.Name +'#'
-                # if the linked part has been renamed by the user, keep the label and add (.Name)
-                #pText = parentLink.LinkedObject.Label
-                pText = Asm4.nameLabel( parentLink.LinkedObject )
+                dText = parentPart.LinkedObject.Document.Name +'#'
+                # if the linked part has been renamed by the user
+                pText = Asm4.nameLabel( parentPart.LinkedObject )
                 self.parentDoc.setText( dText + pText )
                 # highlight the selected part:
-                Gui.Selection.addSelection( parentLink.Document.Name, 'Model', parentLink.Name+'.' )
+                Gui.Selection.addSelection( parentPart.Document.Name, 'Model', parentPart.Name+'.' )
         # something wrong
         else:
             return
+        
         # build the list
+        self.attLCSlist.clear()
         for lcs in self.attLCStable:
             newItem = QtGui.QListWidgetItem()
-            # if the LCS has been renamed, we show both the label and the (name)
-            newItem.setText( Asm4.nameLabel(lcs) )
+            newItem.setText(Asm4.nameLabel(lcs))
             newItem.setIcon( lcs.ViewObject.Icon )
             self.attLCSlist.addItem( newItem )
-        self.onApply()
+            #self.attLCStable.append(lcs)
         return
 
 
 
-    """
-    +-----------------------------------------------+
-    |  A target Datum has been clicked in the list  |
-    +-----------------------------------------------+
-    """
+    # A target Datum has been clicked in the list
     def onDatumSelected( self ):
         # clear the selection in the GUI window
         Gui.Selection.clearSelection()
@@ -296,14 +331,9 @@ class placeDatum( QtGui.QDialog ):
         return
 
 
-
-    """
-    +-----------------------------------------------+
-    |                  Rotations                    |
-    +-----------------------------------------------+
-    """
+    # Rotataions
     def rotAxis( self, addRotation ):
-        self.selectedDatum.AttachmentOffset = addRotation.multiply( self.selectedDatum.AttachmentOffset )
+        self.selectedDatum.AttachmentOffset = self.selectedDatum.AttachmentOffset.multiply(addRotation) 
         self.selectedDatum.recompute()
 
     def onRotX(self):
@@ -316,115 +346,54 @@ class placeDatum( QtGui.QDialog ):
         self.rotAxis(Asm4.rotZ)
 
 
-    """
-    +-----------------------------------------------+
-    |                     Cancel                    |
-    |           restores the previous values        |
-    +-----------------------------------------------+
-    """
-    def onCancel(self):
-        # restore previous expression if it existed
-        if self.old_EE:
-            self.selectedDatum.setExpression('Placement', self.old_EE )
-        self.selectedDatum.ViewObject.ShowLabel = False
-        self.selectedDatum.recompute()
-        # highlight the selected LCS in its new position
-        Gui.Selection.clearSelection()
-        Gui.Selection.addSelection( self.activeDoc.Name, 'Model', self.selectedDatum.Name +'.')
-        self.close()
-
-
-
-    """
-    +-----------------------------------------------+
-    |                      OK                       |
-    |               accept and close                |
-    +-----------------------------------------------+
-    """
-    def onOK(self):
-        self.onApply()
-        self.selectedDatum.ViewObject.ShowLabel = False
-        self.close()
-
-
-
-
-    """
-    +-----------------------------------------------+
-    | nitialises the UI once the widget has stared  |
-    +-----------------------------------------------+
-    """
+    # Initialises the UI once the widget has stared
     def initUI(self):
         self.lscName.setText( Asm4.nameLabel(self.selectedDatum) )
         self.parentDoc.clear()
         self.attLCSlist.clear()
-        self.expression.clear()
-        self.show()
         # list and table containing the available parents in the assembly to choose from
         self.parentList.clear()
-        self.parentList.addItem( 'Please choose' )
         self.parentTable = []
+        self.parentList.addItem( 'Please select' )
         self.parentTable.append( [] )
 
 
-    """
-    +-----------------------------------------------+
-    |     defines the UI, only static elements      |
-    +-----------------------------------------------+
-    """
+    # defines the UI, only static elements
     def drawUI(self):
-        # Our main window will be a QDialog
-        self.setWindowTitle('Attach a Coordinate System')
-        self.setWindowIcon( QtGui.QIcon( os.path.join( Asm4.iconPath , 'FreeCad.svg' ) ) )
-        self.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
-        self.setMinimumSize(370, 570)
-        self.setModal(False)
-
         # the layout for the main window is vertical (top to down)
-        self.mainLayout = QtGui.QVBoxLayout(self)
-
+        self.mainLayout = QtGui.QVBoxLayout(self.form)
+        
         # Selected Datum
-        self.formLayout = QtGui.QFormLayout(self)
-        self.lscName = QtGui.QLineEdit(self)
+        self.mainLayout.addWidget(QtGui.QLabel('Selected Datum :'))
+        self.lscName = QtGui.QLineEdit()
         self.lscName.setReadOnly(True)
-        self.formLayout.addRow(QtGui.QLabel('Selected Datum :'),self.lscName)
-        self.mainLayout.addLayout(self.formLayout)
+        self.mainLayout.addWidget(self.lscName)
 
         # combobox showing all available App::Link
-        self.mainLayout.addWidget(QtGui.QLabel('Selected Parent :'))
-        self.parentList = QtGui.QComboBox(self)
+        self.mainLayout.addWidget(QtGui.QLabel('Attach to :'))
+        self.parentList = QtGui.QComboBox()
         self.mainLayout.addWidget(self.parentList)
-
         # the document containing the linked object
-        self.mainLayout.addWidget(QtGui.QLabel('Parent Part (Doc#Part) :'))
-        self.parentDoc = QtGui.QLineEdit(self)
+        self.parentDoc = QtGui.QLineEdit()
         self.parentDoc.setReadOnly(True)
         self.mainLayout.addWidget(self.parentDoc)
-
 
         # The list of all attachment LCS in the assembly is a QListWidget
         # it is populated only when the parent combo-box is activated
         self.mainLayout.addWidget(QtGui.QLabel('Select LCS in Parent :'))
-        self.attLCSlist = QtGui.QListWidget(self)
+        self.attLCSlist = QtGui.QListWidget()
         self.mainLayout.addWidget(self.attLCSlist)
 
-        # Expression
-        # Create a line that will contain full expression for the expression engine
-        self.mainLayout.addWidget(QtGui.QLabel('Expression Engine :'))
-        self.expression = QtGui.QLineEdit(self)
-        self.mainLayout.addWidget(self.expression)
-
-
         # Rot Buttons
-        self.rotButtonsLayout = QtGui.QHBoxLayout(self)
+        self.rotButtonsLayout = QtGui.QHBoxLayout()
         # RotX button
-        self.RotXButton = QtGui.QPushButton('Rot X', self)
+        self.RotXButton = QtGui.QPushButton('Rot X')
         self.RotXButton.setToolTip("Rotate the Datum around the X axis by 90deg")
         # RotY button
-        self.RotYButton = QtGui.QPushButton('Rot Y', self)
+        self.RotYButton = QtGui.QPushButton('Rot Y')
         self.RotYButton.setToolTip("Rotate the Datum around the Y axis by 90deg")
         # RotZ button
-        self.RotZButton = QtGui.QPushButton('Rot Z', self)
+        self.RotZButton = QtGui.QPushButton('Rot Z')
         self.RotZButton.setToolTip("Rotate the Datum around the Z axis by 90deg")
         # add the buttons
         self.rotButtonsLayout.addStretch()
@@ -434,35 +403,17 @@ class placeDatum( QtGui.QDialog ):
         self.rotButtonsLayout.addStretch()
         self.mainLayout.addLayout(self.rotButtonsLayout)
 
-        # OK Buttons
-        self.OkButtonsLayout = QtGui.QHBoxLayout(self)
-        #
-        # Cancel button
-        self.CancelButton = QtGui.QPushButton('Cancel', self)
-        self.CancelButton.setToolTip("Restore initial parameters and close dialog")
-        # OK button
-        self.OkButton = QtGui.QPushButton('OK', self)
-        self.OkButton.setToolTip("Apply current parameters and close dialog")
-        self.OkButton.setDefault(True)
-        # position the buttons
-        self.OkButtonsLayout.addWidget(self.CancelButton)
-        self.OkButtonsLayout.addStretch()
-        self.OkButtonsLayout.addWidget(self.OkButton)
-        self.mainLayout.addWidget(QtGui.QLabel(' '))
-        self.mainLayout.addLayout(self.OkButtonsLayout)
+        # apply the layout to the main window
+        self.form.setLayout(self.mainLayout)
 
         # Actions
         self.parentList.currentIndexChanged.connect( self.onParentSelected )
-        #self.attLCSlist.currentItemChanged.connect( self.onDatumSelected )
+        self.attLCSlist.currentItemChanged.connect( self.onDatumSelected )
         self.attLCSlist.itemClicked.connect( self.onDatumSelected )
-        self.CancelButton.clicked.connect(self.onCancel)
-        self.OkButton.clicked.connect(self.onOK)
         self.RotXButton.clicked.connect( self.onRotX )
         self.RotYButton.clicked.connect( self.onRotY )
         self.RotZButton.clicked.connect( self.onRotZ)
 
-        # apply the layout to the main window
-        self.setLayout(self.mainLayout)
 
 
 
@@ -471,4 +422,4 @@ class placeDatum( QtGui.QDialog ):
     |       add the command to the workbench        |
     +-----------------------------------------------+
 """
-Gui.addCommand( 'Asm4_placeDatum', placeDatum() )
+Gui.addCommand( 'Asm4_placeDatum', placeDatumCmd() )

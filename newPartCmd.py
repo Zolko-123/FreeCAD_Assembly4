@@ -53,12 +53,26 @@ class newPart:
             return(False)
 
 
+    def checkPart(self):
+        selectedPart = None
+        # if an App::Part is selected
+        if Gui.Selection.getSelection():
+            selectedObj = Gui.Selection.getSelection()[0]
+            if selectedObj.TypeId == 'App::Part':
+                selectedPart = selectedObj
+        return selectedPart
+
+
     def Activated(self):
-        #partName = 'Part'
-        text,ok = QtGui.QInputDialog.getText(None, self.tooltip, 'Enter new '+self.partName+' name :                                        ', text = self.partName)
+        instanceName = Asm4.nextInstance(self.partName)
+        text,ok = QtGui.QInputDialog.getText(None, self.tooltip, 'Enter new '+self.partName+' name :'+' '*30, text = instanceName)
         if ok and text:
             # create Part
             part = App.ActiveDocument.addObject(self.partType,text)
+            # container ?
+            container = self.checkPart()
+            if container and part.Name!='Model':
+                container.addObject(part)
             # add an LCS at the root of the Part, and attach it to the 'Origin'
             lcs0 = part.newObject('PartDesign::CoordinateSystem','LCS_0')
             lcs0.Support = [(part.Origin.OriginFeatures[0],'')]

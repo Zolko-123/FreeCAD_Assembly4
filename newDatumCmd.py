@@ -116,14 +116,15 @@ class newDatum:
             Asm4.warningBox("I can't create a "+self.datumType+" with the current selections")
             
         # check whether there is already a similar datum, and increment the instance number 
-        instanceNum = 1
-        while App.ActiveDocument.getObject( self.datumName+'_'+str(instanceNum) ):
-            instanceNum += 1
-        datumName = self.datumName+'_'+str(instanceNum)
+        # instanceNum = 1
+        #while App.ActiveDocument.getObject( self.datumName+'_'+str(instanceNum) ):
+        #    instanceNum += 1
+        #datumName = self.datumName+'_'+str(instanceNum)
         if parentContainer:
             # input dialog to ask the user the name of the Sketch:
+            proposedName = Asm4.nextInstance(self.datumName)
             text,ok = QtGui.QInputDialog.getText(None,'Create new '+self.datumName,
-                    'Enter '+self.datumName+' name :'+' '*40, text = datumName)
+                    'Enter '+self.datumName+' name :'+' '*40, text = proposedName)
             if ok and text:
                 # App.activeDocument().getObject('Model').newObject( 'Sketcher::SketchObject', text )
                 createdDatum = parentContainer.newObject( self.datumType, text )

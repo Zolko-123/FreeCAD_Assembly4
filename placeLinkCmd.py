@@ -4,32 +4,53 @@
 # placeLinkCmd.py
 
 
-import math, re, os
+import os
 
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
-import Part
+from FreeCAD import Console as FCC
 
 import libAsm4 as Asm4
 
 
 
+"""
+    +-----------------------------------------------+
+    |               Helper functions                |
+    +-----------------------------------------------+
+"""
+def getSelection():
+    # check that there is an App::Part called 'Model'
+    if App.ActiveDocument.getObject('Model') and App.ActiveDocument.Model.TypeId == 'App::Part':
+        if len(Gui.Selection.getSelection())==1:
+            selObj = Gui.Selection.getSelection()[0]
+            # it's an App::Link
+            if selObj.isDerivedFrom('App::Link') and selObj.LinkedObject.TypeId in linkedObjTypes:
+                return selObj
+    return None
+
+
+# type of App::Link target objects we're dealing with
+linkedObjTypes = [ 'App::Part', 'PartDesign::Body' ]
+
+
+# selection view properties overrides
+DrawStyle = 'Solid'
+LineWidth = 3.0
+DiffuseColor = (1.0, 1.0, 1.0, 0.0)
+Transparency = 50.0
+
+
 
 """
     +-----------------------------------------------+
-    |                  main class                   |
+    |                  The command                  |
     +-----------------------------------------------+
 """
-class placeLink( QtGui.QDialog ):
-    "My tool object"
-
-
+class placeLinkCmd():
     def __init__(self):
-        super(placeLink,self).__init__()
-        # draw the GUI, objects are defined later down
-        self.drawUI()
-
+        super(placeLinkCmd,self).__init__()
 
     def GetResources(self):
         return {"MenuText": "Edit Placement of a Part",
@@ -37,51 +58,62 @@ class placeLink( QtGui.QDialog ):
                 "Pixmap" : os.path.join( Asm4.iconPath , 'Place_Link.svg')
                 }
 
-
     def IsActive(self):
-        # is there an active document ?
-        if App.ActiveDocument:
-            # is something selected ?
-            selObj = self.GetSelection()
-            if selObj != None:
-                return True
+        # We only insert a link into an Asm4  Model
+        if App.ActiveDocument and getSelection():
+            return True
         return False
 
-
-    def GetSelection(self):
-        # check that there is an App::Part called 'Model'
-        selectedObj = None
-        if not App.ActiveDocument.getObject('Model'):
-            return None
-        if Gui.Selection.getSelection():
-            selObj = Gui.Selection.getSelection()[0]
-            # it's an App::Link
-            if selObj.isDerivedFrom('App::Link'):
-                selectedObj = selObj
-        return selectedObj
-
-
-
-    """
-    +-----------------------------------------------+
-    |                 the real stuff                |
-    +-----------------------------------------------+
-    """
     def Activated(self):
+        Gui.Control.showDialog(placeLinkUI())
+
+
+
+
+"""
+    +-----------------------------------------------+
+    |    The UI and functions in the Task panel     |
+    +-----------------------------------------------+
+"""
+class placeLinkUI():
+
+    def __init__(self):
+        self.base = QtGui.QWidget()
+        self.form = self.base        
+        iconFile = os.path.join( Asm4.iconPath , 'Place_Link.svg')
+        self.form.setWindowIcon(QtGui.QIcon( iconFile ))
+        self.form.setWindowTitle('Place linked Part')
+
+        # check that we have selected an App::Link object
+        self.selectedLink = []
+        selection = getSelection()
+        if not selection:
+            # This shouldn't happen
+            FCC.PrintWarning("This is not an error message you are supposed to see, something went wrong\n")
+            Gui.Control.closeDialog()
+        else:
+            self.selectedLink = selection
+
+        # save previous view properties
+        self.old_OverrideMaterial = self.selectedLink.ViewObject.OverrideMaterial
+        self.old_DrawStyle = self.selectedLink.ViewObject.DrawStyle
+        self.old_LineWidth = self.selectedLink.ViewObject.LineWidth
+        self.old_DiffuseColor = self.selectedLink.ViewObject.ShapeMaterial.DiffuseColor
+        self.old_Transparency = self.selectedLink.ViewObject.ShapeMaterial.Transparency
+        # set new view properties
+        self.selectedLink.ViewObject.OverrideMaterial = True
+        self.selectedLink.ViewObject.DrawStyle = DrawStyle
+        self.selectedLink.ViewObject.LineWidth = LineWidth
+        self.selectedLink.ViewObject.ShapeMaterial.DiffuseColor = DiffuseColor
+        self.selectedLink.ViewObject.ShapeMaterial.Transparency = Transparency
+
+        # draw the GUI, objects are defined later down
+        self.drawUI()
+
         # get the current active document to avoid errors if user changes tab
         self.activeDoc = App.activeDocument()
         # the parent (top-level) assembly is the App::Part called Model (hard-coded)
         self.parentAssembly = self.activeDoc.Model
-
-        self.attLCStable = []
-
-        # check that we have selected an App::Link object
-        self.selectedLink = []
-        selection = self.GetSelection()
-        if not selection:
-            self.close()
-        else:
-            self.selectedLink = selection
 
         # check that the link is an Asm4 link:
         self.isAsm4EE = False
@@ -93,6 +125,7 @@ class placeLink( QtGui.QDialog ):
                 return
 
         # initialize the UI with the current data
+        self.attLCStable = []
         self.initUI()
         # now self.parentList and self.parentTable are available
 
@@ -110,7 +143,6 @@ class placeLink( QtGui.QDialog ):
                         objText = Asm4.nameLabel(obj)
                         self.parentList.addItem( objIcon, objText, obj)
 
-
         # find all the LCS in the selected link
         self.partLCStable = self.getPartLCS( self.selectedLink.LinkedObject )
         # build the list
@@ -121,7 +153,6 @@ class placeLink( QtGui.QDialog ):
             newItem.setIcon( lcs.ViewObject.Icon )
             self.partLCSlist.addItem(newItem)
 
-
         # get the old values
         if self.isAsm4EE:
             self.old_AO = self.selectedLink.AttachmentOffset
@@ -131,12 +162,9 @@ class placeLink( QtGui.QDialog ):
             self.old_AO = []
             self.old_Parent = ''
 
-
         self.old_EE = ''
         # get and store the current expression engine:
         self.old_EE = Asm4.placementEE(self.selectedLink.ExpressionEngine)
-        # for debugging, use this field to print text
-        #self.expression.setText( self.old_EE )
 
         # decode the old ExpressionEngine
         old_Parent = ''
@@ -147,8 +175,6 @@ class placeLink( QtGui.QDialog ):
         old_linkLCS = ''
         # if the decode is unsuccessful, old_Expression is set to False and the other things are set to 'None'
         ( old_Parent, old_attLCS, old_linkLCS ) = Asm4.splitExpressionLink( self.old_EE, self.old_Parent )
-        #self.expression.setText( old_Parent +'***'+ self.old_Parent )
-
 
         # find the old LCS in the list of LCS of the linked part...
         # MatchExactly, MatchContains, MatchEndsWith ...
@@ -187,9 +213,76 @@ class placeLink( QtGui.QDialog ):
             self.attLCSlist.setCurrentItem( lcs_found[0] )
 
 
+    # Close
+    def finish(self):
+        self.restoreView()
+        Gui.Selection.clearSelection()
+        Gui.Selection.addSelection( self.activeDoc.Name, 'Model', self.selectedLink.Name+'.' )
+        Gui.Control.closeDialog()
 
-        # the widget is shown and not executed to allow it to stay on top
-        self.show()
+
+    # restore initial view properties
+    def restoreView(self, normal=True):
+        self.selectedLink.ViewObject.OverrideMaterial = False
+        self.selectedLink.ViewObject.DrawStyle    = self.old_DrawStyle
+        self.selectedLink.ViewObject.LineWidth    = self.old_LineWidth
+        self.selectedLink.ViewObject.ShapeMaterial.DiffuseColor = self.old_DiffuseColor
+        self.selectedLink.ViewObject.ShapeMaterial.Transparency = self.old_Transparency
+
+
+    # standard FreeCAD Task panel buttons
+    def getStandardButtons(self):
+        return int(QtGui.QDialogButtonBox.Cancel
+                   | QtGui.QDialogButtonBox.Ok
+                   | QtGui.QDialogButtonBox.Ignore)
+
+
+    # OK
+    def accept(self):
+        if self.Apply():
+            # highlight in the 3D window the object we placed
+            self.finish()
+        else:
+            return
+
+
+    # Cancel, restore previous values if available
+    def reject(self):
+        if self.old_AO:
+            self.selectedLink.AttachmentOffset = self.old_AO
+        if self.old_EE:
+            self.selectedLink.setExpression( 'Placement', self.old_EE )
+        self.selectedLink.recompute()
+        # highlight in the 3D window the object we placed
+        self.finish()
+
+
+    # Free insert
+    def clicked(self, button):
+        if button == QtGui.QDialogButtonBox.Ignore:
+            # ask for confirmation before resetting everything
+            msgName = Asm4.nameLabel(self.selectedLink)
+            # see whether the ExpressionEngine field is filled
+            if self.selectedLink.ExpressionEngine :
+                # if yes, then ask for confirmation
+                confirmed = Asm4.confirmBox('This command will release all attachments on '+msgName+' and set it to manual positioning in its current location.')
+                # if not, then it's useless to bother the user
+            else:
+                confirmed = True
+            if confirmed:
+                # unset the ExpressionEngine for the Placement
+                self.selectedLink.setExpression('Placement', None)
+                # reset the assembly properties
+                Asm4.makeAsmProperties( self.selectedLink, reset=True )
+                # finish
+                FCC.PrintWarning("Part is now manually placed\n")
+                self.finish()
+            else:
+                FCC.PrintWarning("Part untouched\n")
+                self.finish()
+
+
+
 
 
 
@@ -232,13 +325,10 @@ class placeLink( QtGui.QDialog ):
             l_LCS = self.partLCStable[ self.partLCSlist.currentRow() ].Name
         else:
             l_LCS = None
-        #self.expression.setText( '***'+ l_LCS +'***' )
 
         # check that all of them have something in
         # constrName has been checked at the beginning
-        if not ( a_Link and a_LCS and l_Part and l_LCS ):
-            self.expression.setText( 'Problem in selections' )
-        else:
+        if a_Link and a_LCS and l_Part and l_LCS :
             # this is where all the magic is, see:
             # 
             # https://forum.freecadweb.org/viewtopic.php?p=278124#p278124
@@ -249,8 +339,6 @@ class placeLink( QtGui.QDialog ):
             # expr = ParentLink.Placement * ParentPart#LCS.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
             # expr = LCS_in_the_assembly.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
             expr = Asm4.makeExpressionPart( a_Link, a_Part, a_LCS, l_Part, l_LCS )
-            # this can be skipped when this method becomes stable
-            self.expression.setText( expr )
             # add the Asm4 properties if it's a pure App::Link
             Asm4.makeAsmProperties(self.selectedLink)
             # store the part where we're attached to in the constraints object
@@ -262,89 +350,13 @@ class placeLink( QtGui.QDialog ):
             # recompute the object to apply the placement:
             self.selectedLink.recompute()
             self.parentAssembly.recompute(True)
-        return
-
-
-    """
-    +-----------------------------------------------+
-    |    insert instance free of any attachment     |
-    +-----------------------------------------------+
-    """
-    def freeInsert(self):
-        # ask for confirmation before resetting everything
-        linkName  = self.selectedLink.Name
-        linkLabel = self.selectedLink.Label
-        if linkName==linkName:
-            linkText = linkName
+            return True
         else:
-            linkText = linkName+' ('+linkName+')'
-        # see whether the ExpressionEngine field is filled
-        if self.selectedLink.ExpressionEngine :
-            # if yes, then ask for confirmation
-            confirmed = Asm4.confirmBox('This command will release all attachments on '+linkText+' and set it to manual positioning in its current location.')
-            # if not, then it's useless to bother the user
-        else:
-            confirmed = True
-        if confirmed:
-            # unset the ExpressionEngine for the Placement
-            self.selectedLink.setExpression('Placement', None)
-            # reset the assembly properties
-            Asm4.makeAsmProperties( self.selectedLink, reset=True )
-            """
-            # property AssemblyType
-            if hasattr(self.selectedLink,'AssemblyType'):
-                self.selectedLink.AssemblyType = ''
-            else:
-                self.selectedLink.addProperty( 'App::PropertyString', 'AssemblyType', 'Attachment' ).AssemblyType = ''
-            # property AttachedBy
-            if hasattr(self.selectedLink,'AttachedBy'):
-                self.selectedLink.AttachedBy = ''
-            else:
-                self.selectedLink.addProperty( 'App::PropertyString', 'AttachedBy', 'Attachment' ).AttachedBy = ''
-            # property AttachedTo
-            if hasattr(self.selectedLink,'AttachedTo'):
-                self.selectedLink.AttachedTo = ''
-            else:
-                self.selectedLink.addProperty( 'App::PropertyString', 'AttachedTo', 'Attachment' ).AttachedTo = ''
-            # property AttachmentOffset
-            if hasattr(self.selectedLink,'AttachmentOffset'):
-                self.selectedLink.AttachmentOffset = App.Placement()
-            else:
-                self.selectedLink.addProperty( 'App::PropertyPlacement', 'AttachmentOffset', 'Attachment' ).AttachmentOffset = App.Placement()
-            """
-            Gui.Selection.clearSelection()
-            Gui.Selection.addSelection( self.activeDoc.Name, 'Model', self.selectedLink.Name+'.' )
-            # finish
-            self.close()
-        else:
-            return
+            FCC.PrintWarning("Problem in selections\n")
+            return False
 
 
-
-
-    """
-    +-----------------------------------------------+
-    |   find all the linked parts in the assembly   |
-    +-----------------------------------------------+
-    """
-    def getAllLinkedParts(self):
-        allLinkedParts = []
-        for obj in self.activeDoc.findObjects("App::Link"):
-            # add it to our list if it's a link to an App::Part ...
-            if obj.LinkedObject.isDerivedFrom('App::Part')or obj.LinkedObject.isDerivedFrom('PartDesign::Body'):
-                # ... except if it's the selected link itself, because
-                # we don't want to place the new link relative to itself !
-                if obj != self.selectedLink:
-                    allLinkedParts.append( obj )
-        return allLinkedParts
-
-
-
-    """
-    +-----------------------------------------------+
-    |           get all the LCS in a part           |
-    +-----------------------------------------------+
-    """
+    # get all the LCS in a part
     def getPartLCS( self, part ):
         partLCS = [ ]
         # parse all objects in the part (they return strings)
@@ -357,12 +369,7 @@ class placeLink( QtGui.QDialog ):
         return partLCS
 
 
-
-    """
-    +------------------------------------------------+
-    |   fill the LCS list when changing the parent   |
-    +------------------------------------------------+
-    """
+    # fill the LCS list when changing the parent
     def onParentSelected(self):
         # clear the selection in the GUI window
         Gui.Selection.clearSelection()
@@ -384,9 +391,7 @@ class placeLink( QtGui.QDialog ):
                 # we get the LCS from the linked part
                 self.attLCStable = self.getPartLCS( parentPart.LinkedObject )
                 # linked part & doc
-                dText = ''
-                if parentPart.LinkedObject.Document != self.activeDoc :
-                    dText = parentPart.LinkedObject.Document.Name +'#'
+                dText = parentPart.LinkedObject.Document.Name +'#'
                 # if the linked part has been renamed by the user
                 pText = Asm4.nameLabel( parentPart.LinkedObject )
                 self.parentDoc.setText( dText + pText )
@@ -395,7 +400,7 @@ class placeLink( QtGui.QDialog ):
         # something wrong
         else:
             return
-        
+
         # build the list
         self.attLCSlist.clear()
         for lcs in self.attLCStable:
@@ -409,16 +414,9 @@ class placeLink( QtGui.QDialog ):
 
 
 
-
-
-    """
-    +-----------------------------------------------+
-    |                  Rotations                    |
-    +-----------------------------------------------+
-    """
-    def rotAxis( self, plaRotAxis ):
-        constrAO = self.selectedLink.AttachmentOffset
-        self.selectedLink.AttachmentOffset = plaRotAxis.multiply( constrAO )
+    # Rotations
+    def rotAxis( self, addRotation ):
+        self.selectedLink.AttachmentOffset = self.selectedLink.AttachmentOffset.multiply( addRotation )
         self.selectedLink.recompute()
 
     def onRotX(self):
@@ -430,46 +428,11 @@ class placeLink( QtGui.QDialog ):
     def onRotZ(self):
         self.rotAxis(Asm4.rotZ)
 
-    def onReset( self ):
-        newPlacement = App.Placement( App.Vector(0,0,0), App.Rotation( App.Vector(0,0,1), 0.0 ) )
-        self.selectedLink.AttachmentOffset = newPlacement
-        self.selectedLink.recompute()
 
-
-
-    """
-    +-----------------------------------------------+
-    |                      OK                       |
-    |               accept and close                |
-    +-----------------------------------------------+
-    """
-    def onOK(self):
-        self.Apply()
-        Gui.Selection.clearSelection()
-        Gui.Selection.addSelection( self.activeDoc.Name, 'Model', self.selectedLink.Name+'.' )
-        self.close()
-
-
-    def onCancel(self):
-        # restore previous values
-        if self.old_AO:
-            self.selectedLink.AttachmentOffset = self.old_AO
-        if self.old_EE:
-            self.selectedLink.setExpression( 'Placement', self.old_EE )
-        self.selectedLink.recompute()
-        Gui.Selection.clearSelection()
-        self.close()
-
-
-    """
-    +-----------------------------------------------+
-    |     initialize the UI for the selected link   |
-    +-----------------------------------------------+
-    """
+    # initialize the UI for the selected link
     def initUI(self):
         # clear the parent name (if any)
         self.parentDoc.clear()
-        self.expression.clear()
         self.partLCSlist.clear()
         self.attLCSlist.clear()
         # the selected link's name 
@@ -483,84 +446,65 @@ class placeLink( QtGui.QDialog ):
         self.linkedDoc.setText( dText + pText )
         # Initialize the assembly tree with the Parent Assembly as first element
         # clear the available parents combo box
+        self.parentTable = []
         self.parentList.clear()
-        self.parentList.addItem('Please choose')
+        self.parentTable.append( [] )
+        self.parentList.addItem('Please select')
+        self.parentTable.append( self.parentAssembly )
         parentIcon = self.parentAssembly.ViewObject.Icon
         self.parentList.addItem( parentIcon, 'Parent Assembly', self.parentAssembly )
-        # all the parts in the assembly
-        self.parentTable = []
-        self.parentTable.append( [] )
-        self.parentTable.append( self.parentAssembly )
 
 
-
-    """
-    +-----------------------------------------------+
-    |     defines the UI, only static elements      |
-    +-----------------------------------------------+
-    """
+    # defines the UI, only static elements
     def drawUI(self):
-        # Our main window will be a QDialog
-        self.setWindowTitle('Place linked Part')
-        self.setWindowIcon( QtGui.QIcon( os.path.join( Asm4.iconPath , 'FreeCad.svg' ) ) )
-        self.setMinimumSize(550, 640)
-        self.resize(550,640)
-        self.setModal(False)
-        # make this dialog stay above the others, always visible
-        self.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
-
         # the layout for the main window is vertical (top to down)
-        self.mainLayout = QtGui.QVBoxLayout(self)
-        # with 2 columns
-        self.columnsLayout = QtGui.QHBoxLayout(self)
-        self.leftLayout = QtGui.QVBoxLayout(self)
-        self.rightLayout = QtGui.QVBoxLayout(self)
+        self.mainLayout = QtGui.QVBoxLayout(self.form)
         
+        # Define the fields for the form ( label + widget )
+        self.formLayout = QtGui.QFormLayout()
+        # Selected Link (the name as seen in the tree of the selected link)
+        self.linkName = QtGui.QLineEdit()
+        self.linkName.setReadOnly(True)
+        self.formLayout.addRow(QtGui.QLabel('Selected Link :'),self.linkName)
+
+        # combobox showing all available App::Link
+        self.parentList = QtGui.QComboBox()
+        self.parentList.setToolTip('Choose the part in which the attachment\ncoordinate system is to be found')
+        # the parent assembly is hardcoded, and made the first real element
+        self.formLayout.addRow(QtGui.QLabel('Attach to :'),self.parentList)
+        self.mainLayout.addLayout(self.formLayout)
+
+        # with 2 columns
+        self.columnsLayout = QtGui.QHBoxLayout()
+        self.leftLayout = QtGui.QVBoxLayout()
+        self.rightLayout = QtGui.QVBoxLayout()
         # Part, left side
         #
-        # Selected Link (the name as seen in the tree of the selected link)
-        self.leftLayout.addWidget(QtGui.QLabel("Selected Link :"))
-        self.linkName = QtGui.QLineEdit(self)
-        self.linkName.setReadOnly(True)
-        self.linkName.setMinimumSize(200, 1)
-        self.leftLayout.addWidget(self.linkName)
-
         # the document containing the linked part
-        # if the linked part is in the same document as the assembly Model
         self.leftLayout.addWidget(QtGui.QLabel("Linked Part :"))
-        self.linkedDoc = QtGui.QLineEdit(self)
+        self.linkedDoc = QtGui.QLineEdit()
         self.linkedDoc.setReadOnly(True)
-        self.linkedDoc.setMinimumSize(200, 1)
         self.leftLayout.addWidget(self.linkedDoc)
 
         # The list of all LCS in the part is a QListWidget
         self.leftLayout.addWidget(QtGui.QLabel("Select LCS in Part :"))
-        self.partLCSlist = QtGui.QListWidget(self)
-        self.partLCSlist.setMinimumSize(100, 250)
+        self.partLCSlist = QtGui.QListWidget()
+        self.partLCSlist.setMinimumHeight(200)
         self.partLCSlist.setToolTip('Select a coordinate system from the list')
         self.leftLayout.addWidget(self.partLCSlist)
 
         # Assembly, Right side
         #
-        # combobox showing all available App::Link
-        self.rightLayout.addWidget(QtGui.QLabel("Select Parent to attach to :"))
-        self.parentList = QtGui.QComboBox(self)
-        self.parentList.setMinimumSize(250, 10)
-        self.parentList.setToolTip('Choose the part in which the attachment\ncoordinate system is to be found')
-        # the parent assembly is hardcoded, and made the first real element
-        self.rightLayout.addWidget(self.parentList)
-
         # the document containing the linked object
         self.rightLayout.addWidget(QtGui.QLabel("Parent Part :"))
-        self.parentDoc = QtGui.QLineEdit(self)
+        self.parentDoc = QtGui.QLineEdit()
         self.parentDoc.setReadOnly(True)
-        self.parentDoc.setMinimumSize(200, 1)
         self.rightLayout.addWidget(self.parentDoc)
         # The list of all attachment LCS in the assembly is a QListWidget
         # it is populated only when the parent combo-box is activated
         self.rightLayout.addWidget(QtGui.QLabel("Select LCS in Parent :"))
-        self.attLCSlist = QtGui.QListWidget(self)
-        self.attLCSlist.setMinimumSize(250, 250)
+        self.attLCSlist = QtGui.QListWidget()
+        self.attLCSlist.setMinimumHeight(200)
         self.attLCSlist.setToolTip('Select a coordinate system from the list')
         self.rightLayout.addWidget(self.attLCSlist)
 
@@ -569,26 +513,13 @@ class placeLink( QtGui.QDialog ):
         self.columnsLayout.addLayout(self.rightLayout)
         self.mainLayout.addLayout(self.columnsLayout)
 
-        # Create a line that will contain full expression for the expression engine
-        self.expression = QtGui.QLineEdit(self)
-        self.expression.setMinimumSize(530, 0)
-        self.mainLayout.addWidget(QtGui.QLabel("Expression Engine :"))
-        self.mainLayout.addWidget(self.expression)
-
-        # Rot Buttons
-        self.rotButtonsLayout = QtGui.QHBoxLayout(self)
-        #
-        # Reset button
-        # self.ResetButton = QtGui.QPushButton('Reset', self)
-        # self.ResetButton.setToolTip("Reset the AttachmentOffset of this Link")
-        # RotX button
-        self.RotXButton = QtGui.QPushButton('Rot X', self)
+        # Rotation Buttons
+        self.rotButtonsLayout = QtGui.QHBoxLayout()
+        self.RotXButton = QtGui.QPushButton('Rot X')
         self.RotXButton.setToolTip("Rotate the instance around the X axis by 90deg")
-        # RotY button
-        self.RotYButton = QtGui.QPushButton('Rot Y', self)
+        self.RotYButton = QtGui.QPushButton('Rot Y')
         self.RotYButton.setToolTip("Rotate the instance around the Y axis by 90deg")
-        # RotZ button
-        self.RotZButton = QtGui.QPushButton('Rot Z', self)
+        self.RotZButton = QtGui.QPushButton('Rot Z')
         self.RotZButton.setToolTip("Rotate the instance around the Z axis by 90deg")
         # add the buttons
         self.rotButtonsLayout.addStretch()
@@ -598,45 +529,16 @@ class placeLink( QtGui.QDialog ):
         self.rotButtonsLayout.addStretch()
         self.mainLayout.addLayout(self.rotButtonsLayout)
 
-
-        # OK Buttons
-        self.OkButtonsLayout = QtGui.QHBoxLayout(self)
-        #
-        # Cancel button
-        self.CancelButton = QtGui.QPushButton('Cancel', self)
-        self.CancelButton.setToolTip("Restore initial parameters and close dialog")
-        # Free Insert button
-        self.FreeButton = QtGui.QPushButton('Free Insert', self)
-        self.FreeButton.setToolTip("Insert the linked part into the assembly with manual placement. \nTo move the part right-click on its name and select \"Transform\"")
-        # OK button
-        self.OkButton = QtGui.QPushButton('OK', self)
-        self.OkButton.setToolTip("Apply current parameters and close dialog")
-        self.OkButton.setDefault(True)
-        # position the buttons
-        self.OkButtonsLayout.addWidget(self.CancelButton)
-        self.OkButtonsLayout.addStretch()
-        self.OkButtonsLayout.addWidget(self.FreeButton)
-        self.OkButtonsLayout.addStretch()
-        self.OkButtonsLayout.addWidget(self.OkButton)
-        self.mainLayout.addWidget(QtGui.QLabel(' '))
-        self.mainLayout.addLayout(self.OkButtonsLayout)
+        # apply the layout to the main window
+        self.form.setLayout(self.mainLayout)
 
         # Actions
         self.parentList.currentIndexChanged.connect( self.onParentSelected )
         self.attLCSlist.itemClicked.connect( self.Apply )
-        #self.attLCSlist.currentItemChanged.connect( self.Apply )
         self.partLCSlist.itemClicked.connect( self.Apply )
-        #self.partLCSlist.currentItemChanged.connect( self.Apply )
-        #self.ResetButton.clicked.connect( self.onReset )
         self.RotXButton.clicked.connect( self.onRotX )
         self.RotYButton.clicked.connect( self.onRotY )
         self.RotZButton.clicked.connect( self.onRotZ)
-        self.CancelButton.clicked.connect(self.onCancel)
-        self.FreeButton.clicked.connect(self.freeInsert)
-        self.OkButton.clicked.connect(self.onOK)
-
-        # apply the layout to the main window
-        self.setLayout(self.mainLayout)
 
 
 """
@@ -644,4 +546,4 @@ class placeLink( QtGui.QDialog ):
     |       add the command to the workbench        |
     +-----------------------------------------------+
 """
-Gui.addCommand( 'Asm4_placeLink', placeLink() )
+Gui.addCommand( 'Asm4_placeLink', placeLinkCmd() )

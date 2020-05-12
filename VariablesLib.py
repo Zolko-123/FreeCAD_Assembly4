@@ -9,7 +9,6 @@ import math, re, os
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
-import Part
 
 import libAsm4 as Asm4
 

@@ -85,7 +85,10 @@ class newModel:
         # we don't check whether it's an App::Part or not
         # Returns True if there is an object called 'Model'
         if self.activeDoc.getObject('Model'):
-            Asm4.warningBox("There is already an Assembly4 Model in this document.")
+            if self.activeDoc.Model.TypeId=='App::Part' and self.activeDoc.Model.Type=='Assembly4 Model':
+                Asm4.warningBox("This document already contains an Assembly4 Model.")
+            else:
+                Asm4.warningBox("This document already contains another FreeCAD object called \"Model\". I cannot create an Assembly4 Model.")
             return(True)
         else:
             return(False)
