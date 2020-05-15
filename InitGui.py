@@ -94,7 +94,7 @@ class Assembly4Workbench(Workbench):
         #import makeLinkArray        # creates a new array of App::Link
         import gotoDocumentCmd     # opens the documentof the selected App::Link
         import HelpCmd             # shows a basic help window
-        import showCommand         # shows a 
+        #import showCommand         # shows a 
         
         # create the toolbars and menus, nearly empty, to decide about their position
         self.appendToolbar("Assembly",["Asm4_newModel"])
