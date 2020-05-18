@@ -69,18 +69,18 @@ class newPart:
         if ok and text:
             # create Part
             part = App.ActiveDocument.addObject(self.partType,text)
-            # container ?
-            container = self.checkPart()
-            if container and part.Name!='Model':
-                container.addObject(part)
             # add an LCS at the root of the Part, and attach it to the 'Origin'
             lcs0 = part.newObject('PartDesign::CoordinateSystem','LCS_0')
             lcs0.Support = [(part.Origin.OriginFeatures[0],'')]
             lcs0.MapMode = 'ObjectXY'
             lcs0.MapReversed = False
-            # If the 'Part' group exists, move it there:
+            # If an App::Part container is selected, move the created part/body there
+            container = self.checkPart()
             partsGroup = App.ActiveDocument.getObject('Parts')
-            if partsGroup and partsGroup.TypeId=='App::DocumentObjectGroup' :
+            if container and part.Name!='Model':
+                container.addObject(part)
+            # If the 'Part' group exists, move it there:
+            elif partsGroup and partsGroup.TypeId=='App::DocumentObjectGroup' :
                 App.ActiveDocument.getObject('Parts').addObject(part)
             # recompute
             part.recompute()
