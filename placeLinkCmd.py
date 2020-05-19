@@ -39,7 +39,7 @@ linkedObjTypes = [ 'App::Part', 'PartDesign::Body' ]
 DrawStyle = 'Solid'
 LineWidth = 3.0
 DiffuseColor = (1.0, 1.0, 1.0, 0.0)
-Transparency = 50.0
+Transparency = 0.50
 
 
 

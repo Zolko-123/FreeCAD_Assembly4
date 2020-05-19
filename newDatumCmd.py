@@ -122,7 +122,7 @@ class newDatum:
         #datumName = self.datumName+'_'+str(instanceNum)
         if parentContainer:
             # input dialog to ask the user the name of the Sketch:
-            proposedName = Asm4.nextInstance(self.datumName)
+            proposedName = Asm4.nextInstance( self.datumName, startAtOne=True )
             text,ok = QtGui.QInputDialog.getText(None,'Create new '+self.datumName,
                     'Enter '+self.datumName+' name :'+' '*40, text = proposedName)
             if ok and text:

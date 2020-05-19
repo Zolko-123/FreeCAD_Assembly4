@@ -70,13 +70,16 @@ def checkWorkbench( workbench ):
     |           get the next instance's name         |
     +-----------------------------------------------+
 """
-def nextInstance( name ):
+def nextInstance( name, startAtOne=False ):
     # if there is no such name, return the original
-    if not App.ActiveDocument.getObject(name):
+    if not App.ActiveDocument.getObject(name) and not startAtOne:
         return name
     # there is already one, we increment
     else:
-        instanceNum = 2
+        if startAtOne:
+            instanceNum = 1
+        else:
+            instanceNum = 2
         while App.ActiveDocument.getObject( name+'_'+str(instanceNum) ):
             instanceNum += 1
         return name+'_'+str(instanceNum)
