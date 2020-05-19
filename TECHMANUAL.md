@@ -21,17 +21,20 @@ Assembly 4 is available through the [FreeCAD Addon Manager](https://github.com/F
 
 ### Manual Installation
 
-Another method is to download and extract the Github [FreeCAD_Assembly4-master.zip](https://github.com/Zolko-123/FreeCAD_Assembly4/archive/master.zip) archive; then unzip the archive and move (or link) the folder *FreeCAD_Assembly4-master* into the directory containing all FreeCAD addon modules:
+It is possible to install this workbench manually into FreeCAD's local workbench directory:
 
 * for Windows: `C:\Users\******\AppData\Roaming\FreeCAD\Mod`
 * for Linux and MacOS: `~/.FreeCAD/Mod` 
 
+This can be useful for testing local modifications to the workbench, or to remove an old stale version of the workbench. In this case, download the Github [FreeCAD_Assembly4-master.zip](https://github.com/Zolko-123/FreeCAD_Assembly4/archive/master.zip) archive from [github.com/Zolko-123/FreeCAD_Assembly4](https://github.com/Zolko-123/FreeCAD_Assembly4) to a temporary directory, and extract the Zip archive. Then, remove any existing Assembly4 directory from FreeCAD's local workbench directory, and move (or link) the folder *FreeCAD_Assembly4-master* into the directory containing all FreeCAD addon modules.
+
+
 
 ## Principle
 
-The very principle of Assembly4 is that `App::Part` objects are linked together using the `App::Link` interface introduced in FreeCAD v0.19. The host parent assembly **and** the included child parts are all `App::Part` type objects. The parts that are linked can be in the same document as the assembly or an external document, invariably. Since a FreeCAD `App::Part` is a container, all objects included in the child part will be included in the parent assembly.
+The very principle of Assembly4 is that FreeCAD container objects ( of type `App::Part` or `PartDesign::Body`) are linked together using the `App::Link` interface introduced in FreeCAD v0.19. The host parent assembly is also an `App::Part` type container objects called `Model`. The parts that are linked can be in the same document as the assembly or an external document, invariably. 
 
-Even though an Assembly4 assembly is a FreeCAD `App::Part` type object, it has some particularities:
+Even though an Assembly4 assembly is a standard FreeCAD `App::Part` type object, it has some particularities:
 
 * it is called *Model* at creation time  
 * it contains a group called *Constraints* at the root  

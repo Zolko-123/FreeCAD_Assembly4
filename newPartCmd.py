@@ -64,7 +64,7 @@ class newPart:
 
 
     def Activated(self):
-        instanceName = Asm4.nextInstance(self.partName)
+        instanceName = Asm4.nextInstance( self.partName )
         text,ok = QtGui.QInputDialog.getText(None, self.tooltip, 'Enter new '+self.partName+' name :'+' '*30, text = instanceName)
         if ok and text:
             # create Part
