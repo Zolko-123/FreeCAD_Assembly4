@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.9.3, 2020-05-18
+Current version 0.9.4, 2020-05-25
 
 
 
@@ -51,6 +51,9 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 
 ## Release notes
+
+* 2020.05.25 (**0.9.4**) :  
+Minor update for Fasteners (simplified format, should be backwards compatible)  
 
 * 2020.05.18 (**0.9.3**) :  
 Bugfixe: create Body/Part didn't place them in the selected App::Part container  

@@ -24,7 +24,8 @@ Assembly 4 is available through the [FreeCAD Addon Manager](https://github.com/F
 It is possible to install this workbench manually into FreeCAD's local workbench directory:
 
 * for Windows: `C:\Users\******\AppData\Roaming\FreeCAD\Mod`
-* for Linux and MacOS: `~/.FreeCAD/Mod` 
+* for Linux: `~/.FreeCAD/Mod` 
+* for MacOS: `~/Library/Preferences/FreeCAD/Mod/`
 
 This can be useful for testing local modifications to the workbench, or to remove an old stale version of the workbench. In this case, download the Github [FreeCAD_Assembly4-master.zip](https://github.com/Zolko-123/FreeCAD_Assembly4/archive/master.zip) archive from [github.com/Zolko-123/FreeCAD_Assembly4](https://github.com/Zolko-123/FreeCAD_Assembly4) to a temporary directory, and extract the Zip archive. Then, remove any existing Assembly4 directory from FreeCAD's local workbench directory, and move (or link) the folder *FreeCAD_Assembly4-master* into the directory containing all FreeCAD addon modules.
 
