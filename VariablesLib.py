@@ -231,7 +231,7 @@ class delVariable():
         self.varValue.clear()
         self.description.clear()
         self.varList.clear()
-        self.varList.addItem('Select a variable')
+        self.varList.addItem('Please choose')
         for var in self.Variables.PropertiesList:
             if self.Variables.getGroupOfProperty(var)=='Variables' :
                 self.varList.addItem(var)
@@ -254,7 +254,7 @@ class delVariable():
         self.formLayout = QtGui.QFormLayout()
         # existing Variable
         self.varList = QtGui.QComboBox()
-        self.formLayout.addRow(QtGui.QLabel('Select Variable'),self.varList)
+        self.formLayout.addRow(QtGui.QLabel('Variable'),self.varList)
         # Variable Name
         self.varName = QtGui.QLineEdit()
         self.formLayout.addRow(QtGui.QLabel('Name'),self.varName)
