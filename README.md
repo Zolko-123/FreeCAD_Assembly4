@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.9.4, 2020-05-25
+Current version 0.9.5, 2020-06-19
 
 
 
@@ -51,6 +51,11 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 
 ## Release notes
+
+* 2020.06.19 (**0.9.5**) :  
+Added new Measure tool  
+Added preliminary BoM, PartList and PartInfo functions  
+Minor bugfixes and improvements  
 
 * 2020.05.25 (**0.9.4**) :  
 Minor update for Fasteners (simplified format, should be backwards compatible)  

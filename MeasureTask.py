@@ -2,37 +2,24 @@
 # -*- coding: utf-8 -*-
 #****************************************************************************
 #*                                                                          *
-#*  Copyright (c) 2020                                                      *
-#*  Maurice easyw@katamail.com                                              *
+#* by Zoltan Hubert                                                         *
 #*                                                                          *
 #*   code partially based on:                                               *
 #*                                                                          *
-# evolution of Macro_CenterFace                                             *
-# some part of Macro WorkFeature                                            *
-# and Macro Rotate To Point, Macro_Delta_xyz                                *
-# and assembly2                                                             *
-#                                                                           *
-# Measure tool                                                              *
-#                                                                           *
-# HDPI improved ui thanks to Mateusz https://github.com/f3nix               *
-#                                                                           *
-#  (C) Maurice easyw-fc 2020                                                *
-#    This program is free software; you can redistribute it and/or modify   *
-#    it under the terms of the GNU Library General Public License (LGPL)    *
-#    as published by the Free Software Foundation; either version 2 of      *
-#    the License, or (at your option) any later version.                    *
-#    for detail see the LICENCE text file.                                  *
+#* Caliper tool                                                             *
+#* evolution of Macro_CenterFace                                            *
+#* some part of Macro WorkFeature                                           *
+#* and Macro Rotate To Point, Macro_Delta_xyz                               *
+#* and assembly2                                                            *
+#*                                                                          *
+#* Measure tool                                                             *
+#*                                                                          *
+#*    This program is free software; you can redistribute it and/or modify  *
+#*    it under the terms of the GNU Library General Public License (LGPL)   *
+#*    as published by the Free Software Foundation; either version 2 of     *
+#*    the License, or (at your option) any later version.                   *
+#*    for detail see the LICENCE text file.                                 *
 #****************************************************************************
-
-
-__title__   = "Caliper for Measuring Part, App::Part & Body objects"
-__author__  = "maurice"
-__url__     = "kicad stepup"
-__version__ = "1.5.8" #Manipulator for Parts
-__date__    = "02.2020"
-
-testing=False #true for showing helpers
-testing2=False #true for showing helpers
 
 
 
@@ -41,17 +28,13 @@ import threading, sys, math, os
 import numpy as np
 
 from PySide import QtGui, QtCore
-from pivy import coin
+#from pivy import coin
 
 import FreeCADGui as Gui
 import FreeCAD as App
 from FreeCAD import Base
 from FreeCAD import Console as FCC
 import Part
-
-#import Draft, DraftTools, DraftVecUtils, DraftGeomUtils
-#import oDraft
-#mDraft = oDraft
 
 import libAsm4 as Asm4
 
@@ -63,35 +46,13 @@ import libAsm4 as Asm4
     |                Global variables               |
     +-----------------------------------------------+
 """
-global initial_placement, last_selection, added_dim
+global taskUI, addedDims, PtS
+addedDims = []
+PtS = None
 
-global pointsDirection     ;pointsDirection = []     # tableau direction store the coordinates of first line (for deplacement)
-global Direction_Distance  ;Direction_Distance = 0.1 # step precision deplacement here 0.1 mm
-global selobject           ;selobject       = ""
-global sel                 ;sel             = ""
 
-global UI
-
-iconSize = 32
-btSize = 48
-btn_sizeX=32;btn_sizeY=32;
-btn_sizeX=32;btn_sizeY=32;
-chkb_sizeX=20;chkb_sizeY=20;
-btn_sm_sizeX=20;btn_sm_sizeY=20;
-btn_md_sizeX=26;btn_md_sizeY=26;
-
-anno_fntsize = 12.0
-anno_precision = 0.001
-
-angle_tolerance = 1e-5 #
-global tobiarc_tol
-tobiarc_tol = 0.001 #0.0001
-
-initial_placement = []
-last_selection = []
-added_dim = []
-
-posz=(0.0,0.0,0.0)
+annoFontSize = 12.0
+annoPrecision = 0.001
 
 
 
@@ -137,28 +98,23 @@ class MeasureUI():
 
         # draw the GUI, objects are defined later down
         self.drawUI()
-
-        # initialize the UI with the current data
-        global UI
-        UI = self
-
-        # global variables
-        global selobject, sel
-        global initial_placement, last_selection, objs
-
-        Gui.Selection.clearSelection()
+        global taskUI
+        taskUI = self
+        global PtS
+        global addedDims
 
         # start the observer
-        self.so=SelObserverCaliper()
-        Gui.Selection.addObserver(self.so) # install resident function
-        FCC.PrintMessage('Observer started ...\n')
+        Gui.Selection.clearSelection()
+        #self.so=SelObserverCaliper()
+        self.so = selectionObserver()
+        Gui.Selection.addObserver( self.so, 1 ) # 1 = resolve
+        FCC.PrintMessage('Observer started\n')
 
         # enable the measurement points
         self.DimensionP1.setEnabled(True)
         self.DimensionP2.setEnabled(False)
-        self.DimensionP3.setEnabled(False)
-
-
+        
+        # init finished
 
     # standard FreeCAD Task panel buttons
     def getStandardButtons(self):
@@ -166,32 +122,38 @@ class MeasureUI():
                    | QtGui.QDialogButtonBox.Reset
                    | QtGui.QDialogButtonBox.Ok )
 
-
     # OK
     def accept(self):
         self.finish()
 
-
     # Clear dimensions
     def clicked(self, button):
+        global addedDims, PtS
         if button == QtGui.QDialogButtonBox.Reset:
-            global added_dim
             FCC.PrintMessage('Removing all measurements ...')
             Gui.Selection.clearSelection()
             self.resultText.clear()
-            for d in added_dim:
+            # remove PtS
+            if PtS and hasattr(PtS,'Name') and App.ActiveDocument.getObject(PtS.Name):
+                App.ActiveDocument.removeObject(PtS.Name)
+                PtS = None
+            # remove all dimensions
+            for d in addedDims:
                 FCC.PrintMessage('.')
                 try:
                     App.ActiveDocument.removeObject(d.Name)
                 except:
                     pass
-            added_dim=[]
+            addedDims=[]
+            # remove also the "Measures" group if any
+            if App.ActiveDocument.getObject('Measures') and \
+                        App.ActiveDocument.getObject('Measures').TypeId=='App::DocumentObjectGroup':
+                App.ActiveDocument.removeObject('Measures')
             self.clearConsole()
             self.DimensionP1.setEnabled(True)
             self.DimensionP2.setEnabled(False)
-            self.DimensionP3.setEnabled(False)
+            #self.DimensionP3.setEnabled(False)
             FCC.PrintMessage(' done\n')
-
 
     # clear report view and Python panel
     def clearConsole(self):
@@ -201,7 +163,6 @@ class MeasureUI():
         #c.clear()
         rv = mw.findChild(QtGui.QTextEdit, "Report view")
         rv.clear()
-
 
     # Help
     def helpRequested(self):
@@ -217,7 +178,6 @@ class MeasureUI():
         #QtGui.QApplication.restoreOverrideCursor()
         res = QtGui.QMessageBox.question(None,"Help on Measurement Tools",msg,QtGui.QMessageBox.Ok)
 
-
     # Close
     def finish(self):
         FCC.PrintMessage("closing ... ")
@@ -226,118 +186,107 @@ class MeasureUI():
             FCC.PrintMessage("done\n")
         except:
             FCC.PrintWarning("was not able to remove observer\n")
-            pass
         # close Task widget
         Gui.Control.closeDialog()
 
+    # when changing the measurement type, reset pre-existing selection
+    def onMeasure_toggled(self):
+        self.DimensionP1.setEnabled(True)
+        self.DimensionP2.setEnabled(False)
+        Gui.Selection.clearSelection()
+        # Angle dimensions only work with Snap selection
+        if self.rbAngle.isChecked():
+            self.rbShape.setChecked(True)
 
-
-    '''
-    # starting or stopping observer
-    def onMeasure_toggled( self,checked ):
-        global selobject, sel
-        global initial_placement, last_selection, objs
-        global DSMove_prev_Val, DSRotate_prev_Val
-
-        if self.Measure.isChecked():
-            pm = QtGui.QPixmap()
-            pm.loadFromData(base64.b64decode(Caliper_selected_b64))
-            self.Measure.setIcon(QtGui.QIcon(pm))
-        else:
-            pm = QtGui.QPixmap()
-            pm.loadFromData(base64.b64decode(Caliper_b64))
-            self.Measure.setIcon(QtGui.QIcon(pm))
-        if App.ActiveDocument is not None:
-            if checked:
-                Gui.Selection.clearSelection()
-                self.rowOverride = True
-                self.DimensionP1.setEnabled(True)
-                self.DimensionP2.setEnabled(False)
-                self.DimensionP3.setEnabled(False)
-                self.bLabel.setEnabled(True)
-                self.so=SelObserverCaliper()
-                Gui.Selection.addObserver(self.so) # install resident function
-                sayw('Observer started ...')
-            else:
-                self.rowOverride = False
-                self.DimensionP1.setEnabled(False)
-                self.DimensionP2.setEnabled(False)
-                self.DimensionP3.setEnabled(False)
-                self.bLabel.setEnabled(False)
-                try:
-                    Gui.Selection.removeObserver(self.so)   # desinstalle la fonction residente SelObserver
-                    sayw('Observer closed')
-                except:
-                    sayerr('not able to remove observer')
-                    pass
-                if App.ActiveDocument is not None:
-                    for obj in App.ActiveDocument.Objects:
-                        Gui.Selection.removeSelection(obj)
-    '''
-
+    # Angle can be measured only between shapes
+    def onSnap_toggled(self):
+        if self.rbAngle.isChecked() and self.rbSnap.isChecked():
+            self.rbDistance.setChecked(True)
 
     # defines the UI, only static elements
     def drawUI(self):
+        iconSize = 32
+        btSize = 48
+        btn_sizeX=32;btn_sizeY=32;
+        btn_sizeX=32;btn_sizeY=32;
+        chkb_sizeX=20;chkb_sizeY=20;
+        btn_sm_sizeX=20;btn_sm_sizeY=20;
+        btn_md_sizeX=26;btn_md_sizeY=26;
         # the layout for the main window is vertical (top to down)
         self.mainLayout = QtGui.QVBoxLayout(self.form)
-
-        # actual measurement tools
-        self.Controls_Group = QtGui.QGroupBox(self.form)
-        #self.Controls_Group = QtGui.QGroupBox()
-        self.Controls_Group.setToolTip("Controls")
-        self.Controls_Group.setTitle("Controls")
-        self.Controls_Group.setObjectName("Controls_Group")
-        self.mainLayout.addWidget(self.Controls_Group)
-
-        # new grid layout
-        self.gridLayout = QtGui.QGridLayout(self.Controls_Group)
         # empty pixmap for icons
         pm = QtGui.QPixmap()
+        self.mainLayout.addWidget(QtGui.QLabel('Controls'))
 
-        # 1,0
-        pm.loadFromData(base64.b64decode(Snap_Options_b64))
-        self.rbSnap = QtGui.QRadioButton(self.Controls_Group)
-        self.rbSnap.setObjectName("rbSnap")
-        self.rbSnap.setToolTip("Snap to EndPoint, MiddlePoint, Center")
-        self.rbSnap.setIconSize(QtCore.QSize(3*btn_md_sizeX,btn_md_sizeY))
-        self.rbSnap.setIcon(QtGui.QIcon(pm))
-        self.rbSnap.setChecked(True)
-        self.gridLayout.addWidget(self.rbSnap, 1, 0, 1, 2 )
+        # measurement type
+        self.measureGroup = QtGui.QFrame(self.form)
+        #self.measureGroup.setTitle("Measurement type")
+        self.measureGroup.setFrameStyle(QtGui.QFrame.StyledPanel | QtGui.QFrame.Plain)
+        self.mainLayout.addWidget(self.measureGroup)
+        self.measureGrid = QtGui.QGridLayout(self.measureGroup)
 
-        # 2,0
+        # 0,0
         pm.loadFromData(base64.b64decode(Dim_Radius_b64))
-        self.rbRadius = QtGui.QRadioButton(self.Controls_Group)
+        self.rbRadius = QtGui.QRadioButton(self.measureGroup)
         self.rbRadius.setObjectName("rbRadius")
-        self.rbRadius.setToolTip("Measure Radius of Arc or Circle")
+        self.rbRadius.setToolTip("Measure Radius of Arc or Circle\nMeasure Length of Edge")
         self.rbRadius.setIconSize(QtCore.QSize(btn_md_sizeX,btn_md_sizeY))
         self.rbRadius.setIcon(QtGui.QIcon(pm))
-        self.rbRadius.setEnabled(True)
-        self.rbRadius.setChecked(False)
-        self.gridLayout.addWidget(self.rbRadius, 2, 0 )
-
-        # 2,1
+        self.rbRadius.setChecked(True)
+        self.measureGrid.addWidget(self.rbRadius, 0, 0 )
+        # 0,1
         pm.loadFromData(base64.b64decode(Dim_Length_b64))
-        self.rbLength = QtGui.QRadioButton(self.Controls_Group)
-        self.rbLength.setObjectName("rbLength")
-        self.rbLength.setToolTip("Measure Length of Edge")
-        self.rbLength.setIconSize(QtCore.QSize(btn_md_sizeX,btn_md_sizeY))
-        self.rbLength.setIcon(QtGui.QIcon(pm))
-        self.rbLength.setChecked(False)
-        self.gridLayout.addWidget(self.rbLength, 2, 1 )
-
-        # 2,3
+        self.rbDistance = QtGui.QRadioButton(self.measureGroup)
+        self.rbDistance.setObjectName("rbDistance")
+        self.rbDistance.setToolTip("Measure Distance")
+        self.rbDistance.setIconSize(QtCore.QSize(btn_md_sizeX,btn_md_sizeY))
+        self.rbDistance.setIcon(QtGui.QIcon(pm))
+        self.measureGrid.addWidget(self.rbDistance, 0, 1 )
+        # 0,2
         pm.loadFromData(base64.b64decode(Dim_Angle_b64))
-        self.rbAngle = QtGui.QRadioButton(self.Controls_Group)
+        self.rbAngle = QtGui.QRadioButton(self.measureGroup)
         self.rbAngle.setObjectName("rbAngle")
         self.rbAngle.setToolTip("Measure Angle")
         self.rbAngle.setIconSize(QtCore.QSize(btn_md_sizeX,btn_md_sizeY))
         self.rbAngle.setIcon(QtGui.QIcon(pm))
-        self.rbAngle.setChecked(False)
-        self.gridLayout.addWidget(self.rbAngle, 2, 2 )
+        self.measureGrid.addWidget(self.rbAngle, 0, 2 )
 
-        # 3,0
+        self.mainLayout.addLayout(self.measureGrid)
+
+        # actual measurement tools
+        self.snapGroup = QtGui.QFrame(self.form)
+        self.snapGroup.setFrameStyle(QtGui.QFrame.StyledPanel | QtGui.QFrame.Plain)
+        # self.snapGroup.setTitle("Selection method")
+        self.mainLayout.addWidget(self.snapGroup)
+        self.snapGrid = QtGui.QGridLayout(self.snapGroup)
+        # 0,0
+        pm.loadFromData(base64.b64decode(Snap_Options_b64))
+        self.rbSnap = QtGui.QRadioButton(self.snapGroup)
+        self.rbSnap.setObjectName("rbSnap")
+        self.rbSnap.setToolTip("Snap to EndPoint, MiddlePoint, Center")
+        self.rbSnap.setIconSize(QtCore.QSize(3*btn_md_sizeX,btn_md_sizeY))
+        self.rbSnap.setIcon(QtGui.QIcon(pm))
+        self.rbSnap.setChecked(False)
+        self.snapGrid.addWidget(self.rbSnap, 0, 0, 1, 2 )
+
+        # 0,2
+        pm.loadFromData(base64.b64decode(Center_Mass_b64))
+        self.rbShape = QtGui.QRadioButton(self.snapGroup)
+        self.rbShape.setObjectName("rbShape")
+        self.rbShape.setToolTip("Select Shape")
+        self.rbShape.setIconSize(QtCore.QSize(btn_md_sizeX,btn_md_sizeY))
+        self.rbShape.setIcon(QtGui.QIcon(pm))
+        self.rbShape.setChecked(True)
+        self.snapGrid.addWidget(self.rbShape, 0, 2 )
+
+        self.mainLayout.addLayout(self.snapGrid)
+
+        # selection buttons/indicators
+        self.selectLayout = QtGui.QHBoxLayout()
+
+        # first element
         pm.loadFromData(base64.b64decode(DimensionP1_b64))
-        self.DimensionP1 = QtGui.QPushButton(self.Controls_Group)
+        self.DimensionP1 = QtGui.QPushButton()
         self.DimensionP1.setObjectName("DimensionP1")
         self.DimensionP1.setToolTip("First Element")
         self.DimensionP1.setMinimumSize(QtCore.QSize(btSize, btSize))
@@ -347,11 +296,10 @@ class MeasureUI():
         self.DimensionP1.setEnabled(False)
         self.DimensionP1.setCheckable(False)
         self.DimensionP1.setChecked(False)
-        self.gridLayout.addWidget(self.DimensionP1, 3, 0 )
 
-        # 3,1
+        # second element
         pm.loadFromData(base64.b64decode(DimensionP2_b64))
-        self.DimensionP2 = QtGui.QPushButton(self.Controls_Group)
+        self.DimensionP2 = QtGui.QPushButton()
         self.DimensionP2.setObjectName("DimensionP2")
         self.DimensionP2.setToolTip("Second Element")
         self.DimensionP2.setMinimumSize(QtCore.QSize(btSize, btSize))
@@ -361,33 +309,20 @@ class MeasureUI():
         self.DimensionP2.setEnabled(False)
         self.DimensionP2.setCheckable(False)
         self.DimensionP2.setChecked(False)
-        self.gridLayout.addWidget(self.DimensionP2, 3, 1 )
 
-        # 3,2
-        pm.loadFromData(base64.b64decode(DimensionP3_b64))
-        self.DimensionP3 = QtGui.QPushButton(self.Controls_Group)
-        self.DimensionP3.setObjectName("DimensionP3")
-        self.DimensionP3.setMinimumSize(QtCore.QSize(btSize, btSize))
-        self.DimensionP3.setMaximumSize(QtCore.QSize(btSize, btSize))
-        self.DimensionP3.setIconSize(QtCore.QSize(iconSize,iconSize))
-        self.DimensionP3.setToolTip("Dimension position new")
-        self.DimensionP3.setIcon(QtGui.QIcon(pm))
-        self.DimensionP3.setEnabled(False)
-        self.DimensionP3.setCheckable(False)
-        self.DimensionP3.setChecked(False)
-        self.gridLayout.addWidget(self.DimensionP3, 3, 2 )
+        self.selectLayout.addStretch()
+        self.selectLayout.addWidget(self.DimensionP1)
+        self.selectLayout.addStretch()
+        self.selectLayout.addWidget(self.DimensionP2)
+        self.selectLayout.addStretch()
+        self.mainLayout.addLayout(self.selectLayout)
 
-        # apply the layout to the main window
-        self.mainLayout.addLayout(self.gridLayout)
-
-
-        # actual measurement tools
+        # Results
         self.Results_Group = QtGui.QGroupBox(self.form)
         self.Results_Group.setToolTip("Results")
         self.Results_Group.setTitle("Results")
         self.Results_Group.setObjectName("Results_Group")
         self.mainLayout.addWidget(self.Results_Group)
-
         self.resultLayout = QtGui.QVBoxLayout(self.Results_Group)
 
         # draw annotation in the GUI window
@@ -425,1003 +360,491 @@ class MeasureUI():
         self.form.setLayout(self.mainLayout)
 
         # Actions
-        #self.Measure.toggled.connect(self.onMeasure_toggled)
-        #self.bLabel.toggled.connect(self.onLabel_toggled)
+        self.rbRadius.toggled.connect(self.onMeasure_toggled)
+        self.rbDistance.toggled.connect(self.onMeasure_toggled)
+        self.rbAngle.toggled.connect(self.onMeasure_toggled)
+        #self.rbAngle.toggled.connect(self.onAngle_toggled)
+        self.rbSnap.toggled.connect(self.onSnap_toggled)
 
 
 
-class SelObserverCaliper():
+"""
+    +-----------------------------------------------+
+    |    a selection observer resident function     |
+    +-----------------------------------------------+
+"""
+class selectionObserver():
     def __init__(self):
-        pass
+        global PtS
+        self.Sel1 = None
+        self.Shp1 = None
+        self.Pt1  = None
+        self.Sel2 = None
+        self.Shp2 = None
+        self.Pt2  = None
+        PtS       = None
 
     def addSelection(self, document, obj, element, position):
-        global UI
-        global selobject, sel, posz, P,P1,P2,PE,PC,APName
-        global initial_placement, last_selection, objs
-        global added_dim, in_hierarchy, vec1, mid, midP, va, vb, P_T
-        global ornt_1, sel1, has_radius, w, angle, dstP
+        global taskUI
+        global PtS
 
         fntsize='0.25mm'
         ticksize='0.1mm'
-        #anno_fntsize = 12.0
-        Vtx_sel=False
-        dx=0;dy=0;dz=0
 
-        #getting the full hierarchy information
-        # Select a subObject
-        if 'LinkView' in dir(Gui): 
-            # Select a subObject w/ the full hierarchy information
-            sel       = Gui.Selection.getSelectionEx('', 0) 
-            ## empty string means current document, '*' means all document. 
-            ## The second argument 1 means resolve sub-object, which is the default value. 0 means full hierarchy.
-        else:
-            sel       = Gui.Selection.getSelectionEx()
-        # Select an object
+        # Select a subObject w/ the full hierarchy information
+        # empty string means current document, '*' means all document. 
+        # The second argument 1 means resolve sub-object, which is the default value. 0 means full hierarchy.
+        # sel = Gui.Selection.getSelectionEx('', 0)[0].SubObjects[0]
+        sel = Gui.Selection.getSelectionEx('', 0) 
         selobject = Gui.Selection.getSelection()
-        
-        #ui.label_1.setText("Length axis (first object) : " + str(sel[0].SubObjects[0].Length) + " mm")
         if len(selobject) == 1 or len(sel) == 1:# or (len(selobject) == 1 and len(sel) == 1):
             #Faces or Edges
             if len(sel[0].SubObjects)>0: 
-                if 'Face' in str(sel[0].SubObjects[0]) \
-                        or 'Edge' in str(sel[0].SubObjects[0]) \
-                        or 'Vertex' in str(sel[0].SubObjects[0]):
-                    #sayw('starting')
-                    if 'Vertex' in str(sel[0].SubObjects[0]):
-                        Vtx_sel=True
-                    objs = []
-                    o = sel[0].Object
-                    #top_lvl=None
-                    #if in_hierarchy:
-                    posz=position
-                    #sayw('posz '+str(posz))
-                    plcm, top_level_obj, bbC, pnt, orient, norm = get_placement_hierarchy (sel[0])
-                    #print(top_level_obj);stop
-                    if top_level_obj is not None:
-                        #say('object in App::Part hierarchy or Body')
-                        top_level_obj_Name=top_level_obj.Name
-                        in_hierarchy=True
-                    else:
-                        #say('object Part')
-                        top_level_obj_Name=sel[0].Object.Name
-                        in_hierarchy=False
-                    rot_center=bbC
-                    has_Placement=False
-                    if hasattr(top_level_obj,'Placement'):
-                        has_Placement=True
-                    if in_hierarchy and has_Placement:
-                        #say('in hierarchy and use hierarchy')
-                        last_selection.append(top_level_obj) #(sel[0])
-                        obj = top_level_obj #sel[0].Object
-                        initial_placement.append(obj.Placement)
-                        objs.append(obj)
-                        #say ('initial Plcm '+str(obj.Placement))
-                    else:
-                        last_selection.append(sel[0].Object)
-                        obj = sel[0].Object
-                        initial_placement.append(obj.Placement)
-                        objs.append(obj)
-                        #say ('initial Plcm '+str(obj.Placement))
-                    #say ('last selection: ' + obj.Name)
-                    #for o in last_selection:
-                    #    say('sel list ' + o.Name) #o.Object.Name)
+                subShape = sel[0].SubObjects[0]
+                # if valid selection
+                if subShape.isValid() and ('Face' in str(subShape) or 'Edge' in str(subShape) or 'Vertex' in str(subShape)):
+                    # clear the result area
+                    taskUI.resultText.clear()
+                    # remove previous snap point
+                    if PtS and hasattr(PtS,'Name') and App.ActiveDocument.getObject(PtS.Name):
+                        App.ActiveDocument.removeObject(PtS.Name)
+                        PtS = None
 
-                    # Measure distance between 2 points
-                    ### ------------------ begin Snap ----------------------- ###
-                    if UI.rbSnap.isChecked():                        ### Snap
-                        #print (sel[0].SubObjects[0].Vertexes[0].Point,sel[0].SubObjects[0].Vertexes[1].Point)
-                        #print 'pnt=',pnt[0]
-                        if UI.DimensionP1.isEnabled(): #step #1
-                            P1=pnt
-                            PC=self.drawPoint(P1)
-                            UI.DimensionP1.setEnabled(False)
-                            UI.DimensionP2.setEnabled(True)
-                        elif UI.DimensionP2.isEnabled(): #step #2
-                            UI.DimensionP2.setEnabled(False)
-                            w=dist(P1, pnt)*5
-                            P2=pnt
-                            ds = dist(P2,P1 )
-                            dx = abs( P2[0]-P1[0] )
-                            dy = abs( P2[1]-P1[1] )
-                            dz = abs( P2[2]-P1[2] )
-                            UI.DimensionP1.setEnabled(True)
-                            App.ActiveDocument.removeObject(PC.Name)
-                            halfedge = (pnt.sub(P1)).multiply(.5)
-                            mid=App.Vector.add(P1,halfedge)
-                            if mid!=P1: #non coincident points
-                                distance = ds
-                                # add an annotation label
-                                self.drawLine( P1, P2 )
-                                if UI.bLabel.isChecked():
-                                    comp = UI.Components.isChecked()
-                                    self.annoDims( mid, ds, dx, dy, dz, comp )
+                    # first element selection
+                    if taskUI.DimensionP1.isEnabled():
+                        # figure out the first selected element
+                        self.Sel1 = None
+                        self.Shp1 = None
+                        self.Pt1  = None
+                        self.Sel2 = None
+                        self.Shp2 = None
+                        self.Pt2  = None
+                        # shape selected
+                        if taskUI.rbShape.isChecked():
+                            # the shape is actually a vertex, thus a point
+                            if 'Vertex' in str(subShape):
+                                self.Pt1 = subShape.Vertexes[0].Point
+                                PtS  = self.drawPoint(self.Pt1)
+                                self.Sel1 = 'point'
+                            # all other (real) shapes
                             else:
-                                distance = 0.0
-                            self.printDims( distance, dx, dy, dz )
-                    ### -------------------- end Snap ----------------------- ###
-                    ### ------------------ begin Radius --------------------- ###
-                    elif (UI.rbRadius.isChecked() and not Vtx_sel):  ### Radius
-                        if UI.DimensionP1.isEnabled():# and not UI.APlane.isEnabled(): #step #1
-                            if 'Edge' in str(sel[0].SubObjects[0]):
-                                UI.DimensionP1.setEnabled(False)
-                                UI.DimensionP2.setEnabled(False)
-                                #print 'bbC',bbC
-                                P1=App.Vector(bbC)
-                                P2=pnt
-                                halfedge = (P2.sub(P1)).multiply(.5)
-                                mid=App.Vector.add(P1,halfedge)
-                                has_radius=0
-                                w=dist(P1, pnt)*5
-                                UI.DimensionP1.setEnabled(True)
-                                curve = sel[0].SubObjects[0].Curve
-                                curve_type = type(curve)
-                                # if it's indeed a circular curve
-                                if curve_type == Part.Circle or curve_type == Part.ArcOfCircle:
-                                    radius = curve.Radius
-                                    center = curve.Center
-                                    axis   = curve.Axis
-                                    self.drawCircle(  radius, center, axis ) 
-                                    self.printCircle( radius, center, axis )
+                                self.Shp1 = subShape
+                                self.Sel1 = 'shape'
+                        # Snap to select a point
+                        elif taskUI.rbSnap.isChecked():
+                            self.Pt1 = self.getSnap(subShape)
+                            if self.Pt1:
+                                PtS  = self.drawPoint(self.Pt1)
+                                self.Sel1 = 'point'
+                        # this measures single objects
+                        if taskUI.rbRadius.isChecked():
+                            # if we have snapped a point before, we show its coordinates
+                            if self.Sel1 == 'point':
+                                self.measureCoords(self.Pt1)
+                            # if we have selected a shape before, we show its charcteristics
+                            elif self.Sel1 == 'shape':
+                                # a surface
+                                if 'Face' in str(self.Shp1):
+                                    self.measureArea(self.Shp1)
+                                # a point (should have been caught before)
+                                elif 'Vertex' in str(self.Shp1):
+                                    self.measureCoords( self.Shp1 )
+                                # a circle or arc of circle
+                                elif hasattr(self.Shp1,'Curve') and hasattr(self.Shp1.Curve,'Radius'):
+                                    self.measureCircle( self.Shp1 )
+                                # a straight line segment
+                                elif hasattr(self.Shp1,'Curve') and self.Shp1.Curve.TypeId=='Part::GeomLine':
+                                    self.measureLine( self.Shp1 )
+                                # dunno what that stuff is
                                 else:
-                                    UI.resultText.clear()
-                                    UI.resultText.setPlainText('Please select a circle or arc of circle')
-                    ### -------------------- end Radius --------------------- ###
-                    ### ------------------ begin Length --------------------- ###
-                    elif (UI.rbLength.isChecked() and not Vtx_sel):  ### Length
-                        if UI.DimensionP1.isEnabled():# and not UI.APlane.isEnabled(): #step #1
-                            if 'Edge' in str(sel[0].SubObjects[0]):
-                                curve = sel[0].SubObjects[0].Curve
-                                curve_type = type(curve)
-                                # if it's indeed a line
-                                if curve_type==Part.Line or curve_type==Part.LineSegment:
-                                    UI.DimensionP1.setEnabled(False)
-                                    UI.DimensionP2.setEnabled(False)
-                                    P1=App.Vector(bbC)
-                                    P2=pnt
-                                    w=dist(P1, pnt)*5
-                                    length = dist(P1, P2)
-                                    dx = abs( P2[0]-P1[0] )
-                                    dy = abs( P2[1]-P1[1] )
-                                    dz = abs( P2[2]-P1[2] )
-                                    halfedge = (pnt.sub(P1)).multiply(.5)
-                                    mid=App.Vector.add(P1,halfedge)
-                                    UI.DimensionP1.setEnabled(True)
-                                    # display measurements
-                                    self.drawLine( P1, P2, 5 )
-                                    self.printDims( length, dx, dy, dz, dimType='Length' )
-                                    if UI.bLabel.isChecked():
-                                        comp = UI.Components.isChecked()
-                                        self.annoDims( mid, length, dx, dy, dz, comp, dimType='Length' )
+                                    self.printResult("Can't measure\n"+str(Shp1))
+                            # dunno what that stuff is
+                            else:
+                                self.printResult("Can't measure\n"+str(subShape))
+                            # unset first selection
+                            self.Sel1 == None
+                        # if not rbRadius, launch the selection of the second element
+                        else:
+                            taskUI.DimensionP1.setEnabled(False)
+                            taskUI.DimensionP2.setEnabled(True)
+
+                    # second element selected
+                    elif taskUI.DimensionP2.isEnabled(): #step #2
+                        taskUI.DimensionP1.setEnabled(True)
+                        taskUI.DimensionP2.setEnabled(False)
+                        # remove showing of previous selected point
+                        if PtS and hasattr(PtS,'Name') and App.ActiveDocument.getObject(PtS.Name):
+                            App.ActiveDocument.removeObject(PtS.Name)
+                            PtS = None
+                        # figure out the second selected element
+                        if taskUI.rbShape.isChecked():
+                            self.Sel2 = 'shape'
+                            self.Shp2 = subShape
+                        # Snap to select a point
+                        elif taskUI.rbSnap.isChecked():
+                            self.Pt2 = self.getSnap(subShape)
+                            if self.Pt2:
+                                self.Sel2 = 'point'
+                        # if we have a valid selection:
+                        if self.Sel2:
+                            # Measure distance
+                            if taskUI.rbDistance.isChecked():
+                                # make a vertex shape out of a point
+                                if self.Pt1 and self.Sel1=='point':
+                                    self.Shp1 = Part.Vertex(Part.Point( self.Pt1 ))
+                                    self.Sel1 = 'shape'
+                                if self.Pt2 and self.Sel2=='point':
+                                    self.Shp2 = Part.Vertex(Part.Point( self.Pt2 ))
+                                    self.Sel2 = 'shape'
+                                if self.Sel1=='shape' and self.Sel2=='shape':
+                                    self.distShapes(self.Shp1,self.Shp2)
+                                # unexpected behaviour
                                 else:
-                                    UI.resultText.clear()
-                                    UI.resultText.setPlainText('Please select a line')
-                    ### -------------------- end Length --------------------- ###
-                    ### ------------------ begin Angle ---------------------- ###
-                    elif (UI.rbAngle.isChecked() and not Vtx_sel):   ### Angle
-                        if ('Edge' in str(sel[0].SubObjects[0]) or 'Face' in str(sel[0].SubObjects[0])):
-                            if UI.DimensionP1.isEnabled(): #step #1
-                                if 'Face' in str(sel[0].SubObjects[0]):
-                                    P1=App.Vector(bbC)
-                                    midP=P1
-                                    #PC=mDraft.makePoint(P1[0],P1[1],P1[2])
-                                    PC=self.drawPoint(P1)
-                                    vec1 = norm
-                                    ornt_1 = orient
-                                    sel1='face'
-                                    va=P1;
-                                    vb=App.Vector(bbC[0]+norm[0],bbC[1]+norm[1],bbC[2]+norm[2])
+                                    self.printResult( 'ERROR 42\n'+str(self.Shp1)+'\n'+str(self.Shp2) )
+                            # Measure angle
+                            elif taskUI.rbAngle.isChecked():
+                                if self.Sel1=='shape' and self.Sel2=='shape':
+                                    self.angleShapes( self.Shp1, self.Shp2 )
                                 else:
-                                    P1=App.Vector(bbC)
-                                    halfedge = (pnt.sub(P1)).multiply(.5)
-                                    midP=App.Vector.add(P1,halfedge)
-                                    #PC=mDraft.makePoint(midP[0],midP[1],midP[2])
-                                    PC=self.drawPoint(midP)
-                                    va=pnt; vb=P1
-                                    vec1 = pnt - P1
-                                    ornt_1 = orient
-                                    sel1='edge'
-                                added_dim.append(App.ActiveDocument.getObject(PC.Name))
-                                Gui.ActiveDocument.getObject(PC.Name).PointSize = 10.000
-                                Gui.ActiveDocument.getObject(PC.Name).PointColor = (1.000,0.333,0.498)
-                                UI.DimensionP1.setEnabled(False)
-                                UI.DimensionP2.setEnabled(True)
+                                    self.printResult( 'Select only faces or lines' )
+                        # some problem
+                        else:
+                            self.printResult( 'ERROR 44\n'+str(self.Shp2) )
+                # not valid selection
+                else:
+                    self.printResult('ERROR 40\n'+str(subShape))
 
-                            elif UI.DimensionP2.isEnabled(): #step #2
-                                UI.DimensionP2.setEnabled(False)
-                                slct=sel[0].SubObjects[0]
-                                P2=pnt
-                                P1=App.Vector(bbC)
-                                
-                                if 'Face' in str(slct):
-                                    v4=P1;
-                                    v3=App.Vector(bbC[0]+norm[0],bbC[1]+norm[1],bbC[2]+norm[2])
-                                    mid=App.Vector(bbC)
-                                    sel2='face'
-                                else:
-                                    v3 = P2 #e2.Vertexes[-1].Point
-                                    v4 = P1 #e2.Vertexes[0].Point
-                                    halfedge = (pnt.sub(P1)).multiply(.5)
-                                    mid=App.Vector.add(P1,halfedge)
-                                    sel2='edge'
-                                halfedge = (mid.sub(midP)).multiply(.5)
-                                # midP = middle of 1st element
-                                # mid  = middle of second element
-                                # mid2 = midpoint between the 2 
-                                mid2=App.Vector.add(midP,halfedge)
-                                #PE=mDraft.makePoint(mid[0],mid[1],mid[2])
-                                #Gui.ActiveDocument.getObject(PE.Name).PointSize = 10.000
-                                #Gui.ActiveDocument.getObject(PE.Name).PointColor = (1.000,0.333,0.498)
-                                PE=self.drawPoint(mid)
-                                w=dist(P1, P2)*5
-                                vec2 = P2 - P1
-                                v1 = va #e1.Vertexes[-1].Point
-                                v2 = vb #e1.Vertexes[0].Point
-                                ve1 = v1.sub(v2)
-                                # Create the Vector for second edge
-                                ve2 = v3.sub(v4)
-                                if orient==ornt_1:
-                                    # print 'adjusting angle'
-                                    ve2 = v4.sub(v3)
-                                angle = math.degrees(ve2.getAngle(ve1))
-                                dstP=-1
-                                #print abs(angle)
+    # figure out snap point of shape
+    def getSnap( self, shape ):
+        point = None
+        if shape.isValid():
+            if 'Vertex' in str(shape):
+                point  = shape.Vertexes[0].Point
+            # for a circle, snap to the center
+            elif 'Edge' in str(shape) and hasattr(shape,'Curve') \
+                                      and hasattr(shape.Curve,'Radius'):
+                point = shape.Curve.Center
+            # as fall-back, snap to center of bounding box
+            elif hasattr(shape,'BoundBox'):
+                point = shape.BoundBox.Center
+        else:
+            self.printResult('Invalid shape\n'+str(shape))
+        return point
 
-                                if (abs(angle)<angle_tolerance or abs(angle-180)<angle_tolerance) and sel1=='face' and sel2=='face':
-                                    ## distance between // planes
-                                    dstP = abs(point_plane_distance(P1, norm, midP))
-                                if (abs(angle)<angle_tolerance or abs(angle-180)<angle_tolerance) and sel1!='face' and sel2!='face':
-                                    ## perpendicular distance between edges
-                                    #sayerr('calculating Distance between // edges')
-                                    a1=np.array([v1[0],v1[1],v1[2]])
-                                    a0=np.array([v2[0],v2[1],v2[2]])
-                                    b0=np.array([v3[0],v3[1],v3[2]])
-                                    b1=np.array([v4[0],v4[1],v4[2]])
-                                    dstP=closestDistanceBetweenLines(a0,a1,b0,b1,clampAll=False)[2]
-
-                                UI.DimensionP1.setEnabled(True)
-                                App.ActiveDocument.removeObject(PC.Name)
-                                App.ActiveDocument.removeObject(PE.Name)
-                                # new dipslays
-                                self.printAngle( angle, dstP )
-                                wire = self.drawLine( midP, mid )
-                                if UI.bLabel.isChecked():
-                                    comp = UI.Components.isChecked()
-                                    self.annoAngle( mid2, angle, dstP, comp )
-                    ### -------------------- end Angle ---------------------- ###
-
-                else: #OLD Vertex not allowed in selection
+    # uses BRepExtrema_DistShapeShape to calculate the distance between 2 shapes
+    def angleShapes( self, shape1, shape2 ):
+        global taskUI
+        if shape1.isValid() and shape2.isValid():
+            Gui.Selection.clearSelection()
+            self.printResult( 'Measuring angles' )
+            # Datum object
+            if shape1.BoundBox.DiagonalLength > 1e+10:
+                pt1 = shape1.Placement.Base
+            else:
+                pt1 = shape1.BoundBox.Center
+            # Datum object
+            if shape2.BoundBox.DiagonalLength > 1e+10:
+                pt2 = shape2.Placement.Base
+            else:
+                pt2 = shape2.BoundBox.Center
+            # get the direction of the shape
+            dir1 = self.getDir(shape1)
+            dir2 = self.getDir(shape2)
+            if dir1 and dir2:
+                distance = -1
+                angle = dir1.getAngle(dir2)*180./math.pi
+                # 2 flat faces
+                if Asm4.isFlatFace(shape1) and Asm4.isFlatFace(shape2):
+                    angle = 180 - angle
+                else:
+                    # 1 flat face and 1 direction
+                    if Asm4.isFlatFace(shape1) or Asm4.isFlatFace(shape2):
+                        angle = 90 - angle
+                    if angle > 90:
+                        angle = 180. - angle
+                # parallel directions
+                if abs(angle) < 1.0e-6 or abs(180-angle)<1.0e-6:
+                    v1 = Part.Vertex(Part.Point( pt1 ))
+                    v2 = Part.Vertex(Part.Point( pt2 ))
+                    distance = v1.distToShape(v2)[0]
+                self.printAngle( angle, distance )
+                try:
+                    self.drawLine(pt1,pt2)
+                    self.annoAngle( self.midPoint(pt1,pt2), angle, distance )
+                except:
                     pass
+            else:
+                self.printResult('Ivalid directions')
+        else:
+            self.printResult('Ivalid shapes')
+
+    # figure out the direction of a shape, be it a line, a surface or a circle
+    def getDir( self, shape ):
+        direction = None
+        if Asm4.isSegment(shape):
+            line = shape
+            pt1 = line.Vertexes[0].Point
+            pt2 = line.Vertexes[1].Point
+            vect = (pt2.sub(pt1))
+            if vect.Length != 0:
+                direction = vect / vect.Length
+        elif Asm4.isLine(shape):
+            direction = shape.Placement.Rotation.multVec(App.Vector(0,0,1))
+        elif Asm4.isCircle(shape):
+            direction = shape.Curve.Axis
+        elif Asm4.isFlatFace(shape):
+            direction = shape.normalAt(0,0)
+        return direction
+
+    # uses BRepExtrema_DistShapeShape to calculate the distance between 2 shapes
+    def distShapes( self, shape1, shape2 ):
+        global taskUI
+        if shape1.isValid() and shape2.isValid():
+            Gui.Selection.clearSelection()
+            measure = shape1.distToShape(shape2)
+            if measure and Asm4.isVector(measure[1][0][0]) and Asm4.isVector(measure[1][0][1]):
+                dist = measure[0]
+                self.printResult('Minimum Distance :\n  '+str(dist))
+                if dist > 1.0e-9:
+                    pt1   = measure[1][0][0]
+                    pt2   = measure[1][0][1]
+                    self.measurePoints(pt1,pt2)
+                    '''
+                    midpt = self.midPoint(pt2,pt1)
+                    self.drawLine( pt1, pt2 )
+                    if taskUI.bLabel.isChecked():
+                        self.drawAnnotation( midpt, ['D = '+self.arrondi(dist)] )
+                    '''
+        else:
+            self.printResult('Ivalid shapes')
+
+    # measure the coordinates of a single point
+    def measureCoords(self, vertex ):
+        global taskUI
+        point = None
+        if Asm4.isVector(vertex):
+            point = vertex
+        elif hasattr(vertex,'isValid')  and vertex.isValid() \
+                                        and hasattr(vertex,'Vertexes') \
+                                        and len(vertex.Vertexes) > 0:
+            point = vertex.Vertexes[0].Point
+        else:
+            self.printResult('Not a valid point\n'+str(vertex))
+        if point:
+            #self.printResult( 'Measuring coordinates of\n'+str(vertex) )
+            anno = ['Coordinates :', 'X : '+str(point.x), 'Y : '+str(point.y), 'Z : '+str(point.z)]
+            text =  'Coordinates :\n'
+            text += "X : "+str(point.x)+"\n"
+            text += 'Y : '+str(point.y)+'\n'
+            text += 'Z : '+str(point.z)
+            self.printResult(text)
+            if taskUI.bLabel.isChecked():
+                self.drawAnnotation( point, anno )
+
+    # mesure distance between 2 points
+    def measurePoints(self, pt1, pt2 ):
+        global taskUI
+        mid = self.midPoint(pt1,pt2)
+        if mid:
+            Gui.Selection.clearSelection()
+            self.drawLine(pt1,pt2)
+            dx = pt1[0]-pt2[0]
+            dy = pt1[1]-pt2[1]
+            dz = pt1[2]-pt2[2]
+            dist = math.sqrt(dx*dx + dy*dy + dz*dz)
+            text =  'Distance = '+str(dist)+'\n'
+            text += "ΔX : "+str(dx)+"\n"
+            text += 'ΔY : '+str(dy)+'\n'
+            text += 'ΔZ : '+str(dz)
+            # self.printResult( 'Measuring length of\n'+str(line) )
+            self.printResult( text )
+            if taskUI.bLabel.isChecked():
+                if taskUI.Components.isChecked():
+                    anno = ['D  = '+self.arrondi(dist),'ΔX = '+self.arrondi(dx), \
+                            'ΔY = '+self.arrondi(dy),  'ΔZ = '+self.arrondi(dz) ]
+                else:
+                    anno = ['D = '+self.arrondi(dist)]
+                self.drawAnnotation( mid, anno )
+        else:
+            self.printResult( 'Not valid Points' )
+
+    # measure a straight line
+    def measureLine(self, line ):
+        global taskUI
+        if Asm4.isSegment(line):
+            pt1 = line.Vertexes[0].Point
+            pt2 = line.Vertexes[1].Point
+            Gui.Selection.clearSelection()
+            self.drawLine(pt1,pt2)
+            dx = pt1[0]-pt2[0]
+            dy = pt1[1]-pt2[1]
+            dz = pt1[2]-pt2[2]
+            length = line.Length
+            text =  'Length = '+str(length)+'\n'
+            text += "ΔX = "+str(dx)+"\n"
+            text += 'ΔY = '+str(dy)+'\n'
+            text += 'ΔZ = '+str(dz)
+            # self.printResult( 'Measuring length of\n'+str(line) )
+            self.printResult( text )
+            if taskUI.bLabel.isChecked():
+                mid = line.BoundBox.Center
+                if taskUI.Components.isChecked():
+                    anno = ['L  = '+self.arrondi(length),'ΔX = '+self.arrondi(dx), \
+                            'ΔY = '+self.arrondi(dy),    'ΔZ = '+self.arrondi(dz) ]
+                else:
+                    anno = ['L = '+self.arrondi(length)]
+                self.drawAnnotation( mid, anno )
+        else:
+            self.printResult( 'Not a valid Line\n'+str(line) )
+
+    def measureArea(self, face ):
+        if face.isValid() and hasattr(face,'Area'):
+            if Asm4.isFlatFace(face):
+                self.printResult('Flat face\nArea : '+str(face.Area)+'\n')
+            else:
+                self.printResult('Area : '+str(face.Area)+"\n")
+        else:
+            self.printResult('Not a valid surface\n'+str(face) )
+
+    def measureCircle(self, circle):
+        global taskUI, PtS
+        if Asm4.isCircle(circle):
+            radius = circle.Curve.Radius
+            center = circle.Curve.Center
+            axis   = circle.Curve.Axis
+            Gui.Selection.clearSelection()
+            self.drawCircle( radius, center, axis )
+            text =  'Radius : '+str(radius)+"\n"
+            # if annotation is checked, show label with R = radius
+            text += "Diameter : "+self.arrondi(radius*2)+"\n"
+            text += 'Center : \n'
+            text += '  ( '+self.arrondi(center.x)+", "+self.arrondi(center.y)+", "+self.arrondi(center.z)+" )\n"
+            text += 'Axis : \n'
+            text += "  ( "+self.arrondi(axis.x)+", "+self.arrondi(axis.y)+", "+self.arrondi(axis.z)+" )"
+            self.printResult(text)
+            if taskUI.bLabel.isChecked():
+                pt = circle.Vertexes[0].Point
+                self.drawLine(center,pt)
+                self.drawAnnotation( pt, ['R = '+self.arrondi(radius)] )
+            else:
+                PtS = self.drawPoint(center)
+        else:
+            self.printResult('Not a valid circle\n'+str(circle))
 
     def printDims(self, ds, dx, dy, dz, dimType='Distance'):
-        global UI
-        UI.resultText.clear()
-        text = dimType+' : '+self.prec(ds)
+        text = dimType+' : '+str(ds)
         text += "\nΔX = "+str(dx)+"\nΔY = "+str(dy)+"\nΔZ = "+str(dz)
-        UI.resultText.setPlainText(text)
-
-    def annoDims(self, pos, ds, dx, dy, dz, components=False, dimType='Distance'):
-        global UI
-        anno = App.ActiveDocument.addObject("App::AnnotationLabel","DistanceLbl")
-        anno.BasePosition = pos
-        if components:
-            anno.LabelText = [dimType+': '+self.prec(ds), 'dx: '+self.prec(dx),'dy: '+self.prec(dy),'dz: '+self.prec(dz)]
-        else:
-            anno.LabelText = [str(ds)]
-        annoG = Gui.ActiveDocument.getObject(anno.Name)
-        annoG.FontSize = anno_fntsize
-        added_dim.append(anno)
+        self.printResult(text)
 
     def printAngle(self, angle, distance=-1 ):
-        global UI
-        UI.resultText.clear()
+        global taskUI
+        taskUI.resultText.clear()
         text = 'Angle : '+str(angle)+'°\n'
         if distance != -1:
-            text += 'Distance // '+self.prec(distance)
-        UI.resultText.setPlainText(text)
+            text += 'Distance // '+str(distance)
+        taskUI.resultText.setPlainText(text)
 
-    def annoAngle(self, pos, angle, distance=-1, components=False ):
-        anno = App.ActiveDocument.addObject("App::AnnotationLabel","AngleLbl")
-        anno.BasePosition = pos
-        if distance == -1 or components==False :
-            anno.LabelText = [str(angle)+'°']
+    # add the dim to the global addedDims table to be able to remove it
+    # add it also the the "Measures" group
+    def addToDims( self, dim ):
+        global addedDims
+        # check whether there is a "Measures" group
+        if not App.ActiveDocument.getObject('Measures'):
+            # if no, create one
+            measuresGroup = App.ActiveDocument.addObject( 'App::DocumentObjectGroup', 'Measures' )
+            # if there is already one, use it
+        elif App.ActiveDocument.getObject('Measures').TypeId=='App::DocumentObjectGroup':
+            measuresGroup = App.ActiveDocument.getObject('Measures')
+        # there is already a "Measures" object but it's not a Group, don't use it
         else:
-            anno.LabelText = ['Angle: '+self.prec(angle)+'°', 'Distance // '+self.prec(distance)]
+            measuresGroup = None
+        if measuresGroup:
+            measuresGroup.addObject(dim)
+        # finally, add the dim to the global addedDims table/list
+        addedDims.append(dim)
+
+    # print the result in the text field of the UI
+    def printResult(self,text):
+        global taskUI
+        taskUI.resultText.clear()
+        taskUI.resultText.setPlainText(text)
+
+    def drawAnnotation(self, pos, textTable ):
+        anno = App.ActiveDocument.addObject("App::AnnotationLabel","MeasureLbl")
+        anno.BasePosition = pos
+        # textTable is a table if strings: [ 'toto', 'titi', 'tata' ]
+        anno.LabelText = textTable
         annoG = Gui.ActiveDocument.getObject(anno.Name)
-        annoG.FontSize = anno_fntsize
-        added_dim.append(anno)
-        
-    def printCircle(self, rad, Center, Axis ):
-        global UI
-        UI.resultText.clear()
-        text =  'Radius : '+str(rad)+"\n"
-        text += 'Center : \n'
-        text += '  ( '+self.prec(Center.x)+", "+self.prec(Center.y)+", "+self.prec(Center.z)+" )\n"
-        text += 'Axis : \n'
-        text += "  ( "+self.prec(Axis.x)+", "+self.prec(Axis.y)+", "+self.prec(Axis.z)+" "
-        UI.resultText.setPlainText(text)
-
-
-    # round to precision anno_precision
-    def prec( self, val ):
-        #string = str(int(val/anno_precision + anno_precision)*anno_precision)
-        string = '{0:.3f}'.format(val)
-        return string
+        annoG.FontSize = annoFontSize
+        self.addToDims(anno)
 
     def drawCircle( self, radius, center, axis ):
         cc = Part.makeCircle( radius, center, axis )
-        circle = App.ActiveDocument.addObject('Part::Feature', 'MeasuredCircle')
+        circle = App.ActiveDocument.addObject('Part::Feature', 'aCircle')
         circle.Shape = Part.Wire( cc )
         circle.ViewObject.LineWidth = 5
         circle.ViewObject.LineColor = ( 1.0, 1.0, 1.0 )
         circle.ViewObject.PointSize = 10
         circle.ViewObject.PointColor= ( 0.0, 0.0, 1.0 )
-        added_dim.append(circle)
+        self.addToDims(circle)
 
     def drawLine( self, pt1, pt2, width=3 ):
-        line = Part.makeLine( pt1, pt2 )
-        wire = App.ActiveDocument.addObject('Part::Feature', 'DistanceLine')
-        wire.Shape = Part.Wire(line)
-        wire.ViewObject.LineWidth = width
-        wire.ViewObject.LineColor = ( 1.0, 1.0, 1.0 )
-        wire.ViewObject.PointSize = 10
-        wire.ViewObject.PointColor= ( 0.0, 0.0, 1.0 )
-        added_dim.append(wire)
+        if pt1!=pt2:
+            line = Part.makeLine( pt1, pt2 )
+            wire = App.ActiveDocument.addObject('Part::Feature', 'aLine')
+            wire.Shape = Part.Wire(line)
+            wire.ViewObject.LineWidth = width
+            wire.ViewObject.LineColor = ( 1.0, 1.0, 1.0 )
+            wire.ViewObject.PointSize = 10
+            wire.ViewObject.PointColor= ( 0.0, 0.0, 1.0 )
+            self.addToDims(wire)
+        else:
+            point = App.ActiveDocument.addObject('Part::Feature', 'aPoint')
+            point.Shape = Part.Vertex(Part.Point( pt1 ))
+            point.ViewObject.PointSize = 10
+            point.ViewObject.PointColor= ( 0.0, 0.0, 1.0 )
+            self.addToDims(point)
 
     def drawPoint( self, pt ):
-        point = App.ActiveDocument.addObject('Part::Feature', 'MeasurePoint')
+        point = App.ActiveDocument.addObject('Part::Feature', 'PtS')
         point.Shape = Part.Vertex(Part.Point( pt ))
         point.ViewObject.PointSize = 10
         point.ViewObject.PointColor= ( 1.000, 0.667, 0.000 )
-        added_dim.append(point)
+        self.addToDims(point)
         return point
 
-
-
-def get_placement_hierarchy (sel0):
-    """get normal at face and placement relative to hierarchy
-    of first selection object/face
-    return normal, placement, topObj, bbox center, Pnt absolute"""
-
-    global UI
-    global use_hierarchy, posz, tobiarc_tol
-
-    Gui.Selection.clearSelection()
-
-    Obj=sel0.Object
-    subObj=sel0.SubObjects[0]
-    edge_op=0
-    pad=0
-    pV1= App.Vector(0.0, 0.0, 0.0)
-    pV2= App.Vector(0.0, 0.0, 0.0)
-    Pnt= App.Vector(0.0, 0.0, 0.0)
-    orient = None; nwnorm = None; Vtx=False
-
-    top_level_obj = get_top_level(Obj)
-    if top_level_obj is not None: #hierarchy object
-        face=subObj
-        if 'Face' in str(subObj):
-            #say('Hierarchy obj Face')
-            face=sel0.SubObjects[0]
-        #say('Hierarchy obj')
-        if 'Face' in str(subObj):
-            #say('Hierarchy obj Face')
-            pad=0 #face
-        elif 'Edge' in str(subObj):
-            #pV1=subObj.Vertex1.Point
-            orient=subObj.Orientation
-            wire = Part.Wire(subObj)
-            if subObj.isClosed():
-                subObj = Part.Face(wire)
-                face=subObj
-                circ=subObj.copy()
-            else:
-                #pV2=subObj.Vertex2.Point
-                subObj = wire
-                face=subObj
-                #print subObj.Vertex2.Point
-                edge_op=1
-            pad=1 #edge
-        elif 'Vertex' in str(subObj):
-            #sayerr('vertex')
-            Vtx=True
-            Pt=subObj.Point
-            #point = subObj.Point
-            #P=subObj.Point
-            #nP=mDraft.makePoint(Pt)
-            nP=self.drawPoint(Pt)
-            #wire = Part.Wire(nP)
-            subObj = nP.Shape
-            App.ActiveDocument.removeObject(nP.Name)
-        if 1: #use_hierarchy:
-            nwshp = subObj.copy()
-            pOriginal=subObj.Placement
-            p0 =  App.Placement (App.Vector(0,0,0), App.Rotation(0,0,0), App.Vector(0,0,0))
-            nwshp.Placement=p0
-            r=[]
-            t=nwshp.copy()
-            #resetting Placement
-            for i in t.childShapes():
-                c=i.copy()
-                c.Placement=t.Placement.multiply(c.Placement)
-                r.append((i,c))
-            acpy=t.replaceShape(r)
-            acpy.Placement=App.Placement()
-            if hasattr(Obj,'InListRecursive'):
-                lrl=len(Obj.InListRecursive)
-                #for o_ in Obj.InListRecursive:
-                #    say(o_.Name)
-                if len(Obj.InList):
-                    top_level_obj = get_top_level(Obj)
-                    #sayerr(top_level_obj.Label)
-                    listSorted=get_sorted_list (Obj)
-                    #for p in listSorted:
-                    #    print p.Name
-                    #print listSorted, ' Sorted; Top ', top_level_obj[j]
-                    #stop
-                    for i in range (0,lrl):
-                        if hasattr(listSorted[i],'Placement'):
-                            #if 'Plane' not in ob.InListRecursive[i].TypeId:
-                            #print(listSorted[i].TypeId)
-                            #if 'LinkView' in dir(FreeCADGui):
-                            #    print(sel[0].SubElementNames)
-                            if listSorted[i].hasExtension("App::GeoFeatureGroupExtension") or listSorted[i].TypeId == 'App::LinkGroup': # or listSorted[i].TypeId == 'App::Link':
-                                acpy.Placement=acpy.Placement.multiply(listSorted[i].Placement)
-            #say(acpy.Placement)
-            #acpy.Placement=acpy.Placement.multiply(pOriginal)
-            #acpy.Placement=acpy.Placement.multiply(pOriginal)
-            if pad == 0: #note making wire from edge already resets the original placement
-                acpy.Placement=acpy.Placement.multiply(pOriginal)
-            nwshp.Placement = acpy.Placement
-            if edge_op==1:
-                #nwnorm = (subObj.Vertex2.Point - subObj.Vertex1.Point).normalize()
-                #pV1=nwshp.Vertex1.Point; pV2=nwshp.Vertex2.Point
-                pV1=nwshp.Vertexes[0].Point; pV2=nwshp.Vertexes[1].Point
-
-                ss=subObj.copy()#SubObjects[0] is the edge list
-                pointsDirection  = []
-                pointsDirection = ss.discretize(Number=5) # discretize the path line
-                nwnorm=pointsDirection[0].sub(pointsDirection[1])
-            #print edge_op
-            if pad==0 and not Vtx:
-                face.Placement=nwshp.Placement
-                nwnorm = face.normalAt(0,0)
-
-            try:
-                if hasattr(nwshp,'Solids'):
-                    if hasattr(nwshp.Solids[0],'CenterOfMass'):
-                        bbxCenter = nwshp.Solids[0].CenterOfMass
-                        #print 'Mass 1'
-                else:
-                    bbxCenter = nwshp.BoundBox.Center
-            except:
-                bbxCenter = nwshp.BoundBox.Center
-        # else:
-        #     nwshp = subObj.copy()
-        #     if edge_op==1:
-        #         #nwnorm = (subObj.Vertex2.Point - subObj.Vertex1.Point).normalize()
-        #         pV1=nwshp.Vertex1.Point; pV2=nwshp.Vertex2.Point
-        #     #else:
-        #     #    nwnorm = nwshp.normalAt(0,0)
-        #     bbxCenter = nwshp.BoundBox.Center
-        if UI.rbSnap.isChecked():
-            pCkd=App.Vector(posz)
-            #print 'points ',pV1, pV2, pCkd
-            if edge_op==1:
-                if 'Vertex' not in str(subObj):
-                    d1=dist(pV1,pCkd);d2=dist(pV2,pCkd)
-                    halfedge = (pV1.sub(pV2)).multiply(.5)
-                    mid=App.Vector.add(pV2,halfedge)
-                    #sayw(mid)
-                    d3=dist(pCkd,mid)
-                    d=min(d1,d2,d3)
-                    #sayerr('d1 '+str(d1)+' d2 '+str(d2)+' d3 '+str(d3)+' d '+str(d))
-                    if d==d1:
-                        Pnt=pV1
-                    elif d==d2:
-                        Pnt=pV2
-                    else:
-                        Pnt=mid
-                else:
-                    #Pnt=nwshp.Vertex1.Point
-                    Pnt=nwshp.Vertexes[0].Point
-            else: #edge_op=0
-                Pnt=App.Vector(bbxCenter)
-            return nwshp.Placement, top_level_obj, bbxCenter, Pnt, orient, nwnorm
-        elif UI.rbSnap.isChecked() and (edge_op==0 or pad==0) :
-            Pnt=App.Vector(bbxCenter)
-            return nwshp.Placement, top_level_obj, bbxCenter, Pnt, orient, nwnorm
-        elif UI.rbRadius.isChecked():
-            #bbxCenter=DraftGeomUtils.findMidpoint(circ)
-            #bbxCenter=subObj.BoundBox.Center
-            if edge_op==1:
-                curve_type = type(nwshp.Edges[0].Curve)
-                if curve_type == Part.Circle or curve_type == Part.ArcOfCircle:
-                    circ=nwshp.Edges[0].Curve
-                    bbxCenter=circ.Center
-                else:
-                    #bbxCenter=nwshp.BoundBox.Center
-                    #bbxCenter=(nwshp.Vertex2.Point[0],nwshp.Vertex2.Point[1],nwshp.Vertex2.Point[2])
-                    bbxCenter=(nwshp.Vertexes[1].Point[0],nwshp.Vertexes[1].Point[1],nwshp.Vertexes[1].Point[2])
-            else:
-                try:
-                    if hasattr(nwshp,'Solids'):
-                        if hasattr(nwshp.Solids[0],'CenterOfMass'):
-                            bbxCenter = nwshp.Solids[0].CenterOfMass
-                            #print 'Mass 1'
-                    else:
-                        bbxCenter = nwshp.BoundBox.Center
-                except:
-                    bbxCenter = nwshp.BoundBox.Center
-                    #if hasattr(nwshp,'CenterOfMass'):
-                    #    bbxCenter = nwshp.CenterOfMass
-                    #else:
-                    #    bbxCenter = nwshp.BoundBox.Center
-            if pad==1:
-                #Pnt=nwshp.Vertex1.Point
-                Pnt=nwshp.Vertexes[0].Point
-            else:
-                Pnt=App.Vector(bbxCenter)
-            return Obj.Placement, top_level_obj, bbxCenter, Pnt, orient, nwnorm
-            #sayerr(bbxCenter)
-            #sayw(Pnt)
-        elif UI.rbLength.isChecked():
-            #bbxCenter=DraftGeomUtils.findMidpoint(circ)
-            #bbxCenter=subObj.BoundBox.Center
-            if edge_op==1:
-                #Pnt=nwshp.Vertex1.Point
-                Pnt=nwshp.Vertexes[0].Point
-                bbxCenter=(nwshp.Vertexes[1].Point[0],nwshp.Vertexes[1].Point[1],nwshp.Vertexes[1].Point[2])
-            else:
-                #Pnt=nwshp.Vertex1.Point
-                Pnt=nwshp.Vertexes[0].Point
-                try:
-                    if hasattr(nwshp,'Solids'):
-                        if hasattr(nwshp.Solids[0],'CenterOfMass'):
-                            bbxCenter = nwshp.Solids[0].CenterOfMass
-                            #print 'Mass 1'
-                    else:
-                        bbxCenter = nwshp.BoundBox.Center
-                except:
-                    bbxCenter = nwshp.BoundBox.Center
-                    #if hasattr(nwshp,'CenterOfMass'):
-                    #    bbxCenter = nwshp.CenterOfMass
-                    #else:
-                    #    bbxCenter = nwshp.BoundBox.Center
-            return Obj.Placement, top_level_obj, bbxCenter, Pnt, orient, nwnorm
-        elif UI.rbAngle.isChecked():
-            #bbxCenter=DraftGeomUtils.findMidpoint(circ)
-            #bbxCenter=subObj.BoundBox.Center
-            if edge_op==1:
-                #Pnt=nwshp.Vertex1.Point
-                Pnt=nwshp.Vertexes[0].Point
-                #bbxCenter=(nwshp.Vertex2.Point[0],nwshp.Vertex2.Point[1],nwshp.Vertex2.Point[2])
-                bbxCenter=(nwshp.Vertexes[1].Point[0],nwshp.Vertexes[1].Point[1],nwshp.Vertexes[1].Point[2])
-            else:
-                #Pnt=nwshp.Vertex1.Point
-                Pnt=nwshp.Vertexes[0].Point
-                try:
-                    if hasattr(nwshp,'Solids'):
-                        if hasattr(nwshp.Solids[0],'CenterOfMass'):
-                            bbxCenter = nwshp.Solids[0].CenterOfMass
-                            #print 'Mass 1'
-                    else:
-                        bbxCenter = nwshp.BoundBox.Center
-                except:
-                    bbxCenter = nwshp.BoundBox.Center
-                #if hasattr(nwshp,'CenterOfMass'):
-                #    bbxCenter = nwshp.CenterOfMass
-                #else:
-                #    bbxCenter = nwshp.BoundBox.Center
-            return Obj.Placement, top_level_obj, bbxCenter, Pnt, orient, nwnorm
-
-
-    elif 'Face' in str(subObj) or 'Edge' in str(subObj) or 'Vertex' in str(subObj): # not in hierarchy
-        #say('Part obj')
-        pad=0 #face
-        face=subObj
-        plcm=subObj.Placement
-        #sayerr(plcm)
-        if 'Edge' in str(subObj):
-            wire = Part.Wire(subObj)
-            orient=subObj.Orientation
-            if subObj.isClosed():
-                circ=subObj.copy()
-                subObj = Part.Face(wire)
-                face=subObj
-                nwnorm = face.normalAt(0,0)
-                plcm=subObj.Placement
-                #norm = subObj.normalAt(0,0)
-            else:
-                edge_op=1
-                ss=subObj.copy()#SubObjects[0] is the edge list
-                pointsDirection  = []
-                pointsDirection = ss.discretize(Number=5) # discretize the path line
-                nwnorm=pointsDirection[0].sub(pointsDirection[1])
-                #norm = (subObj.Vertex2.Point - subObj.Vertex1.Point).normalize()
-                #pV1=subObj.Vertex1.Point; pV2=subObj.Vertex2.Point
-                if len(subObj.Vertexes)>=2:
-                    pV1=subObj.Vertexes[0].Point; pV2=subObj.Vertexes[1].Point
-                else:
-                    pV1=subObj.Vertexes[0].Point; pV2=subObj.Vertexes[0].Point
-            pad=1 #edge
-        #
-        if pad==0 and 'Vertex' not in str(subObj):
-            try:
-                nwnorm = face.normalAt(0,0)
-            except:
-                nwnorm = subObj.normalAt(0,0)
-                #nwnorm = face.normalAt(0,0)
-        try:
-            if hasattr(subObj,'Solids'):
-                if hasattr(subObj.Solids[0],'CenterOfMass'):
-                    bbxCenter = subObj.Solids[0].CenterOfMass
-                    #print 'Mass 1'
-            else:
-                bbxCenter = subObj.BoundBox.Center
-        except:
-            bbxCenter = subObj.BoundBox.Center
-            #print 'BBox 2'
-        top_level_obj=None
-        #sayerr(str(norm)+str(Obj.Placement)+str(bbxCenter)+str(top_level_obj))
-        pCkd=App.Vector(posz)
-        #print 'points ',pV1, pV2, pCkd
-        if UI.rbSnap.isChecked():
-            #sayw('points '+str(pV1)+str(pV2)+str(pCkd))
-            if edge_op==1:
-                if 'Vertex' not in str(subObj):
-                    d1=dist(pV1,pCkd);d2=dist(pV2,pCkd)
-                    halfedge = (pV1.sub(pV2)).multiply(.5)
-                    mid=App.Vector.add(pV2,halfedge)
-                    #sayw(mid)
-                    d3=dist(pCkd,mid)
-                    #sayerr('d1 '+str(d1)+' d2 '+str(d2)+' d3 '+str(d3))
-                    d=min(d1,d2,d3)
-                    if d==d1:
-                        Pnt=pV1
-                    elif d==d2:
-                        Pnt=pV2
-                    else:
-                        Pnt=mid
-                else:
-                    #Pnt=subObj.Vertex1.Point
-                    Pnt=subObj.Vertexes[0].Point
-            else: #edge_op=0
-                Pnt=App.Vector(bbxCenter)
-            #sayw(Pnt)
-        elif UI.rbSnap.isChecked() and (edge_op==0 or pad==0):
-            Pnt=App.Vector(bbxCenter)
-        elif UI.rbRadius.isChecked():
-            #bbxCenter=DraftGeomUtils.findMidpoint(circ)
-            #bbxCenter=subObj.BoundBox.Center
-            # print edge_op, '-', type(subObj.Curve)
-            if edge_op==1:
-                curve_type = type(subObj.Curve)
-                #print (str(curve_type))
-                if curve_type == Part.Circle or curve_type == Part.ArcOfCircle:
-                    circ=subObj.Curve
-                    bbxCenter=circ.Center
-                else:
-                    #bbxCenter=subObj.BoundBox.Center
-                    #bbxCenter=(subObj.Vertex2.Point[0],subObj.Vertex2.Point[1],subObj.Vertex2.Point[2])
-                    bbxCenter=(subObj.Vertexes[1].Point[0],subObj.Vertexes[1].Point[1],subObj.Vertexes[1].Point[2])
-            else:
-                try:
-                    if hasattr(subObj,'Solids'):
-                        if hasattr(subObj.Solids[0],'CenterOfMass'):
-                            bbxCenter = subObj.Solids[0].CenterOfMass
-                            #print 'Mass 1'
-                    else:
-                        bbxCenter = subObj.BoundBox.Center
-                except:
-                    bbxCenter = subObj.BoundBox.Center
-            if pad==1:
-                #Pnt=wire.Vertex1.Point
-                Pnt=wire.Vertexes[0].Point
-            else:
-                Pnt=App.Vector(bbxCenter)
-            #sayerr(bbxCenter)
-            #sayw(Pnt)
-        elif UI.rbLength.isChecked():
-            #bbxCenter=DraftGeomUtils.findMidpoint(circ)
-            #bbxCenter=subObj.BoundBox.Center
-            if edge_op==1:
-                #Pnt=subObj.Vertex1.Point
-                Pnt=subObj.Vertexes[0].Point
-                #bbxCenter=(subObj.Vertex2.Point[0],subObj.Vertex2.Point[1],subObj.Vertex2.Point[2])
-                bbxCenter=(subObj.Vertexes[1].Point[0],subObj.Vertexes[1].Point[1],subObj.Vertexes[1].Point[2])
-            else:
-                #Pnt=subObj.Vertex1.Point
-                Pnt=subObj.Vertexes[0].Point
-                if hasattr(subObj,'CenterOfMass'):
-                    bbxCenter = subObj.CenterOfMass
-                else:
-                    bbxCenter = subObj.BoundBox.Center
-        elif UI.rbAngle.isChecked():
-            if edge_op==1:
-                #Pnt=subObj.Vertex1.Point
-                Pnt=subObj.Vertexes[0].Point
-                #bbxCenter=(subObj.Vertex2.Point[0],subObj.Vertex2.Point[1],subObj.Vertex2.Point[2])
-                bbxCenter=(subObj.Vertexes[1].Point[0],subObj.Vertexes[1].Point[1],subObj.Vertexes[1].Point[2])
-            else:
-                #Pnt=subObj.Vertex1.Point
-                Pnt=subObj.Vertexes[0].Point
-                if hasattr(subObj,'CenterOfMass'):
-                    bbxCenter = subObj.CenterOfMass
-                else:
-                    bbxCenter = subObj.BoundBox.Center
-        return plcm, top_level_obj, bbxCenter, Pnt, orient, nwnorm
-
-
-
-"""
-    +-----------------------------------------------+
-    |            math helper functions              |
-    +-----------------------------------------------+
-"""
-
-def isVector( vect ):
-    if isinstance(vect,App.Vector):
-        return True
-    return False
-###
-
-def length(vect):
-    if isVector(vect):
-        return math.sqrt(vect.x*vect.x + vect.y*vect.y + vect.z*vect.z)
-###
-
-def normalized( vect ):
-    "normalized(Vector) - returns a unit vector"
-    if isVector(vect):
-        l=length(vect)
-        return App.Vector(vect.x/l, vect.y/l, vect.z/l)
-###
-
-def dotproduct( first, other ):
-    "dotproduct(Vector,Vector) - returns the dot product of both vectors"
-    if isVector(first) and isVector(other):
-        return (first.x*other.x + first.y*other.y + first.z*other.z)
-###
-
-def dist(first, second):
-    "dist(Vector,Vector) - returns the distance between both points/vectors"
-    if isVector(first) and isVector(second):
-        return length(first-second)
-###
-
-def point_plane_distance(point, plane_normal, plane_point):
-    """signed distance between plane and point"""
-    return float(dotproduct(plane_normal, (point.sub(plane_point))))
-###
-
-def areAligned(A, B, C, info=0, tolerance=1e-12):
-    # A, B ad C are Vectors
-    # Return true if the 3 points are aligned.
-    if isVector(A) and isVector(B) and isVector(C):
-        Vector_1 = B - A
-        Vector_2 = C - B
-        Vector_3 = Vector_1.cross(Vector_2)
-        if abs(Vector_3.x) <= tolerance and abs(Vector_3.y) <= tolerance and abs(Vector_3.z) <= tolerance:
-            return True
+    def annoAngle(self, pos, angle, distance=-1 ):
+        global taskUI
+        anno = App.ActiveDocument.addObject("App::AnnotationLabel","AngleLbl")
+        anno.BasePosition = pos
+        if distance == -1 or taskUI.Components.isChecked()==False :
+            anno.LabelText = [self.arrondi(angle)+'°']
         else:
-            return False
-    return
-###
+            anno.LabelText = ['Angle: '+self.arrondi(angle)+'°', 'Distance // '+self.arrondi(distance)]
+        annoG = Gui.ActiveDocument.getObject(anno.Name)
+        annoG.FontSize = annoFontSize
+        self.addToDims(anno)
 
-def closestDistanceBetweenLines(a0,a1,b0,b1,clampAll=False,clampA0=False,clampA1=False,clampB0=False,clampB1=False):
-    ## https://stackoverflow.com/questions/2824478/shortest-distance-between-two-line-segments
-    ''' Given two lines defined by numpy.array pairs (a0,a1,b0,b1)
-        Return the closest points on each segment and their distance
-    '''
-
-    # If clampAll=True, set all clamps to True
-    if clampAll:
-        clampA0=True
-        clampA1=True
-        clampB0=True
-        clampB1=True
-
-
-    # Calculate denomitator
-    A = a1 - a0
-    B = b1 - b0
-    magA = np.linalg.norm(A)
-    magB = np.linalg.norm(B)
-
-    _A = A / magA
-    _B = B / magB
-
-    cross = np.cross(_A, _B);
-    denom = np.linalg.norm(cross)**2
-
-
-    # If lines are parallel (denom=0) test if lines overlap.
-    # If they don't overlap then there is a closest point solution.
-    # If they do overlap, there are infinite closest positions, but there is a closest distance
-    if not denom:
-        d0 = np.dot(_A,(b0-a0))
-
-        # Overlap only possible with clamping
-        if clampA0 or clampA1 or clampB0 or clampB1:
-            d1 = np.dot(_A,(b1-a0))
-
-            # Is segment B before A?
-            if d0 <= 0 >= d1:
-                if clampA0 and clampB1:
-                    if np.absolute(d0) < np.absolute(d1):
-                        return a0,b0,np.linalg.norm(a0-b0)
-                    return a0,b1,np.linalg.norm(a0-b1)
-
-
-            # Is segment B after A?
-            elif d0 >= magA <= d1:
-                if clampA1 and clampB0:
-                    if np.absolute(d0) < np.absolute(d1):
-                        return a1,b0,np.linalg.norm(a1-b0)
-                    return a1,b1,np.linalg.norm(a1-b1)
-
-
-        # Segments overlap, return distance between parallel segments
-        return None,None,np.linalg.norm(((d0*_A)+a0)-b0)
-
-
-
-    # Lines criss-cross: Calculate the projected closest points
-    t = (b0 - a0);
-    detA = np.linalg.det([t, _B, cross])
-    detB = np.linalg.det([t, _A, cross])
-
-    t0 = detA/denom;
-    t1 = detB/denom;
-
-    pA = a0 + (_A * t0) # Projected closest point on segment A
-    pB = b0 + (_B * t1) # Projected closest point on segment B
-
-
-    # Clamp projections
-    if clampA0 or clampA1 or clampB0 or clampB1:
-        if clampA0 and t0 < 0:
-            pA = a0
-        elif clampA1 and t0 > magA:
-            pA = a1
-
-        if clampB0 and t1 < 0:
-            pB = b0
-        elif clampB1 and t1 > magB:
-            pB = b1
-
-        # Clamp projection A
-        if (clampA0 and t0 < 0) or (clampA1 and t0 > magA):
-            dot = np.dot(_B,(pA-b0))
-            if clampB0 and dot < 0:
-                dot = 0
-            elif clampB1 and dot > magB:
-                dot = magB
-            pB = b0 + (_B * dot)
-
-        # Clamp projection B
-        if (clampB0 and t1 < 0) or (clampB1 and t1 > magB):
-            dot = np.dot(_A,(pB-a0))
-            if clampA0 and dot < 0:
-                dot = 0
-            elif clampA1 and dot > magA:
-                dot = magA
-            pA = a0 + (_A * dot)
-
-
-    return pA,pB,np.linalg.norm(pA-pB)
-###
-
-
-def recurse_node(obj,plcm,scl):
-    #sayerr(obj.Name)
-    if "App::Part" in obj.TypeId or "Body" in obj.TypeId or "Compound" in obj.TypeId \
-        or 'App::LinkGroup' in obj.TypeId: # or 'App::Link' in obj.TypeId:
-        for o in obj.OutList: #for o in obj.Group:
-            #sayerr(o.Name)
-            if "App::Part" in o.TypeId  or "Body" in o.TypeId or "Compound" in o.TypeId \
-               or 'App::LinkGroup' in obj.TypeId: # or 'App::Link' in obj.TypeId:
-                #sayerr(o.Name)#+" * "+obj.Name)
-                stop
-                new_plcm=get_node_plc(o,obj)
-                recurse_node(o,new_plcm,scl)
-            else:
-                if "Sketcher" not in o.TypeId:
-                    simple_cpy_plc(o,plcm)
-                    scl.append(App.ActiveDocument.ActiveObject)
-##
-
-def get_top_level (obj):
-    lvl=10000
-    top=None
-    if hasattr(obj,'InListRecursive'):
-        for ap in obj.InListRecursive:
-            if hasattr(ap,'Placement'):
-                if len(ap.InListRecursive) < lvl:
-                    top = ap
-                    lvl = len(ap.InListRecursive)
-    #print (top);stop
-    return top
-##
-
-def get_sorted_list (obj):
-    lvl=10000
-    completed=0
-    listUs=obj.InListRecursive
-    #sayerr('unsorted')
-    #for p in listUs:
-    #    print p.Label
-    listUsName=[]
-    for o in obj.InListRecursive:
-        listUsName.append(o.Name)
-    listS=[]
-    i=0
-    while len (listUsName) > 0:
-        for apName in listUsName:
-            #apName=listUsName[i]
-            ap=App.ActiveDocument.getObject(apName)
-            if len(ap.InListRecursive) < lvl:
-                lvl = len(ap.InListRecursive)
-                top = ap
-                topName = ap.Name
-        listS.append(top)
-        #print topName
-        idx=listUsName.index(topName)
-        #sayw(idx)
-        listUsName.pop(idx)
-        lvl=10000
-        #sayerr(listUsName)
-    return listS
-##
-
-'''
-def reset_prop_shapes(obj):
-    s=obj.Shape
-    #say('resetting props #2')
-    r=[]
-    t=s.copy()
-    for i in t.childShapes():
-        c=i.copy()
-        c.Placement=t.Placement.multiply(c.Placement)
-        r.append((i,c))
-
-    w=t.replaceShape(r)
-    w.Placement=App.Placement()
-    Part.show(w)
-    Gui.ActiveDocument.ActiveObject.ShapeColor=Gui.ActiveDocument.getObject(obj.Name).ShapeColor
-    Gui.ActiveDocument.ActiveObject.LineColor=Gui.ActiveDocument.getObject(obj.Name).LineColor
-    Gui.ActiveDocument.ActiveObject.PointColor=Gui.ActiveDocument.getObject(obj.Name).PointColor
-    Gui.ActiveDocument.ActiveObject.DiffuseColor=Gui.ActiveDocument.getObject(obj.Name).DiffuseColor
-    Gui.ActiveDocument.ActiveObject.Transparency=Gui.ActiveDocument.getObject(obj.Name).Transparency
-    new_label=obj.Label
-    App.ActiveDocument.removeObject(obj.Name)
-    App.ActiveDocument.recompute()
-    App.ActiveDocument.ActiveObject.Label=new_label
-    rstObj=App.ActiveDocument.ActiveObject
-    #say(rstObj)
-    #
-    return rstObj
-###
-
-
-def say(msg):
-    App.Console.PrintMessage(msg)
-    App.Console.PrintMessage('\n')
-
-def sayw(msg):
-    App.Console.PrintWarning(msg)
-    App.Console.PrintWarning('\n')
-
-def sayerr(msg):
-    App.Console.PrintError(msg)
-    App.Console.PrintWarning('\n')
-'''
+    # round to precision anno_precision
+    def arrondi( self, val ):
+        approxval = int(val/annoPrecision + annoPrecision*0.1)*annoPrecision
+        string = '{0:.3f}'.format(approxval)
+        return string
+    
+    def midPoint(self, pt1, pt2):
+        if Asm4.isVector(pt1) and Asm4.isVector(pt2):
+            return App.Vector.add(pt1,(pt2.sub(pt1)).multiply(.5))
+        return None
 
 
 
 
-####################################
-# embedded button images
+
+"""
+    +-----------------------------------------------+
+    |            embedded button images             |
+    +-----------------------------------------------+
+"""
 import base64
 # "b64_data" is a variable containing your base64 encoded jpeg
 

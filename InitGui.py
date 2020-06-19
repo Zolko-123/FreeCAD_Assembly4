@@ -90,6 +90,7 @@ class Assembly4Workbench(Workbench):
         import newModelCmd         # creates a new App::Part container called 'Model'
         import newDatumCmd         # creates a new LCS in 'Model'
         import newPartCmd          # creates a new App::Part container called 'Model'
+        import infoPartCmd         # edits part information for BoM
         import insertLinkCmd       # inserts an App::Link to a 'Model' in another file
         import placeLinkCmd        # places a linked part by snapping LCS (in the Part and in the Assembly)
         import placeDatumCmd       # places an LCS relative to an external file (creates a local attached copy)
@@ -225,33 +226,38 @@ class Assembly4Workbench(Workbench):
                                 "Asm4_newBody", 
                                 "Part_Import",
                                 "Asm4_insertLink", 
-                                "Asm4_makeBOM", 
                                 "Asm4_insertScrew", 
                                 "Asm4_insertNut", 
                                 "Asm4_insertWasher",
-                                "Asm4_placeLink", 
-                                "Asm4_releaseAttachment", 
-                                "Asm4_placeFastener", 
+                                "Separator",
                                 "Asm4_newSketch", 
                                 "Asm4_newLCS", 
                                 "Asm4_newPlane", 
                                 "Asm4_newAxis", 
                                 "Asm4_newPoint", 
                                 "Asm4_newHole", 
-                                "Asm4_placeDatum", 
                                 "Asm4_importDatum", 
+                                "Separator",
+                                "Asm4_placeLink", 
+                                "Asm4_releaseAttachment", 
+                                "Asm4_placeFastener", 
+                                "Asm4_placeDatum", 
                                 #"Asm4_makeLinkArray",
+                                "Separator",
+                                "Asm4_infoPart", 
+                                "Asm4_makeBOM", 
                                 "Asm4_Measure", 
                                 "Asm4_addVariable", 
+                                "Asm4_delVariable", 
                                 "Asm4_Animate", 
                                 "Asm4_updateAssembly"]
         self.appendMenu("&Assembly",self.itemsAssemblyMenu)
         # commands to appear in the Assembly4 toolbar
         self.itemsAssemblyToolbar = [ "Asm4_newPart", 
                                 "Asm4_newBody", 
+                                "Asm4_infoPart", 
                                 "Asm4_insertLink", 
                                 FastenersDropDown, 
-                                "Asm4_makeBOM", 
                                 "Separator",
                                 "Asm4_newSketch", 
                                 'Asm4_newLCS', 
@@ -266,8 +272,10 @@ class Assembly4Workbench(Workbench):
                                 "Asm4_placeDatum", 
                                 "Separator",
                                 #"Asm4_makeLinkArray",
+                                "Asm4_makeBOM", 
                                 "Asm4_Measure", 
                                 "Asm4_addVariable", 
+                                "Asm4_delVariable", 
                                 "Asm4_Animate",
                                 "Asm4_updateAssembly"]
         self.appendToolbar("Assembly",self.itemsAssemblyToolbar) # leave settings off toolbar

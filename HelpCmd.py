@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 # coding: utf-8
 #
+# LGPL
+# Copyright HUBERT Zoltán
+#
 # HelpCmd.py
 
 
@@ -20,12 +23,11 @@ import libAsm4 as Asm4
     |                  main class                   |
     +-----------------------------------------------+
 """
-class Asm4Help( QtGui.QDialog ):
-    "My tool object"
-
+class Asm4Help():
 
     def __init__(self):
         super(Asm4Help,self).__init__()
+        self.UI = QtGui.QDialog()
         self.drawUI()
 
 
@@ -45,7 +47,7 @@ class Asm4Help( QtGui.QDialog ):
 
     def Activated(self):
         # Now we can draw the UI
-        self.show()
+        self.UI.show()
 
 
     """
@@ -54,7 +56,7 @@ class Asm4Help( QtGui.QDialog ):
     +-----------------------------------------------+
     """
     def onOK(self):
-        self.close()
+        self.UI.close()
 
 
 
@@ -65,13 +67,13 @@ class Asm4Help( QtGui.QDialog ):
     """
     def drawUI(self):
         # Our main window will be a QDialog
-        self.setWindowTitle('Help for FreeCAD and Assembly4')
-        self.setWindowIcon( QtGui.QIcon( os.path.join( Asm4.iconPath , 'FreeCad.svg' ) ) )
-        self.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
-        self.setMinimumSize(600, 600)
-        self.setModal(False)
+        self.UI.setWindowTitle('Help for FreeCAD and Assembly4')
+        self.UI.setWindowIcon( QtGui.QIcon( os.path.join( Asm4.iconPath , 'FreeCad.svg' ) ) )
+        self.UI.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
+        self.UI.setMinimumSize(600, 600)
+        self.UI.setModal(False)
         # set main window widgets layout
-        self.mainLayout = QtGui.QVBoxLayout(self)
+        self.mainLayout = QtGui.QVBoxLayout(self.UI)
 
         # FreeCAD version info
         FCmajor = App.ConfigGet('ExeVersion')
@@ -87,23 +89,23 @@ class Asm4Help( QtGui.QDialog ):
         self.mainLayout.addWidget(QtGui.QLabel('Assembly4 version : \t'+Asm4version))
 
         # Help text
-        self.helpSource = QtGui.QTextBrowser(self)
+        self.helpSource = QtGui.QTextBrowser()
         self.helpSource.setSearchPaths( [os.path.join( Asm4.wbPath, 'Resources' )] )
         self.helpSource.setSource( 'Asm4_Help.html' )
         self.mainLayout.addWidget(self.helpSource)
         self.mainLayout.addWidget(QtGui.QLabel(' '))
 
         # the button row definition
-        self.buttonLayout = QtGui.QHBoxLayout(self)
+        self.buttonLayout = QtGui.QHBoxLayout()
         self.buttonLayout.addStretch()
         # OK button
-        self.OkButton = QtGui.QPushButton('OK', self)
+        self.OkButton = QtGui.QPushButton('OK')
         self.OkButton.setDefault(True)
         self.buttonLayout.addWidget(self.OkButton)
         self.mainLayout.addLayout(self.buttonLayout)
 
         # finally, apply the layout to the main window
-        self.setLayout(self.mainLayout)
+        self.UI.setLayout(self.mainLayout)
 
         # Actions
         self.OkButton.clicked.connect(self.onOK)

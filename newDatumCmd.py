@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 # coding: utf-8
-# 
+#
+# LGPL
+# Copyright HUBERT Zoltán
+#
 # newDatumCmd.py 
 
 
@@ -175,7 +178,8 @@ class newHole:
                 if len(edge.SubObjects) == 1:
                     edgeObj = edge.SubObjects[0]
                     # if the edge is circular
-                    if hasattr(edgeObj,"Curve") and hasattr(edgeObj.Curve,"centerOfCurvature"):
+                    #if hasattr(edgeObj,"Curve") and hasattr(edgeObj.Curve,"centerOfCurvature"):
+                    if Asm4.isCircle(edgeObj):
                         # find the feature on which the edge is located
                         parentObj = Gui.Selection.getSelection()[0]
                         edgeName = edge.SubElementNames[0]
