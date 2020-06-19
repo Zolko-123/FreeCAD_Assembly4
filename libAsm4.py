@@ -1,7 +1,11 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # coding: utf-8
-# 
-# libraries for FreeCAD's Assembly Without Solver
+#
+# LGPL
+# Copyright HUBERT Zoltán
+#
+# libraries for FreeCAD's Assembly 4 workbench
+
 
 
 """
@@ -21,6 +25,19 @@ import FreeCADGui as Gui
 import FreeCAD as App
 
 
+
+# Types of datum objects
+datumTypes = [  'PartDesign::CoordinateSystem', \
+                'PartDesign::Plane',            \
+                'PartDesign::Line',             \
+                'PartDesign::Point']
+
+
+partInfo =[     'Description',                  \
+                'Reference',                    \
+                'Supplier',                     \
+                'SupplierDescription',          \
+                'SupplierReference' ]
 
 
 """
@@ -63,6 +80,14 @@ def checkWorkbench( workbench ):
             hasWB = True
     return hasWB
 
+# checks whether there is an Asm4 Model in the active document
+def checkModel():
+    retval = None
+    if App.ActiveDocument and App.ActiveDocument.getObject('Model'):
+        model = App.ActiveDocument.getObject('Model')
+        if model.TypeId=='App::Part':
+            retval = model
+    return retval
 
 
 """
@@ -101,6 +126,50 @@ def placementEE( EE ):
                 return expr[1]
     return None
 
+
+
+
+"""
+    +-----------------------------------------------+
+    |              some geometry tests              |
+    +-----------------------------------------------+
+"""
+def isVector( vect ):
+    if isinstance(vect,App.Vector):
+        return True
+    return False
+
+def isCircle(shape):
+    if shape.isValid()  and hasattr(shape,'Curve') \
+                        and shape.Curve.TypeId=='Part::GeomCircle' \
+                        and hasattr(shape.Curve,'Center') \
+                        and hasattr(shape.Curve,'Radius'):
+        return True
+    return False
+
+def isLine(shape):
+    if shape.isValid()  and hasattr(shape,'Curve') \
+                        and shape.Curve.TypeId=='Part::GeomLine' \
+                        and hasattr(shape,'Placement'):
+        return True
+    return False
+   
+def isSegment(shape):
+    if shape.isValid()  and hasattr(shape,'Curve') \
+                        and shape.Curve.TypeId=='Part::GeomLine' \
+                        and hasattr(shape,'Length') \
+                        and hasattr(shape,'Vertexes') \
+                        and len(shape.Vertexes)==2:
+        return True
+    return False
+
+def isFlatFace(shape):
+    if shape.isValid()  and hasattr(shape,'Area')   \
+                        and shape.Area > 1.0e-6     \
+                        and hasattr(shape,'Volume') \
+                        and shape.Volume < 1.0e-9:
+        return True
+    return False
 
 
 """

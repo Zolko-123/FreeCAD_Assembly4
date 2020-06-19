@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 # coding: utf-8
-# 
+#
+# LGPL
+# Copyright HUBERT Zoltán
+#
 # newPartCmd.py 
 
 
@@ -81,7 +84,7 @@ class newPart:
                 container.addObject(part)
             # If the 'Part' group exists, move it there:
             elif partsGroup and partsGroup.TypeId=='App::DocumentObjectGroup' :
-                App.ActiveDocument.getObject('Parts').addObject(part)
+                partsGroup.addObject(part)
             # recompute
             part.recompute()
             App.ActiveDocument.recompute()

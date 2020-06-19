@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 # coding: utf-8
-# 
+#
+# LGPL
+# Copyright HUBERT Zoltán
+#
 # importDatumCmd.py 
 
 
@@ -35,10 +38,10 @@ def getSelection():
 
 
 # Types of objects to import
-datumTypes = ['PartDesign::CoordinateSystem',
-                           'PartDesign::Plane',
-                           'PartDesign::Line',
-                           'PartDesign::Point']
+datumTypes = [  'PartDesign::CoordinateSystem', \
+                'PartDesign::Plane',            \
+                'PartDesign::Line',             \
+                'PartDesign::Point']
 
 
 # icon to show in the Menu, toolbar and widget window

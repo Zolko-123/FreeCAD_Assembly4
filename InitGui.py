@@ -3,8 +3,6 @@
 #
 #  InitGui.py
 #  
-#  Copyright 2018 Mark Ganson <TheMarkster> mwganson at gmail
-#  
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
 #  the Free Software Foundation; either version 2 of the License, or
@@ -23,6 +21,8 @@
 #  
 ###################################################################################
 
+
+import os
 
 import asm4wb_locator
 asm4wbPath = os.path.dirname( asm4wb_locator.__file__ )
@@ -62,26 +62,35 @@ class dropDownCmdGroup:
     +-----------------------------------------------+
 """
 class Assembly4Workbench(Workbench):
- 
-    global main_Assembly4WB_Icon
 
+    global main_Assembly4WB_Icon
     MenuText = "Assembly 4"
     ToolTip = "Assembly 4 workbench"
     Icon = main_Assembly4WB_Icon
 
-    
     def __init__(self):
         "This function is executed when FreeCAD starts"
         pass
+
+    def Activated(self):
+        "This function is executed when the workbench is activated"
+        return
+
+    def Deactivated(self):
+        "This function is executed when the workbench is deactivated"
+        return 
+
+    def GetClassName(self): 
+        # this function is mandatory if this is a full python workbench
+        return "Gui::PythonWorkbench"
 
 
     def Initialize(self):
         global dropDownCmdGroup
         import newModelCmd         # creates a new App::Part container called 'Model'
-        #import newSketchCmd        # creates a new Sketch in 'Model'
         import newDatumCmd         # creates a new LCS in 'Model'
         import newPartCmd          # creates a new App::Part container called 'Model'
-        #import newBodyCmd          # creates a new Body in 'Model
+        import infoPartCmd         # edits part information for BoM
         import insertLinkCmd       # inserts an App::Link to a 'Model' in another file
         import placeLinkCmd        # places a linked part by snapping LCS (in the Part and in the Assembly)
         import placeDatumCmd       # places an LCS relative to an external file (creates a local attached copy)
@@ -93,8 +102,9 @@ class Assembly4Workbench(Workbench):
         #import newLinkArray        # creates a new array of App::Link
         #import makeLinkArray        # creates a new array of App::Link
         import gotoDocumentCmd     # opens the documentof the selected App::Link
+        import MeasureTask         # Measure tool in the Task panel
+        import makeBomCmd          # creates the parts list
         import HelpCmd             # shows a basic help window
-        #import showCommand         # shows a 
         
         # create the toolbars and menus, nearly empty, to decide about their position
         self.appendToolbar("Assembly",["Asm4_newModel"])
@@ -216,28 +226,36 @@ class Assembly4Workbench(Workbench):
                                 "Asm4_newBody", 
                                 "Part_Import",
                                 "Asm4_insertLink", 
-                                "Asm4_placeLink", 
-                                "Asm4_releaseAttachment", 
                                 "Asm4_insertScrew", 
                                 "Asm4_insertNut", 
                                 "Asm4_insertWasher",
-                                "Asm4_placeFastener", 
+                                "Separator",
                                 "Asm4_newSketch", 
                                 "Asm4_newLCS", 
                                 "Asm4_newPlane", 
                                 "Asm4_newAxis", 
                                 "Asm4_newPoint", 
                                 "Asm4_newHole", 
-                                "Asm4_placeDatum", 
                                 "Asm4_importDatum", 
+                                "Separator",
+                                "Asm4_placeLink", 
+                                "Asm4_releaseAttachment", 
+                                "Asm4_placeFastener", 
+                                "Asm4_placeDatum", 
                                 #"Asm4_makeLinkArray",
+                                "Separator",
+                                "Asm4_infoPart", 
+                                "Asm4_makeBOM", 
+                                "Asm4_Measure", 
                                 "Asm4_addVariable", 
+                                "Asm4_delVariable", 
                                 "Asm4_Animate", 
                                 "Asm4_updateAssembly"]
         self.appendMenu("&Assembly",self.itemsAssemblyMenu)
         # commands to appear in the Assembly4 toolbar
         self.itemsAssemblyToolbar = [ "Asm4_newPart", 
                                 "Asm4_newBody", 
+                                "Asm4_infoPart", 
                                 "Asm4_insertLink", 
                                 FastenersDropDown, 
                                 "Separator",
@@ -254,7 +272,10 @@ class Assembly4Workbench(Workbench):
                                 "Asm4_placeDatum", 
                                 "Separator",
                                 #"Asm4_makeLinkArray",
+                                "Asm4_makeBOM", 
+                                "Asm4_Measure", 
                                 "Asm4_addVariable", 
+                                "Asm4_delVariable", 
                                 "Asm4_Animate",
                                 "Asm4_updateAssembly"]
         self.appendToolbar("Assembly",self.itemsAssemblyToolbar) # leave settings off toolbar
@@ -284,49 +305,6 @@ class Assembly4Workbench(Workbench):
                                 "Asm4_insertWasher",
                                 #"Asm4_makeLinkArray"
                                 ]
-        
-
-    """
-    +-----------------------------------------------+
-    |               helper functions                |
-    +-----------------------------------------------+
-    """
-    def checkWorkbench( self, workbench ):
-        # checks whether the specified workbench is installed
-        listWB = Gui.listWorkbenches()
-        hasWB = False
-        for wb in listWB.keys():
-            if wb == workbench:
-                hasWB = True
-        return hasWB
-
-
-    """
-    +-----------------------------------------------+
-    |          Standard necessary functions         |
-    +-----------------------------------------------+
-    """
-    def Activated(self):
-        """
-        from PySide import QtGui, QtCore
-        "This function is executed when the workbench is activated"
-        # Set the drop-down button for the Configurations in text mode 
-        # QtCore.Qt.ToolButtonTextOnly
-        # QtCore.Qt.ToolButtonTextBesideIcon
-        # QtCore.Qt.ToolButtonTextUnderIcon
-        # QtCore.Qt.ToolButtonIconOnly
-        for toolbar in Gui.getMainWindow().findChildren(QtGui.QToolBar):
-            if toolbar.objectName()=='Assembly 4':
-                for button in toolbar.children():
-                    if button.isWidgetType() and button.text()=='Configurations':
-                        button.setToolButtonStyle( QtCore.Qt.ToolButtonTextOnly )
-        """
-        return
-
-
-    def Deactivated(self):
-        "This function is executed when the workbench is deactivated"
-        return 
 
 
     def ContextMenu(self, recipient):
@@ -338,10 +316,20 @@ class Assembly4Workbench(Workbench):
         self.appendContextMenu( "Create", self.itemsCreateMenu ) # add commands to the context menu
         self.appendContextMenu( "", "Separator")
 
- 
-    def GetClassName(self): 
-        # this function is mandatory if this is a full python workbench
-        return "Gui::PythonWorkbench"
+
+    """
+    +-----------------------------------------------+
+    |               helper functions                |
+    +-----------------------------------------------+
+    """
+    def checkWorkbench( self, workbench ):
+        # checks whether the specified workbench (a 'string') is installed
+        listWB = Gui.listWorkbenches()
+        hasWB = False
+        for wb in listWB.keys():
+            if wb == workbench:
+                hasWB = True
+        return hasWB
 
     
     
