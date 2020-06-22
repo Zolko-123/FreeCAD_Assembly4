@@ -76,8 +76,8 @@ class MeasureCmd():
 
     def GetResources(self):
         return {"MenuText": "Measure",
-                "ToolTip": "Attach a Datum object in the assembly to a Datum in a linked Part",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_Measure.svg')
+                "ToolTip": "Measure Tool",
+                "Pixmap" : os.path.join( Asm4.iconPath , 'Part_Measure.svg')
                 }
 
     def IsActive(self):
@@ -101,7 +101,7 @@ class MeasureUI():
     def __init__(self):
         self.base = QtGui.QWidget()
         self.form = self.base
-        iconFile = os.path.join( Asm4.iconPath , 'Asm4_Measure.svg')
+        iconFile = os.path.join( Asm4.iconPath , 'Part_Measure.svg')
         self.form.setWindowIcon(QtGui.QIcon( iconFile ))
         self.form.setWindowTitle('Measure')
 
