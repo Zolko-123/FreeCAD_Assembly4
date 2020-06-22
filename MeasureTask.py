@@ -6,7 +6,7 @@
 #*                                                                          *
 #*   code partially based on:                                               *
 #*                                                                          *
-#* Caliper tool                                                             *
+#* Caliper tool, icons by easyw-fc                                          *
 #* evolution of Macro_CenterFace                                            *
 #* some part of Macro WorkFeature                                           *
 #* and Macro Rotate To Point, Macro_Delta_xyz                               *
@@ -76,8 +76,8 @@ class MeasureCmd():
 
     def GetResources(self):
         return {"MenuText": "Measure",
-                "ToolTip": "Attach a Datum object in the assembly to a Datum in a linked Part",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_Measure.svg')
+                "ToolTip": "Measure Tool",
+                "Pixmap" : os.path.join( Asm4.iconPath , 'Part_Measure.svg')
                 }
 
     def IsActive(self):
@@ -101,7 +101,7 @@ class MeasureUI():
     def __init__(self):
         self.base = QtGui.QWidget()
         self.form = self.base
-        iconFile = os.path.join( Asm4.iconPath , 'Asm4_Measure.svg')
+        iconFile = os.path.join( Asm4.iconPath , 'Part_Measure.svg')
         self.form.setWindowIcon(QtGui.QIcon( iconFile ))
         self.form.setWindowTitle('Measure')
 
@@ -123,6 +123,7 @@ class MeasureUI():
         self.Selection1.setEnabled(True)
         self.Selection1.setChecked(False)
         self.Selection2.setEnabled(False)
+        self.sel1Icon.setIcon(QtGui.QIcon(self.selectIcon))
         
         # init finished
 
@@ -251,19 +252,19 @@ class MeasureUI():
         btn_sm_sizeX=20;btn_sm_sizeY=20;
         btn_md_sizeX=26;btn_md_sizeY=26;
         
+        # icons
         self.validIcon  = QtGui.QIcon(os.path.join( Asm4.iconPath , 'Asm4_valid.svg' ))
         self.selectIcon = QtGui.QIcon(os.path.join( Asm4.iconPath , 'Asm4_select.svg'))
         self.noneIcon   = None
+        # empty pixmap for icons
+        pm = QtGui.QPixmap()
         
         # the layout for the main window is vertical (top to down)
         self.mainLayout = QtGui.QVBoxLayout(self.form)
-        # empty pixmap for icons
-        pm = QtGui.QPixmap()
         self.mainLayout.addWidget(QtGui.QLabel('Controls'))
 
         # measurement type
         self.measureGroup = QtGui.QFrame(self.form)
-        #self.measureGroup.setTitle("Measurement type")
         self.measureGroup.setFrameStyle(QtGui.QFrame.StyledPanel | QtGui.QFrame.Plain)
         self.mainLayout.addWidget(self.measureGroup)
         self.measureGrid = QtGui.QGridLayout(self.measureGroup)
@@ -324,82 +325,47 @@ class MeasureUI():
 
         self.mainLayout.addLayout(self.snapGrid)
 
-        # selection buttons/indicators
-        #self.selectLayout = QtGui.QHBoxLayout()
-
         self.selectGrid = QtGui.QGridLayout(self.snapGroup)
 
         # first element
         self.Selection1 = QtGui.QPushButton('Selection 1')
         self.Selection1.setToolTip("Select First Element")
         self.Selection1.setMaximumWidth(150)
-        #self.Selection1 = QtGui.QCheckBox()
-        #self.Selection1.setObjectName("DimensionP1")
-        #self.Selection1.setMinimumSize(QtCore.QSize(btSize, btSize))
-        #self.Selection1.setMaximumSize(QtCore.QSize(btSize, btSize))
-        #self.Selection1.setIconSize(QtCore.QSize(iconSize,iconSize))
-        #self.Selection1.setIcon(QtGui.QIcon(pm))
-        #self.Selection1.setEnabled(False)
         self.Selection1.setCheckable(True)
         self.Selection1.setChecked(False)
         self.sel1Name  = QtGui.QLineEdit()
         self.sel1Name.setMinimumWidth (50)
         self.sel1Name.setReadOnly(True)
-        pm.loadFromData(base64.b64decode(DimensionP1_b64))
         self.sel1Icon = QtGui.QPushButton()
         self.sel1Icon.setFlat(True)
         self.sel1Icon.setMinimumSize(QtCore.QSize(iconSize, iconSize))
         self.sel1Icon.setMaximumSize(QtCore.QSize(iconSize, iconSize))
         self.sel1Icon.setIconSize(QtCore.QSize(iconSize,iconSize))
-        #self.sel1Icon.setIcon(QtGui.QIcon(pm))
-        self.sel1Icon.setIcon(QtGui.QIcon(self.selectIcon))
+        self.sel1Icon.setIcon(QtGui.QIcon(self.noneIcon))
         self.selectGrid.addWidget(self.Selection1, 0,0)
-        self.selectGrid.addWidget(self.sel1Name,    0,1)
+        self.selectGrid.addWidget(self.sel1Name,   0,1)
         self.selectGrid.addWidget(self.sel1Icon,   0,2)
-
 
         # second element
         self.Selection2 = QtGui.QPushButton('Selection 2')
         self.Selection2.setToolTip("Select Second Element")
         self.Selection2.setMaximumWidth(150)
-        #self.Selection2 = QtGui.QCheckBox()
-        #self.Selection2.setObjectName("DimensionP2")
-        #self.Selection2.setMinimumSize(QtCore.QSize(btSize, btSize))
-        #self.Selection2.setMaximumSize(QtCore.QSize(btSize, btSize))
-        #self.Selection2.setIconSize(QtCore.QSize(iconSize,iconSize))
-        #self.Selection2.setIcon(QtGui.QIcon(pm))
         self.Selection2.setEnabled(False)
-        #self.Selection2.setCheckable(False)
         self.Selection2.setChecked(False)
-        #self.sel2Icon = QtGui.QLabel('2nd Element')
         self.sel2Name  = QtGui.QLineEdit()
         self.sel2Name.setMinimumWidth (50)
         self.sel2Name.setReadOnly(True)
-        pm.loadFromData(base64.b64decode(DimensionP2_b64))
         self.sel2Icon = QtGui.QPushButton()
         self.sel2Icon.setFlat(True)
         self.sel2Icon.setMinimumSize(QtCore.QSize(iconSize, iconSize))
         self.sel2Icon.setMaximumSize(QtCore.QSize(iconSize, iconSize))
         self.sel2Icon.setIconSize(QtCore.QSize(iconSize,iconSize))
-        #self.sel2Icon.setIcon(QtGui.QIcon(pm))
         self.sel2Icon.setIcon(QtGui.QIcon(self.noneIcon))
         self.selectGrid.addWidget(self.Selection2, 1,0)
-        self.selectGrid.addWidget(self.sel2Name,    1,1)
+        self.selectGrid.addWidget(self.sel2Name,   1,1)
         self.selectGrid.addWidget(self.sel2Icon,   1,2)
 
         self.mainLayout.addLayout(self.selectGrid)
-
-        #self.mainLayout.addWidget(self.Selection1)
-        #self.mainLayout.addWidget(self.Selection2)
-
-        '''
-        self.selectLayout.addStretch()
-        self.selectLayout.addWidget(self.Selection1)
-        self.selectLayout.addStretch()
-        self.selectLayout.addWidget(self.Selection2)
-        self.selectLayout.addStretch()
-        self.mainLayout.addLayout(self.selectLayout)
-        '''
         
         # Results
         self.Results_Group = QtGui.QGroupBox(self.form)
@@ -410,30 +376,23 @@ class MeasureUI():
         self.resultLayout = QtGui.QVBoxLayout(self.Results_Group)
 
         # draw annotation in the GUI window
-        pm.loadFromData(base64.b64decode(AnnotationPlane_b64))
         self.bLabel = QtGui.QCheckBox(self.Results_Group)
         self.bLabel.setObjectName("bLabel")
         self.bLabel.setToolTip("Enable extra Label")
         self.bLabel.setText("Show Label in 3D view")
-        #self.bLabel.setIconSize(QtCore.QSize(btn_md_sizeX,btn_md_sizeY))
-        #self.bLabel.setIcon(QtGui.QIcon(pm))
         self.bLabel.setChecked(True)
         self.resultLayout.addWidget(self.bLabel)
 
         # draw X-Y-Z components
-        pm.loadFromData(base64.b64decode(AnnotationPlane_b64))
         self.Components = QtGui.QCheckBox(self.Results_Group)
         self.Components.setObjectName("Components")
         self.Components.setToolTip("Show all dimension components")
         self.Components.setText("Show Components")
-        #self.Components.setIconSize(QtCore.QSize(btn_md_sizeX,btn_md_sizeY))
-        #self.Components.setIcon(QtGui.QIcon(pm))
         self.Components.setChecked(True)
         self.resultLayout.addWidget(self.Components)
 
         # Results
         self.resultText = QtGui.QTextEdit()
-        self.resultText.setPlainText('Results of Measures')
         self.resultText.setMinimumSize(200, 200)
         self.resultText.setReadOnly(True)
         self.resultLayout.addWidget(self.resultText)
