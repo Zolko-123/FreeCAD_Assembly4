@@ -55,6 +55,15 @@ annoFontSize = 12.0
 annoPrecision = 0.001
 
 
+# remove previous snap point
+def removePtS():
+    global PtS
+    if PtS and hasattr(PtS,'Name') and App.ActiveDocument.getObject(PtS.Name):
+        App.ActiveDocument.removeObject(PtS.Name)
+        PtS = None
+
+
+
 
 """
     +-----------------------------------------------+
@@ -111,8 +120,9 @@ class MeasureUI():
         FCC.PrintMessage('Observer started\n')
 
         # enable the measurement points
-        self.DimensionP1.setEnabled(True)
-        self.DimensionP2.setEnabled(False)
+        self.Selection1.setEnabled(True)
+        self.Selection1.setChecked(False)
+        self.Selection2.setEnabled(False)
         
         # init finished
 
@@ -126,17 +136,21 @@ class MeasureUI():
     def accept(self):
         self.finish()
 
-    # Clear dimensions
+    # Reset, Clear dimensions
     def clicked(self, button):
         global addedDims, PtS
         if button == QtGui.QDialogButtonBox.Reset:
             FCC.PrintMessage('Removing all measurements ...')
             Gui.Selection.clearSelection()
             self.resultText.clear()
-            # remove PtS
-            if PtS and hasattr(PtS,'Name') and App.ActiveDocument.getObject(PtS.Name):
-                App.ActiveDocument.removeObject(PtS.Name)
-                PtS = None
+            self.sel1Name.clear()
+            self.sel2Name.clear()
+            self.sel1Icon.setIcon(QtGui.QIcon(self.selectIcon))
+            self.sel2Icon.setIcon(QtGui.QIcon(self.noneIcon))
+            removePtS()
+            #if PtS and hasattr(PtS,'Name') and App.ActiveDocument.getObject(PtS.Name):
+            #    App.ActiveDocument.removeObject(PtS.Name)
+            #    PtS = None
             # remove all dimensions
             for d in addedDims:
                 FCC.PrintMessage('.')
@@ -150,8 +164,9 @@ class MeasureUI():
                         App.ActiveDocument.getObject('Measures').TypeId=='App::DocumentObjectGroup':
                 App.ActiveDocument.removeObject('Measures')
             self.clearConsole()
-            self.DimensionP1.setEnabled(True)
-            self.DimensionP2.setEnabled(False)
+            self.Selection1.setEnabled(True)
+            self.Selection1.setChecked(False)
+            self.Selection2.setEnabled(False)
             #self.DimensionP3.setEnabled(False)
             FCC.PrintMessage(' done\n')
 
@@ -191,12 +206,35 @@ class MeasureUI():
 
     # when changing the measurement type, reset pre-existing selection
     def onMeasure_toggled(self):
-        self.DimensionP1.setEnabled(True)
-        self.DimensionP2.setEnabled(False)
+        global PtS
+        self.Selection1.setChecked(False)
+        self.Selection2.setEnabled(False)
         Gui.Selection.clearSelection()
+        removePtS()
+        self.sel1Icon.setIcon(QtGui.QIcon(self.selectIcon))
+        self.sel2Icon.setIcon(QtGui.QIcon(self.noneIcon))
         # Angle dimensions only work with Snap selection
         if self.rbAngle.isChecked():
             self.rbShape.setChecked(True)
+
+    # when changing the measurement type, reset pre-existing selection
+    def onSel1_toggled(self):
+        if not self.Selection1.isChecked() and self.Selection2.isEnabled():
+            self.Selection1.setChecked(False)
+            self.sel1Name.clear()
+            self.Selection2.setEnabled(False)
+            Gui.Selection.clearSelection()
+            removePtS()
+            self.sel1Icon.setIcon(QtGui.QIcon(self.selectIcon))
+            self.sel2Icon.setIcon(QtGui.QIcon(self.noneIcon))
+        else:
+            if not self.Selection2.isEnabled():
+                self.Selection1.setChecked(False)
+                #self.sel1Name.clear()
+                #self.sel2Name.clear()
+                self.sel1Icon.setIcon(QtGui.QIcon(self.selectIcon))
+                #self.sel2Icon.setIcon(QtGui.QIcon(self.noneIcon))
+
 
     # Angle can be measured only between shapes
     def onSnap_toggled(self):
@@ -212,6 +250,11 @@ class MeasureUI():
         chkb_sizeX=20;chkb_sizeY=20;
         btn_sm_sizeX=20;btn_sm_sizeY=20;
         btn_md_sizeX=26;btn_md_sizeY=26;
+        
+        self.validIcon  = QtGui.QIcon(os.path.join( Asm4.iconPath , 'Asm4_valid.svg' ))
+        self.selectIcon = QtGui.QIcon(os.path.join( Asm4.iconPath , 'Asm4_select.svg'))
+        self.noneIcon   = None
+        
         # the layout for the main window is vertical (top to down)
         self.mainLayout = QtGui.QVBoxLayout(self.form)
         # empty pixmap for icons
@@ -282,41 +325,82 @@ class MeasureUI():
         self.mainLayout.addLayout(self.snapGrid)
 
         # selection buttons/indicators
-        self.selectLayout = QtGui.QHBoxLayout()
+        #self.selectLayout = QtGui.QHBoxLayout()
+
+        self.selectGrid = QtGui.QGridLayout(self.snapGroup)
 
         # first element
+        self.Selection1 = QtGui.QPushButton('Selection 1')
+        self.Selection1.setToolTip("Select First Element")
+        self.Selection1.setMaximumWidth(150)
+        #self.Selection1 = QtGui.QCheckBox()
+        #self.Selection1.setObjectName("DimensionP1")
+        #self.Selection1.setMinimumSize(QtCore.QSize(btSize, btSize))
+        #self.Selection1.setMaximumSize(QtCore.QSize(btSize, btSize))
+        #self.Selection1.setIconSize(QtCore.QSize(iconSize,iconSize))
+        #self.Selection1.setIcon(QtGui.QIcon(pm))
+        #self.Selection1.setEnabled(False)
+        self.Selection1.setCheckable(True)
+        self.Selection1.setChecked(False)
+        self.sel1Name  = QtGui.QLineEdit()
+        self.sel1Name.setMinimumWidth (50)
+        self.sel1Name.setReadOnly(True)
         pm.loadFromData(base64.b64decode(DimensionP1_b64))
-        self.DimensionP1 = QtGui.QPushButton()
-        self.DimensionP1.setObjectName("DimensionP1")
-        self.DimensionP1.setToolTip("First Element")
-        self.DimensionP1.setMinimumSize(QtCore.QSize(btSize, btSize))
-        self.DimensionP1.setMaximumSize(QtCore.QSize(btSize, btSize))
-        self.DimensionP1.setIconSize(QtCore.QSize(iconSize,iconSize))
-        self.DimensionP1.setIcon(QtGui.QIcon(pm))
-        self.DimensionP1.setEnabled(False)
-        self.DimensionP1.setCheckable(False)
-        self.DimensionP1.setChecked(False)
+        self.sel1Icon = QtGui.QPushButton()
+        self.sel1Icon.setFlat(True)
+        self.sel1Icon.setMinimumSize(QtCore.QSize(iconSize, iconSize))
+        self.sel1Icon.setMaximumSize(QtCore.QSize(iconSize, iconSize))
+        self.sel1Icon.setIconSize(QtCore.QSize(iconSize,iconSize))
+        #self.sel1Icon.setIcon(QtGui.QIcon(pm))
+        self.sel1Icon.setIcon(QtGui.QIcon(self.selectIcon))
+        self.selectGrid.addWidget(self.Selection1, 0,0)
+        self.selectGrid.addWidget(self.sel1Name,    0,1)
+        self.selectGrid.addWidget(self.sel1Icon,   0,2)
+
 
         # second element
+        self.Selection2 = QtGui.QPushButton('Selection 2')
+        self.Selection2.setToolTip("Select Second Element")
+        self.Selection2.setMaximumWidth(150)
+        #self.Selection2 = QtGui.QCheckBox()
+        #self.Selection2.setObjectName("DimensionP2")
+        #self.Selection2.setMinimumSize(QtCore.QSize(btSize, btSize))
+        #self.Selection2.setMaximumSize(QtCore.QSize(btSize, btSize))
+        #self.Selection2.setIconSize(QtCore.QSize(iconSize,iconSize))
+        #self.Selection2.setIcon(QtGui.QIcon(pm))
+        self.Selection2.setEnabled(False)
+        #self.Selection2.setCheckable(False)
+        self.Selection2.setChecked(False)
+        #self.sel2Icon = QtGui.QLabel('2nd Element')
+        self.sel2Name  = QtGui.QLineEdit()
+        self.sel2Name.setMinimumWidth (50)
+        self.sel2Name.setReadOnly(True)
         pm.loadFromData(base64.b64decode(DimensionP2_b64))
-        self.DimensionP2 = QtGui.QPushButton()
-        self.DimensionP2.setObjectName("DimensionP2")
-        self.DimensionP2.setToolTip("Second Element")
-        self.DimensionP2.setMinimumSize(QtCore.QSize(btSize, btSize))
-        self.DimensionP2.setMaximumSize(QtCore.QSize(btSize, btSize))
-        self.DimensionP2.setIconSize(QtCore.QSize(iconSize,iconSize))
-        self.DimensionP2.setIcon(QtGui.QIcon(pm))
-        self.DimensionP2.setEnabled(False)
-        self.DimensionP2.setCheckable(False)
-        self.DimensionP2.setChecked(False)
+        self.sel2Icon = QtGui.QPushButton()
+        self.sel2Icon.setFlat(True)
+        self.sel2Icon.setMinimumSize(QtCore.QSize(iconSize, iconSize))
+        self.sel2Icon.setMaximumSize(QtCore.QSize(iconSize, iconSize))
+        self.sel2Icon.setIconSize(QtCore.QSize(iconSize,iconSize))
+        #self.sel2Icon.setIcon(QtGui.QIcon(pm))
+        self.sel2Icon.setIcon(QtGui.QIcon(self.noneIcon))
+        self.selectGrid.addWidget(self.Selection2, 1,0)
+        self.selectGrid.addWidget(self.sel2Name,    1,1)
+        self.selectGrid.addWidget(self.sel2Icon,   1,2)
 
+        self.mainLayout.addLayout(self.selectGrid)
+
+        #self.mainLayout.addWidget(self.Selection1)
+        #self.mainLayout.addWidget(self.Selection2)
+
+        '''
         self.selectLayout.addStretch()
-        self.selectLayout.addWidget(self.DimensionP1)
+        self.selectLayout.addWidget(self.Selection1)
         self.selectLayout.addStretch()
-        self.selectLayout.addWidget(self.DimensionP2)
+        self.selectLayout.addWidget(self.Selection2)
         self.selectLayout.addStretch()
         self.mainLayout.addLayout(self.selectLayout)
-
+        '''
+        
         # Results
         self.Results_Group = QtGui.QGroupBox(self.form)
         self.Results_Group.setToolTip("Results")
@@ -365,6 +449,7 @@ class MeasureUI():
         self.rbAngle.toggled.connect(self.onMeasure_toggled)
         #self.rbAngle.toggled.connect(self.onAngle_toggled)
         self.rbSnap.toggled.connect(self.onSnap_toggled)
+        self.Selection1.toggled.connect(self.onSel1_toggled)
 
 
 
@@ -405,13 +490,13 @@ class selectionObserver():
                 if subShape.isValid() and ('Face' in str(subShape) or 'Edge' in str(subShape) or 'Vertex' in str(subShape)):
                     # clear the result area
                     taskUI.resultText.clear()
-                    # remove previous snap point
-                    if PtS and hasattr(PtS,'Name') and App.ActiveDocument.getObject(PtS.Name):
-                        App.ActiveDocument.removeObject(PtS.Name)
-                        PtS = None
+                    removePtS()
+                    #if PtS and hasattr(PtS,'Name') and App.ActiveDocument.getObject(PtS.Name):
+                    #    App.ActiveDocument.removeObject(PtS.Name)
+                    #    PtS = None
 
                     # first element selection
-                    if taskUI.DimensionP1.isEnabled():
+                    if not taskUI.Selection1.isChecked():
                         # figure out the first selected element
                         self.Sel1 = None
                         self.Shp1 = None
@@ -419,7 +504,9 @@ class selectionObserver():
                         self.Sel2 = None
                         self.Shp2 = None
                         self.Pt2  = None
-                        # shape selected
+                        #taskUI.sel1Name.setText(str(subShape))
+                        taskUI.sel1Name.setText(str(subShape).split(' ')[0][1:])
+                        taskUI.sel2Name.clear()                        # shape selected
                         if taskUI.rbShape.isChecked():
                             # the shape is actually a vertex, thus a point
                             if 'Vertex' in str(subShape):
@@ -441,6 +528,7 @@ class selectionObserver():
                             # if we have snapped a point before, we show its coordinates
                             if self.Sel1 == 'point':
                                 self.measureCoords(self.Pt1)
+                                taskUI.sel1Icon.setIcon(QtGui.QIcon(taskUI.validIcon))
                             # if we have selected a shape before, we show its charcteristics
                             elif self.Sel1 == 'shape':
                                 # a surface
@@ -464,19 +552,21 @@ class selectionObserver():
                             # unset first selection
                             self.Sel1 == None
                         # if not rbRadius, launch the selection of the second element
-                        else:
-                            taskUI.DimensionP1.setEnabled(False)
-                            taskUI.DimensionP2.setEnabled(True)
+                        elif self.Sel1 is not None:
+                            #taskUI.Selection1.setEnabled(False)
+                            taskUI.Selection2.setEnabled(True)
+                            taskUI.Selection1.setChecked(True)
+                            taskUI.sel1Icon.setIcon(QtGui.QIcon(taskUI.validIcon))
+                            taskUI.sel2Icon.setIcon(QtGui.QIcon(taskUI.selectIcon))
+
 
                     # second element selected
-                    elif taskUI.DimensionP2.isEnabled(): #step #2
-                        taskUI.DimensionP1.setEnabled(True)
-                        taskUI.DimensionP2.setEnabled(False)
-                        # remove showing of previous selected point
-                        if PtS and hasattr(PtS,'Name') and App.ActiveDocument.getObject(PtS.Name):
-                            App.ActiveDocument.removeObject(PtS.Name)
-                            PtS = None
+                    elif taskUI.Selection2.isEnabled(): #step #2
+                        #if PtS and ha#sattr(PtS,'Name') and App.ActiveDocument.getObject(PtS.Name):
+                        #    App.ActiveDocument.removeObject(PtS.Name)
+                        #    PtS = None
                         # figure out the second selected element
+                        taskUI.sel2Name.setText(str(subShape).split(' ')[0][1:])
                         if taskUI.rbShape.isChecked():
                             self.Sel2 = 'shape'
                             self.Shp2 = subShape
@@ -486,7 +576,12 @@ class selectionObserver():
                             if self.Pt2:
                                 self.Sel2 = 'point'
                         # if we have a valid selection:
-                        if self.Sel2:
+                        if self.Sel2 is not None:
+                            taskUI.Selection2.setEnabled(False)
+                            taskUI.Selection1.setChecked(False)
+                            taskUI.sel1Icon.setIcon(QtGui.QIcon(taskUI.selectIcon))
+                            taskUI.sel2Icon.setIcon(QtGui.QIcon(taskUI.validIcon))
+                            removePtS()
                             # Measure distance
                             if taskUI.rbDistance.isChecked():
                                 # make a vertex shape out of a point
@@ -514,28 +609,12 @@ class selectionObserver():
                 else:
                     self.printResult('ERROR 40\n'+str(subShape))
 
-    # figure out snap point of shape
-    def getSnap( self, shape ):
-        point = None
-        if shape.isValid():
-            if 'Vertex' in str(shape):
-                point  = shape.Vertexes[0].Point
-            # for a circle, snap to the center
-            elif 'Edge' in str(shape) and hasattr(shape,'Curve') \
-                                      and hasattr(shape.Curve,'Radius'):
-                point = shape.Curve.Center
-            # as fall-back, snap to center of bounding box
-            elif hasattr(shape,'BoundBox'):
-                point = shape.BoundBox.Center
-        else:
-            self.printResult('Invalid shape\n'+str(shape))
-        return point
 
     # uses BRepExtrema_DistShapeShape to calculate the distance between 2 shapes
     def angleShapes( self, shape1, shape2 ):
         global taskUI
         if shape1.isValid() and shape2.isValid():
-            Gui.Selection.clearSelection()
+            #Gui.Selection.clearSelection()
             self.printResult( 'Measuring angles' )
             # Datum object
             if shape1.BoundBox.DiagonalLength > 1e+10:
@@ -578,24 +657,6 @@ class selectionObserver():
         else:
             self.printResult('Ivalid shapes')
 
-    # figure out the direction of a shape, be it a line, a surface or a circle
-    def getDir( self, shape ):
-        direction = None
-        if Asm4.isSegment(shape):
-            line = shape
-            pt1 = line.Vertexes[0].Point
-            pt2 = line.Vertexes[1].Point
-            vect = (pt2.sub(pt1))
-            if vect.Length != 0:
-                direction = vect / vect.Length
-        elif Asm4.isLine(shape):
-            direction = shape.Placement.Rotation.multVec(App.Vector(0,0,1))
-        elif Asm4.isCircle(shape):
-            direction = shape.Curve.Axis
-        elif Asm4.isFlatFace(shape):
-            direction = shape.normalAt(0,0)
-        return direction
-
     # uses BRepExtrema_DistShapeShape to calculate the distance between 2 shapes
     def distShapes( self, shape1, shape2 ):
         global taskUI
@@ -617,56 +678,6 @@ class selectionObserver():
                     '''
         else:
             self.printResult('Ivalid shapes')
-
-    # measure the coordinates of a single point
-    def measureCoords(self, vertex ):
-        global taskUI
-        point = None
-        if Asm4.isVector(vertex):
-            point = vertex
-        elif hasattr(vertex,'isValid')  and vertex.isValid() \
-                                        and hasattr(vertex,'Vertexes') \
-                                        and len(vertex.Vertexes) > 0:
-            point = vertex.Vertexes[0].Point
-        else:
-            self.printResult('Not a valid point\n'+str(vertex))
-        if point:
-            #self.printResult( 'Measuring coordinates of\n'+str(vertex) )
-            anno = ['Coordinates :', 'X : '+str(point.x), 'Y : '+str(point.y), 'Z : '+str(point.z)]
-            text =  'Coordinates :\n'
-            text += "X : "+str(point.x)+"\n"
-            text += 'Y : '+str(point.y)+'\n'
-            text += 'Z : '+str(point.z)
-            self.printResult(text)
-            if taskUI.bLabel.isChecked():
-                self.drawAnnotation( point, anno )
-
-    # mesure distance between 2 points
-    def measurePoints(self, pt1, pt2 ):
-        global taskUI
-        mid = self.midPoint(pt1,pt2)
-        if mid:
-            Gui.Selection.clearSelection()
-            self.drawLine(pt1,pt2)
-            dx = pt1[0]-pt2[0]
-            dy = pt1[1]-pt2[1]
-            dz = pt1[2]-pt2[2]
-            dist = math.sqrt(dx*dx + dy*dy + dz*dz)
-            text =  'Distance = '+str(dist)+'\n'
-            text += "ΔX : "+str(dx)+"\n"
-            text += 'ΔY : '+str(dy)+'\n'
-            text += 'ΔZ : '+str(dz)
-            # self.printResult( 'Measuring length of\n'+str(line) )
-            self.printResult( text )
-            if taskUI.bLabel.isChecked():
-                if taskUI.Components.isChecked():
-                    anno = ['D  = '+self.arrondi(dist),'ΔX = '+self.arrondi(dx), \
-                            'ΔY = '+self.arrondi(dy),  'ΔZ = '+self.arrondi(dz) ]
-                else:
-                    anno = ['D = '+self.arrondi(dist)]
-                self.drawAnnotation( mid, anno )
-        else:
-            self.printResult( 'Not valid Points' )
 
     # measure a straight line
     def measureLine(self, line ):
@@ -697,15 +708,34 @@ class selectionObserver():
         else:
             self.printResult( 'Not a valid Line\n'+str(line) )
 
-    def measureArea(self, face ):
-        if face.isValid() and hasattr(face,'Area'):
-            if Asm4.isFlatFace(face):
-                self.printResult('Flat face\nArea : '+str(face.Area)+'\n')
-            else:
-                self.printResult('Area : '+str(face.Area)+"\n")
+    # mesure distance between 2 points
+    def measurePoints(self, pt1, pt2 ):
+        global taskUI
+        mid = self.midPoint(pt1,pt2)
+        if mid:
+            Gui.Selection.clearSelection()
+            self.drawLine(pt1,pt2)
+            dx = pt1[0]-pt2[0]
+            dy = pt1[1]-pt2[1]
+            dz = pt1[2]-pt2[2]
+            dist = math.sqrt(dx*dx + dy*dy + dz*dz)
+            text =  'Distance = '+str(dist)+'\n'
+            text += "ΔX : "+str(dx)+"\n"
+            text += 'ΔY : '+str(dy)+'\n'
+            text += 'ΔZ : '+str(dz)
+            # self.printResult( 'Measuring length of\n'+str(line) )
+            self.printResult( text )
+            if taskUI.bLabel.isChecked():
+                if taskUI.Components.isChecked():
+                    anno = ['D  = '+self.arrondi(dist),'ΔX = '+self.arrondi(dx), \
+                            'ΔY = '+self.arrondi(dy),  'ΔZ = '+self.arrondi(dz) ]
+                else:
+                    anno = ['D = '+self.arrondi(dist)]
+                self.drawAnnotation( mid, anno )
         else:
-            self.printResult('Not a valid surface\n'+str(face) )
+            self.printResult( 'Not valid Points' )
 
+    # measure radius of a circle
     def measureCircle(self, circle):
         global taskUI, PtS
         if Asm4.isCircle(circle):
@@ -730,6 +760,76 @@ class selectionObserver():
                 PtS = self.drawPoint(center)
         else:
             self.printResult('Not a valid circle\n'+str(circle))
+
+
+    # figure out the direction of a shape, be it a line, a surface or a circle
+    def getDir( self, shape ):
+        direction = None
+        if Asm4.isSegment(shape):
+            line = shape
+            pt1 = line.Vertexes[0].Point
+            pt2 = line.Vertexes[1].Point
+            vect = (pt2.sub(pt1))
+            if vect.Length != 0:
+                direction = vect / vect.Length
+        elif Asm4.isLine(shape):
+            direction = shape.Placement.Rotation.multVec(App.Vector(0,0,1))
+        elif Asm4.isCircle(shape):
+            direction = shape.Curve.Axis
+        elif Asm4.isFlatFace(shape):
+            direction = shape.normalAt(0,0)
+        return direction
+
+    # figure out snap point of shape
+    def getSnap( self, shape ):
+        point = None
+        if shape.isValid():
+            if 'Vertex' in str(shape):
+                point  = shape.Vertexes[0].Point
+            # for a circle, snap to the center
+            elif 'Edge' in str(shape) and hasattr(shape,'Curve') \
+                                      and hasattr(shape.Curve,'Radius'):
+                point = shape.Curve.Center
+            # as fall-back, snap to center of bounding box
+            elif hasattr(shape,'BoundBox'):
+                point = shape.BoundBox.Center
+        else:
+            self.printResult('Invalid shape\n'+str(shape))
+        return point
+
+    # measure the coordinates of a single point
+    def measureCoords(self, vertex ):
+        global taskUI
+        point = None
+        if Asm4.isVector(vertex):
+            point = vertex
+        elif hasattr(vertex,'isValid')  and vertex.isValid() \
+                                        and hasattr(vertex,'Vertexes') \
+                                        and len(vertex.Vertexes) > 0:
+            point = vertex.Vertexes[0].Point
+        else:
+            self.printResult('Not a valid point\n'+str(vertex))
+        if point:
+            #self.printResult( 'Measuring coordinates of\n'+str(vertex) )
+            anno = ['Coordinates :', 'X : '+str(point.x), 'Y : '+str(point.y), 'Z : '+str(point.z)]
+            text =  'Coordinates :\n'
+            text += "X : "+str(point.x)+"\n"
+            text += 'Y : '+str(point.y)+'\n'
+            text += 'Z : '+str(point.z)
+            self.printResult(text)
+            if taskUI.bLabel.isChecked():
+                self.drawAnnotation( point, anno )
+
+
+    def measureArea(self, face ):
+        if face.isValid() and hasattr(face,'Area'):
+            if Asm4.isFlatFace(face):
+                self.printResult('Flat face\nArea : '+str(face.Area)+'\n')
+            else:
+                self.printResult('Area : '+str(face.Area)+"\n")
+        else:
+            self.printResult('Not a valid surface\n'+str(face) )
+
 
     def printDims(self, ds, dx, dy, dz, dimType='Distance'):
         text = dimType+' : '+str(ds)
