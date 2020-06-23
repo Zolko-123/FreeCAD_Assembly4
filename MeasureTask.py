@@ -14,6 +14,8 @@
 #*                                                                          *
 #* Measure tool                                                             *
 #*                                                                          *
+#*    This is a stand-alone tool that doesn't need anything outside Part    *                                                                     *
+#*                                                                          *
 #*    This program is free software; you can redistribute it and/or modify  *
 #*    it under the terms of the GNU Library General Public License (LGPL)   *
 #*    as published by the Free Software Foundation; either version 2 of     *
@@ -36,6 +38,7 @@ from FreeCAD import Base
 from FreeCAD import Console as FCC
 import Part
 
+# only needed for icons
 import libAsm4 as Asm4
 
 
@@ -124,52 +127,69 @@ class MeasureUI():
         self.Selection1.setChecked(False)
         self.Selection2.setEnabled(False)
         self.sel1Icon.setIcon(QtGui.QIcon(self.selectIcon))
-        
         # init finished
+
 
     # standard FreeCAD Task panel buttons
     def getStandardButtons(self):
-        return int(  QtGui.QDialogButtonBox.Help
-                   | QtGui.QDialogButtonBox.Reset
-                   | QtGui.QDialogButtonBox.Ok )
+        return int(   QtGui.QDialogButtonBox.Cancel
+                    | QtGui.QDialogButtonBox.Reset
+                    | QtGui.QDialogButtonBox.Ok )
 
-    # OK
+    # OK button
     def accept(self):
-        self.finish()
+        self.Finish()
 
-    # Reset, Clear dimensions
+    # Cancel button
+    def reject(self):
+        self.Reset()
+        self.Finish()
+
+    # Reset button
     def clicked(self, button):
-        global addedDims, PtS
         if button == QtGui.QDialogButtonBox.Reset:
-            FCC.PrintMessage('Removing all measurements ...')
-            Gui.Selection.clearSelection()
-            self.resultText.clear()
-            self.sel1Name.clear()
-            self.sel2Name.clear()
-            self.sel1Icon.setIcon(QtGui.QIcon(self.selectIcon))
-            self.sel2Icon.setIcon(QtGui.QIcon(self.noneIcon))
-            removePtS()
-            #if PtS and hasattr(PtS,'Name') and App.ActiveDocument.getObject(PtS.Name):
-            #    App.ActiveDocument.removeObject(PtS.Name)
-            #    PtS = None
-            # remove all dimensions
-            for d in addedDims:
-                FCC.PrintMessage('.')
-                try:
-                    App.ActiveDocument.removeObject(d.Name)
-                except:
-                    pass
-            addedDims=[]
-            # remove also the "Measures" group if any
-            if App.ActiveDocument.getObject('Measures') and \
-                        App.ActiveDocument.getObject('Measures').TypeId=='App::DocumentObjectGroup':
-                App.ActiveDocument.removeObject('Measures')
-            self.clearConsole()
-            self.Selection1.setEnabled(True)
-            self.Selection1.setChecked(False)
-            self.Selection2.setEnabled(False)
-            #self.DimensionP3.setEnabled(False)
-            FCC.PrintMessage(' done\n')
+            self.Reset()
+
+    # Close
+    def Finish(self):
+        FCC.PrintMessage("closing ... ")
+        try:
+            Gui.Selection.removeObserver(self.so)   # desinstalle la fonction residente SelObserver
+            FCC.PrintMessage("done\n")
+        except:
+            FCC.PrintWarning("was not able to remove observer\n")
+        # close Task widget
+        Gui.Control.closeDialog()
+
+    # Reset (clear measures)
+    def Reset(self):
+        global PtS, addedDims
+        Gui.Selection.clearSelection()
+        self.clearConsole()
+        FCC.PrintMessage('Removing all measurements ...')
+        removePtS()
+        for d in addedDims:
+            FCC.PrintMessage('.')
+            try:
+                App.ActiveDocument.removeObject(d.Name)
+            except:
+                pass
+        addedDims=[]
+        # remove also the "Measures" group if any
+        if App.ActiveDocument.getObject('Measures') and \
+                    App.ActiveDocument.getObject('Measures').TypeId=='App::DocumentObjectGroup':
+            App.ActiveDocument.removeObject('Measures')
+        # clear UI
+        self.sel1Name.clear()
+        self.sel2Name.clear()
+        self.sel1Icon.setIcon(QtGui.QIcon(self.selectIcon))
+        self.sel2Icon.setIcon(QtGui.QIcon(self.noneIcon))
+        self.Selection1.setEnabled(True)
+        self.Selection1.setChecked(False)
+        self.Selection2.setEnabled(False)
+        self.resultText.clear()
+        FCC.PrintMessage(' done\n')
+
 
     # clear report view and Python panel
     def clearConsole(self):
@@ -180,31 +200,8 @@ class MeasureUI():
         rv = mw.findChild(QtGui.QTextEdit, "Report view")
         rv.clear()
 
-    # Help
-    def helpRequested(self):
-        # show help window
-        msg="""Clik on <b>Measure button</b> to start the Measurement.<br>
-        Select the type of Snapping you need<br>
-        and then Click on a Face, an Edge or a Vertex<br>
-        to identify your measurement points.<br>
-        <b>Check Annotation Plane</b> to use an Annotation Plane to place a Dimension.
-        <br><b>Caliper Tools</b> work with <b>Part, App::Part</b> and <b>Body</b> objects<br>"""
-        #QtGui.QApplication.restoreOverrideCursor()
-        #res=''
-        #QtGui.QApplication.restoreOverrideCursor()
-        res = QtGui.QMessageBox.question(None,"Help on Measurement Tools",msg,QtGui.QMessageBox.Ok)
-
-    # Close
-    def finish(self):
-        FCC.PrintMessage("closing ... ")
-        try:
-            Gui.Selection.removeObserver(self.so)   # desinstalle la fonction residente SelObserver
-            FCC.PrintMessage("done\n")
-        except:
-            FCC.PrintWarning("was not able to remove observer\n")
-        # close Task widget
-        Gui.Control.closeDialog()
-
+    # Actions
+    #
     # when changing the measurement type, reset pre-existing selection
     def onMeasure_toggled(self):
         global PtS
@@ -218,7 +215,7 @@ class MeasureUI():
         if self.rbAngle.isChecked():
             self.rbShape.setChecked(True)
 
-    # when changing the measurement type, reset pre-existing selection
+    # re-initialize Selection 1
     def onSel1_toggled(self):
         if not self.Selection1.isChecked() and self.Selection2.isEnabled():
             self.Selection1.setChecked(False)
@@ -231,16 +228,14 @@ class MeasureUI():
         else:
             if not self.Selection2.isEnabled():
                 self.Selection1.setChecked(False)
-                #self.sel1Name.clear()
-                #self.sel2Name.clear()
                 self.sel1Icon.setIcon(QtGui.QIcon(self.selectIcon))
                 #self.sel2Icon.setIcon(QtGui.QIcon(self.noneIcon))
-
 
     # Angle can be measured only between shapes
     def onSnap_toggled(self):
         if self.rbAngle.isChecked() and self.rbSnap.isChecked():
             self.rbDistance.setChecked(True)
+
 
     # defines the UI, only static elements
     def drawUI(self):
@@ -261,13 +256,14 @@ class MeasureUI():
         
         # the layout for the main window is vertical (top to down)
         self.mainLayout = QtGui.QVBoxLayout(self.form)
-        self.mainLayout.addWidget(QtGui.QLabel('Controls'))
 
         # measurement type
+        self.mainLayout.addWidget(QtGui.QLabel('Controls'))
         self.measureGroup = QtGui.QFrame(self.form)
         self.measureGroup.setFrameStyle(QtGui.QFrame.StyledPanel | QtGui.QFrame.Plain)
         self.mainLayout.addWidget(self.measureGroup)
         self.measureGrid = QtGui.QGridLayout(self.measureGroup)
+        self.mainLayout.addLayout(self.measureGrid)
 
         # 0,0
         pm.loadFromData(base64.b64decode(Dim_Radius_b64))
@@ -295,14 +291,15 @@ class MeasureUI():
         self.rbAngle.setIcon(QtGui.QIcon(pm))
         self.measureGrid.addWidget(self.rbAngle, 0, 2 )
 
-        self.mainLayout.addLayout(self.measureGrid)
-
         # actual measurement tools
         self.snapGroup = QtGui.QFrame(self.form)
         self.snapGroup.setFrameStyle(QtGui.QFrame.StyledPanel | QtGui.QFrame.Plain)
         # self.snapGroup.setTitle("Selection method")
         self.mainLayout.addWidget(self.snapGroup)
         self.snapGrid = QtGui.QGridLayout(self.snapGroup)
+        self.mainLayout.addLayout(self.snapGrid)
+        self.selectGrid = QtGui.QGridLayout(self.snapGroup)
+
         # 0,0
         pm.loadFromData(base64.b64decode(Snap_Options_b64))
         self.rbSnap = QtGui.QRadioButton(self.snapGroup)
@@ -322,10 +319,6 @@ class MeasureUI():
         self.rbShape.setIcon(QtGui.QIcon(pm))
         self.rbShape.setChecked(True)
         self.snapGrid.addWidget(self.rbShape, 0, 2 )
-
-        self.mainLayout.addLayout(self.snapGrid)
-
-        self.selectGrid = QtGui.QGridLayout(self.snapGroup)
 
         # first element
         self.Selection1 = QtGui.QPushButton('Selection 1')
@@ -388,7 +381,7 @@ class MeasureUI():
         self.Components.setObjectName("Components")
         self.Components.setToolTip("Show all dimension components")
         self.Components.setText("Show Components")
-        self.Components.setChecked(True)
+        self.Components.setChecked(False)
         self.resultLayout.addWidget(self.Components)
 
         # Results
@@ -450,9 +443,6 @@ class selectionObserver():
                     # clear the result area
                     taskUI.resultText.clear()
                     removePtS()
-                    #if PtS and hasattr(PtS,'Name') and App.ActiveDocument.getObject(PtS.Name):
-                    #    App.ActiveDocument.removeObject(PtS.Name)
-                    #    PtS = None
 
                     # first element selection
                     if not taskUI.Selection1.isChecked():
@@ -487,7 +477,6 @@ class selectionObserver():
                             # if we have snapped a point before, we show its coordinates
                             if self.Sel1 == 'point':
                                 self.measureCoords(self.Pt1)
-                                taskUI.sel1Icon.setIcon(QtGui.QIcon(taskUI.validIcon))
                             # if we have selected a shape before, we show its charcteristics
                             elif self.Sel1 == 'shape':
                                 # a surface
@@ -497,14 +486,18 @@ class selectionObserver():
                                 elif 'Vertex' in str(self.Shp1):
                                     self.measureCoords( self.Shp1 )
                                 # a circle or arc of circle
-                                elif hasattr(self.Shp1,'Curve') and hasattr(self.Shp1.Curve,'Radius'):
+                                # elif hasattr(self.Shp1,'Curve') and hasattr(self.Shp1.Curve,'Radius'):
+                                elif self.isCircle(self.Shp1):
+                                    taskUI.sel1Name.setText('Circle')
                                     self.measureCircle( self.Shp1 )
                                 # a straight line segment
-                                elif hasattr(self.Shp1,'Curve') and self.Shp1.Curve.TypeId=='Part::GeomLine':
+                                #elif hasattr(self.Shp1,'Curve') and self.Shp1.Curve.TypeId=='Part::GeomLine':
+                                elif self.isSegment(self.Shp1):
+                                    taskUI.sel1Name.setText('Segment')
                                     self.measureLine( self.Shp1 )
                                 # dunno what that stuff is
                                 else:
-                                    self.printResult("Can't measure\n"+str(Shp1))
+                                    self.printResult("Can't measure\n"+str(self.Shp1))
                             # dunno what that stuff is
                             else:
                                 self.printResult("Can't measure\n"+str(subShape))
@@ -517,7 +510,6 @@ class selectionObserver():
                             taskUI.Selection1.setChecked(True)
                             taskUI.sel1Icon.setIcon(QtGui.QIcon(taskUI.validIcon))
                             taskUI.sel2Icon.setIcon(QtGui.QIcon(taskUI.selectIcon))
-
 
                     # second element selected
                     elif taskUI.Selection2.isEnabled(): #step #2
@@ -573,7 +565,7 @@ class selectionObserver():
     def angleShapes( self, shape1, shape2 ):
         global taskUI
         if shape1.isValid() and shape2.isValid():
-            #Gui.Selection.clearSelection()
+            Gui.Selection.clearSelection()
             self.printResult( 'Measuring angles' )
             # Datum object
             if shape1.BoundBox.DiagonalLength > 1e+10:
@@ -592,11 +584,11 @@ class selectionObserver():
                 distance = -1
                 angle = dir1.getAngle(dir2)*180./math.pi
                 # 2 flat faces
-                if Asm4.isFlatFace(shape1) and Asm4.isFlatFace(shape2):
+                if self.isFlatFace(shape1) and self.isFlatFace(shape2):
                     angle = 180 - angle
                 else:
                     # 1 flat face and 1 direction
-                    if Asm4.isFlatFace(shape1) or Asm4.isFlatFace(shape2):
+                    if self.isFlatFace(shape1) or self.isFlatFace(shape2):
                         angle = 90 - angle
                     if angle > 90:
                         angle = 180. - angle
@@ -622,7 +614,7 @@ class selectionObserver():
         if shape1.isValid() and shape2.isValid():
             Gui.Selection.clearSelection()
             measure = shape1.distToShape(shape2)
-            if measure and Asm4.isVector(measure[1][0][0]) and Asm4.isVector(measure[1][0][1]):
+            if measure and self.isVector(measure[1][0][0]) and self.isVector(measure[1][0][1]):
                 dist = measure[0]
                 self.printResult('Minimum Distance :\n  '+str(dist))
                 if dist > 1.0e-9:
@@ -641,7 +633,7 @@ class selectionObserver():
     # measure a straight line
     def measureLine(self, line ):
         global taskUI
-        if Asm4.isSegment(line):
+        if self.isSegment(line):
             pt1 = line.Vertexes[0].Point
             pt2 = line.Vertexes[1].Point
             Gui.Selection.clearSelection()
@@ -697,7 +689,7 @@ class selectionObserver():
     # measure radius of a circle
     def measureCircle(self, circle):
         global taskUI, PtS
-        if Asm4.isCircle(circle):
+        if self.isCircle(circle):
             radius = circle.Curve.Radius
             center = circle.Curve.Center
             axis   = circle.Curve.Axis
@@ -724,19 +716,26 @@ class selectionObserver():
     # figure out the direction of a shape, be it a line, a surface or a circle
     def getDir( self, shape ):
         direction = None
-        if Asm4.isSegment(shape):
+        # for a segment, it's the normalized vector along the segment
+        if self.isSegment(shape):
             line = shape
             pt1 = line.Vertexes[0].Point
             pt2 = line.Vertexes[1].Point
             vect = (pt2.sub(pt1))
             if vect.Length != 0:
                 direction = vect / vect.Length
-        elif Asm4.isLine(shape):
+        # for another line (like Datum::Line) it's the Z vector 
+        # multiplied by the Line's Placement
+        elif self.isLine(shape):
             direction = shape.Placement.Rotation.multVec(App.Vector(0,0,1))
-        elif Asm4.isCircle(shape):
+        # for a Circle it's the circle's axis
+        elif self.isCircle(shape):
             direction = shape.Curve.Axis
-        elif Asm4.isFlatFace(shape):
+            # TODO: drawAxis(circle)
+        # for a flt face it's the normal
+        elif self.isFlatFace(shape):
             direction = shape.normalAt(0,0)
+            # TODO: drawNormal(face)
         return direction
 
     # figure out snap point of shape
@@ -760,7 +759,7 @@ class selectionObserver():
     def measureCoords(self, vertex ):
         global taskUI
         point = None
-        if Asm4.isVector(vertex):
+        if self.isVector(vertex):
             point = vertex
         elif hasattr(vertex,'isValid')  and vertex.isValid() \
                                         and hasattr(vertex,'Vertexes') \
@@ -782,7 +781,7 @@ class selectionObserver():
 
     def measureArea(self, face ):
         if face.isValid() and hasattr(face,'Area'):
-            if Asm4.isFlatFace(face):
+            if self.isFlatFace(face):
                 self.printResult('Flat face\nArea : '+str(face.Area)+'\n')
             else:
                 self.printResult('Area : '+str(face.Area)+"\n")
@@ -891,10 +890,46 @@ class selectionObserver():
         return string
     
     def midPoint(self, pt1, pt2):
-        if Asm4.isVector(pt1) and Asm4.isVector(pt2):
+        if self.isVector(pt1) and self.isVector(pt2):
             return App.Vector.add(pt1,(pt2.sub(pt1)).multiply(.5))
         return None
 
+    def isVector( self, vect ):
+        if isinstance(vect,App.Vector):
+            return True
+        return False
+
+    def isCircle(self, shape):
+        if shape.isValid()  and hasattr(shape,'Curve') \
+                            and shape.Curve.TypeId=='Part::GeomCircle' \
+                            and hasattr(shape.Curve,'Center') \
+                            and hasattr(shape.Curve,'Radius'):
+            return True
+        return False
+
+    def isLine(self, shape):
+        if shape.isValid()  and hasattr(shape,'Curve') \
+                            and shape.Curve.TypeId=='Part::GeomLine' \
+                            and hasattr(shape,'Placement'):
+            return True
+        return False
+    
+    def isSegment(self, shape):
+        if shape.isValid()  and hasattr(shape,'Curve') \
+                            and shape.Curve.TypeId=='Part::GeomLine' \
+                            and hasattr(shape,'Length') \
+                            and hasattr(shape,'Vertexes') \
+                            and len(shape.Vertexes)==2:
+            return True
+        return False
+
+    def isFlatFace(self, shape):
+        if shape.isValid()  and hasattr(shape,'Area')   \
+                            and shape.Area > 1.0e-6     \
+                            and hasattr(shape,'Volume') \
+                            and shape.Volume < 1.0e-9:
+            return True
+        return False
 
 
 

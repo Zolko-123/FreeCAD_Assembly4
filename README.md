@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.9.5, 2020-06-19
+Current version 0.9.6, 2020-06-23
 
 
 
@@ -51,6 +51,9 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 
 ## Release notes
+
+* 2020.06.23 (**0.9.6**) :  
+Improved Measure tool  
 
 * 2020.06.19 (**0.9.5**) :  
 Added new Measure tool  
