@@ -443,9 +443,6 @@ class selectionObserver():
                     # clear the result area
                     taskUI.resultText.clear()
                     removePtS()
-                    #if PtS and hasattr(PtS,'Name') and App.ActiveDocument.getObject(PtS.Name):
-                    #    App.ActiveDocument.removeObject(PtS.Name)
-                    #    PtS = None
 
                     # first element selection
                     if not taskUI.Selection1.isChecked():
@@ -480,7 +477,6 @@ class selectionObserver():
                             # if we have snapped a point before, we show its coordinates
                             if self.Sel1 == 'point':
                                 self.measureCoords(self.Pt1)
-                                taskUI.sel1Icon.setIcon(QtGui.QIcon(taskUI.validIcon))
                             # if we have selected a shape before, we show its charcteristics
                             elif self.Sel1 == 'shape':
                                 # a surface
@@ -490,14 +486,18 @@ class selectionObserver():
                                 elif 'Vertex' in str(self.Shp1):
                                     self.measureCoords( self.Shp1 )
                                 # a circle or arc of circle
-                                elif hasattr(self.Shp1,'Curve') and hasattr(self.Shp1.Curve,'Radius'):
+                                # elif hasattr(self.Shp1,'Curve') and hasattr(self.Shp1.Curve,'Radius'):
+                                elif self.isCircle(self.Shp1):
+                                    taskUI.sel1Name.setText('Circle')
                                     self.measureCircle( self.Shp1 )
                                 # a straight line segment
-                                elif hasattr(self.Shp1,'Curve') and self.Shp1.Curve.TypeId=='Part::GeomLine':
+                                #elif hasattr(self.Shp1,'Curve') and self.Shp1.Curve.TypeId=='Part::GeomLine':
+                                elif self.isSegment(self.Shp1):
+                                    taskUI.sel1Name.setText('Segment')
                                     self.measureLine( self.Shp1 )
                                 # dunno what that stuff is
                                 else:
-                                    self.printResult("Can't measure\n"+str(Shp1))
+                                    self.printResult("Can't measure\n"+str(self.Shp1))
                             # dunno what that stuff is
                             else:
                                 self.printResult("Can't measure\n"+str(subShape))
@@ -510,7 +510,6 @@ class selectionObserver():
                             taskUI.Selection1.setChecked(True)
                             taskUI.sel1Icon.setIcon(QtGui.QIcon(taskUI.validIcon))
                             taskUI.sel2Icon.setIcon(QtGui.QIcon(taskUI.selectIcon))
-
 
                     # second element selected
                     elif taskUI.Selection2.isEnabled(): #step #2
@@ -566,7 +565,7 @@ class selectionObserver():
     def angleShapes( self, shape1, shape2 ):
         global taskUI
         if shape1.isValid() and shape2.isValid():
-            #Gui.Selection.clearSelection()
+            Gui.Selection.clearSelection()
             self.printResult( 'Measuring angles' )
             # Datum object
             if shape1.BoundBox.DiagonalLength > 1e+10:
