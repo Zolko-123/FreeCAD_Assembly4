@@ -13,6 +13,7 @@ import os
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
+import Part
 
 import libAsm4 as Asm4
 
@@ -176,14 +177,13 @@ class newHole:
                 # check whether it's a circular edge:
                 edge = Gui.Selection.getSelectionEx()[0]
                 if len(edge.SubObjects) == 1:
-                    edgeObj = edge.SubObjects[0]
                     # if the edge is circular
-                    #if hasattr(edgeObj,"Curve") and hasattr(edgeObj.Curve,"centerOfCurvature"):
-                    if Asm4.isCircle(edgeObj):
+                    if Asm4.isCircle(edge.SubObjects[0]):
                         # find the feature on which the edge is located
                         parentObj = Gui.Selection.getSelection()[0]
                         edgeName = edge.SubElementNames[0]
-                        selection = ( parentObj, edgeName )
+                        # selection = ( parentObj, edgeName )
+                        selection = ( parentObj, edge )
         return selection
 
     """
@@ -193,6 +193,7 @@ class newHole:
     """
     def Activated(self):
         ( selectedObj, edge ) = self.getSelection()
+        edgeName = edge.SubElementNames[0]
         parentPart = selectedObj.getParentGeoFeatureGroup()
         # if the solid having the edge is indeed in an App::Part
         if parentPart and (parentPart.TypeId=='App::Part' or parentPart.TypeId=='PartDesign::Body'):
@@ -201,13 +202,23 @@ class newHole:
             while App.ActiveDocument.getObject( 'HoleAxis_'+str(instanceNum) ):
                 instanceNum += 1
             axis = parentPart.newObject('PartDesign::Line','HoleAxis_'+str(instanceNum))
-            axis.Support = [( selectedObj, (edge,) )]
+            axis.Support = [( selectedObj, (edgeName,) )]
             axis.MapMode = 'AxisOfCurvature'
             axis.MapReversed = False
             axis.ResizeMode = 'Manual'
-            axis.Length = 40
-            Gui.ActiveDocument.getObject(axis.Name).ShapeColor = (0.0,1.0,1.0)
-            Gui.ActiveDocument.getObject(axis.Name).Transparency = 0
+            axis.Length = edge.SubObjects[0].BoundBox.DiagonalLength
+            axis.ViewObject.ShapeColor = (0.0,0.0,1.0)
+            axis.ViewObject.Transparency = 50
+            '''
+            pt1    = App.Vector(0,0,diam/2.)
+            pt2    = App.Vector(0,0,-diam/2.)
+            axis   = parentPart.newObject('Part::FeaturePython', 'HoleAxis_'+str(instanceNum))
+            axis.ViewObject.Proxy = Asm4.setCustomIcon(axis,'Asm4_Hole.svg')
+            axis.Shape = Part.Wire(Part.makeLine(pt1,pt2))
+            axis.Placement = circle.Placement
+            axis.ViewObject.DrawStyle = 'Dashdot'
+            axis.ViewObject.LineColor = (0.0,0.0,1.0)
+            '''
             axis.recompute()
             parentPart.recompute()
 

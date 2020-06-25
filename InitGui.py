@@ -102,7 +102,7 @@ class Assembly4Workbench(Workbench):
         #import newLinkArray        # creates a new array of App::Link
         #import makeLinkArray        # creates a new array of App::Link
         import gotoDocumentCmd     # opens the documentof the selected App::Link
-        import MeasureTask         # Measure tool in the Task panel
+        import Asm4_Measure        # Measure tool in the Task panel
         import makeBomCmd          # creates the parts list
         import HelpCmd             # shows a basic help window
         

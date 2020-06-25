@@ -66,6 +66,30 @@ def makeAsmProperties( obj, reset=False ):
     return
 
 
+# custum icon
+# views/view_custom.py
+# https://wiki.freecadweb.org/Viewprovider
+# https://wiki.freecadweb.org/Custom_icon_in_tree_view
+# 
+# obj = App.ActiveDocument.addObject("App::FeaturePython", "Name")
+# obj.ViewObject.Proxy = ViewProviderCustomIcon( obj, path + "FreeCADIco.png")
+# icon download to file
+#
+# usage:
+# object = App.ActiveDocument.addObject('App::FeaturePython','objName')
+# object = model.newObject('App::FeaturePython','objName')
+# object.ViewObject.Proxy = Asm4.setCustomIcon(object,'Asm4_Variables.svg')
+class setCustomIcon():
+    def __init__( self, obj, iconFile):
+        #obj.Proxy = self
+        self.customIcon = os.path.join( iconPath, iconFile )
+        
+    def getIcon(self):                                              # GetIcon
+        return self.customIcon
+
+
+
+
 """
     +-----------------------------------------------+
     |         check whether a workbench exists      |
