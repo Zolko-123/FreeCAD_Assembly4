@@ -4,7 +4,7 @@
 # placeLinkCmd.py
 
 
-import os
+import os, time
 
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
@@ -65,6 +65,7 @@ class placeLinkCmd():
         return False
 
     def Activated(self):
+        #time.sleep(1.0)
         Gui.Control.showDialog(placeLinkUI())
 
 
@@ -144,7 +145,7 @@ class placeLinkUI():
                         self.parentList.addItem( objIcon, objText, obj)
 
         # find all the LCS in the selected link
-        self.partLCStable = self.getPartLCS( self.selectedLink.LinkedObject )
+        self.partLCStable = Asm4.getPartLCS( self.selectedLink.LinkedObject )
         # build the list
         self.partLCSlist.clear()
         for lcs in self.partLCStable:
@@ -355,7 +356,7 @@ class placeLinkUI():
             FCC.PrintWarning("Problem in selections\n")
             return False
 
-
+    '''
     # get all the LCS in a part
     def getPartLCS( self, part ):
         partLCS = [ ]
@@ -367,7 +368,7 @@ class placeLinkUI():
             if obj.TypeId == 'PartDesign::CoordinateSystem':
                 partLCS.append( obj )
         return partLCS
-
+    '''
 
     # fill the LCS list when changing the parent
     def onParentSelected(self):
@@ -381,7 +382,7 @@ class placeLinkUI():
             parentName = 'Parent Assembly'
             parentPart = self.parentAssembly
             # we get the LCS directly in the root App::Part 'Model'
-            self.attLCStable = self.getPartLCS( parentPart )
+            self.attLCStable = Asm4.getPartLCS( parentPart )
             self.parentDoc.setText( parentPart.Document.Name+'#'+Asm4.nameLabel(parentPart) )
         # if something is selected
         elif self.parentList.currentIndex() > 1:
@@ -389,7 +390,7 @@ class placeLinkUI():
             parentPart = self.activeDoc.getObject( parentName )
             if parentPart:
                 # we get the LCS from the linked part
-                self.attLCStable = self.getPartLCS( parentPart.LinkedObject )
+                self.attLCStable = Asm4.getPartLCS( parentPart.LinkedObject )
                 # linked part & doc
                 dText = parentPart.LinkedObject.Document.Name +'#'
                 # if the linked part has been renamed by the user

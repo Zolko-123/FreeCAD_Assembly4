@@ -40,6 +40,19 @@ class newModel:
             return(False)
 
 
+    # checks whether there already is an Asm4 Model in the document
+    def checkModel(self):
+        if self.activeDoc.getObject('Model'):
+            if self.activeDoc.Model.TypeId=='App::Part' and self.activeDoc.Model.Type=='Assembly4 Model':
+                Asm4.warningBox("This document already contains an Assembly4 Model.")
+            else:
+                Asm4.warningBox("This document already contains another FreeCAD object called \"Model\". I cannot create an Assembly4 Model.")
+            return(True)
+        else:
+            return(False)
+
+
+    # the real stuff
     def Activated(self):
         # get the current active document to avoid errors if user changes tab
         self.activeDoc = App.activeDocument()
@@ -60,7 +73,9 @@ class newModel:
             # create a group Constraints to store future solver constraints there
             model.newObject('App::DocumentObjectGroup','Constraints')
             # create an object Variables to hold variables to be used in this document
-            model.newObject('App::FeaturePython','Variables')
+            variables = model.newObject('App::FeaturePython','Variables')
+            #variables.ViewObject.Proxy = Asm4.setCustomIcon(variables,'Asm4_Variables.svg')
+
             # create a Configuration property
             model.addProperty('App::PropertyEnumeration', 'Configuration', 'Parameters')
             model.Configuration = ['Default']
@@ -79,19 +94,6 @@ class newModel:
             model.recompute()
             self.activeDoc.recompute()
 
-
-    def checkModel(self):
-        # check whether there is already a Model in the document
-        # we don't check whether it's an App::Part or not
-        # Returns True if there is an object called 'Model'
-        if self.activeDoc.getObject('Model'):
-            if self.activeDoc.Model.TypeId=='App::Part' and self.activeDoc.Model.Type=='Assembly4 Model':
-                Asm4.warningBox("This document already contains an Assembly4 Model.")
-            else:
-                Asm4.warningBox("This document already contains another FreeCAD object called \"Model\". I cannot create an Assembly4 Model.")
-            return(True)
-        else:
-            return(False)
 
 
 # add the command to the workbench

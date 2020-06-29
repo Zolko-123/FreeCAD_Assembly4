@@ -269,7 +269,7 @@ class placeDatumUI():
             Gui.Selection.addSelection( self.activeDoc.Name, 'Model', self.selectedDatum.Name +'.')
         return
 
-
+    '''
     # get all datums in a part
     def getPartLCS( self, part ):
         partLCS = [ ]
@@ -280,7 +280,12 @@ class placeDatumUI():
             obj = part.getObject( objName[0:-1] )
             if obj.TypeId in datumTypes:
                 partLCS.append( obj )
+            elif obj.TypeId == 'App::DocumentObjectGroup':
+                datums = self.getPartLCS(obj)
+                for datum in datums:
+                    partLCS.append(datum)
         return partLCS
+    '''
 
 
     # fill the LCS list when changing the parent
@@ -295,7 +300,7 @@ class placeDatumUI():
             parentPart = self.activeDoc.getObject( parentName )
             if parentPart:
                 # we get the LCS from the linked part
-                self.attLCStable = self.getPartLCS( parentPart.LinkedObject )
+                self.attLCStable = Asm4.getPartLCS( parentPart.LinkedObject )
                 # linked part & doc
                 dText = parentPart.LinkedObject.Document.Name +'#'
                 # if the linked part has been renamed by the user

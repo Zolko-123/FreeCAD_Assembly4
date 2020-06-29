@@ -5,13 +5,12 @@
 
 
 
+
 import os
 
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
-#from FreeCAD import Console as FCC
-
 
 import libAsm4 as Asm4
 
@@ -19,77 +18,59 @@ import libAsm4 as Asm4
 
 """
     +-----------------------------------------------+
-    |               Helper functions                |
+    |                  main class                   |
     +-----------------------------------------------+
 """
-def getSelection():
-    selectedObj = None
-    # check that there is an App::Part called 'Model'
-    if App.ActiveDocument.getObject('Model') and App.ActiveDocument.Model.TypeId == 'App::Part':
-        selectedObj = App.ActiveDocument.Model
-    else:
-        return None
-    # if an App::Link is selected, return that (we'll duplicate it)
-    if len(Gui.Selection.getSelection())==1:
-        selObj = Gui.Selection.getSelection()[0]
-        # it's an App::Link
-        if selObj.isDerivedFrom('App::Link'):
-            selectedObj = selObj
-    return selectedObj
+class insertLink( QtGui.QDialog ):
+    "My tool object"
 
-
-# allowed types to link-to
-linkTypes = [ 'App::Part', 'PartDesign::Body']
-
-# global success state variable
-success = False
-
-"""
-    +-----------------------------------------------+
-    |                  The command                  |
-    +-----------------------------------------------+
-"""
-class insertLinkCmd():
     def __init__(self):
-        super(insertLinkCmd,self).__init__()
+        super(insertLink,self).__init__()
+        # the GUI objects are defined later down
+        self.drawUI()
+
 
     def GetResources(self):
-        return {"MenuText": "Insert Part",
+        return {"MenuText": "Link a Part",
                 "Accel": "Ctrl+L",
-                "ToolTip": "Insert a Part into the Assembly",
+                "ToolTip": "Insert a link to a Part",
                 "Pixmap" : os.path.join( Asm4.iconPath , 'Link_Part.svg')
                 }
 
+
     def IsActive(self):
         # We only insert a link into an Asm4  Model
-        if App.ActiveDocument and getSelection():
+        if Asm4.checkModel:
             return True
         return False
 
+
+    def getSelection(self):
+        selectedObj = None
+        # check that there is an App::Part called 'Model'
+        if App.ActiveDocument.getObject('Model'):
+            selectedObj = App.ActiveDocument.getObject('Model')
+        else:
+            return None
+        # if an App::Link is selected, return that (we'll duplicate it)
+        if Gui.Selection.getSelection():
+            selObj = Gui.Selection.getSelection()[0]
+            # it's an App::Link
+            if selObj.isDerivedFrom('App::Link'):
+                selectedObj = selObj
+        return selectedObj
+
+
+
+    """
+    +-----------------------------------------------+
+    |                 the real stuff                |
+    +-----------------------------------------------+
+    """
     def Activated(self):
-        Gui.Control.showDialog( insertLinkUI() )
-        # Gui.runCommand( 'Asm4_placeLink' )
+        # This function is executed when the command is activated
 
-
-
-"""
-    +-----------------------------------------------+
-    |    The UI and functions in the Task panel     |
-    +-----------------------------------------------+
-"""
-class insertLinkUI():
-
-    def __init__(self):
-        self.base = QtGui.QWidget()
-        self.form = self.base        
-        iconFile = os.path.join( Asm4.iconPath , 'Link_Part.svg')
-        self.form.setWindowIcon(QtGui.QIcon( iconFile ))
-        self.form.setWindowTitle('Insert a Part into the Assembly')
-
-        # the GUI objects are defined later down
-        self.drawUI()
-        
-        # hey-ho, let's go
+        # initialise stuff
         self.partList.clear()
         self.linkNameInput.clear()
         self.allParts = []
@@ -104,24 +85,31 @@ class insertLinkUI():
         self.asmModel = self.activeDoc.getObject('Model')
         
         # if an App::Link is selected, we'll ducplicate it
-        selObj = getSelection()
         self.origLink = None
-        if selObj.isDerivedFrom('App::Link'):
-            selType = selObj.LinkedObject.TypeId
-            if selType in linkTypes:
-                self.origLink = selObj
+        selObj = None
+        if Gui.Selection.getSelection():
+            selObj = Gui.Selection.getSelection()[0]
+            # it's an App::Link
+            if hasattr(selObj,'isDerivedFrom') and selObj.isDerivedFrom('App::Link'):
+                selType = selObj.LinkedObject.TypeId
+                if selType=='App::Part' or selType=='PartDesign::Body':
+                    self.origLink = selObj
         
         # Search for all App::Parts and PartDesign::Body in all open documents
         # Also store the document of the part
         for doc in App.listDocuments().values():
-            for linkType in linkTypes:
-                for obj in doc.findObjects( linkType ):
-                    # we don't want to link to itself to the 'Model' object
-                    # other App::Part in the same document are OK 
-                    # but only those at top level (not nested inside other containers)
-                    if obj != self.asmModel and obj.getParentGeoFeatureGroup()==None:
-                        self.allParts.append( obj )
-                        self.partsDoc.append( doc )
+            for obj in doc.findObjects("App::Part"):
+                # we don't want to link to itself to the 'Model' object
+                # other App::Part in the same document are OK 
+                # but only those at top level (not nested inside other containers)
+                if obj != self.asmModel and obj.getParentGeoFeatureGroup()==None:
+                    self.allParts.append( obj )
+                    self.partsDoc.append( doc )
+            for obj in doc.findObjects("PartDesign::Body"):
+                # but only those at top level (not nested inside other containers)
+                if obj.getParentGeoFeatureGroup()==None:
+                    self.allParts.append( obj )
+                    self.partsDoc.append( doc )
 
         # build the list
         for part in self.allParts:
@@ -159,23 +147,19 @@ class insertLinkUI():
                     proposedLinkName = origName+'_2'
                 self.linkNameInput.setText( proposedLinkName )
 
-
-    # close
-    def finish(self):
-        Gui.Control.closeDialog()
+        # show the UI
+        self.show()
 
 
-    # standard panel UI buttons
-    def getStandardButtons(self):
-        return int(QtGui.QDialogButtonBox.Cancel | QtGui.QDialogButtonBox.Ok)
 
-    # Cancel
-    def reject(self):
-        self.finish()
-
-
-    # OK: we insert the selected part
-    def accept(self):
+    """
+    +-----------------------------------------------+
+    |         the real stuff happens here           |
+    +-----------------------------------------------+
+    """
+    def onCreateLink(self):
+        # parse the selected items 
+        # TODO : there should only be 1
         selectedPart = []
         for selected in self.partList.selectedIndexes():
             # get the selected part
@@ -195,17 +179,20 @@ class insertLinkUI():
                 createdLink.Label = linkName
             # update the link
             createdLink.recompute()
+            
+            # close the dialog UI...
+            self.close()
+
             # ... and launch the placement of the inserted part
             Gui.Selection.clearSelection()
             Gui.Selection.addSelection( self.activeDoc.Name, 'Model', createdLink.Name+'.' )
-            # close the dialog UI...
-            self.finish()
+            Gui.runCommand( 'Asm4_placeLink' )
 
-        # close the dialog UI...
-        self.finish()
+        # if still open, close the dialog UI
+        self.close()
 
 
-    # a part in the parts list has been clicked, we propose a name for the link
+
     def onItemClicked( self, item ):
         for selected in self.partList.selectedIndexes():
             # get the selected part
@@ -225,28 +212,65 @@ class insertLinkUI():
             self.linkNameInput.setText( proposedLinkName )
 
 
-    # Define the iUI, only static elements
+
+
+    """
+    +-----------------------------------------------+
+    |                 some functions                |
+    +-----------------------------------------------+
+    """
+
+
+    def onCancel(self):
+        self.close()
+
+
+
+    """
+    +-----------------------------------------------+
+    |     defines the UI, only static elements      |
+    +-----------------------------------------------+
+    """
     def drawUI(self):
+
+        # Our main window is a QDialog
+        # make this dialog stay above the others, always visible
+        self.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
+        self.setModal(False)
+        self.setWindowTitle('Insert a Part')
+        self.setWindowIcon( QtGui.QIcon( os.path.join( Asm4.iconPath , 'FreeCad.svg' ) ) )
+        self.setMinimumSize(400, 500)
+        self.resize(400,500)
+
+        # Define the individual widgets
         # The part list is a QListWidget
-        self.partList = QtGui.QListWidget(self.form)
-        self.partList.setMinimumHeight(300)
+        self.partList = QtGui.QListWidget(self)
         # Create a line that will contain the name of the link (in the tree)
-        self.linkNameInput = QtGui.QLineEdit(self.form)
+        self.linkNameInput = QtGui.QLineEdit(self)
+        # Cancel button
+        self.cancelButton = QtGui.QPushButton('Cancel', self)
+        # Insert Link button
+        self.insertButton = QtGui.QPushButton('Insert', self)
+        self.insertButton.setDefault(True)
 
         # Place the widgets with layouts
-        self.mainLayout = QtGui.QVBoxLayout(self.form)
+        self.mainLayout = QtGui.QVBoxLayout(self)
         self.mainLayout.addWidget(QtGui.QLabel("Select Part to be inserted :"))
         self.mainLayout.addWidget(self.partList)
         self.mainLayout.addWidget(QtGui.QLabel("Enter a Name for the link :\n(Must be unique in the Model tree)"))
         self.mainLayout.addWidget(self.linkNameInput)
-        #self.mainLayout.addLayout(self.buttonsLayout)
-        self.form.setLayout(self.mainLayout)
+        self.mainLayout.addWidget(QtGui.QLabel(' '))
+        self.buttonsLayout = QtGui.QHBoxLayout(self)
+        self.buttonsLayout.addWidget(self.cancelButton)
+        self.buttonsLayout.addStretch()
+        self.buttonsLayout.addWidget(self.insertButton)
+        self.mainLayout.addLayout(self.buttonsLayout)
+        self.setLayout(self.mainLayout)
 
         # Actions
+        self.cancelButton.clicked.connect(self.onCancel)
+        self.insertButton.clicked.connect(self.onCreateLink)
         self.partList.itemClicked.connect( self.onItemClicked)
-
-
-
 
 
 """
@@ -254,5 +278,5 @@ class insertLinkUI():
     |       add the command to the workbench        |
     +-----------------------------------------------+
 """
-Gui.addCommand( 'Asm4_insertLink', insertLinkCmd() )
+Gui.addCommand( 'Asm4_insertLink', insertLink() )
 

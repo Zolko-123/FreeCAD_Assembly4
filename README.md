@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.9.6, 2020-06-23
+Current version 0.9.7, 2020-06-29
 
 
 
@@ -51,6 +51,9 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 
 ## Release notes
+
+* 2020.06.29 (**0.9.7**) :  
+Native Fasteners, included Task to change parameters  
 
 * 2020.06.23 (**0.9.6**) :  
 Improved Measure tool  

@@ -66,6 +66,30 @@ def makeAsmProperties( obj, reset=False ):
     return
 
 
+# custum icon
+# views/view_custom.py
+# https://wiki.freecadweb.org/Viewprovider
+# https://wiki.freecadweb.org/Custom_icon_in_tree_view
+# 
+# obj = App.ActiveDocument.addObject("App::FeaturePython", "Name")
+# obj.ViewObject.Proxy = ViewProviderCustomIcon( obj, path + "FreeCADIco.png")
+# icon download to file
+#
+# usage:
+# object = App.ActiveDocument.addObject('App::FeaturePython','objName')
+# object = model.newObject('App::FeaturePython','objName')
+# object.ViewObject.Proxy = Asm4.setCustomIcon(object,'Asm4_Variables.svg')
+class setCustomIcon():
+    def __init__( self, obj, iconFile):
+        #obj.Proxy = self
+        self.customIcon = os.path.join( iconPath, iconFile )
+        
+    def getIcon(self):                                              # GetIcon
+        return self.customIcon
+
+
+
+
 """
     +-----------------------------------------------+
     |         check whether a workbench exists      |
@@ -88,6 +112,58 @@ def checkModel():
         if model.TypeId=='App::Part':
             retval = model
     return retval
+
+
+# get from the selected datum the corresponding link
+def getLinkAndDatum():
+    retval = (None,None)
+    # only for Asm4 
+    if checkModel() and len(Gui.Selection.getSelection())==1:
+        parentAssembly = App.ActiveDocument.Model
+        # find all the links to Part or Body objects
+        childrenTable = []
+        for objStr in parentAssembly.getSubObjects():
+            # the string ends with a . that must be removed
+            obj = App.ActiveDocument.getObject( objStr[0:-1] )
+            if obj.TypeId == 'App::Link' and hasattr(obj.LinkedObject,'isDerivedFrom'):
+                if  obj.LinkedObject.isDerivedFrom('App::Part') or obj.LinkedObject.isDerivedFrom('PartDesign::Body'):
+                    # add it to our tree table if it's a link to an App::Part ...
+                    childrenTable.append( obj )
+
+        selObj = Gui.Selection.getSelection()[0]
+        # a datum is selected
+        if selObj.TypeId in datumTypes:
+            # this returns the selection hierarchy in the form 'linkName.datumName.'
+            selTree = Gui.Selection.getSelectionEx("", 0)[0].SubElementNames[0]
+            (parents, toto, dot) = selTree.partition('.'+selObj.Name)
+            link = App.ActiveDocument.getObject( parents )
+            if dot =='.' and link in childrenTable:
+                retval = (link,selObj)
+            else:
+                # see whether the datum is in a group, some people like to do that
+                (parents2, dot, groupName) = parents.partition('.')
+                link2 = App.ActiveDocument.getObject( parents2 )
+                group = App.ActiveDocument.getObject( groupName )
+                if link2 in childrenTable and group.TypeId=='App::DocumentObjectGroup':
+                    retval = (link2,selObj)
+    return retval
+
+
+# get all datums in a part
+def getPartLCS( part ):
+    partLCS = [ ]
+    # parse all objects in the part (they return strings)
+    for objName in part.getSubObjects(1):
+        # get the proper objects
+        # all object names end with a "." , this needs to be removed
+        obj = part.getObject( objName[0:-1] )
+        if obj.TypeId in datumTypes:
+            partLCS.append( obj )
+        elif obj.TypeId == 'App::DocumentObjectGroup':
+            datums = getPartLCS(obj)
+            for datum in datums:
+                partLCS.append(datum)
+    return partLCS
 
 
 """
