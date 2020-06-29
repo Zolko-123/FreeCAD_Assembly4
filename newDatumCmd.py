@@ -30,7 +30,7 @@ class newDatum:
         self.datumName = datumName
         # recognised types
         self.datumTypes = ['PartDesign::Point','PartDesign::Line','PartDesign::Plane','PartDesign::CoordinateSystem']
-        self.containers = [ 'App::Part', 'PartDesign::Body' ]
+        self.containers = [ 'App::Part', 'PartDesign::Body', 'App::DocumentObjectGroup']
         if self.datumName   == 'Point':
             self.datumType   = 'PartDesign::Point'
             self.menutext    = "New Point"
@@ -87,7 +87,7 @@ class newDatum:
         if Gui.Selection.getSelection():
             selectedObj = Gui.Selection.getSelection()[0]
             # ... and it's an App::Part or an datum object
-            if selectedObj.TypeId=='App::Part' or selectedObj.TypeId=='PartDesign::Body'or selectedObj.TypeId in self.datumTypes:
+            if selectedObj.TypeId in self.containers or selectedObj.TypeId in self.datumTypes:
                 return(selectedObj)
         # or of nothing is selected ...
         elif App.ActiveDocument.getObject('Model'):
@@ -145,7 +145,7 @@ class newDatum:
                 # highlight the created datum object
                 Gui.Selection.clearSelection()
                 Gui.Selection.addSelection( App.ActiveDocument.Name, parentContainer.Name, createdDatum.Name+'.' )
-
+                #Gui.runCommand('Part_EditAttachment')
 
 
 

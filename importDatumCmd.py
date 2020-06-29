@@ -26,7 +26,7 @@ import libAsm4 as Asm4
 """
 def getSelection():
     # check that there is an App::Part called 'Model'
-    if not App.ActiveDocument.getObject('Model'):
+    if Asm4.checkModel is None:
         return None
     # if something is selected ...
     if len(Gui.Selection.getSelection())==1:
@@ -70,9 +70,10 @@ class importDatumCmd():
         return False
 
     def Activated(self):
+        Gui.Control.showDialog( importDatumUI() )
         # Before calling the UI, we make some checks:
-
         # We get all the App::Link parts in the assembly 
+        '''
         parentAssembly = App.ActiveDocument.Model
         childrenTable = []
         for objStr in parentAssembly.getSubObjects():
@@ -92,10 +93,17 @@ class importDatumCmd():
         if dot =='.' and targetLink in childrenTable:
             Gui.Control.showDialog( importDatumUI() )
         else:
-            # something fishy, abort
-            FCC.PrintWarning('The selected datum object cannot be imported into this assembly\n')
-            return
-
+            # see whether the datum is in a group, some people like to do that
+            (targetLinkName, dot, groupName) = targetLink.partition('.')
+            targetLink = App.ActiveDocument.getObject( targetLinkName )
+            group = App.ActiveDocument.getObject( groupName )
+            if targetLink in childrenTable and group.TypeId=='App::DocumentObjectGroup':
+                Gui.Control.showDialog( importDatumUI() )
+            else:
+                # something fishy, abort
+                FCC.PrintWarning('The selected datum object cannot be imported into this assembly\n')
+                return
+        '''
 
 
 """
@@ -105,24 +113,33 @@ class importDatumCmd():
 """
 class importDatumUI():
     def __init__(self):
-        self.base = QtGui.QWidget()
-        self.form = self.base        
-        self.form.setWindowIcon(QtGui.QIcon( iconFile ))
-        self.form.setWindowTitle('Import a Datum object into the Assembly')
+        ( link, datum ) = Asm4.getLinkAndDatum()
+        if not link is None:
+            self.targetDatum = datum
+            self.targetLink  = link
+            
+            self.base = QtGui.QWidget()
+            self.form = self.base        
+            self.form.setWindowIcon(QtGui.QIcon( iconFile ))
+            self.form.setWindowTitle('Import a Datum object into the Assembly')
 
-        # get the current active document to avoid errors if user changes tab
-        self.activeDoc = App.ActiveDocument
-        self.parentAssembly = self.activeDoc.Model
+            # get the current active document to avoid errors if user changes tab
+            self.activeDoc = App.ActiveDocument
+            self.parentAssembly = self.activeDoc.Model
 
-        # this has been checked before calling
-        self.targetDatum = getSelection()
-        selectionTree = Gui.Selection.getSelectionEx("", 0)[0].SubElementNames[0]
-        (targetLinkName, sel, dot) = selectionTree.partition('.'+self.targetDatum.Name)
-        self.targetLink = self.activeDoc.getObject( targetLinkName )
+            '''
+            # this has been checked before calling
+            self.targetDatum = getSelection()
+            selectionTree = Gui.Selection.getSelectionEx("", 0)[0].SubElementNames[0]
+            (targetLinkName, sel, dot) = selectionTree.partition('.'+self.targetDatum.Name)
+            self.targetLink = self.activeDoc.getObject( targetLinkName )
+            '''
 
-        # make and initialize UI
-        self.drawUI()
-        self.initUI()
+            # make and initialize UI
+            self.drawUI()
+            self.initUI()
+        else:
+            Asm4.warningBox( 'The selected datum object cannot be imported into this assembly' )
 
 
     # this is the end ...
