@@ -17,6 +17,25 @@ import libAsm4 as Asm4
 
 
 
+# get the Variables feature
+def getVariables():
+    retval = None
+    if App.ActiveDocument:
+        variables = App.ActiveDocument.getObject('Variables')
+        if variables and variables.TypeId=='App::FeaturePython':
+            retval = variables
+    return retval
+
+# check whether an App::Part is selected
+def checkPart():
+    retval = None
+    # if an App::Part is selected
+    if Gui.Selection.getSelection():
+        selectedObj = Gui.Selection.getSelection()[0]
+        if selectedObj.TypeId == 'App::Part':
+            retval = selectedObj
+    return retval
+
 
 """
     +-----------------------------------------------+
@@ -54,8 +73,8 @@ class addVariable():
 
 
     def IsActive(self):
-        # if there is an Asm4 Model in the ActiveDocument
-        if Asm4.checkModel():
+        # if there is an Asm4 Model in the ActiveDocument, or if an App::Part is selected
+        if Asm4.checkModel() or checkPart() or getVariables():
             return True
         return False
    
@@ -65,7 +84,11 @@ class addVariable():
         self.Variables = App.ActiveDocument.getObject('Variables')
         # if it doesn't exist then create it (for older Asm4 documents)
         if not self.Variables:
-            self.Variables =  App.ActiveDocument.getObject('Model').newObject('App::FeaturePython','Variables')
+            if checkPart():
+                part = checkPart()
+            else:
+                part = App.ActiveDocument.getObject('Model')
+            self.Variables =  part.newObject('App::FeaturePython','Variables')
 
         # (re-)initialise the UI
         self.typeList.clear()
@@ -184,7 +207,7 @@ class delVariable():
 
     def IsActive(self):
         # if there is an Asm4 Model in the ActiveDocument
-        if Asm4.checkModel():
+        if getVariables():
             return True
         return False
 
@@ -209,7 +232,7 @@ class delVariable():
             # get its value
             self.varName.setText(selectedProp)
             value = self.Variables.getPropertyByName(selectedProp)
-            self.varValue.setText(value)
+            self.varValue.setText(str(value))
         return
 
 
