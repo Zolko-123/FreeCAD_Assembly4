@@ -93,5 +93,5 @@ class HyperDual:
         return HyperDual(real, grad, hess)
 
     def __repr__(self):
-        return repr(self.real) + " + " + repr(self.grad) + " + \n" + repr(self.hess)
+        return repr(self.real) + " + " + repr(self.grad) + " + \n" + repr(self.hess) + "\n"
 
