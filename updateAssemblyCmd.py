@@ -4,7 +4,9 @@
 # updateAssembly.py 
 
 
+import time
 import math, re, os
+import numpy as np
 
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
@@ -13,6 +15,8 @@ import Part
 
 import libAsm4 as Asm4
 
+from solver.Solver import Solver
+from solver.Solver import get_lists
 
 
 class updateAssembly:
@@ -42,10 +46,6 @@ class updateAssembly:
             if obj.TypeId == 'App::Part':
                 obj.recompute('True')
         #App.ActiveDocument.recompute()
-        import time
-        import numpy as np
-        from solver.Solver import Solver
-        from solver.Solver import get_lists
         t = time.time()
         f, x, x_names = get_lists()
         x_i = np.zeros_like(x)
@@ -55,26 +55,28 @@ class updateAssembly:
         solved = sol.solve(x_i)
         for i in range(len(x)):
             obj = x_names[i]
-            if "Rotation" in obj:
-                angles = App.ActiveDocument.getObject(obj.split(".")[0]).Placement.Rotation.toEuler()
-                if "x" in obj.split(".")[3]:
-                    App.ActiveDocument.getObject(obj.split(".")[0]).Placement.Rotation = App.Rotation(angles[0], angles[1], solved.x[i])
-                elif "y" in obj.split(".")[3]:
-                    App.ActiveDocument.getObject(obj.split(".")[0]).Placement.Rotation = App.Rotation(angles[0], solved.x[i], angles[2])
-                elif "z" in obj.split(".")[3]:
-                    App.ActiveDocument.getObject(obj.split(".")[0]).Placement.Rotation = App.Rotation(solved.x[i], angles[1], angles[2])
-            else:
-                rsetattr(App.ActiveDocument, obj, solved.x[i])
+            obj_name = obj.split(".")[0]
+            component = obj.split(".")[2]
+            placement = obj.split(".")[1]
+            if placement == "Rotation":
+                angles = App.ActiveDocument.getObject(obj_name).Placement.Rotation.toEuler()
+                if component == "x":
+                    App.ActiveDocument.getObject(obj_name).Placement.Rotation = App.Rotation(angles[0], angles[1], solved.x[i])
+                elif component == "y":
+                    App.ActiveDocument.getObject(obj_name).Placement.Rotation = App.Rotation(angles[0], solved.x[i], angles[2])
+                elif component == "z":
+                    App.ActiveDocument.getObject(obj_name).Placement.Rotation = App.Rotation(solved.x[i], angles[1], angles[2])
+            elif placement == "Base":
+                if component == "x":
+                    App.ActiveDocument.getObject(obj_name).Placement.Base.x = solved.x[i]
+                elif component == "y":
+                    App.ActiveDocument.getObject(obj_name).Placement.Base.y = solved.x[i]
+                elif component == "z":
+                    App.ActiveDocument.getObject(obj_name).Placement.Base.z = solved.x[i]
         print(solved)
         App.ActiveDocument.recompute()
         time_used = time.time() - t
         print(f"solver took {time_used}")
-
-
-from solver.Solver import rgetattr
-def rsetattr(obj, attr, val):
-    pre, _, post = attr.rpartition(".")
-    return setattr(rgetattr(obj, pre) if pre else obj, post, val)
 
 
 # add the command to the workbench

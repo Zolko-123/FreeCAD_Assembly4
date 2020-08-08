@@ -1,6 +1,6 @@
-import functools
 from scipy.optimize import minimize
 import numpy as np
+import FreeCAD as App
 from .HyperDual import HyperDual
 from .Constraints import Equality
 
@@ -55,21 +55,22 @@ class Solver:
             hd_list.append()
 
 
-import FreeCAD as App
-
 def get_lists():
+    """
+    Gets 3 lists. A list containing the constraint functions. A list
+    containing the independent variables. And a list containing the
+    ids of the independent variables.
+    """
     # Assuming that constraints are only between exactly two objects
     f_list = []
     x_list = []
     x_names = []
     # First we try to find the unique variables 
     for f in App.ActiveDocument.Constraints.Group:
-        x_names.append(f.Object_1)
-        x_names.append(f.Object_2)
- 
-    print(x_names)
+        x_names.append(f.Obj1Name)
+        x_names.append(f.Obj2Name)
+
     unique_variables = set(x_names)
-    print(unique_variables)
     x_names = []
 
     i = 0
@@ -80,49 +81,51 @@ def get_lists():
         if f.Type == "Equality_Constraint":
             x1_real = None
             x2_real = None
+            x1_name = f.Obj1Name
+            x2_name = f.Obj2Name
             # Rotations are a little bit more complicated than placements
-            if "Rotation" in f.Object_1:
-                if "x" in f.Object_1.split(".")[3]:
-                    x1_real = App.ActiveDocument.getObject(f.Object_1.split(".")[0]).Placement.Rotation.toEuler()[2]
-                    x2_real = App.ActiveDocument.getObject(f.Object_2.split(".")[0]).Placement.Rotation.toEuler()[2]
-                elif "y" in f.Object_1.split(".")[3]:
-                    x1_real = App.ActiveDocument.getObject(f.Object_1.split(".")[0]).Placement.Rotation.toEuler()[1]
-                    x2_real = App.ActiveDocument.getObject(f.Object_2.split(".")[0]).Placement.Rotation.toEuler()[1]
-                elif "z" in f.Object_1.split(".")[3]:
-                    x1_real = App.ActiveDocument.getObject(f.Object_1.split(".")[0]).Placement.Rotation.toEuler()[0]
-                    x2_real = App.ActiveDocument.getObject(f.Object_2.split(".")[0]).Placement.Rotation.toEuler()[0]
-            else:
-                x1_real = rgetattr(App.ActiveDocument, f.Object_1)
-                x2_real = rgetattr(App.ActiveDocument, f.Object_2)
+            if "Rotation" == f.Placement:
+                if f.Component == "x":
+                    x1_real = App.ActiveDocument.getObject(f.Object_1).Placement.Rotation.toEuler()[2]
+                    x2_real = App.ActiveDocument.getObject(f.Object_2).Placement.Rotation.toEuler()[2]
+                elif f.Component == "y":
+                    x1_real = App.ActiveDocument.getObject(f.Object_1).Placement.Rotation.toEuler()[1]
+                    x2_real = App.ActiveDocument.getObject(f.Object_2).Placement.Rotation.toEuler()[1]
+                elif f.Component == "z":
+                    x1_real = App.ActiveDocument.getObject(f.Object_1).Placement.Rotation.toEuler()[0]
+                    x2_real = App.ActiveDocument.getObject(f.Object_2).Placement.Rotation.toEuler()[0]
+            elif f.Placement == "Base":
+                x1_real = getattr(App.ActiveDocument.getObject(f.Object_1).Placement.Base, f.Component)
+                x2_real = getattr(App.ActiveDocument.getObject(f.Object_2).Placement.Base, f.Component)
             x1_grad = np.zeros_like(initial_grad)
             x2_grad = np.zeros_like(initial_grad)
 
             # Check if variables are already in the list (we don't want to put
             # the same variable twice)
-            if f.Object_1 in x_names and not f.Object_2 in x_names:
+            if f.Obj1Name in x_names and not f.Obj2Name in x_names:
                 # since x1 is already in the list, we skip it
-                x1_index = x_names.index(f.Object_1)
+                x1_index = x_names.index(f.Obj1Name)
                 x2_grad[i] = 1.
                 constraint = Equality(x1_index, i)
                 x2 = HyperDual(x2_real, x2_grad, initial_hess)
                 f_list.append(constraint)
                 x_list.append(x2)
-                x_names.append(f.Object_2)
+                x_names.append(f.Obj2Name)
                 i += 1  # We only added one new variable
-            elif f.Object_2 in x_names and not f.Object_1 in x_names:
+            elif f.Obj2Name in x_names and not f.Obj1Name in x_names:
                 # since x2 is already in the list, we skip it
-                x2_index = x_names.index(f.Object_2)
+                x2_index = x_names.index(f.Obj2Name)
                 x1_grad[i] = 1.
                 constraint = Equality(i, x2_index)
                 x1 = HyperDual(x1_real, x1_grad, initial_hess)
                 f_list.append(constraint)
                 x_list.append(x1)
-                x_names.append(f.Object_1)
+                x_names.append(f.Obj1Name)
                 i += 1  # Only one new variable
-            elif f.Object_1 in x_names and f.Object_2 in x_names:
+            elif f.Obj1Name in x_names and f.Obj2Name in x_names:
                 # Both x1 and x2 are in the list, we just get their indeces
-                x1_index = x_names.index(f.Object_1)
-                x2_index = x_names.index(f.Object_2)
+                x1_index = x_names.index(f.Obj1Name)
+                x2_index = x_names.index(f.Obj2Name)
                 constraint = Equality(x1_index, x2_index)
                 f_list.append(constraint)
                 # No new variables to append 
@@ -136,8 +139,8 @@ def get_lists():
                 f_list.append(constraint)
                 x_list.append(x1)
                 x_list.append(x2)
-                x_names.append(f.Object_1)
-                x_names.append(f.Object_2)
+                x_names.append(f.Obj1Name)
+                x_names.append(f.Obj2Name)
                 i += 2  # we added two new variables
 
 #            x1 = HyperDual(x1_real, x1_grad, initial_hess)
@@ -149,7 +152,3 @@ def get_lists():
 #            x_names.append(f.Object_2)
     return f_list, x_list, x_names
 
-def rgetattr(obj, attr, *args):
-    def _getattr(obj, attr):
-        return getattr(obj, attr, *args)
-    return functools.reduce(_getattr, [obj] + attr.split("."))
