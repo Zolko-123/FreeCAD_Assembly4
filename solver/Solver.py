@@ -75,63 +75,80 @@ def get_lists():
 
     i = 0
     n = len(unique_variables)
-    initial_grad = np.zeros(n)
-    initial_hess = np.zeros((n,n))
+    #initial_grad = np.zeros(n)
+    #initial_hess = np.zeros((n,n))
     for f in App.ActiveDocument.Constraints.Group:
         if f.Type == "Equality_Constraint":
-            x1_real = None
-            x2_real = None
-            x1_name = f.Obj1Name
-            x2_name = f.Obj2Name
-            x1_index = None
-            x2_index = None
-            x1_grad = np.zeros_like(initial_grad)
-            x2_grad = np.zeros_like(initial_grad)
-
-            # Rotations are a little bit more complicated than placements
-            if "Rotation" == f.Placement:
-                if f.Component == "x":
-                    x1_real = App.ActiveDocument.getObject(f.Object_1).Placement.Rotation.toEuler()[2]
-                    x2_real = App.ActiveDocument.getObject(f.Object_2).Placement.Rotation.toEuler()[2]
-                elif f.Component == "y":
-                    x1_real = App.ActiveDocument.getObject(f.Object_1).Placement.Rotation.toEuler()[1]
-                    x2_real = App.ActiveDocument.getObject(f.Object_2).Placement.Rotation.toEuler()[1]
-                elif f.Component == "z":
-                    x1_real = App.ActiveDocument.getObject(f.Object_1).Placement.Rotation.toEuler()[0]
-                    x2_real = App.ActiveDocument.getObject(f.Object_2).Placement.Rotation.toEuler()[0]
-            elif f.Placement == "Base":
-                x1_real = getattr(App.ActiveDocument.getObject(f.Object_1).Placement.Base, f.Component)
-                x2_real = getattr(App.ActiveDocument.getObject(f.Object_2).Placement.Base, f.Component)
-
-            # Check if variables are already in the list (we don't want to put
-            # the same variable twice)
-            if f.Obj1Name in x_names:
-                # skip x1 since it already is in the list 
-                # we only need its index in the list
-                x1_index = x_names.index(f.Obj1Name)
-            else:
-                # x1 not in the list, therefore we add it
-                x1_grad[i] = 1.
-                x1 = HyperDual(x1_real, x1_grad, initial_hess)
-                x1_index = i
-                x_list.append(x1)
-                x_names.append(f.Obj1Name)
-                i += 1
-
-            if f.Obj2Name in x_names:
-                # Now do the same we did for x1 to x2
-                x2_index = x_names.index(f.Obj2Name)
-            else:
-                x2_grad[i] = 1.
-                x2 = HyperDual(x2_real, x2_grad, initial_hess)
-                x2_index = i
-                x_list.append(x2)
-                x_names.append(f.Obj2Name)
-                i += 1
-
-            constraint = Equality(x1_index, x2_index)
-            f_list.append(constraint)
-
+            f_new, x_new, x_names_new = get_equality_lists(f, x_names, n, i)
+            if f_new:
+                f_list.extend(f_new)
+            if x_new:
+                x_list.extend(x_new)
+            if x_names_new:
+                x_names.extend(x_names_new)
+            i += len(x_new)
 
     return f_list, x_list, x_names
 
+
+def get_equality_lists(f, x_names, n, i):
+    """
+    Gets lists for Equality Constraints
+    """
+    f_new = []
+    x_new = []
+    x_names_new = []
+    x1_real = None
+    x2_real = None
+    x1_name = f.Obj1Name
+    x2_name = f.Obj2Name
+    x1_index = None
+    x2_index = None
+    x1_grad = np.zeros(n)
+    x2_grad = np.zeros(n)
+    initial_hess = np.zeros((n,n))
+
+    # Rotations are a little bit more complicated than placements
+    if "Rotation" == f.Placement:
+        if f.Component == "x":
+            x1_real = App.ActiveDocument.getObject(f.Object_1).Placement.Rotation.toEuler()[2]
+            x2_real = App.ActiveDocument.getObject(f.Object_2).Placement.Rotation.toEuler()[2]
+        elif f.Component == "y":
+            x1_real = App.ActiveDocument.getObject(f.Object_1).Placement.Rotation.toEuler()[1]
+            x2_real = App.ActiveDocument.getObject(f.Object_2).Placement.Rotation.toEuler()[1]
+        elif f.Component == "z":
+            x1_real = App.ActiveDocument.getObject(f.Object_1).Placement.Rotation.toEuler()[0]
+            x2_real = App.ActiveDocument.getObject(f.Object_2).Placement.Rotation.toEuler()[0]
+    elif f.Placement == "Base":
+        x1_real = getattr(App.ActiveDocument.getObject(f.Object_1).Placement.Base, f.Component)
+        x2_real = getattr(App.ActiveDocument.getObject(f.Object_2).Placement.Base, f.Component)
+
+    # Check if variables are already in the list (we don't want to put
+    # the same variable twice)
+    if x1_name in x_names:
+        # skip x1 since it already is in the list 
+        # we only need its index in the list
+        x1_index = x_names.index(x1_name)
+    else:
+        # x1 not in the list, therefore we add it
+        x1_grad[i] = 1.
+        x1 = HyperDual(x1_real, x1_grad, initial_hess)
+        x1_index = i
+        x_new.append(x1)
+        x_names_new.append(x1_name)
+        i += 1
+
+    if x2_name in x_names:
+        # Now do the same we did for x1 to x2
+        x2_index = x_names.index(x2_name)
+    else:
+        x2_grad[i] = 1.
+        x2 = HyperDual(x2_real, x2_grad, initial_hess)
+        x2_index = i
+        x_new.append(x2)
+        x_names_new.append(x2_name)
+        i += 1
+
+    constraint = Equality(x1_index, x2_index)
+    f_new.append(constraint)
+    return f_new, x_new, x_names_new
