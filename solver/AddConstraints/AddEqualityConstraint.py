@@ -38,7 +38,10 @@ class EqualityPanel:
         obj1 = self.form.firstObjectList.selectedItems()[0].text()
         obj2 = self.form.secondObjectList.selectedItems()[0].text()
         if not obj1 or not obj2:
-            print("Select first and second object")
+            print("Select first and second objects")
+            return
+        if obj1 == obj2:
+            print("Select two distinct objects")
             return
         if self.form.xCheck.isChecked():
             # We want to set the x-coordinates of both objects equal
@@ -86,6 +89,12 @@ class EqualityPanel:
         newConstraint.addProperty("App::PropertyString", "Object_2").Object_2 = obj2
         newConstraint.addProperty("App::PropertyString", "Placement").Placement = placement
         newConstraint.addProperty("App::PropertyString", "Component").Component = component
+        # Obj1Name and Obj2Name are used as a sort of id for each variable 
+        # since the same variable could be on multiple constraints
+        newConstraint.addProperty("App::PropertyString", "Obj1Name", "", "", 4)
+        newConstraint.Obj1Name = obj1 + "." + placement + "." + component
+        newConstraint.addProperty("App::PropertyString", "Obj2Name", "", "", 4)
+        newConstraint.Obj2Name = obj2 + "." + placement + "." + component
         App.ActiveDocument.Constraints.addObject(newConstraint)
 
 Gui.addCommand("Asm4_EqualityConstraint", EqualityConstraint())

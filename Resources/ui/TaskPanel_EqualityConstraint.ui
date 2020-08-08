@@ -17,7 +17,7 @@
    <item row="2" column="0" colspan="2">
     <widget class="QLabel" name="label_3">
      <property name="text">
-      <string>Coordinates to set equal for both objects</string>
+      <string>Components of placements to set equal </string>
      </property>
     </widget>
    </item>
@@ -38,21 +38,21 @@
    <item row="4" column="0" colspan="2">
     <widget class="QCheckBox" name="yCheck">
      <property name="text">
-      <string>y axis</string>
+      <string>y-axis</string>
      </property>
     </widget>
    </item>
    <item row="6" column="0">
     <widget class="QCheckBox" name="xrotCheck">
      <property name="text">
-      <string>x axis rotation</string>
+      <string>x-axis rotation</string>
      </property>
     </widget>
    </item>
    <item row="7" column="0">
     <widget class="QCheckBox" name="yrotCheck">
      <property name="text">
-      <string>y axis rotation</string>
+      <string>y-axis rotation</string>
      </property>
     </widget>
    </item>
@@ -65,7 +65,7 @@
    <item row="5" column="0" colspan="2">
     <widget class="QCheckBox" name="zCheck">
      <property name="text">
-      <string>z axis</string>
+      <string>z-axis</string>
      </property>
      <property name="checked">
       <bool>false</bool>
@@ -75,14 +75,14 @@
    <item row="3" column="0" colspan="2">
     <widget class="QCheckBox" name="xCheck">
      <property name="text">
-      <string>x axis</string>
+      <string>x-axis</string>
      </property>
     </widget>
    </item>
    <item row="8" column="0">
     <widget class="QCheckBox" name="zrotCheck">
      <property name="text">
-      <string>z axis rotation</string>
+      <string>z-axis rotation</string>
      </property>
     </widget>
    </item>
