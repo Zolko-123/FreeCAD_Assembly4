@@ -28,71 +28,64 @@ class EqualityConstraint:
 
 class EqualityPanel:
     def __init__(self):
+        self.type = "Equality_Constraint"
         self.form = Gui.PySideUic.loadUi(
             os.path.join(asm4.wbPath,
             "Resources/ui/TaskPanel_EqualityConstraint.ui"))
-        # Fill the objects lists
         self.addObjects()
 
     def accept(self):
-        obj1Name = self.form.firstObjectList.selectedItems()[0].text()
-        obj2Name = self.form.secondObjectList.selectedItems()[0].text()
-        if not obj1Name or not obj2Name:
+        obj1 = self.form.firstObjectList.selectedItems()[0].text()
+        obj2 = self.form.secondObjectList.selectedItems()[0].text()
+        if not obj1 or not obj2:
             print("Select first and second object")
             return
         if self.form.xCheck.isChecked():
             # We want to set the x-coordinates of both objects equal
-            obj1 = obj1Name + ".Placement.Base.x"
-            obj2 = obj2Name + ".Placement.Base.x"
-            self.addConstraintObject(obj1, obj2, "Equality_Constraint")
+            self.addConstraintObject(obj1, obj2, self.type, "Base", "x")
         if self.form.yCheck.isChecked():
             # we want to set the y-coordinates of both objects equal
-            obj1 = obj1Name + ".Placement.Base.y"
-            obj2 = obj2Name + ".Placement.Base.y"
-            self.addConstraintObject(obj1, obj2, "Equality_Constraint")
+            self.addConstraintObject(obj1, obj2, self.type, "Base", "y")
         if self.form.zCheck.isChecked():
             # we want to set the z-coordinates of both objects equal
-            obj1 = obj1Name + ".Placement.Base.z"
-            obj2 = obj2Name + ".Placement.Base.z"
-            self.addConstraintObject(obj1, obj2, "Equality_Constraint")
+            self.addConstraintObject(obj1, obj2, self.type, "Base", "z")
         if self.form.xrotCheck.isChecked():
             # Set rotation about x-axis equal
-            obj1 = obj1Name + ".Placement.Rotation.x"
-            obj2 = obj2Name + ".Placement.Rotation.x"
-            self.addConstraintObject(obj1, obj2, "Equality_Constraint")
+            self.addConstraintObject(obj1, obj2, self.type, "Rotation", "x")
         if self.form.yrotCheck.isChecked():
             # set rotation about y-axis equal
-            obj1 = obj1Name + ".Placement.Rotation.y"
-            obj2 = obj2Name + ".Placement.Rotation.y"
-            self.addConstraintObject(obj1, obj2, "Equality_Constraint")
+            self.addConstraintObject(obj1, obj2, self.type, "Rotation", "y")
         if self.form.zrotCheck.isChecked():
             # Set rotation about z-axis equal
-            obj1 = obj1Name + ".Placement.Rotation.z"
-            obj2 = obj2Name + ".Placement.Rotation.z"
-            self.addConstraintObject(obj1, obj2, "Equality_Constraint")
+            self.addConstraintObject(obj1, obj2, self.type, "Rotation", "z")
 
         Gui.Control.closeDialog()
         App.ActiveDocument.recompute()
 
     def addObjects(self):
+        # Her we populate the list view widgets
         for obj in App.ActiveDocument.Objects:
+            if not obj.TypeId in asm4.datumTypes:
+                continue
             newItem = QtGui.QListWidgetItem()
             newItem.setText(asm4.nameLabel(obj))
             newItem.setIcon(obj.ViewObject.Icon)
             self.form.firstObjectList.addItem(newItem)
         for obj in App.ActiveDocument.Objects:
+            if not obj.TypeId in asm4.datumTypes:
+                continue
             newItem = QtGui.QListWidgetItem()
             newItem.setText(asm4.nameLabel(obj))
             newItem.setIcon(obj.ViewObject.Icon)
             self.form.secondObjectList.addItem(newItem)
 
-    def addConstraintObject(self, obj1, obj2, constraintType):
-        newConstraint = App.ActiveDocument.addObject(
-            "App::FeaturePython",
-            constraintType)
+    def addConstraintObject(self, obj1, obj2, constraintType, placement, component):
+        newConstraint = App.ActiveDocument.addObject("App::FeaturePython", constraintType)
         newConstraint.addProperty("App::PropertyString", "Type", "", "", 1).Type = constraintType
         newConstraint.addProperty("App::PropertyString", "Object_1").Object_1 = obj1
         newConstraint.addProperty("App::PropertyString", "Object_2").Object_2 = obj2
+        newConstraint.addProperty("App::PropertyString", "Placement").Placement = placement
+        newConstraint.addProperty("App::PropertyString", "Component").Component = component
         App.ActiveDocument.Constraints.addObject(newConstraint)
 
 Gui.addCommand("Asm4_EqualityConstraint", EqualityConstraint())
