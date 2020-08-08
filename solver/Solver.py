@@ -83,6 +83,11 @@ def get_lists():
             x2_real = None
             x1_name = f.Obj1Name
             x2_name = f.Obj2Name
+            x1_index = None
+            x2_index = None
+            x1_grad = np.zeros_like(initial_grad)
+            x2_grad = np.zeros_like(initial_grad)
+
             # Rotations are a little bit more complicated than placements
             if "Rotation" == f.Placement:
                 if f.Component == "x":
@@ -97,58 +102,36 @@ def get_lists():
             elif f.Placement == "Base":
                 x1_real = getattr(App.ActiveDocument.getObject(f.Object_1).Placement.Base, f.Component)
                 x2_real = getattr(App.ActiveDocument.getObject(f.Object_2).Placement.Base, f.Component)
-            x1_grad = np.zeros_like(initial_grad)
-            x2_grad = np.zeros_like(initial_grad)
 
             # Check if variables are already in the list (we don't want to put
             # the same variable twice)
-            if f.Obj1Name in x_names and not f.Obj2Name in x_names:
-                # since x1 is already in the list, we skip it
+            if f.Obj1Name in x_names:
+                # skip x1 since it already is in the list 
+                # we only need its index in the list
                 x1_index = x_names.index(f.Obj1Name)
-                x2_grad[i] = 1.
-                constraint = Equality(x1_index, i)
-                x2 = HyperDual(x2_real, x2_grad, initial_hess)
-                f_list.append(constraint)
-                x_list.append(x2)
-                x_names.append(f.Obj2Name)
-                i += 1  # We only added one new variable
-            elif f.Obj2Name in x_names and not f.Obj1Name in x_names:
-                # since x2 is already in the list, we skip it
-                x2_index = x_names.index(f.Obj2Name)
-                x1_grad[i] = 1.
-                constraint = Equality(i, x2_index)
-                x1 = HyperDual(x1_real, x1_grad, initial_hess)
-                f_list.append(constraint)
-                x_list.append(x1)
-                x_names.append(f.Obj1Name)
-                i += 1  # Only one new variable
-            elif f.Obj1Name in x_names and f.Obj2Name in x_names:
-                # Both x1 and x2 are in the list, we just get their indeces
-                x1_index = x_names.index(f.Obj1Name)
-                x2_index = x_names.index(f.Obj2Name)
-                constraint = Equality(x1_index, x2_index)
-                f_list.append(constraint)
-                # No new variables to append 
             else:
-                # neither x1 nor x2 are in the list
+                # x1 not in the list, therefore we add it
                 x1_grad[i] = 1.
-                x2_grad[i+1] = 1.
-                constraint = Equality(i, i+1)
                 x1 = HyperDual(x1_real, x1_grad, initial_hess)
-                x2 = HyperDual(x2_real, x2_grad, initial_hess)
-                f_list.append(constraint)
+                x1_index = i
                 x_list.append(x1)
-                x_list.append(x2)
                 x_names.append(f.Obj1Name)
-                x_names.append(f.Obj2Name)
-                i += 2  # we added two new variables
+                i += 1
 
-#            x1 = HyperDual(x1_real, x1_grad, initial_hess)
-#            x2 = HyperDual(x2_real, x2_grad, initial_hess)
-#            f_list.append(constraint)
-#            x_list.append(x1)
-#            x_list.append(x2)
-#            x_names.append(f.Object_1)
-#            x_names.append(f.Object_2)
+            if f.Obj2Name in x_names:
+                # Now do the same we did for x1 to x2
+                x2_index = x_names.index(f.Obj2Name)
+            else:
+                x2_grad[i] = 1.
+                x2 = HyperDual(x2_real, x2_grad, initial_hess)
+                x2_index = i
+                x_list.append(x2)
+                x_names.append(f.Obj2Name)
+                i += 1
+
+            constraint = Equality(x1_index, x2_index)
+            f_list.append(constraint)
+
+
     return f_list, x_list, x_names
 
