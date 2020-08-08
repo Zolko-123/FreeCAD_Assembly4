@@ -29,3 +29,5 @@ class Function:
         return self.val.hess
             
 ```
+
+The next problem is to get the vector x which represents all the placement components in the assembly (position coordinates and rotation angles). The components in the vector x have to be unique placement components. For example, the x-component of the placement of a part can't be twice in the vector x. So the first step is to use a set to get the unique variables. And then to construct 3 lists based with the number of independent variables. The first list contains constriant functions. The second list contains all the independent variables in hyperdual form. And the last list is similar to the second, but it contains the names of all the variables so we can set the variables values in the FreeCAD document once the optimize function returns the results. In other words, the last list is a sort of "id" for all the variables.
