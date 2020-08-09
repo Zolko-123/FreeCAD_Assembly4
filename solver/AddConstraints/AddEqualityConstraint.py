@@ -71,7 +71,7 @@ class EqualityPanel:
             if not obj.TypeId in asm4.datumTypes:
                 continue
             newItem = QtGui.QListWidgetItem()
-            newItem.setText(asm4.nameLabel(obj))
+            newItem.setText(obj.Name)
             newItem.setIcon(obj.ViewObject.Icon)
             self.form.firstObjectList.addItem(newItem)
         for obj in App.ActiveDocument.Objects:
