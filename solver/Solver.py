@@ -2,7 +2,7 @@ from scipy.optimize import minimize
 import numpy as np
 import FreeCAD as App
 from .HyperDual import HyperDual
-from .Constraints import Equality
+from .Constraints import Equality, Fix
 
 class Solver:
     def __init__(self, x=None, f=None):
@@ -61,14 +61,16 @@ def get_lists():
     containing the independent variables. And a list containing the
     ids of the independent variables.
     """
-    # Assuming that constraints are only between exactly two objects
     f_list = []
     x_list = []
     x_names = []
     # First we try to find the unique variables 
     for f in App.ActiveDocument.Constraints.Group:
-        x_names.append(f.Obj1Name)
-        x_names.append(f.Obj2Name)
+        if f.Type == "Equality_Constraint":
+            x_names.append(f.Obj1Name)
+            x_names.append(f.Obj2Name)
+        elif f.Type == "Fix_Constraint":
+            x_names.append(f.ObjName)
 
     unique_variables = set(x_names)
     x_names = []
@@ -80,6 +82,15 @@ def get_lists():
     for f in App.ActiveDocument.Constraints.Group:
         if f.Type == "Equality_Constraint":
             f_new, x_new, x_names_new = get_equality_lists(f, x_names, n, i)
+            if f_new:
+                f_list.extend(f_new)
+            if x_new:
+                x_list.extend(x_new)
+            if x_names_new:
+                x_names.extend(x_names_new)
+            i += len(x_new)
+        if f.Type == "Fix_Constraint":
+            f_new, x_new, x_names_new = get_fix_lists(f, x_names, n, i)
             if f_new:
                 f_list.extend(f_new)
             if x_new:
@@ -150,5 +161,44 @@ def get_equality_lists(f, x_names, n, i):
         i += 1
 
     constraint = Equality(x1_index, x2_index)
+    f_new.append(constraint)
+    return f_new, x_new, x_names_new
+
+def get_fix_lists(f, x_names, n, i):
+    """
+    Gets lists for Fix Constraints
+    """
+    f_new = []
+    x_new = []
+    x_names_new = []
+    x1_real = None
+    x1_name = f.ObjName
+    x1_index = None
+    x1_grad = np.zeros(n)
+    initial_hess = np.zeros((n, n))
+    c = HyperDual(f.Value, x1_grad, initial_hess)
+
+    if f.Placement == "Rotation":
+        if f.Component == "x":
+            x1_real = App.ActiveDocument.getObject(f.Object).Placement.Rotation.toEuler()[2]
+        elif f.Component == "y":
+            x1_real = App.ActiveDocument.getObject(f.Object).Placement.Rotation.toEuler()[1]
+        elif f.Component == "z":
+            x1_real = App.ActiveDocument.getObject(f.Object).Placement.Rotation.toEuler()[0]
+    elif f.Placement == "Base":
+        x1_real = getattr(App.ActiveDocument.getObject(f.Object).Placement.Base, f.Component)
+
+    # We don't want to put the same variable twice
+    if x1_name in x_names:
+        x1_index = x_names.index(x1_name)
+    else:
+        # x1 not in the list, so we add it
+        x1_grad[i] = 1.
+        x1 = HyperDual(x1_real, x1_grad, initial_hess)
+        x1_index = i
+        x_new.append(x1)
+        x_names_new.append(x1_name)
+        i += 1
+    constraint = Fix(x1_index, c)
     f_new.append(constraint)
     return f_new, x_new, x_names_new
