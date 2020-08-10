@@ -176,7 +176,7 @@ def get_fix_lists(f, x_names, n, i):
     x1_index = None
     x1_grad = np.zeros(n)
     initial_hess = np.zeros((n, n))
-    c = HyperDual(f.Value, x1_grad, initial_hess)
+    c = f.Value
 
     if f.Placement == "Rotation":
         if f.Component == "x":
