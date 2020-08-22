@@ -46,6 +46,9 @@ class updateAssembly:
             if obj.TypeId == 'App::Part':
                 obj.recompute('True')
         #App.ActiveDocument.recompute()
+        # Check if there is a model in the Document before solving constraints
+        if Asm4.checkModel() is None:
+            return
         t = time.time()
         f, x, x_names = get_lists()
         x_i = np.zeros_like(x)
