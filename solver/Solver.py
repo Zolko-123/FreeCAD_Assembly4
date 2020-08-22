@@ -4,11 +4,13 @@ import FreeCAD as App
 from .HyperDual import HyperDual
 from .Constraints import Equality, Fix
 
+
 class Solver:
     def __init__(self, x=None, f=None):
-        self.x = x          # List  of variables to be solved (hyper duals)
-        self.f = f          # List of constraint objects
-        self.val = None
+        self.x = x              # List  of variables to be solved (hyper duals)
+        self.f = f              # List of constraint objects
+        self.val = None         # Value of function at current point
+        self.current_x = None   # Current point
 
     def eval(self, x):
         """ Evaluate the sum of squares used by the minimize function"""
@@ -20,24 +22,31 @@ class Solver:
             total += self.f[i].eval(self.x)**2
 
         self.val = total
+        self.current_x = x
         return self.val.real
 
     def grad(self, x):
         """ Returns teh gradient of evaluated sum of squares """
+        # Checks that we have evaluated the fuction at point x
+        if not np.array_equal(self.current_x, x):
+            self.eval(x)
         return self.val.grad
 
     def hess(self, x):
         """ Returns the hessian of evaluated sum of squares """
+        # Checks that we have evaluated the function at point x
+        if not np.array_equal(self.current_x, x):
+            self.eval(x)
         return self.val.hess
 
     def solve(self, initial_x=None, constraints=None):
         """ Tries to solve the sum of squares problem.
             initial_x: list of initial values for the solver (list of reals)
             constraints: list of constraint objects """
-        #if initial_x:
+        # if initial_x:
         #    self.x = convert_to_hp(initial_x)
 
-        #if constraints:
+        # if constraints:
         #    self.f = constraints
 
         x0 = np.array(initial_x)
