@@ -81,8 +81,9 @@ def get_lists():
                 x_names.append(f.Obj1Name)
             if f.Obj2Name not in x_names:
                 x_names.append(f.Obj2Name)
-#        elif f.Type == "Fix_Constraint":
-#            x_names.append(f.ObjName)
+        elif f.Type == "Fix_Constraint":
+            if f.ObjName not in x_names:
+                x_names.append(f.ObjName)
 
 #    unique_variables = set(x_names)
 #    x_names = []
@@ -94,6 +95,8 @@ def get_lists():
     for f in App.ActiveDocument.Constraints.Group:
         if f.Type == "Equality_Constraint":
             f_list.append(Equality.makeConstraint(f, x_names, x_list))
+        if f.Type == "Fix_Constraint":
+            f_list.append(Fix.makeConstraint(f, x_names, x_list))
 #            i += len(x_new)
 #        if f.Type == "Fix_Constraint":
 #            f_new, x_new, x_names_new = get_fix_lists(f, x_names, n, i)
@@ -111,7 +114,6 @@ def get_lists():
         new_hd = HyperDual(x, new_grad, initial_hess)
         x_hd.append(new_hd)
         i += 1
-
     return f_list, x_hd, x_names
 
 

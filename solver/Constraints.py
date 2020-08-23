@@ -78,3 +78,36 @@ class Fix:
 
     def eval(self, x):
         return x[self.a] - self.c
+
+    @classmethod
+    def makeConstraint(cls, f, xNames, xList):
+        """
+        Looks for new vairaibles to be added to the variable list.
+        f: a particular fix constraint containing information about the
+        object to be fixed.
+        xList: list containing the values of all the variables.
+        returns: a Fix object created with data from f.
+        """
+        # Note that there is only one variable being fixed
+        xName = f.ObjName
+        xVal = None
+        xIndex = xNames.index(xName)
+        c = f.Value
+        if f.Placement == "Rotation":
+            if f.Component == "x":
+                xVal = App.ActiveDocument.getObject(f.Object) \
+                          .Placement.Rotation.toEuler()[2]
+            elif f.Component == "y":
+                xVal = App.ActiveDocument.getObject(f.Object) \
+                          .Placement.Rotation.toEuler()[1]
+            elif f.Component == "z":
+                xVal = App.ActiveDocument.getObject(f.Object) \
+                          .Placement.Rotation.toEuler()[0]
+        elif f.Placement == "Base":
+            xVal = getattr(App.ActiveDocument.getObject(f.Object)
+                              .Placement.Base, f.Component)
+        if xList[xIndex] is None:
+            xList[xIndex] = xVal
+
+        constraint = cls(xIndex, c)
+        return constraint
