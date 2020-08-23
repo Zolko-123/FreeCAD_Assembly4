@@ -73,42 +73,46 @@ def get_lists():
     f_list = []
     x_list = []
     x_names = []
+    x_hd = []   # List of hyper duals
     # First we try to find the unique variables 
     for f in App.ActiveDocument.Constraints.Group:
         if f.Type == "Equality_Constraint":
-            x_names.append(f.Obj1Name)
-            x_names.append(f.Obj2Name)
-        elif f.Type == "Fix_Constraint":
-            x_names.append(f.ObjName)
+            if f.Obj1Name not in x_names:
+                x_names.append(f.Obj1Name)
+            if f.Obj2Name not in x_names:
+                x_names.append(f.Obj2Name)
+#        elif f.Type == "Fix_Constraint":
+#            x_names.append(f.ObjName)
 
-    unique_variables = set(x_names)
-    x_names = []
-
-    i = 0
-    n = len(unique_variables)
+#    unique_variables = set(x_names)
+#    x_names = []
+#    i = 0
+    n = len(x_names)
+    x_list = [None]*n
     #initial_grad = np.zeros(n)
-    #initial_hess = np.zeros((n,n))
+    initial_hess = np.zeros((n, n))
     for f in App.ActiveDocument.Constraints.Group:
         if f.Type == "Equality_Constraint":
-            f_new, x_new, x_names_new = get_equality_lists(f, x_names, n, i)
-            if f_new:
-                f_list.extend(f_new)
-            if x_new:
-                x_list.extend(x_new)
-            if x_names_new:
-                x_names.extend(x_names_new)
-            i += len(x_new)
-        if f.Type == "Fix_Constraint":
-            f_new, x_new, x_names_new = get_fix_lists(f, x_names, n, i)
-            if f_new:
-                f_list.extend(f_new)
-            if x_new:
-                x_list.extend(x_new)
-            if x_names_new:
-                x_names.extend(x_names_new)
-            i += len(x_new)
+            f_list.append(Equality.makeConstraint(f, x_names, x_list))
+#            i += len(x_new)
+#        if f.Type == "Fix_Constraint":
+#            f_new, x_new, x_names_new = get_fix_lists(f, x_names, n, i)
+#            if f_new:
+#                f_list.extend(f_new)
+#            if x_new:
+#                x_list.extend(x_new)
+#            if x_names_new:
+#                x_names.extend(x_names_new)
+#            i += len(x_new
+    i = 0
+    for x in x_list:
+        new_grad = np.zeros(n)
+        new_grad[i] = 1
+        new_hd = HyperDual(x, new_grad, initial_hess)
+        x_hd.append(new_hd)
+        i += 1
 
-    return f_list, x_list, x_names
+    return f_list, x_hd, x_names
 
 
 def get_equality_lists(f, x_names, n, i):

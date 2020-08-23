@@ -12,8 +12,8 @@ class Equality:
     def eval(self, x):
         return x[self.a] - x[self.b]
 
-    @staticmethod
-    def getLists(f, x_names):
+    @classmethod
+    def makeConstraint(cls, f, x_names, x_list):
         """
         Looks for new variables to be added to the variable lists.
         f: is a particular equality constraint between two datum objects. It
@@ -22,38 +22,50 @@ class Equality:
         x_names: is a list of the current variables already accounted. Note
         that variables need to be unique so this list is needed in order to
         avoid repeated variables in the lists
-        returns: a list of the variables being constrained and their respective
-        names
+        x_list: a list of the values of all the variables. The values are
+        either a real value or None. This method modifies x_list in place
+        (values of the variables are put on x_list in their corresponding
+        place)
+        returns: an Equality object created with data from f
         """
-        x_new_vals = []     # Values of variables being constrained
-        x_new_id = [
-            f.Obj1Name,
-            f.Obj2Name,
-        ]                   # Names of variables being constrained
+        x1_name = f.Obj1Name
+        x2_name = f.Obj2Name
+        x1_val = None
+        x2_val = None
+        x1_index = x_names.index(x1_name)
+        x2_index = x_names.index(x2_name)
 
         if f.Placement == "Placement":
             if f.Component == "x":
-                x_new_vals[0] = App.ActiveDocument.getObject(f.Object_1) \
-                                    .Placement.Rotation.toEuler()[2]
-                x_new_vals[1] = App.ActiveDocument.getObject(f.Object_2) \
-                                   .Placement.Rotation.toEuler()[2]
+                x1_val = App.ActiveDocument.getObject(f.Object_1) \
+                            .Placement.Rotation.toEuler()[2]
+                x2_val = App.ActiveDocument.getObject(f.Object_2) \
+                            .Placement.Rotation.toEuler()[2]
             elif f.Component == "y":
-                x_new_vals[0] = App.ActiveDocument.getObject(f.Object_1) \
-                                   .Placement.Rotation.toEuler()[1]
-                x_new_vals[1] = App.ActiveDocument.getObject(f.Object_2) \
-                                   .Placement.Rotation.toEuler()[1]
+                x1_val = App.ActiveDocument.getObject(f.Object_1) \
+                            .Placement.Rotation.toEuler()[1]
+                x2_val = App.ActiveDocument.getObject(f.Object_2) \
+                            .Placement.Rotation.toEuler()[1]
             elif f.Component == "z":
-                x_new_vals[0] = App.ActiveDocument.getObject(f.Object_1) \
-                                   .Placement.Rotation.toEuler()[0]
-                x_new_vals[1] = App.ActiveDocument.getObject(f.Object_2) \
-                                   .Placement.Rotation.toEuler()[0]
+                x1_val = App.ActiveDocument.getObject(f.Object_1) \
+                            .Placement.Rotation.toEuler()[0]
+                x2_val = App.ActiveDocument.getObject(f.Object_2) \
+                            .Placement.Rotation.toEuler()[0]
         elif f.Placement == "Base":
-            x_new_vals[0] = getattr(App.ActiveDocument.getObject(f.Object_1)
-                                       .Placement.Base, f.Component)
-            x_new_vals[1] = getattr(App.ActiveDocument.getObject(f.Object_2)
-                                       .Placement.Base, f.Component)
+            x1_val = getattr(App.ActiveDocument.getObject(f.Object_1)
+                                .Placement.Base, f.Component)
+            x2_val = getattr(App.ActiveDocument.getObject(f.Object_2)
+                                .Placement.Base, f.Component)
 
-        return x_new_vals, x_new_id
+        # Modify x_list in place
+        if x_list[x1_index] is None:
+            x_list[x1_index] = x1_val
+        if x_list[x2_index] is None:
+            x_list[x2_index] = x2_val
+
+        # Now we create the constraint object
+        constraint = cls(x1_index, x2_index)
+        return constraint
 
 
 class Fix:
