@@ -77,20 +77,17 @@ def get_lists():
     # First we try to find the unique variables 
     for f in App.ActiveDocument.Constraints.Group:
         if f.Type == "Equality_Constraint":
-            if f.Obj1Name not in x_names:
-                x_names.append(f.Obj1Name)
-            if f.Obj2Name not in x_names:
-                x_names.append(f.Obj2Name)
-        elif f.Type == "Fix_Constraint":
-            if f.ObjName not in x_names:
-                x_names.append(f.ObjName)
+            Equality.getVariables(f, x_names)
+#        elif f.Type == "Fix_Constraint":
+#            if f.ObjName not in x_names:
+#                x_names.append(f.ObjName)
 
     n = len(x_names)
     x_list = [None]*n
     initial_hess = np.zeros((n, n))
     for f in App.ActiveDocument.Constraints.Group:
         if f.Type == "Equality_Constraint":
-            f_list.append(Equality.makeConstraint(f, x_names, x_list))
+            f_list.extend(Equality.makeConstraint(f, x_names, x_list))
         if f.Type == "Fix_Constraint":
             f_list.append(Fix.makeConstraint(f, x_names, x_list))
     i = 0

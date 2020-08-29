@@ -28,44 +28,58 @@ class Equality:
         place)
         returns: an Equality object created with data from f
         """
-        x1_name = f.Obj1Name
-        x2_name = f.Obj2Name
-        x1_val = None
-        x2_val = None
-        x1_index = x_names.index(x1_name)
-        x2_index = x_names.index(x2_name)
+        constraints = []
+        for compPair in f.Components:
+            x1Name = compPair[0]
+            x2Name = compPair[1]
+            x1Val = None
+            x2Val = None
+            x1Index = x_names.index(x1Name)
+            x2Index = x_names.index(x2Name)
+            component = x1Name.split(".")[2]
+            placement = x1Name.split(".")[1]
 
-        if f.Placement == "Placement":
-            if f.Component == "x":
-                x1_val = App.ActiveDocument.getObject(f.Object_1) \
-                            .Placement.Rotation.toEuler()[2]
-                x2_val = App.ActiveDocument.getObject(f.Object_2) \
-                            .Placement.Rotation.toEuler()[2]
-            elif f.Component == "y":
-                x1_val = App.ActiveDocument.getObject(f.Object_1) \
-                            .Placement.Rotation.toEuler()[1]
-                x2_val = App.ActiveDocument.getObject(f.Object_2) \
-                            .Placement.Rotation.toEuler()[1]
-            elif f.Component == "z":
-                x1_val = App.ActiveDocument.getObject(f.Object_1) \
-                            .Placement.Rotation.toEuler()[0]
-                x2_val = App.ActiveDocument.getObject(f.Object_2) \
-                            .Placement.Rotation.toEuler()[0]
-        elif f.Placement == "Base":
-            x1_val = getattr(App.ActiveDocument.getObject(f.Object_1)
-                                .Placement.Base, f.Component)
-            x2_val = getattr(App.ActiveDocument.getObject(f.Object_2)
-                                .Placement.Base, f.Component)
+            if placement == "Placement":
+                if component == "x":
+                    x1Val = App.ActiveDocument.getObject(f.Object_1) \
+                                .Placement.Rotation.toEuler()[2]
+                    x2Val = App.ActiveDocument.getObject(f.Object_2) \
+                               .Placement.Rotation.toEuler()[2]
+                elif component == "y":
+                    x1Val = App.ActiveDocument.getObject(f.Object_1) \
+                               .Placement.Rotation.toEuler()[1]
+                    x2Val = App.ActiveDocument.getObject(f.Object_2) \
+                               .Placement.Rotation.toEuler()[1]
+                elif component == "z":
+                    x1Val = App.ActiveDocument.getObject(f.Object_1) \
+                               .Placement.Rotation.toEuler()[0]
+                    x2Val = App.ActiveDocument.getObject(f.Object_2) \
+                               .Placement.Rotation.toEuler()[0]
+            elif placement == "Base":
+                x1Val = getattr(App.ActiveDocument.getObject(f.Object_1)
+                                   .Placement.Base, component)
+                x2Val = getattr(App.ActiveDocument.getObject(f.Object_2)
+                                   .Placement.Base, component)
 
-        # Modify x_list in place
-        if x_list[x1_index] is None:
-            x_list[x1_index] = x1_val
-        if x_list[x2_index] is None:
-            x_list[x2_index] = x2_val
+            # Modify x_list in place
+            if x_list[x1Index] is None:
+                x_list[x1Index] = x1Val
+            if x_list[x2Index] is None:
+                x_list[x2Index] = x2Val
 
-        # Now we create the constraint object
-        constraint = cls(x1_index, x2_index)
-        return constraint
+            # Now we create the constraint object
+            constraints.append(cls(x1Index, x2Index))
+        return constraints
+
+    @staticmethod
+    def getVariables(f, xNames):
+        """ Adds unique variables names to the x names list for the solver
+        """
+        for comp in f.Components:
+            if comp[0] not in xNames:
+                xNames.append(comp[0])
+            if comp[1] not in xNames:
+                xNames.append(comp[1])
 
 
 class Fix:
