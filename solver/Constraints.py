@@ -39,7 +39,7 @@ class Equality:
             component = x1Name.split(".")[2]
             placement = x1Name.split(".")[1]
 
-            if placement == "Placement":
+            if placement == "Rotation":
                 if component == "x":
                     x1Val = App.ActiveDocument.getObject(f.Object_1) \
                                 .Placement.Rotation.toEuler()[2]
