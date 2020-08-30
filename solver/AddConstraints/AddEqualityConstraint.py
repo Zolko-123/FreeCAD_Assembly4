@@ -48,33 +48,21 @@ class EqualityPanel:
             return
         if self.form.xCheck.isChecked():
             # We want to set the x-coordinates of both objects equal
-#            components.append(obj1 + ".Base.x")
-#            components.append(obj2 + ".Base.x")
             compStatus.append("Base_x")
         if self.form.yCheck.isChecked():
             # we want to set the y-coordinates of both objects equal
-#            components.append(obj1 + ".Base.y")
-#            components.append(obj2 + ".Base.y")
             compStatus.append("Base_y")
         if self.form.zCheck.isChecked():
             # we want to set the z-coordinates of both objects equal
-#            components.append(obj1 + ".Base.z")
-#            components.append(obj2 + ".Base.z")
             compStatus.append("Base_z")
         if self.form.xrotCheck.isChecked():
             # Set rotation about x-axis equal
-#            components.append(obj1 + ".Rotation.x")
-#            components.append(obj2 + ".Rotation.x")
             compStatus.append("Rot_x")
         if self.form.yrotCheck.isChecked():
             # set rotation about y-axis equal
-#            components.append(obj1 + ".Rotation.y")
-#            components.append(obj2 + ".Rotation.y")
             compStatus.append("Rot_y")
         if self.form.zrotCheck.isChecked():
             # Set rotation about z-axis equal
-#            components.append(obj1 + ".Rotation.z")
-#            components.append(obj2 + ".Rotation.z")
             compStatus.append("Rot_z")
 
         newConstraint = App.ActiveDocument.addObject("App::FeaturePython", self.type)
