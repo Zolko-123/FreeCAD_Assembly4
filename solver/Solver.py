@@ -78,9 +78,8 @@ def get_lists():
     for f in App.ActiveDocument.Constraints.Group:
         if f.Type == "Equality_Constraint":
             Equality.getVariables(f, x_names)
-#        elif f.Type == "Fix_Constraint":
-#            if f.ObjName not in x_names:
-#                x_names.append(f.ObjName)
+        elif f.Type == "Fix_Constraint":
+            Fix.getVariables(f, x_names)
 
     n = len(x_names)
     x_list = [None]*n
@@ -89,7 +88,7 @@ def get_lists():
         if f.Type == "Equality_Constraint":
             f_list.extend(Equality.makeConstraint(f, x_names, x_list))
         if f.Type == "Fix_Constraint":
-            f_list.append(Fix.makeConstraint(f, x_names, x_list))
+            f_list.extend(Fix.makeConstraint(f, x_names, x_list))
     i = 0
     for x in x_list:
         new_grad = np.zeros(n)

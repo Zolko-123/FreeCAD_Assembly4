@@ -100,28 +100,46 @@ class Fix:
         f: a particular fix constraint containing information about the
         object to be fixed.
         xList: list containing the values of all the variables.
-        returns: a Fix object created with data from f.
+        returns: a list of  Fix objects created with data from f.
         """
         # Note that there is only one variable being fixed
-        xName = f.ObjName
-        xVal = None
-        xIndex = xNames.index(xName)
-        c = f.Value
-        if f.Placement == "Rotation":
-            if f.Component == "x":
-                xVal = App.ActiveDocument.getObject(f.Object) \
-                          .Placement.Rotation.toEuler()[2]
-            elif f.Component == "y":
-                xVal = App.ActiveDocument.getObject(f.Object) \
-                          .Placement.Rotation.toEuler()[1]
-            elif f.Component == "z":
-                xVal = App.ActiveDocument.getObject(f.Object) \
-                          .Placement.Rotation.toEuler()[0]
-        elif f.Placement == "Base":
-            xVal = getattr(App.ActiveDocument.getObject(f.Object)
-                              .Placement.Base, f.Component)
-        if xList[xIndex] is None:
-            xList[xIndex] = xVal
+        constraints = []
+        for component in f.Components:
+            if not f.Components[component]["enable"]:
+                continue
+            xName = f.Components[component]["objName"]
+            xVal = None
+            xIndex = xNames.index(xName)
+            placement = xName.split(".")[1]
+            placementComp = xName.split(".")[2]
+            c = f.Components[component]["value"]
+            if placement == "Rotation":
+                if placementComp == "x":
+                    xVal = App.ActiveDocument.getObject(f.Object) \
+                              .Placement.Rotation.toEuler()[2]
+                elif placementComp == "y":
+                    xVal = App.ActiveDocument.getObject(f.Object) \
+                              .Placement.Rotation.toEuler()[1]
+                elif placementComp == "z":
+                    xVal = App.ActiveDocument.getObject(f.Object) \
+                              .Placement.Rotation.toEuler()[0]
+            elif placement == "Base":
+                xVal = getattr(App.ActiveDocument.getObject(f.Object)
+                                  .Placement.Base, placementComp)
+            if xList[xIndex] is None:
+                xList[xIndex] = xVal
 
-        constraint = cls(xIndex, c)
-        return constraint
+            constraint = cls(xIndex, c)
+            constraints.append(constraint)
+        return constraints
+
+    @staticmethod
+    def getVariables(f, xNames):
+        """ Adds unique variables names to the x names list for the solver
+        """
+        for component in f.Components:
+            if not f.Components[component]["enable"]:
+                continue
+            objName = f.Components[component]["objName"]
+            if objName not in xNames:
+                xNames.append(objName)
