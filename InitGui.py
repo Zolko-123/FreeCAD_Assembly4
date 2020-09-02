@@ -223,7 +223,7 @@ class Assembly4Workbench(Workbench):
                                 "Asm4_delVariable", 
                                 "Asm4_Animate",
                                 "Asm4_updateAssembly"]
-        self.appendToolbar("Assembly",self.itemsAssemblyToolbar) # leave settings off toolbar
+        self.appendToolbar("Assembly",self.itemsAssemblyToolbar)
 
 
         """
@@ -252,6 +252,23 @@ class Assembly4Workbench(Workbench):
                                 "Asm4_insertWasher",
                                 #"Asm4_makeLinkArray"
                                 ]
+
+        """
+    +-----------------------------------------------+
+    |                     Structure                 |
+    +-----------------------------------------------+
+        """
+        # commands to add to the standard Structure toolbar
+        itemsStructureToolbar = [ "Asm4_newBody", 
+                                'Asm4_newLCS', 
+                                'Asm4_newPlane', 
+                                'Asm4_newAxis', 
+                                'Asm4_newPoint', 
+                                "Asm4_newSketch"]
+        #self.removeToolbar('Std_LinkMake')
+        #self.appendToolbar("Structure",itemsStructureToolbar)
+
+        
 
 
     def ContextMenu(self, recipient):

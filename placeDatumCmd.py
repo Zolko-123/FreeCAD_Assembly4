@@ -26,12 +26,12 @@ import libAsm4 as Asm4
 def getSelection():    
     selectedObj = None
     # check that there is an App::Part called 'Model'
-    if App.ActiveDocument.getObject('Model') and App.ActiveDocument.getObject('Model').TypeId=='App::Part' :
-        # check that something is selected
-        if len(Gui.Selection.getSelection())==1:
-            selection = Gui.Selection.getSelection()[0]
-            if selection.TypeId in datumTypes:
-                selectedObj = selection
+    # if App.ActiveDocument.getObject('Model') and App.ActiveDocument.getObject('Model').TypeId=='App::Part' :
+    # check that something is selected
+    if len(Gui.Selection.getSelection())==1:
+        selection = Gui.Selection.getSelection()[0]
+        if selection.TypeId in datumTypes:
+            selectedObj = selection
     # now we should be safe
     return selectedObj
 
@@ -71,7 +71,11 @@ class placeDatumCmd():
     def Activated(self):
         selectedDatum = getSelection()
         # check if the datum object is already mapped to something
-        if selectedDatum.MapMode != 'Deactivated':
+        if selectedDatum.MapMode == 'Deactivated' and Asm4.checkModel():
+            Gui.Control.showDialog( placeDatumUI() )
+        else:
+            Gui.runCommand('Part_EditAttachment')
+            '''
             message = 'This datum object \"'+selectedDatum.Label+'\" is mapped to some geometry. Attaching-it with Assembly4 will loose this mapping.'
             if Asm4.confirmBox(message):
                 # unset MappingMode
@@ -81,8 +85,7 @@ class placeDatumCmd():
             else:
                 # don't do anything and ...
                 return
-        else:
-            Gui.Control.showDialog( placeDatumUI() )
+            '''
 
 
 
@@ -200,17 +203,19 @@ class placeDatumUI():
 
     # OK
     def accept(self):
-        self.onApply()
-        if self.selectedDatum:
-            self.selectedDatum.ViewObject.ShowLabel = False
-        self.finish()
+        if self.onApply():
+            if self.selectedDatum:
+                self.selectedDatum.ViewObject.ShowLabel = False
+            self.finish()
+        else:
+            FCC.PrintWarning("Problem in selections\n")
 
     # Cancel
     def reject(self):
         # restore previous expression if it existed
         if self.old_EE != None:
             self.selectedDatum.setExpression('Placement', self.old_EE )
-        if self.selectedDatum:
+        if self.selectedDatum and self.selectedDatum.TypeId=='PartDesign::CoordinateSystem':
             self.selectedDatum.ViewObject.ShowLabel = False
         self.selectedDatum.recompute()
         # highlight the selected LCS in its new position
@@ -249,11 +254,15 @@ class placeDatumUI():
 
         # check that all of them have something in
         # constrName has been checked at the beginning
+        '''
         if not a_Part :
             FCC.PrintWarning("Problem in selections (no a_Part)\n")
         elif not a_LCS :
             FCC.PrintWarning("Problem in selections (no a_LCS)\n")
         else:
+        '''
+        retval = False
+        if a_Part and a_LCS:
             # don't forget the last '.' !!!
             # <<LinkName>>.Placement.multiply( <<LinkName>>.<<LCS.>>.Placement )
             # expr = '<<'+ a_Part +'>>.Placement.multiply( <<'+ a_Part +'>>.<<'+ a_LCS +'.>>.Placement )'
@@ -267,7 +276,8 @@ class placeDatumUI():
             # highlight the selected LCS in its new position
             Gui.Selection.clearSelection()
             Gui.Selection.addSelection( self.activeDoc.Name, 'Model', self.selectedDatum.Name +'.')
-        return
+            retval = True
+        return retval
 
     '''
     # get all datums in a part
@@ -335,7 +345,7 @@ class placeDatumUI():
             # LCS in the linked part
             a_LCS = self.attLCStable[ self.attLCSlist.currentRow() ].Name
             Gui.Selection.addSelection( self.activeDoc.Name, 'Model', a_Link+'.'+a_LCS+'.')
-        self.onApply()
+        success = self.onApply()
         return
 
 
