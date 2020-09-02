@@ -133,6 +133,17 @@ class addVariable():
         self.UI.close()
 
 
+    # Verify and handle bad names similar to the spreadsheet workbench
+    def onNameEdited(self):
+        pattern = re.compile("^[A-Za-z][_A-Za-z0-9]*$")
+        if pattern.match(self.varName.text()):
+            self.varName.setStyleSheet("color: black;")
+            self.OkButton.setEnabled(True)
+        else:
+            self.varName.setStyleSheet("color: red;")
+            self.OkButton.setEnabled(False)
+
+
     # defines the UI, only static elements
     def drawUI(self):
         # Our main window will be a QDialog
@@ -184,6 +195,7 @@ class addVariable():
         # Actions
         self.CancelButton.clicked.connect(self.onCancel)
         self.OkButton.clicked.connect(self.onOK)
+        self.varName.textEdited.connect(self.onNameEdited)
 
 
 
