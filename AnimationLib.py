@@ -109,27 +109,103 @@ class animateVariable():
         sleep   = self.sleepValue.value()
         # basic checks
         if varName:
+            # loop indefinitely
+            if self.Loop.isChecked():
+                while self.Run and self.Loop.isChecked():
+                    self.runFwd(varName)
+            # go back-and-forth indefinitely
+            elif self.Pendulum.isChecked():
+                while self.Run and self.Pendulum.isChecked():
+                    self.runFwd(varName)
+                    self.runBwd(varName)
+            else:
+                self.runFwd(varName)
+            '''
             varValue = begin
             # if we go forwards ...
             if end>begin and step>0:
                 while varValue <= end and self.Run:
-                    setattr( self.Variables, varName, varValue )
+                    #setattr( self.Variables, varName, varValue )
+                    #App.ActiveDocument.Model.recompute('True')
+                    #Gui.updateGui()
+                    self.setVarValue(varName,varValue)
                     self.slider.setValue(varValue)
-                    App.ActiveDocument.Model.recompute('True')
-                    Gui.updateGui()
                     varValue += step
                     time.sleep(sleep)
             # ... or backwards
             elif end<begin and step<0:
                 while varValue >= end and self.Run:
-                    setattr( self.Variables, varName, varValue )
+                    #setattr( self.Variables, varName, varValue )
+                    #App.ActiveDocument.Model.recompute('True')
+                    #Gui.updateGui()
+                    self.setVarValue(varName,varValue)
                     self.slider.setValue(varValue)
-                    App.ActiveDocument.Model.recompute('True')
-                    Gui.updateGui()
                     varValue += step
                     time.sleep(sleep)
+            '''
         return
 
+
+    def runFwd( self, varName ):
+        begin   = self.minValue.value()
+        end     = self.maxValue.value()
+        step    = self.stepValue.value()
+        sleep   = self.sleepValue.value()
+        varValue = begin
+        # if we go positive ...
+        if end>begin and step>0:
+            while varValue <= end and self.Run:
+                self.setVarValue(varName,varValue)
+                self.slider.setValue(varValue)
+                varValue += step
+                time.sleep(sleep)
+        # ... or negative
+        elif end<begin and step<0:
+            while varValue >= end and self.Run:
+                self.setVarValue(varName,varValue)
+                self.slider.setValue(varValue)
+                varValue += step
+                time.sleep(sleep)
+
+    
+    def runBwd( self, varName ):
+        begin   = self.minValue.value()
+        end     = self.maxValue.value()
+        step    = self.stepValue.value()
+        sleep   = self.sleepValue.value()
+        varValue = end
+        # if we went positive ...
+        if end>begin and step>0:
+            while varValue >= begin and self.Run:
+                self.setVarValue(varName,varValue)
+                self.slider.setValue(varValue)
+                varValue -= step
+                time.sleep(sleep)
+        # ... or negative
+        elif end<begin and step<0:
+            while varValue <= begin and self.Run:
+                self.setVarValue(varName,varValue)
+                self.slider.setValue(varValue)
+                varValue -= step
+                time.sleep(sleep)
+
+
+    def onLoop(self):
+        if self.Pendulum.isChecked() and self.Loop.isChecked():
+            self.Pendulum.setChecked(False)
+        return
+
+
+    def onPendulum(self):
+        if self.Loop.isChecked() and self.Pendulum.isChecked():
+            self.Loop.setChecked(False)
+        return
+
+
+    def setVarValue(self,name,value):
+        setattr( self.Variables, name, value )
+        App.ActiveDocument.Model.recompute('True')
+        Gui.updateGui()
 
 
     """
@@ -141,9 +217,10 @@ class animateVariable():
         self.Run = False
         varName = self.varList.currentText()
         varValue = self.slider.value()
-        setattr( self.Variables, varName, varValue )
-        App.ActiveDocument.Model.recompute('True')
-        Gui.updateGui()
+        self.setVarValue(varName,varValue)
+        #setattr( self.Variables, varName, varValue )
+        #App.ActiveDocument.Model.recompute('True')
+        #Gui.updateGui()
         return
 
 
@@ -152,14 +229,6 @@ class animateVariable():
         self.sliderMaxValue.setText( str(self.maxValue.value()) )
         self.slider.setRange( self.minValue.value(), self.maxValue.value() )
         self.slider.setSingleStep( self.stepValue.value() )
-        return
-
-
-    def stepMinus(self):
-        return
-
-
-    def stepPlus(self):
         return
 
 
@@ -234,15 +303,25 @@ class animateVariable():
         self.slider.setRange(0, 10)
         self.slider.setTickInterval(0)
         self.sliderMinValue = QtGui.QLabel('Min')
-        self.sliderMaxValue = QtGui.QLabel('Max')        
-        #self.stepLeft  = QtGui.QPushButton('<', self)
-        #self.stepRight = QtGui.QPushButton('>', self)
-        #self.sliderLayout.addWidget(self.stepLeft)
+        self.sliderMaxValue = QtGui.QLabel('Max')
         self.sliderLayout.addWidget(self.sliderMinValue)
         self.sliderLayout.addWidget(self.slider)
         self.sliderLayout.addWidget(self.sliderMaxValue)
-        #self.sliderLayout.addWidget(self.stepRight)
         self.mainLayout.addLayout(self.sliderLayout)
+        
+        # loop and pendumlum tick-boxes
+        self.Loop = QtGui.QCheckBox()
+        self.Loop.setLayoutDirection(QtCore.Qt.RightToLeft)
+        self.Loop.setToolTip("Infinite Loop")
+        self.Loop.setText("Loop")
+        self.Loop.setChecked(False)
+        self.mainLayout.addWidget(self.Loop)
+        self.Pendulum = QtGui.QCheckBox()
+        self.Pendulum.setLayoutDirection(QtCore.Qt.RightToLeft)
+        self.Pendulum.setToolTip("Back-and-forth pendulum")
+        self.Pendulum.setText("Pendulum")
+        self.Pendulum.setChecked(False)
+        self.mainLayout.addWidget(self.Pendulum)
 
         self.mainLayout.addWidget(QtGui.QLabel())
         self.mainLayout.addStretch()
@@ -268,15 +347,15 @@ class animateVariable():
 
         # Actions
         self.varList.currentIndexChanged.connect( self.onSelectVar )
-        self.slider.sliderMoved.connect(self.sliderMoved)
-        self.CloseButton.clicked.connect(self.onClose)
-        self.StopButton.clicked.connect(self.onStop)
-        self.RunButton.clicked.connect(self.onRun)
-        self.minValue.valueChanged.connect( self.onValuesChanged )
-        self.maxValue.valueChanged.connect( self.onValuesChanged )
-        self.stepValue.valueChanged.connect( self.onValuesChanged )
-        #self.stepLeft.clicked.connect(self.stepMinus)
-        #self.stepRight.clicked.connect(self.stepPlus)
+        self.slider.sliderMoved.connect(          self.sliderMoved)
+        self.minValue.valueChanged.connect(       self.onValuesChanged )
+        self.maxValue.valueChanged.connect(       self.onValuesChanged )
+        self.stepValue.valueChanged.connect(      self.onValuesChanged )
+        self.Loop.toggled.connect(                self.onLoop )
+        self.Pendulum.toggled.connect(            self.onPendulum )
+        self.CloseButton.clicked.connect(         self.onClose )
+        self.StopButton.clicked.connect(          self.onStop )
+        self.RunButton.clicked.connect(           self.onRun )
 
 
 

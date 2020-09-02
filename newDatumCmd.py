@@ -145,7 +145,7 @@ class newDatum:
                 # highlight the created datum object
                 Gui.Selection.clearSelection()
                 Gui.Selection.addSelection( App.ActiveDocument.Name, parentContainer.Name, createdDatum.Name+'.' )
-                #Gui.runCommand('Part_EditAttachment')
+                Gui.runCommand('Part_EditAttachment')
 
 
 

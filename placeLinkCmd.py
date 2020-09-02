@@ -244,6 +244,7 @@ class placeLinkUI():
             # highlight in the 3D window the object we placed
             self.finish()
         else:
+            FCC.PrintWarning("Problem in selections\n")
             return
 
 
@@ -353,7 +354,7 @@ class placeLinkUI():
             self.parentAssembly.recompute(True)
             return True
         else:
-            FCC.PrintWarning("Problem in selections\n")
+            #FCC.PrintWarning("Problem in selections\n")
             return False
 
     '''
