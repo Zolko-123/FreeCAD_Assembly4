@@ -71,6 +71,7 @@ class insertLink( QtGui.QDialog ):
         # This function is executed when the command is activated
 
         # initialise stuff
+        self.filterPartList.clear()
         self.partList.clear()
         self.linkNameInput.clear()
         self.allParts = []
@@ -213,6 +214,21 @@ class insertLink( QtGui.QDialog ):
 
 
 
+    def onFilterChange(self):
+        filterStr = self.filterPartList.text().strip()
+
+        for x in range(self.partList.count()):
+            item = self.partList.item(x)
+            # check it items's text match the filter
+            if filterStr:
+                if filterStr in item.text():
+                    item.setHidden(False)
+                else:
+                    item.setHidden(True)
+            else:
+                item.setHidden(False)
+
+
 
     """
     +-----------------------------------------------+
@@ -243,6 +259,8 @@ class insertLink( QtGui.QDialog ):
         self.resize(400,500)
 
         # Define the individual widgets
+        # Create a line for filtering the parts list
+        self.filterPartList = QtGui.QLineEdit(self)
         # The part list is a QListWidget
         self.partList = QtGui.QListWidget(self)
         # Create a line that will contain the name of the link (in the tree)
@@ -255,6 +273,8 @@ class insertLink( QtGui.QDialog ):
 
         # Place the widgets with layouts
         self.mainLayout = QtGui.QVBoxLayout(self)
+        self.mainLayout.addWidget(QtGui.QLabel("Filter :"))
+        self.mainLayout.addWidget(self.filterPartList)
         self.mainLayout.addWidget(QtGui.QLabel("Select Part to be inserted :"))
         self.mainLayout.addWidget(self.partList)
         self.mainLayout.addWidget(QtGui.QLabel("Enter a Name for the link :\n(Must be unique in the Model tree)"))
@@ -271,6 +291,7 @@ class insertLink( QtGui.QDialog ):
         self.cancelButton.clicked.connect(self.onCancel)
         self.insertButton.clicked.connect(self.onCreateLink)
         self.partList.itemClicked.connect( self.onItemClicked)
+        self.filterPartList.textChanged.connect(self.onFilterChange)
 
 
 """
