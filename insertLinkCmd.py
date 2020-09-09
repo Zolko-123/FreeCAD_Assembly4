@@ -40,7 +40,7 @@ class insertLink( QtGui.QDialog ):
 
     def IsActive(self):
         # We only insert a link into an Asm4  Model
-        if Asm4.checkModel:
+        if Asm4.checkModel():
             return True
         return False
 
