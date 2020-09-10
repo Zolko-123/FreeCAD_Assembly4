@@ -105,6 +105,7 @@ class Assembly4Workbench(Workbench):
         import Asm4_Measure        # Measure tool in the Task panel
         import makeBomCmd          # creates the parts list
         import HelpCmd             # shows a basic help window
+        import treeSelectionOverride    # ovveride 3D view click to select assembly entry in the tree view
         
         # create the toolbars and menus, nearly empty, to decide about their position
         self.appendToolbar("Assembly",["Asm4_newModel"])
