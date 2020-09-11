@@ -22,11 +22,17 @@ class asm4SelObserver:
             for subObj in reversed(objList):
                 if Asm4.isLinkToPart(subObj):
                     Gui.Selection.clearSelection()
-                    # TODO: Check why do we have to add '.' at the end to have the selection work
+                    # Have to add the '.' at the end to distinguish between features and sub-objects
                     Gui.Selection.addSelection(doc, obj, subObj.Name + '.')
                     break
 
-# add the listener, 0 forces to resolve the links
-s = asm4SelObserver()
-Gui.Selection.addObserver(s, 0)
+observer = asm4SelObserver();
 
+def Activate():
+    global observer
+    # add the listener, 0 forces to resolve the links
+    Gui.Selection.addObserver(observer, 0)
+
+def Deactivate():
+    global observer
+    Gui.Selection.removeObserver(observer) 
