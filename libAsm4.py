@@ -482,3 +482,30 @@ def splitExpressionDatum( expr ):
 
 
 
+"""
+    +-----------------------------------------------+
+    |        Selection Helper functions             |
+    +-----------------------------------------------+
+"""
+def getModelSelected():
+    if App.ActiveDocument.getObject('Model') and App.ActiveDocument.Model.TypeId == 'App::Part':
+        selection = Gui.Selection.getSelection()
+        if len(selection)==1:
+            selObj = selection[0]
+            if selObj.Name == 'Model' and selObj.TypeId == 'App::Part':
+                return selObj
+    return False
+    
+def getSelection():
+    # check that there is an App::Part called 'Model'
+    if App.ActiveDocument.getObject('Model') and App.ActiveDocument.Model.TypeId == 'App::Part':
+        selection = Gui.Selection.getSelection()
+        if len(selection)==1:
+            selObj = selection[0]
+            # it's an App::Link
+            if selObj.isDerivedFrom('App::Link') and selObj.LinkedObject.TypeId in linkedObjTypes:
+                return selObj
+    return None
+
+# type of App::Link target objects we're dealing with
+linkedObjTypes = [ 'App::Part', 'PartDesign::Body' ]

@@ -14,27 +14,6 @@ from FreeCAD import Console as FCC
 import libAsm4 as Asm4
 
 
-
-"""
-    +-----------------------------------------------+
-    |               Helper functions                |
-    +-----------------------------------------------+
-"""
-def getSelection():
-    # check that there is an App::Part called 'Model'
-    if App.ActiveDocument.getObject('Model') and App.ActiveDocument.Model.TypeId == 'App::Part':
-        if len(Gui.Selection.getSelection())==1:
-            selObj = Gui.Selection.getSelection()[0]
-            # it's an App::Link
-            if selObj.isDerivedFrom('App::Link') and selObj.LinkedObject.TypeId in linkedObjTypes:
-                return selObj
-    return None
-
-
-# type of App::Link target objects we're dealing with
-linkedObjTypes = [ 'App::Part', 'PartDesign::Body' ]
-
-
 # selection view properties overrides
 DrawStyle = 'Solid'
 LineWidth = 3.0
@@ -60,7 +39,7 @@ class placeLinkCmd():
 
     def IsActive(self):
         # We only insert a link into an Asm4  Model
-        if App.ActiveDocument and getSelection():
+        if App.ActiveDocument and Asm4.getSelection():
             return True
         return False
 
@@ -87,7 +66,7 @@ class placeLinkUI():
 
         # check that we have selected an App::Link object
         self.selectedLink = []
-        selection = getSelection()
+        selection = Asm4.getSelection()
         if not selection:
             # This shouldn't happen
             FCC.PrintWarning("This is not an error message you are supposed to see, something went wrong\n")
