@@ -113,6 +113,13 @@ def checkModel():
             retval = model
     return retval
 
+def isLinkToPart(obj):
+    if obj.TypeId == 'App::Link' and hasattr(obj.LinkedObject,'isDerivedFrom'):
+        if  obj.LinkedObject.isDerivedFrom('App::Part') or obj.LinkedObject.isDerivedFrom('PartDesign::Body'):
+            return True
+    else:
+        return False
+
 
 # get from the selected datum the corresponding link
 def getLinkAndDatum():
@@ -125,10 +132,9 @@ def getLinkAndDatum():
         for objStr in parentAssembly.getSubObjects():
             # the string ends with a . that must be removed
             obj = App.ActiveDocument.getObject( objStr[0:-1] )
-            if obj.TypeId == 'App::Link' and hasattr(obj.LinkedObject,'isDerivedFrom'):
-                if  obj.LinkedObject.isDerivedFrom('App::Part') or obj.LinkedObject.isDerivedFrom('PartDesign::Body'):
-                    # add it to our tree table if it's a link to an App::Part ...
-                    childrenTable.append( obj )
+            if isLinkToPart(obj):
+                # add it to our tree table if it's a link to an App::Part ...
+                childrenTable.append( obj )
 
         selObj = Gui.Selection.getSelection()[0]
         # a datum is selected
@@ -479,6 +485,4 @@ def splitExpressionDatum( expr ):
     +-----------------------------------------------+
 """
 # is in the FastenersLib.py file
-
-
 
