@@ -108,6 +108,7 @@ class Assembly4Workbench(Workbench):
         import Asm4_Measure        # Measure tool in the Task panel
         import makeBomCmd          # creates the parts list
         import HelpCmd             # shows a basic help window
+        import showHideLcsCmd      # shows/hides all the LCSs
         
         # create the toolbars and menus, nearly empty, to decide about their position
         self.appendToolbar("Assembly",["Asm4_newModel"])
@@ -241,7 +242,10 @@ class Assembly4Workbench(Workbench):
                                 "Asm4_importDatum"   ,
                                 "Asm4_placeDatum"    ,
                                 'Asm4_FSparameters'  ,
-                                'Asm4_placeFastener' ] 
+                                'Asm4_placeFastener' ,
+                                'Separator'          ,
+                                'Asm4_showLcs'       ,
+                                'Asm4_hideLcs']
         # commands to appear in the 'Create' sub-menu in the contextual menu (right-click)
         self.itemsCreateMenu = ["Asm4_newSketch",  
                                 "Asm4_newBody", 
