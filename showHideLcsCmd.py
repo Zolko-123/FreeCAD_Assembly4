@@ -39,6 +39,10 @@ class showLcsCmd:
     +-----------------------------------------------+
     """
     def Activated(self):
+        global processedLinks
+        # reset processed links cache
+        processedLinks = []
+
         model = Asm4.getModelSelected()
         if model:
             for objName in model.getSubObjects():
@@ -69,6 +73,10 @@ class hideLcsCmd:
     +-----------------------------------------------+
     """
     def Activated(self):
+        global processedLinks
+        # reset processed links cache
+        processedLinks = []
+
         model = Asm4.getModelSelected()
         if model:
             for objName in model.getSubObjects():
@@ -77,10 +85,15 @@ class hideLcsCmd:
             ShowChildLCSs(Asm4.getSelection(), False)
 
 
+# Already processed links cache, no need to process the same part if its linked multiple times
+processedLinks = []
 
 # Show/Hide the LCSs in the provided object and all linked children
 def ShowChildLCSs(obj, show):
-    if obj.TypeId == 'App::Link':
+    global processedLinks
+
+    if obj.TypeId == 'App::Link' and obj.Name not in processedLinks:
+        processedLinks.append(obj.Name)
         for linkObj in obj.LinkedObject.Document.Objects:
             ShowChildLCSs(linkObj, show)
     else:
