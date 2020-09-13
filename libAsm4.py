@@ -39,6 +39,8 @@ partInfo =[     'Description',                  \
                 'SupplierDescription',          \
                 'SupplierReference' ]
 
+containerTypes = [  'App::Part', \
+                    'PartDesign::Body' ]
 
 """
     +-----------------------------------------------+

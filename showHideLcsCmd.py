@@ -80,17 +80,16 @@ class hideLcsCmd:
 
 # Show/Hide the LCSs in the provided object and all linked children
 def ShowChildLCSs(obj, show):
-    lcsTypes = ["PartDesign::CoordinateSystem", "PartDesign::Line", "PartDesign::Point", "PartDesign::Plane"]
-
     if obj.TypeId == 'App::Link':
         for linkObj in obj.LinkedObject.Document.Objects:
             ShowChildLCSs(linkObj, show)
     else:
-        for subObjName in obj.getSubObjects():
-            subObj = obj.getSubObject(subObjName, 1)    # 1 for returning the real object
-            if subObj != None:
-                if subObj.TypeId in lcsTypes:
-                    subObj.Visibility = show
+        if obj.TypeId in Asm4.containerTypes:
+            for subObjName in obj.getSubObjects():
+                subObj = obj.getSubObject(subObjName, 1)    # 1 for returning the real object
+                if subObj != None:
+                    if subObj.TypeId in Asm4.datumTypes:
+                        subObj.Visibility = show
 
 """
     +-----------------------------------------------+
