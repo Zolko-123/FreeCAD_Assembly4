@@ -18,13 +18,16 @@ class asm4SelObserver:
             # 3D view click
             # Get list of objects from the top document to the clicked feature
             objList = App.getDocument(doc).getObject(obj).getSubObjectList(sub)
-            # Look for the link from bottom of the list up to the top document
-            for subObj in reversed(objList):
-                if Asm4.isLinkToPart(subObj):
-                    Gui.Selection.clearSelection()
-                    # Have to add the '.' at the end to distinguish between features and sub-objects
-                    Gui.Selection.addSelection(doc, obj, subObj.Name + '.')
-                    break
+
+            # Build the name of the selected sub-object for multiple sub-assembly levels
+            subObjName = ''
+            for subObj in objList:
+                if subObj.TypeId == 'App::Link':
+                    subObjName = subObjName + subObj.Name + '.'
+
+            if subObjName != '':
+                Gui.Selection.clearSelection()
+                Gui.Selection.addSelection(doc, obj, subObjName)
 
 observer = asm4SelObserver();
 
