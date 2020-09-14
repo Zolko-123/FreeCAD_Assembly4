@@ -24,7 +24,7 @@ class showLcsCmd:
     def GetResources(self):
         return {"MenuText": "Show LCS",
                 "ToolTip": "Show LCS of selected part and its children",
-#                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_CoordinateSystem.svg')
+                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_showLCS.svg')
                 }
 
     def IsActive(self):
@@ -58,7 +58,7 @@ class hideLcsCmd:
     def GetResources(self):
         return {"MenuText": "Hide LCS",
                 "ToolTip": "Hide LCS of selected part and its children",
-#                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_CoordinateSystem.svg')
+                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_hideLCS.svg')
                 }
 
     def IsActive(self):
