@@ -109,7 +109,8 @@ class Assembly4Workbench(Workbench):
         import makeBomCmd          # creates the parts list
         import HelpCmd             # shows a basic help window
         import showHideLcsCmd      # shows/hides all the LCSs
-        
+        import configurationEngine  # save/restore configuration
+
         # create the toolbars and menus, nearly empty, to decide about their position
         self.appendToolbar("Assembly",["Asm4_newModel"])
         # self.appendToolbar("Design",["Asm4_newPart"])
@@ -245,7 +246,10 @@ class Assembly4Workbench(Workbench):
                                 'Asm4_placeFastener' ,
                                 'Separator'          ,
                                 'Asm4_showLcs'       ,
-                                'Asm4_hideLcs']
+                                'Asm4_hideLcs'       ,
+                                'Separator'          ,
+                                'Asm4_saveConfiguration',
+                                'Asm4_restoreConfiguration']
         # commands to appear in the 'Create' sub-menu in the contextual menu (right-click)
         self.itemsCreateMenu = ["Asm4_newSketch",  
                                 "Asm4_newBody", 

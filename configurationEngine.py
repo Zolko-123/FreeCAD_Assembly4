@@ -22,6 +22,82 @@ ATTACHMENT_AXIS_Z_COL   = 'G'
 ATTACHMENT_ANGLE_COL    = 'H'
 
 
+"""
+    +-----------------------------------------------+
+    |                  main class                   |
+    +-----------------------------------------------+
+"""
+class saveConfigurationCmd:
+    def __init__(self):
+        super(saveConfigurationCmd,self).__init__()
+
+    def GetResources(self):
+        return {"MenuText": "Save configuration",
+                "ToolTip": "Save configuration of the selected object",
+                #"Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_showLCS.svg')
+                }
+
+    def IsActive(self):
+        # Will handle LCSs only for the Assembly4 model
+        if Asm4.getSelection() or Asm4.getModelSelected():
+            return True
+        return False
+
+    """
+    +-----------------------------------------------+
+    |                 the real stuff                |
+    +-----------------------------------------------+
+    """
+    def Activated(self):
+        #TODO: Ask for configuration name
+        doc = GetDocument('test')
+
+        model = Asm4.getModelSelected()
+        if model:
+            for objName in model.getSubObjects():
+                SaveObject(doc, model.getSubObject(objName, 1))
+        else:
+            SaveObject(doc, Asm4.getSelection())
+
+
+class restoreConfigurationCmd:
+    def __init__(self):
+        super(restoreConfigurationCmd,self).__init__()
+
+    def GetResources(self):
+        return {"MenuText": "Restore configuration",
+                "ToolTip": "Restore configuration of the selected object",
+                #"Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_showLCS.svg')
+                }
+
+    def IsActive(self):
+        # Will handle LCSs only for the Assembly4 model
+        if Asm4.getSelection() or Asm4.getModelSelected():
+            return True
+        return False
+
+    """
+    +-----------------------------------------------+
+    |                 the real stuff                |
+    +-----------------------------------------------+
+    """
+    def Activated(self):
+        #TODO: Ask for configuration name
+        doc = GetDocument('test')
+
+        model = Asm4.getModelSelected()
+        if model:
+            for objName in model.getSubObjects():
+                RestoreObject(doc, model.getSubObject(objName, 1))
+        else:
+            RestoreObject(doc, Asm4.getSelection())
+
+
+"""
+    +-----------------------------------------------+
+    |                  storage engine               |
+    +-----------------------------------------------+
+"""
 def GetDocument(name):
     # Get Configurations group where the spreadsheets will be saved
     conf = App.ActiveDocument.getObject('Configurations')
@@ -42,7 +118,7 @@ def PrepareDocument(doc, name):
     doc.clearAll()
     doc.set(HEADER_CELL, 'This is an Assembly4 configuration file. Manual changes or deleletion of that file might break your assembly completely!')
     doc.set(NAME_CELL, name)
-    headerRow = str(OBJECTS_START_ROW-1)
+    headerRow = str(int(OBJECTS_START_ROW)-1)
     doc.set(OBJECT_NAME_COL + headerRow, 'ObjectName')
     doc.set(ATTACHMENT_POS_X_COL + headerRow, 'Position_X')
     doc.set(ATTACHMENT_POS_Y_COL + headerRow, 'Position_Y')
@@ -69,17 +145,33 @@ def GetObjectData(doc, name, col):
 def SaveObject(doc, obj):
     row = GetObjectRow(doc, obj.Name)
     if row is None:
-        doc.insertRow(OBJECTS_START_ROW, 1)
+        doc.insertRows(OBJECTS_START_ROW, 1)
         row = OBJECTS_START_ROW
 
-    doc.set(OBJECT_NAME_COL + row, obj.Name)
+    linkedObjName = Asm4.getLinkedObjectName(App.ActiveDocument.Name, App.ActiveDocument.Model.Name, obj.Name)
+    doc.set(OBJECT_NAME_COL + row, linkedObjName)
     attachment = obj.AttachmentOffset
-    doc.set(ATTACHMENT_POS_X_COL + row, attachment.Base.x)
-    doc.set(ATTACHMENT_POS_Y_COL + row, attachment.Base.y)
-    doc.set(ATTACHMENT_POS_Z_COL + row, attachment.Base.z)
-    doc.set(ATTACHMENT_AXIS_X_COL + row, attachment.Rotation.Axis.x)
-    doc.set(ATTACHMENT_AXIS_Y_COL + row, attachment.Rotation.Axis.y)
-    doc.set(ATTACHMENT_AXIS_Z_COL + row, attachment.Rotation.Axis.z)
-    doc.set(ATTACHMENT_ANGLE_COL + row, attachment.Rotation.Angle)
+    doc.set(ATTACHMENT_POS_X_COL + row, str(attachment.Base.x))
+    doc.set(ATTACHMENT_POS_Y_COL + row, str(attachment.Base.y))
+    doc.set(ATTACHMENT_POS_Z_COL + row, str(attachment.Base.z))
+    doc.set(ATTACHMENT_AXIS_X_COL + row, str(attachment.Rotation.Axis.x))
+    doc.set(ATTACHMENT_AXIS_Y_COL + row, str(attachment.Rotation.Axis.y))
+    doc.set(ATTACHMENT_AXIS_Z_COL + row, str(attachment.Rotation.Axis.z))
+    doc.set(ATTACHMENT_ANGLE_COL + row, str(attachment.Rotation.Angle))
 
+
+def RestoreObject(doc, obj):
+    #TODO
+    todo = 1
+
+
+
+
+"""
+    +-----------------------------------------------+
+    |       add the command to the workbench        |
+    +-----------------------------------------------+
+"""
+Gui.addCommand( 'Asm4_saveConfiguration', saveConfigurationCmd() )
+Gui.addCommand( 'Asm4_restoreConfiguration', restoreConfigurationCmd() )
 

@@ -502,7 +502,7 @@ def getModelSelected():
             if selObj.Name == 'Model' and selObj.TypeId == 'App::Part':
                 return selObj
     return False
-    
+
 def getSelection():
     # check that there is an App::Part called 'Model'
     if App.ActiveDocument.getObject('Model') and App.ActiveDocument.Model.TypeId == 'App::Part':
@@ -513,6 +513,18 @@ def getSelection():
             if selObj.isDerivedFrom('App::Link') and selObj.LinkedObject.TypeId in linkedObjTypes:
                 return selObj
     return None
+
+def getLinkedObjectName(doc, obj, sub):
+    # Get list of objects from the top document to the clicked feature
+    objList = App.getDocument(doc).getObject(obj).getSubObjectList(sub)
+
+    # Build the name of the selected sub-object for multiple sub-assembly levels
+    name = ''
+    for subObj in objList:
+        if subObj.TypeId == 'App::Link':
+            name = name + subObj.Name + '.'
+    return name
+
 
 # type of App::Link target objects we're dealing with
 linkedObjTypes = [ 'App::Part', 'PartDesign::Body' ]
