@@ -39,6 +39,8 @@ partInfo =[     'Description',                  \
                 'SupplierDescription',          \
                 'SupplierReference' ]
 
+containerTypes = [  'App::Part', \
+                    'PartDesign::Body' ]
 
 """
     +-----------------------------------------------+
@@ -113,6 +115,22 @@ def checkModel():
             retval = model
     return retval
 
+def getModelSelected():
+    if App.ActiveDocument.getObject('Model') and App.ActiveDocument.Model.TypeId == 'App::Part':
+        selection = Gui.Selection.getSelection()
+        if len(selection)==1:
+            selObj = selection[0]
+            if selObj.Name == 'Model' and selObj.TypeId == 'App::Part':
+                return selObj
+    return False
+
+def isLinkToPart(obj):
+    if obj.TypeId == 'App::Link' and hasattr(obj.LinkedObject,'isDerivedFrom'):
+        if  obj.LinkedObject.isDerivedFrom('App::Part') or obj.LinkedObject.isDerivedFrom('PartDesign::Body'):
+            return True
+    else:
+        return False
+
 
 # get from the selected datum the corresponding link
 def getLinkAndDatum():
@@ -125,10 +143,9 @@ def getLinkAndDatum():
         for objStr in parentAssembly.getSubObjects():
             # the string ends with a . that must be removed
             obj = App.ActiveDocument.getObject( objStr[0:-1] )
-            if obj.TypeId == 'App::Link' and hasattr(obj.LinkedObject,'isDerivedFrom'):
-                if  obj.LinkedObject.isDerivedFrom('App::Part') or obj.LinkedObject.isDerivedFrom('PartDesign::Body'):
-                    # add it to our tree table if it's a link to an App::Part ...
-                    childrenTable.append( obj )
+            if isLinkToPart(obj):
+                # add it to our tree table if it's a link to an App::Part ...
+                childrenTable.append( obj )
 
         selObj = Gui.Selection.getSelection()[0]
         # a datum is selected
@@ -481,4 +498,24 @@ def splitExpressionDatum( expr ):
 # is in the FastenersLib.py file
 
 
+"""
+    +-----------------------------------------------+
+    |        Selection Helper functions             |
+    +-----------------------------------------------+
+"""
+
+    
+def getSelection():
+    # check that there is an App::Part called 'Model'
+    if App.ActiveDocument.getObject('Model') and App.ActiveDocument.Model.TypeId == 'App::Part':
+        selection = Gui.Selection.getSelection()
+        if len(selection)==1:
+            selObj = selection[0]
+            # it's an App::Link
+            if selObj.isDerivedFrom('App::Link') and selObj.LinkedObject.TypeId in linkedObjTypes:
+                return selObj
+    return None
+
+# type of App::Link target objects we're dealing with
+linkedObjTypes = [ 'App::Part', 'PartDesign::Body' ]
 

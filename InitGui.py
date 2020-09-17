@@ -31,7 +31,7 @@ asm4wb_icons_path = os.path.join( asm4wbPath, 'Resources/icons')
 global main_Assembly4WB_Icon
 main_Assembly4WB_Icon = os.path.join( asm4wb_icons_path , 'Assembly4.svg' )
 
-
+import treeSelectionOverride as selectionOverride
 
 """
     +-----------------------------------------------+
@@ -64,6 +64,7 @@ class dropDownCmdGroup:
 class Assembly4Workbench(Workbench):
 
     global main_Assembly4WB_Icon
+    global selectionOverride
     MenuText = "Assembly 4"
     ToolTip = "Assembly 4 workbench"
     Icon = main_Assembly4WB_Icon
@@ -74,10 +75,12 @@ class Assembly4Workbench(Workbench):
 
     def Activated(self):
         "This function is executed when the workbench is activated"
+        selectionOverride.Activate()
         return
 
     def Deactivated(self):
         "This function is executed when the workbench is deactivated"
+        selectionOverride.Deactivate()
         return 
 
     def GetClassName(self): 
@@ -105,6 +108,7 @@ class Assembly4Workbench(Workbench):
         import Asm4_Measure        # Measure tool in the Task panel
         import makeBomCmd          # creates the parts list
         import HelpCmd             # shows a basic help window
+        import showHideLcsCmd      # shows/hides all the LCSs
         
         # create the toolbars and menus, nearly empty, to decide about their position
         self.appendToolbar("Assembly",["Asm4_newModel"])
@@ -192,6 +196,8 @@ class Assembly4Workbench(Workbench):
                                 "Asm4_infoPart", 
                                 "Asm4_makeBOM", 
                                 "Asm4_Measure", 
+                                'Asm4_showLcs',
+                                'Asm4_hideLcs',
                                 "Asm4_addVariable", 
                                 "Asm4_delVariable", 
                                 "Asm4_Animate", 
@@ -238,7 +244,10 @@ class Assembly4Workbench(Workbench):
                                 "Asm4_importDatum"   ,
                                 "Asm4_placeDatum"    ,
                                 'Asm4_FSparameters'  ,
-                                'Asm4_placeFastener' ] 
+                                'Asm4_placeFastener' ,
+                                'Separator'          ,
+                                'Asm4_showLcs'       ,
+                                'Asm4_hideLcs']
         # commands to appear in the 'Create' sub-menu in the contextual menu (right-click)
         self.itemsCreateMenu = ["Asm4_newSketch",  
                                 "Asm4_newBody", 

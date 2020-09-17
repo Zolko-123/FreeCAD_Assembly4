@@ -63,7 +63,7 @@ Assembly4 commands are accessible from the Assembly menu or the Assembly4 toolba
 
 ### Toolbar
 
-Commands are activated with relevant selection. If a command is inactive (grayed oit) it's because something is selected to which that function doesn't apply.
+Commands are activated with relevant selection. If a command is inactive (grayed out) it's because something is selected to which that function doesn't apply.
 
 ![](Resources/media/Asm4_Toolbar.png)
 
