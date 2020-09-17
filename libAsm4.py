@@ -115,6 +115,15 @@ def checkModel():
             retval = model
     return retval
 
+def getModelSelected():
+    if App.ActiveDocument.getObject('Model') and App.ActiveDocument.Model.TypeId == 'App::Part':
+        selection = Gui.Selection.getSelection()
+        if len(selection)==1:
+            selObj = selection[0]
+            if selObj.Name == 'Model' and selObj.TypeId == 'App::Part':
+                return selObj
+    return False
+
 def isLinkToPart(obj):
     if obj.TypeId == 'App::Link' and hasattr(obj.LinkedObject,'isDerivedFrom'):
         if  obj.LinkedObject.isDerivedFrom('App::Part') or obj.LinkedObject.isDerivedFrom('PartDesign::Body'):
@@ -494,14 +503,7 @@ def splitExpressionDatum( expr ):
     |        Selection Helper functions             |
     +-----------------------------------------------+
 """
-def getModelSelected():
-    if App.ActiveDocument.getObject('Model') and App.ActiveDocument.Model.TypeId == 'App::Part':
-        selection = Gui.Selection.getSelection()
-        if len(selection)==1:
-            selObj = selection[0]
-            if selObj.Name == 'Model' and selObj.TypeId == 'App::Part':
-                return selObj
-    return False
+
     
 def getSelection():
     # check that there is an App::Part called 'Model'

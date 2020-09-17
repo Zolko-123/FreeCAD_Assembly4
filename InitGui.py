@@ -196,6 +196,8 @@ class Assembly4Workbench(Workbench):
                                 "Asm4_infoPart", 
                                 "Asm4_makeBOM", 
                                 "Asm4_Measure", 
+                                'Asm4_showLcs',
+                                'Asm4_hideLcs',
                                 "Asm4_addVariable", 
                                 "Asm4_delVariable", 
                                 "Asm4_Animate", 
