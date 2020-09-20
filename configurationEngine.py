@@ -5,13 +5,14 @@
 #
 # The code to save and restore configurations, using spreadsheets
 
+from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
 import libAsm4 as Asm4
 import math
 
 HEADER_CELL             = 'A1'
-NAME_CELL               = 'A2'
+DESCRIPTION_CELL        = 'A2'
 OBJECTS_START_ROW       = '5'
 OBJECT_NAME_COL         = 'A'
 ATTACHMENT_POS_X_COL    = 'B'
@@ -50,14 +51,16 @@ class saveConfigurationCmd:
     +-----------------------------------------------+
     """
     def Activated(self):
-        #TODO: Ask for configuration name
-        doc = GetDocument('test', 'Configurations')
+        ui = saveConfigurationUI()
 
-        model = Asm4.getModelSelected()
-        if model:
-            SaveSubObjects(doc, model)
-        else:
-            SaveObject(doc, Asm4.getSelection())
+        # Fill the configurations list
+        confGroup = GetGroup('Configurations')
+        if confGroup:
+            for obj in confGroup.OutList:
+                if obj.TypeId == 'Spreadsheet::Sheet':
+                    ui.addListEntry(obj.Label, GetDocumentDescription(obj))
+
+        Gui.Control.showDialog(ui)
 
 
 class restoreConfigurationCmd:
@@ -82,14 +85,16 @@ class restoreConfigurationCmd:
     +-----------------------------------------------+
     """
     def Activated(self):
-        #TODO: Ask for configuration name
-        doc = GetDocument('test', 'Configurations')
+        ui = restoreConfigurationUI()
 
-        model = Asm4.getModelSelected()
-        if model:
-            RestoreSubObjects(doc, model)
-        else:
-            RestoreObject(doc, Asm4.getSelection())
+        # Fill the configurations list
+        confGroup = GetGroup('Configurations')
+        if confGroup:
+            for obj in confGroup.OutList:
+                if obj.TypeId == 'Spreadsheet::Sheet':
+                    ui.addListEntry(obj.Label, GetDocumentDescription(obj))
+
+        Gui.Control.showDialog(ui)
 
 
 """
@@ -97,28 +102,85 @@ class restoreConfigurationCmd:
     |                  storage engine               |
     +-----------------------------------------------+
 """
-def GetDocument(name, groupName = ''):
-    # Look for the specified group, or ActiveDocument if not specified
-    if groupName != '':
-        group = App.ActiveDocument.getObject(groupName)
-        if group is None:
-            group = App.ActiveDocument.addObject('App::DocumentObjectGroup', groupName)
-    else:
-        group = App.ActiveDocument
+def RestoreConfiguration(docName):
+    print('Restoring configuration from "' + docName + '"')
+    doc = GetDocument(docName, 'Configurations')
 
-    # Get the needed document, create if not exist
-    doc = group.getObject(name)
+    model = Asm4.getModelSelected()
+    if model:
+        RestoreSubObjects(doc, model)
+    else:
+        RestoreObject(doc, Asm4.getSelection())
+    App.ActiveDocument.recompute()
+
+
+def SaveConfiguration(docName, description):
+    print('Saving configuration to "' + docName + '"')
+    doc = GetDocument(docName, 'Configurations')
+    if doc:
+        confirm = Asm4.confirmBox('Override cofiguration in "' + docName + '"?')
+        if not confirm:
+            print('Cancel save...')
+            return
+        else:
+            SetDocumentDescription(doc, description)
+    else:
+        doc = CreateDocument(docName, description, 'Configurations')
+
+    model = Asm4.getModelSelected()
+    if model:
+        SaveSubObjects(doc, model)
+    else:
+        SaveObject(doc, Asm4.getSelection())
+    doc.recompute(True)
+
+
+def GetDocument(name, groupName=''):
+    group = GetGroup(groupName)
+
+    # Get the needed document
+    return group.getObject(name)
     if doc is None:
         doc = group.newObject('Spreadsheet::Sheet', name)
-        PrepareDocument(doc, name)
+        PrepareDocument(doc, description)
 
     return doc
 
 
-def PrepareDocument(doc, name):
+def CreateDocument(name, description, groupName=''):
+    group = GetGroup(groupName)
+
+    # Create the document
+    doc = group.newObject('Spreadsheet::Sheet', name)
+    PrepareDocument(doc, description)
+
+    return doc
+
+def GetGroup(groupName, create=True):
+    # Look for the specified group, or ActiveDocument if not specified
+    group = None
+    if groupName != '':
+        group = App.ActiveDocument.getObject(groupName)
+        if group is None and create==True:
+            group = App.ActiveDocument.addObject('App::DocumentObjectGroup', groupName)
+    else:
+        group = App.ActiveDocument
+
+    return group
+
+
+def SetDocumentDescription(doc, description):
+    doc.set(DESCRIPTION_CELL, description)
+
+
+def GetDocumentDescription(doc):
+    return doc.get(DESCRIPTION_CELL)
+
+
+def PrepareDocument(doc, description):
     doc.clearAll()
     doc.set(HEADER_CELL, 'This is an Assembly4 configuration file. Manual changes or deleletion of that file might break your assembly completely!')
-    doc.set(NAME_CELL, name)
+    doc.set(DESCRIPTION_CELL, description)
     headerRow = str(int(OBJECTS_START_ROW)-1)
     doc.set(OBJECT_NAME_COL + headerRow, 'ObjectName')
     doc.set(ATTACHMENT_POS_X_COL + headerRow, 'Position_X')
@@ -186,7 +248,6 @@ def SaveObject(doc, obj, namePrefix=''):
     doc.set(ATTACHMENT_AXIS_Y_COL + row, str(attachment.Rotation.Axis.y))
     doc.set(ATTACHMENT_AXIS_Z_COL + row, str(attachment.Rotation.Axis.z))
     doc.set(ATTACHMENT_ANGLE_COL + row, str(math.degrees(attachment.Rotation.Angle)))
-    doc.recompute(True)
 
 
 def RestoreSubObjects(doc, container, namePrefix=''):
@@ -204,25 +265,183 @@ def RestoreObject(doc, obj, namePrefix=''):
     print("Restoring " + linkedObjName + " from " + doc.Name)
     row = GetObjectRow(doc, linkedObjName)
     if row is None:
-        print('No data for object "' + linkedObjName + '." in configuration "' + doc.Name + '"')
+        print('No data for object "' + linkedObjName + '" in configuration "' + doc.Name + '"')
         return
 
     x = doc.get(ATTACHMENT_POS_X_COL + row)
     y = doc.get(ATTACHMENT_POS_Y_COL + row)
     z = doc.get(ATTACHMENT_POS_Z_COL + row)
     v1 = App.Vector(x, y, z)
-    print(v1)
     x = doc.get(ATTACHMENT_AXIS_X_COL + row)
     y = doc.get(ATTACHMENT_AXIS_Y_COL + row)
     z = doc.get(ATTACHMENT_AXIS_Z_COL + row)
     angle = doc.get(ATTACHMENT_ANGLE_COL + row)
     v2 = App.Vector(x, y, z)
     rotation = App.Rotation(v2, angle)
-    print(rotation)
     placement = App.Placement(v1, rotation)
-    print(placement)
     obj.AttachmentOffset = placement
-    obj.recompute()
+
+
+class ListEntry(QtGui.QListWidgetItem):
+    name = ''
+    description = ''
+    def __init__(self, name, description=''):
+        self.name = name
+        self.description = description
+        super(ListEntry, self).__init__()
+
+"""
+    +-----------------------------------------------+
+    |           Restore configuration UI            |
+    +-----------------------------------------------+
+"""
+class restoreConfigurationUI():
+    def __init__(self):
+        self.base = QtGui.QWidget()
+        self.form = self.base
+        #iconFile = os.path.join( Asm4.iconPath , 'Place_Link.svg')
+        #self.form.setWindowIcon(QtGui.QIcon( iconFile ))
+        self.form.setWindowTitle('Restore configuration')
+
+        # draw the GUI, objects are defined later down
+        self.initUI()
+
+
+    # standard FreeCAD Task panel buttons
+    def getStandardButtons(self):
+        return int(QtGui.QDialogButtonBox.Cancel | QtGui.QDialogButtonBox.Ok)
+
+
+    # OK
+    def accept(self):
+        selectedItems = self.configurationList.selectedItems()
+        if len(selectedItems) == 0:
+            Asm4.warningBox('No cofiguration selected!')
+            return
+
+        item = selectedItems[0]
+        RestoreConfiguration(item.name)
+        Gui.Control.closeDialog()
+
+
+    # Cancel
+    def reject(self):
+        Gui.Control.closeDialog()
+
+
+    # Free insert
+    def clicked(self, button):
+        pass
+
+
+    # defines the UI, only static elements
+    def initUI(self):
+        # the layout for the main window is vertical (top to down)
+        self.mainLayout = QtGui.QVBoxLayout(self.form)
+
+        # List of configurations
+        self.mainLayout.addWidget(QtGui.QLabel("Select configuration:"))
+        self.configurationList = QtGui.QListWidget()
+        self.configurationList.setMinimumHeight(100)
+        self.mainLayout.addWidget(self.configurationList)
+
+        # apply the layout to the main window
+        self.form.setLayout(self.mainLayout)
+
+
+    def addListEntry(self, name, description):
+        newItem = ListEntry(name)
+        str = name
+        if description != '':
+            str = str + ' (' + description + ')'
+        newItem.setText(str)
+        self.configurationList.addItem(newItem)
+
+
+"""
+    +-----------------------------------------------+
+    |            Save configuration UI              |
+    +-----------------------------------------------+
+"""
+class saveConfigurationUI():
+    def __init__(self):
+        self.base = QtGui.QWidget()
+        self.form = self.base
+        #iconFile = os.path.join( Asm4.iconPath , 'Place_Link.svg')
+        #self.form.setWindowIcon(QtGui.QIcon( iconFile ))
+        self.form.setWindowTitle('Save configuration')
+
+        # draw the GUI, objects are defined later down
+        self.initUI()
+
+
+    # standard FreeCAD Task panel buttons
+    def getStandardButtons(self):
+        return int(QtGui.QDialogButtonBox.Cancel | QtGui.QDialogButtonBox.Ok)
+
+
+    # OK
+    def accept(self):
+        if self.configurationName.text().strip() == '':
+            Asm4.warningBox('No configuration name specified!')
+            return
+
+        SaveConfiguration(self.configurationName.text().strip(), self.configurationDescription.text().strip())
+        Gui.Control.closeDialog()
+
+
+    # Cancel
+    def reject(self):
+        Gui.Control.closeDialog()
+
+
+    # Free insert
+    def clicked(self, button):
+        pass
+
+
+    # defines the UI, only static elements
+    def initUI(self):
+        # the layout for the main window is vertical (top to down)
+        self.mainLayout = QtGui.QVBoxLayout(self.form)
+
+        # Configuration name
+        self.mainLayout.addWidget(QtGui.QLabel("Name:"))
+        self.configurationName = QtGui.QLineEdit()
+        self.mainLayout.addWidget(self.configurationName)
+        # Configuration description
+        self.mainLayout.addWidget(QtGui.QLabel("Description:"))
+        self.configurationDescription = QtGui.QLineEdit()
+        self.mainLayout.addWidget(self.configurationDescription)
+        # List of configurations
+        self.mainLayout.addWidget(QtGui.QLabel("Override configuration:"))
+        self.configurationList = QtGui.QListWidget()
+        self.configurationList.setMinimumHeight(100)
+        self.configurationList.itemSelectionChanged.connect(self.onListChange)
+        self.mainLayout.addWidget(self.configurationList)
+
+        # apply the layout to the main window
+        self.form.setLayout(self.mainLayout)
+
+    def onListChange(self):
+        # Get selected entry
+        selectedItems = self.configurationList.selectedItems()
+        if len(selectedItems) != 1:
+            return
+
+        item = selectedItems[0]
+        item.__class__ = ListEntry
+        self.configurationName.setText(item.name)
+        self.configurationDescription.setText(item.description)
+
+
+    def addListEntry(self, name, description):
+        newItem = ListEntry(name, description)
+        str = name
+        if description != '':
+            str = str + ' (' + description + ')'
+        newItem.setText(str)
+        self.configurationList.addItem(newItem)
 
 
 """
