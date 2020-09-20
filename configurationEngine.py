@@ -170,7 +170,7 @@ def GetGroup(groupName, create=True):
 
 
 def SetDocumentDescription(doc, description):
-    doc.set(DESCRIPTION_CELL, description)
+    doc.set(DESCRIPTION_CELL, str(description))
 
 
 def GetDocumentDescription(doc):
@@ -180,7 +180,7 @@ def GetDocumentDescription(doc):
 def PrepareDocument(doc, description):
     doc.clearAll()
     doc.set(HEADER_CELL, 'This is an Assembly4 configuration file. Manual changes or deleletion of that file might break your assembly completely!')
-    doc.set(DESCRIPTION_CELL, description)
+    doc.set(DESCRIPTION_CELL, str(description))
     headerRow = str(int(OBJECTS_START_ROW)-1)
     doc.set(OBJECT_NAME_COL + headerRow, 'ObjectName')
     doc.set(ATTACHMENT_POS_X_COL + headerRow, 'Position_X')
@@ -219,27 +219,27 @@ def GetObjectData(doc, name, col):
     return doc.get(str(col) + str(row))
 
 
-def SaveSubObjects(doc, container, namePrefix=''):
-    print("Container: " + container.Name)
-    print("Prefix: " + namePrefix)
+def SaveSubObjects(doc, container):
     for objName in container.getSubObjects():
         obj = container.getSubObject(objName, 1)
         if obj.TypeId == 'App::Link':
-            SaveObject(doc, obj, namePrefix)
+            SaveObject(doc, obj)
 
 
-def SaveObject(doc, obj, namePrefix=''):
-    linkedObjName = namePrefix + obj.Name + '.';
+def SaveObject(doc, obj):
+    SaveSubObjects(doc, obj)
 
-    SaveSubObjects(doc, obj, linkedObjName)
-    print("Saving " + linkedObjName + " to " + doc.Name)
-    row = GetObjectRow(doc, linkedObjName)
+    parentObj, objFullName = obj.Parents[0]
+    objName = App.ActiveDocument.Name + '.' + parentObj.Name + '.' + objFullName
+
+    print("Saving " + objName + " to " + doc.Name)
+    row = GetObjectRow(doc, objName)
     if row is None:
         doc.insertRows(OBJECTS_START_ROW, 1)
         row = OBJECTS_START_ROW
 
-    doc.set(OBJECT_NAME_COL + row, linkedObjName)
-    doc.setAlias(OBJECT_NAME_COL + row, GetValidAlias(linkedObjName))
+    doc.set(OBJECT_NAME_COL + row, objName)
+    doc.setAlias(OBJECT_NAME_COL + row, GetValidAlias(objName))
     attachment = obj.AttachmentOffset
     doc.set(ATTACHMENT_POS_X_COL + row, str(attachment.Base.x))
     doc.set(ATTACHMENT_POS_Y_COL + row, str(attachment.Base.y))
@@ -250,22 +250,23 @@ def SaveObject(doc, obj, namePrefix=''):
     doc.set(ATTACHMENT_ANGLE_COL + row, str(math.degrees(attachment.Rotation.Angle)))
 
 
-def RestoreSubObjects(doc, container, namePrefix=''):
+def RestoreSubObjects(doc, container):
     for objName in container.getSubObjects():
         obj = container.getSubObject(objName, 1)
         if obj.TypeId == 'App::Link':
-            RestoreObject(doc, obj, namePrefix)
+            RestoreObject(doc, obj)
 
 
-def RestoreObject(doc, obj, namePrefix=''):
-    linkedObjName = namePrefix + obj.Name + '.';
+def RestoreObject(doc, obj):
+    RestoreSubObjects(doc, obj)
 
-    RestoreSubObjects(doc, obj, namePrefix + obj.Name + '.')
+    parentObj, objFullName = obj.Parents[0]
+    objName = App.ActiveDocument.Name + '.' + parentObj.Name + '.' + objFullName
 
-    print("Restoring " + linkedObjName + " from " + doc.Name)
-    row = GetObjectRow(doc, linkedObjName)
+    print("Restoring " + objName + " from " + doc.Name)
+    row = GetObjectRow(doc, objName)
     if row is None:
-        print('No data for object "' + linkedObjName + '" in configuration "' + doc.Name + '"')
+        print('No data for object "' + objName + '" in configuration "' + doc.Name + '"')
         return
 
     x = doc.get(ATTACHMENT_POS_X_COL + row)
@@ -383,7 +384,13 @@ class saveConfigurationUI():
     # OK
     def accept(self):
         if self.configurationName.text().strip() == '':
-            Asm4.warningBox('No configuration name specified!')
+            Asm4.warningBox('Please specify configuration name!')
+            self.configurationName.setFocus()
+            return
+
+        if self.configurationDescription.text().strip() == '':
+            Asm4.warningBox('Please specify configuration description!')
+            self.configurationDescription.setFocus()
             return
 
         SaveConfiguration(self.configurationName.text().strip(), self.configurationDescription.text().strip())
