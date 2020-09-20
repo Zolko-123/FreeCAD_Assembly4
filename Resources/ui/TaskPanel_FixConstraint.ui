@@ -14,92 +14,6 @@
    <string>Dialog</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="7" column="0">
-    <widget class="QCheckBox" name="yrotCheck">
-     <property name="text">
-      <string>y-axis rotation</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="0">
-    <widget class="QLabel" name="label">
-     <property name="text">
-      <string>Object to fix</string>
-     </property>
-    </widget>
-   </item>
-   <item row="6" column="0">
-    <widget class="QCheckBox" name="xrotCheck">
-     <property name="text">
-      <string>x-axis rotation</string>
-     </property>
-    </widget>
-   </item>
-   <item row="8" column="0">
-    <widget class="QCheckBox" name="zrotCheck">
-     <property name="text">
-      <string>z-axis rotation</string>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="0">
-    <widget class="QCheckBox" name="yCheck">
-     <property name="text">
-      <string>y-axis</string>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="0">
-    <widget class="QCheckBox" name="zCheck">
-     <property name="text">
-      <string>z-axis</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="0">
-    <widget class="QLabel" name="label_2">
-     <property name="text">
-      <string>Components of placement to fix</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="0">
-    <widget class="QCheckBox" name="xCheck">
-     <property name="text">
-      <string>x-axis</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0" colspan="2">
-    <widget class="QListWidget" name="objectList"/>
-   </item>
-   <item row="7" column="1">
-    <widget class="Gui::QuantitySpinBox" name="yrotVal">
-     <property name="unit" stdset="0">
-      <string>deg</string>
-     </property>
-    </widget>
-   </item>
-   <item row="6" column="1">
-    <widget class="Gui::QuantitySpinBox" name="xrotVal">
-     <property name="enabled">
-      <bool>true</bool>
-     </property>
-     <property name="unit" stdset="0">
-      <string notr="true">deg</string>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="1">
-    <widget class="Gui::QuantitySpinBox" name="zVal">
-     <property name="enabled">
-      <bool>true</bool>
-     </property>
-     <property name="unit" stdset="0">
-      <string notr="true">mm</string>
-     </property>
-    </widget>
-   </item>
    <item row="4" column="1">
     <widget class="Gui::QuantitySpinBox" name="yVal">
      <property name="enabled">
@@ -126,10 +40,106 @@
      </property>
     </widget>
    </item>
+   <item row="6" column="1">
+    <widget class="Gui::QuantitySpinBox" name="xrotVal">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="unit" stdset="0">
+      <string notr="true">deg</string>
+     </property>
+    </widget>
+   </item>
    <item row="8" column="1">
     <widget class="Gui::QuantitySpinBox" name="zrotVal">
      <property name="unit" stdset="0">
       <string notr="true">deg</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="0">
+    <widget class="QCheckBox" name="zCheck">
+     <property name="text">
+      <string>z-axis</string>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="0">
+    <widget class="QCheckBox" name="zrotCheck">
+     <property name="text">
+      <string>z-axis rotation</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QCheckBox" name="xCheck">
+     <property name="text">
+      <string>x-axis</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QListWidget" name="referenceList"/>
+   </item>
+   <item row="6" column="0">
+    <widget class="QCheckBox" name="xrotCheck">
+     <property name="text">
+      <string>x-axis rotation</string>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="0">
+    <widget class="QCheckBox" name="yrotCheck">
+     <property name="text">
+      <string>y-axis rotation</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>Components of placement to fix</string>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="1">
+    <widget class="Gui::QuantitySpinBox" name="yrotVal">
+     <property name="unit" stdset="0">
+      <string>deg</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QListWidget" name="objectList"/>
+   </item>
+   <item row="4" column="0">
+    <widget class="QCheckBox" name="yCheck">
+     <property name="text">
+      <string>y-axis</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="1">
+    <widget class="Gui::QuantitySpinBox" name="zVal">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="unit" stdset="0">
+      <string notr="true">mm</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Object to fix</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="QLabel" name="label_3">
+     <property name="text">
+      <string>Reference object</string>
      </property>
     </widget>
    </item>
@@ -142,6 +152,22 @@
    <header>Gui/QuantitySpinBox.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>objectList</tabstop>
+  <tabstop>referenceList</tabstop>
+  <tabstop>xCheck</tabstop>
+  <tabstop>xVal</tabstop>
+  <tabstop>yCheck</tabstop>
+  <tabstop>yVal</tabstop>
+  <tabstop>zCheck</tabstop>
+  <tabstop>zVal</tabstop>
+  <tabstop>xrotCheck</tabstop>
+  <tabstop>xrotVal</tabstop>
+  <tabstop>yrotCheck</tabstop>
+  <tabstop>yrotVal</tabstop>
+  <tabstop>zrotCheck</tabstop>
+  <tabstop>zrotVal</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

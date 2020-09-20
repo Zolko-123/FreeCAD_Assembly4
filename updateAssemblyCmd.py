@@ -15,6 +15,7 @@ import Part
 
 import libAsm4 as Asm4
 
+from math import pi
 from solver.Solver import Solver
 from solver.Solver import get_lists
 
@@ -64,11 +65,11 @@ class updateAssembly:
             if placement == "Rotation":
                 angles = App.ActiveDocument.getObject(obj_name).Placement.Rotation.toEuler()
                 if component == "x":
-                    App.ActiveDocument.getObject(obj_name).Placement.Rotation = App.Rotation(angles[0], angles[1], solved.x[i])
+                    App.ActiveDocument.getObject(obj_name).Placement.Rotation = App.Rotation(angles[0], angles[1], solved.x[i]*180/pi)
                 elif component == "y":
-                    App.ActiveDocument.getObject(obj_name).Placement.Rotation = App.Rotation(angles[0], solved.x[i], angles[2])
+                    App.ActiveDocument.getObject(obj_name).Placement.Rotation = App.Rotation(angles[0], solved.x[i]*180/pi, angles[2])
                 elif component == "z":
-                    App.ActiveDocument.getObject(obj_name).Placement.Rotation = App.Rotation(solved.x[i], angles[1], angles[2])
+                    App.ActiveDocument.getObject(obj_name).Placement.Rotation = App.Rotation(solved.x[i]*180/pi, angles[1], angles[2])
             elif placement == "Base":
                 if component == "x":
                     App.ActiveDocument.getObject(obj_name).Placement.Base.x = solved.x[i]

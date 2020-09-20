@@ -2,6 +2,8 @@ import time
 import numpy as np
 from scipy.optimize import minimize
 from HyperDual import HyperDual
+from HyperDual import hdsin
+from HyperDual import hdcos
 
 
 # Here are the discrete functions (from scipy optimize page)
@@ -58,6 +60,8 @@ x02 = HyperDual(0.7, [0., 1., 0., 0., 0.], initial_hess)
 x03 = HyperDual(0.8, [0., 0., 1., 0., 0.], initial_hess)
 x04 = HyperDual(1.9, [0., 0., 0., 1., 0.], initial_hess)
 x05 = HyperDual(1.2, [0., 0., 0., 0., 1.], initial_hess)
+
+print(hdcos(x01))
 
 x0 = np.array([1.3, 0.7, 0.8, 1.9, 1.2])
 x0hd = np.array([x01, x02, x03, x04, x05])

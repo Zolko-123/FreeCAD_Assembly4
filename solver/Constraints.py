@@ -1,4 +1,6 @@
 import FreeCAD as App
+from .HyperDual import HyperDualQuaternion, hdsin, hdcos
+from math import pi
 
 
 class Equality:
@@ -84,14 +86,145 @@ class Equality:
 
 class Fix:
     """ A variable is fixed to a value """
-    def __init__(self, a, c):
-        # a is the postion of variable to fix
-        # c is the value we want for the variable
-        self.a = a
-        self.c = c
+    def __init__(self, indexList, fixType):
+        # indexList contains the indeces of the variables needed to
+        # create the placements of the object and the reference
+        # fixType is the type of fix (Rotation or Base)
+        self.xPlacement = App.Placement
+        self.rPlacement = App.Placement
+        self.indexList = indexList
+        self.fixType = fixType
 
     def eval(self, x):
-        return x[self.a] - self.c
+        # quaternion representing the reference rotation
+        rqrotxIndex = None
+        rqrotyIndex = None
+        rqrotzIndex = None
+        # quaternion representing the object rotation
+        oqrotxIndex = None
+        oqrotyIndex = None
+        oqrotzIndex = None
+        # quaternion representing the position of the object
+        pxIndex = None
+        pyIndex = None
+        pzIndex = None
+        # quaternion representing the fix rotation
+        fqrotxIndex = None
+        fqrotyIndex = None
+        fqrotzIndex = None
+        fqrotx = None
+        fqroty = None
+        fqrotz = None
+        # quaternion representing the fix base
+        fqbasexIndex = None
+        fqbaseyIndex = None
+        fqbasezIndex = None
+        fqbasex = None
+        fqbasey = None
+        fqbasez = None
+
+        rqrotxIndex = self.indexList["Rotation_x"]["Reference"]
+        oqrotxIndex = self.indexList["Rotation_x"]["Object"]
+        rqrotyIndex = self.indexList["Rotation_y"]["Reference"]
+        oqrotyIndex = self.indexList["Rotation_y"]["Object"]
+        rqrotzIndex = self.indexList["Rotation_z"]["Reference"]
+        oqrotzIndex = self.indexList["Rotation_z"]["Object"]
+        pxIndex = self.indexList["Base_x"]["Object"]
+        pyIndex = self.indexList["Base_y"]["Object"]
+        pzIndex = self.indexList["Base_z"]["Object"]
+        if self.indexList["Rotation_x"]["Enable"]:
+            val = self.indexList["Rotation_x"]["FixVal"]
+            fqrotx = HyperDualQuaternion(hdsin(val/2),
+                                         0,
+                                         0,
+                                         hdcos(val/2))
+        else:
+            fqrotxIndex = self.indexList["Rotation_x"]["Object"]
+            fqrotx = HyperDualQuaternion(hdsin(x[fqrotxIndex]/2),
+                                         0,
+                                         0,
+                                         hdcos(x[fqrotxIndex]/2))
+        if self.indexList["Rotation_y"]["Enable"]:
+            val = self.indexList["Rotation_y"]["FixVal"]
+            fqroty = HyperDualQuaternion(0,
+                                         hdsin(val/2),
+                                         0,
+                                         hdcos(val/2))
+        else:
+            fqrotyIndex = self.indexList["Rotation_y"]["Object"]
+            fqroty = HyperDualQuaternion(0,
+                                         hdsin(x[fqrotyIndex]/2),
+                                         0,
+                                         hdcos(x[fqrotyIndex]/2))
+        if self.indexList["Rotation_z"]["Enable"]:
+            val = self.indexList["Rotation_z"]["FixVal"]
+            fqrotz = HyperDualQuaternion(0,
+                                         0,
+                                         hdsin(val/2),
+                                         hdcos(val/2))
+        else:
+            fqrotzIndex = self.indexList["Rotation_z"]["Object"]
+            fqrotz = HyperDualQuaternion(0,
+                                         0,
+                                         hdsin(x[fqrotzIndex]/2),
+                                         hdcos(x[fqrotzIndex]/2))
+
+        if self.indexList["Base_x"]["Enable"]:
+            fqbasex = self.indexList["Base_x"]["FixVal"]
+        else:
+            fqbasexIndex = self.indexList["Base_x"]["Object"]
+            fqbasex = x[fqbasexIndex]
+        if self.indexList["Base_y"]["Enable"]:
+            fqbasey = self.indexList["Base_y"]["FixVal"]
+        else:
+            fqbaseyIndex = self.indexList["Base_y"]["Object"]
+            fqbasey = x[fqbaseyIndex]
+        if self.indexList["Base_z"]["Enable"]:
+            fqbasez = self.indexList["Base_z"]["FixVal"]
+        else:
+            fqbasezIndex = self.indexList["Base_z"]["Object"]
+            fqbasez = x[fqbasezIndex]
+
+        rqx = HyperDualQuaternion(hdsin((x[rqrotxIndex]).real/2),
+                                  0,
+                                  0,
+                                  hdcos((x[rqrotxIndex]).real/2))
+        rqy = HyperDualQuaternion(0,
+                                  hdsin((x[rqrotyIndex]).real/2),
+                                  0,
+                                  hdcos((x[rqrotyIndex]).real/2))
+        rqz = HyperDualQuaternion(0,
+                                  0,
+                                  hdsin((x[rqrotzIndex]).real/2),
+                                  hdcos((x[rqrotzIndex]).real/2))
+        oqx = HyperDualQuaternion(hdsin(x[oqrotxIndex]/2),
+                                  0,
+                                  0,
+                                  hdcos(x[oqrotxIndex]/2))
+        oqy = HyperDualQuaternion(0,
+                                  hdsin(x[oqrotyIndex]/2),
+                                  0,
+                                  hdcos(x[oqrotyIndex]/2))
+        oqz = HyperDualQuaternion(0,
+                                  0,
+                                  hdsin(x[oqrotzIndex]/2),
+                                  hdcos(x[oqrotzIndex]/2))
+        rq = rqz@rqy@rqx
+        oq = oqz@oqy@oqx
+        fqrot = fqrotz@fqroty@fqrotx
+        p = HyperDualQuaternion(x[pxIndex], x[pyIndex], x[pzIndex], 0)
+        fqbase = HyperDualQuaternion(fqbasex, fqbasey, fqbasez, 0)
+        if self.fixType == "Base":
+            result = rq**-1@p@rq - fqbase
+            print(fqbase)
+            print(result)
+            print(rq)
+            print(p)
+            return result.q0**2 + result.q1**2 + result.q2**2
+        # First, fill up the rotation objects
+        elif self.fixType == "Rotation":
+            result = fqrot**-1@rq**-1@oq
+            return result.q0**2 + result.q1**2 + result.q2**2
 
     @classmethod
     def makeConstraint(cls, f, xNames, xList):
@@ -104,33 +237,117 @@ class Fix:
         """
         # Note that there is only one variable being fixed
         constraints = []
+        # Stores the indices of the variables used to construct the
+        # placements of the object and the reference
+        indexList = {
+                "Base_x": {
+                    "Object": None,
+                    "Reference": None,
+                    "Enable": False,
+                    "FixVal": None,
+                },
+                "Base_y": {
+                    "Object": None,
+                    "Reference": None,
+                    "Enable": False,
+                    "FixVal": None,
+                },
+                "Base_z": {
+                    "Object": None,
+                    "Reference": None,
+                    "Enable": False,
+                    "FixVal": None,
+                },
+                "Rotation_x": {
+                    "Object": None,
+                    "Reference": None,
+                    "Enable": False,
+                    "FixVal": None,
+                },
+                "Rotation_y": {
+                    "Object": None,
+                    "Reference": None,
+                    "Enable": False,
+                    "FixVal": None,
+                },
+                "Rotation_z": {
+                    "Object": None,
+                    "Reference": None,
+                    "Enable": False,
+                    "FixVal": None,
+                },
+        }
+
         for component in f.Components:
-            if not f.Components[component]["enable"]:
-                continue
             xName = f.Components[component]["objName"]
+            rName = f.Components[component]["refName"]
             xVal = None
+            rVal = None
             xIndex = xNames.index(xName)
-            placement = xName.split(".")[1]
-            placementComp = xName.split(".")[2]
-            c = f.Components[component]["value"]
-            if placement == "Rotation":
-                if placementComp == "x":
+            rIndex = xNames.index(rName)
+            xplacement = xName.split(".")[1]
+            xplacementComp = xName.split(".")[2]
+            if xplacement == "Rotation":
+                if xplacementComp == "x":
                     xVal = App.ActiveDocument.getObject(f.Object) \
-                              .Placement.Rotation.toEuler()[2]
-                elif placementComp == "y":
+                              .Placement.Rotation.toEuler()[2] * pi/180
+                    rVal = App.ActiveDocument.getObject(f.Reference) \
+                              .Placement.Rotation.toEuler()[2] * pi/180
+                    indexList["Rotation_x"]["Object"] = xIndex
+                    indexList["Rotation_x"]["Reference"] = rIndex
+                    indexList["Rotation_x"]["Enable"] = f.Components[component]["enable"]
+                    indexList["Rotation_x"]["FixVal"] = f.Components[component]["value"] * pi/180
+                elif xplacementComp == "y":
                     xVal = App.ActiveDocument.getObject(f.Object) \
-                              .Placement.Rotation.toEuler()[1]
-                elif placementComp == "z":
+                              .Placement.Rotation.toEuler()[1] * pi/180
+                    rVal = App.ActiveDocument.getObject(f.Reference) \
+                              .Placement.Rotation.toEuler()[1] * pi/180
+                    indexList["Rotation_y"]["Object"] = xIndex
+                    indexList["Rotation_y"]["Reference"] = rIndex
+                    indexList["Rotation_y"]["Enable"] = f.Components[component]["enable"]
+                    indexList["Rotation_y"]["FixVal"] = f.Components[component]["value"] * pi/180
+                elif xplacementComp == "z":
                     xVal = App.ActiveDocument.getObject(f.Object) \
-                              .Placement.Rotation.toEuler()[0]
-            elif placement == "Base":
+                              .Placement.Rotation.toEuler()[0] * pi/180
+                    rVal = App.ActiveDocument.getObject(f.Reference) \
+                              .Placement.Rotation.toEuler()[0] * pi/180
+                    indexList["Rotation_z"]["Object"] = xIndex
+                    indexList["Rotation_z"]["Reference"] = rIndex
+                    indexList["Rotation_z"]["Enable"] = f.Components[component]["enable"]
+                    indexList["Rotation_z"]["FixVal"] = f.Components[component]["value"] * pi/180
+            elif xplacement == "Base":
                 xVal = getattr(App.ActiveDocument.getObject(f.Object)
-                                  .Placement.Base, placementComp)
+                                  .Placement.Base, xplacementComp)
+                rVal = getattr(App.ActiveDocument.getObject(f.Reference)
+                                  .Placement.Base, xplacementComp)
+                if xplacementComp == "x":
+                    indexList["Base_x"]["Object"] = xIndex
+                    indexList["Base_x"]["Reference"] = rIndex
+                    indexList["Base_x"]["Enable"] = f.Components[component]["enable"]
+                    indexList["Base_x"]["FixVal"] = f.Components[component]["value"]
+                if xplacementComp == "y":
+                    indexList["Base_y"]["Object"] = xIndex
+                    indexList["Base_y"]["Reference"] = rIndex
+                    indexList["Base_y"]["Enable"] = f.Components[component]["enable"]
+                    indexList["Base_y"]["FixVal"] = f.Components[component]["value"]
+                if xplacementComp == "z":
+                    indexList["Base_z"]["Object"] = xIndex
+                    indexList["Base_z"]["Reference"] = rIndex
+                    indexList["Base_z"]["Enable"] = f.Components[component]["enable"]
+                    indexList["Base_z"]["FixVal"] = f.Components[component]["value"]
+
             if xList[xIndex] is None:
                 xList[xIndex] = xVal
+            if xList[rIndex] is None:
+                xList[rIndex] = rVal
 
-            constraint = cls(xIndex, c)
-            constraints.append(constraint)
+        # Now, we make two fix constraints. One for the base and the other for
+        # the rotation of the object
+        BaseConstraint = cls(indexList, "Base")
+        constraints.append(BaseConstraint)
+        RotConstraint = cls(indexList, "Rotation")
+        constraints.append(RotConstraint)
+
         return constraints
 
     @staticmethod
@@ -138,8 +355,11 @@ class Fix:
         """ Adds unique variables names to the x names list for the solver
         """
         for component in f.Components:
-            if not f.Components[component]["enable"]:
-                continue
+            # We need all the components in order to compute the inverse
+            # placement of the reference object
             objName = f.Components[component]["objName"]
+            refName = f.Components[component]["refName"]
             if objName not in xNames:
                 xNames.append(objName)
+            if refName not in xNames:
+                xNames.append(refName)

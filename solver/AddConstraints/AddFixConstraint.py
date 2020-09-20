@@ -39,6 +39,7 @@ class FixPanel:
 
     def accept(self):
         objName = self.form.objectList.selectedItems()[0].text()
+        refName = self.form.referenceList.selectedItems()[0].text()
         qty = App.Units.Quantity
         # Components is where all the data about which component
         # of the placement is being constrained and its value
@@ -47,34 +48,39 @@ class FixPanel:
                 "value": 0,
                 "enable": False,
                 "objName": objName + ".Base.x",
+                "refName": refName + ".Base.x",
             },
             "Base_y": {
                 "value": 0,
                 "enable": False,
                 "objName": objName + ".Base.y",
+                "refName": refName + ".Base.y",
             },
             "Base_z": {
                 "value": 0,
                 "enable": False,
                 "objName": objName + ".Base.z",
+                "refName": refName + ".Base.z",
             },
             "Rotation_x": {
                 "value": 0,
                 "enable": False,
                 "objName": objName + ".Rotation.x",
+                "refName": refName + ".Rotation.x",
             },
             "Rotation_y": {
                 "value": 0,
                 "enable": False,
                 "objName": objName + ".Rotation.y",
+                "refName": refName + ".Rotation.y",
             },
             "Rotation_z": {
                 "value": 0,
                 "enable": False,
                 "objName": objName + ".Rotation.z",
-            },
+                "refName": refName + ".Rotation.z",
+            }
         }
-
         if self.form.xCheck.isChecked():
             # Fix x coordinate of object
             value = qty(self.form.xVal.text()).Value
@@ -107,7 +113,7 @@ class FixPanel:
             components["Rotation_z"]["enable"] = True
 
         newConstraint = App.ActiveDocument.addObject("App::FeaturePython", self.type)
-        FixConstraint(newConstraint, objName, self.type, components)
+        FixConstraint(newConstraint, objName, refName, self.type, components)
         Gui.Control.closeDialog()
         App.ActiveDocument.recompute()
 
@@ -119,15 +125,24 @@ class FixPanel:
             newItem.setText(obj.Name)
             newItem.setIcon(obj.ViewObject.Icon)
             self.form.objectList.addItem(newItem)
+        for obj in App.ActiveDocument.Objects:
+            if obj.TypeId not in asm4.datumTypes:
+                continue
+            newItem = QtGui.QListWidgetItem()
+            newItem.setText(obj.Name)
+            newItem.setIcon(obj.ViewObject.Icon)
+            self.form.referenceList.addItem(newItem)
 
 
 class FixConstraint():
-    def __init__(self, obj, objName, constraintType, components):
+    def __init__(self, obj, objName, refName, constraintType, components):
         obj.Proxy = self
         obj.addProperty("App::PropertyString", "Type", "", "", 1)
         obj.Type = constraintType
         obj.addProperty("App::PropertyString", "Object")
         obj.Object = objName
+        obj.addProperty("App::PropertyString", "Reference")
+        obj.Reference = refName
         obj.addProperty("App::PropertyBool", "Base_x", "Placement")
         obj.addProperty("App::PropertyFloat", "Base_x_val", "Placement")
         obj.addProperty("App::PropertyBool", "Base_y", "Placement")
