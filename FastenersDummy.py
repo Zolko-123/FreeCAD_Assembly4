@@ -97,6 +97,7 @@ class placeFastenerCmd():
     +-----------------------------------------------+
 """
 class changeFSparametersCmd():
+    def __init__(self):
         super(changeFSparametersCmd,self).__init__()
 
     def GetResources(self):
