@@ -14,6 +14,15 @@ from FreeCAD import Console as FCC
 import libAsm4 as Asm4
 
 
+
+
+"""
+    +-----------------------------------------------+
+    |                Global variables               |
+    +-----------------------------------------------+
+"""
+global taskUI
+
 # selection view properties overrides
 DrawStyle = 'Solid'
 LineWidth = 3.0
@@ -93,6 +102,8 @@ class placeLinkUI():
 
         # draw the GUI, objects are defined later down
         self.drawUI()
+        global taskUI
+        taskUI = self
 
         # get the current active document to avoid errors if user changes tab
         self.activeDoc = App.activeDocument()
@@ -536,7 +547,7 @@ class placeLinkUI():
     |            selection observer                 |
     +-----------------------------------------------+
 """
-class Asm4SelObserver:
+class linkSelObserver:
     def addSelection(self,doc,obj,sub,pnt):               # Selection object
         # Since both 3D view clicks and manual tree selection gets into the same callback
         # we will determine by clicked coordinates, for manual tree selections the coordinates are (0,0,0)
@@ -545,11 +556,31 @@ class Asm4SelObserver:
             # Get linked object name that handles sub-sub-assembly
             subObjName = Asm4.getLinkedObjectName(doc, obj, sub)
             if subObjName != '':
+                # set the selection to the selected object
                 Gui.Selection.clearSelection()
                 Gui.Selection.addSelection(doc, obj, subObjName)
+                # set the selected object drop-down to this object
+                global taskUI
+                link = App.ActiveDocument.getObject(subObjName[0:-1])
+                #FCC.PrintMessage('LinkedObject = '+link.LinkedObject.Name+'\n')
+                # try to find this link in the parents 
+                parent_found = False
+                parent_index = 1
+                for item in taskUI.parentTable[1:]:
+                    if item.Name == link.Name:
+                        parent_found = True
+                        break
+                    else:
+                        parent_index = parent_index +1
+                if not parent_found:
+                    parent_index = 0
+                taskUI.parentList.setCurrentIndex( parent_index )
+            # select the Parent Assembly
+            else:
+                taskUI.parentList.setCurrentIndex( 1 )
 
 
-observer = Asm4SelObserver();
+observer = linkSelObserver();
 
 
 

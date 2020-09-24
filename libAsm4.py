@@ -115,14 +115,6 @@ def checkModel():
             retval = model
     return retval
 
-def getModelSelected():
-    if App.ActiveDocument.getObject('Model') and App.ActiveDocument.Model.TypeId == 'App::Part':
-        selection = Gui.Selection.getSelection()
-        if len(selection)==1:
-            selObj = selection[0]
-            if selObj.Name == 'Model' and selObj.TypeId == 'App::Part':
-                return selObj
-    return False
 
 def isLinkToPart(obj):
     if obj.TypeId == 'App::Link' and hasattr(obj.LinkedObject,'isDerivedFrom'):
@@ -524,10 +516,10 @@ def getSelection():
                 return selObj
     return None
 
+
 def getLinkedObjectName(doc, obj, sub):
     # Get list of objects from the top document to the clicked feature
     objList = App.getDocument(doc).getObject(obj).getSubObjectList(sub)
-
     # Build the name of the selected sub-object for multiple sub-assembly levels
     name = ''
     for subObj in objList:
