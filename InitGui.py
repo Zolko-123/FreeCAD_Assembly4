@@ -172,7 +172,6 @@ class Assembly4Workbench(Workbench):
         # commands to appear in the Assembly4 menu 'Assembly'
         self.itemsAssemblyMenu = [ "Asm4_newPart", 
                                 "Asm4_newBody", 
-                                "Part_Import",
                                 "Asm4_insertLink", 
                                 "Asm4_insertScrew", 
                                 "Asm4_insertNut", 
