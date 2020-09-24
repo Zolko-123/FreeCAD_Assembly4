@@ -45,6 +45,10 @@ class placeLinkCmd():
 
     def Activated(self):
         #time.sleep(1.0)
+        global observer
+        # add the listener, 0 forces to resolve the links
+        Gui.Selection.addObserver(observer, 0)
+        # launch the UI in the task panel
         Gui.Control.showDialog(placeLinkUI())
 
 
@@ -195,6 +199,10 @@ class placeLinkUI():
 
     # Close
     def finish(self):
+        # removde the  observer
+        global observer
+        Gui.Selection.removeObserver(observer) 
+
         self.restoreView()
         Gui.Selection.clearSelection()
         Gui.Selection.addSelection( self.activeDoc.Name, 'Model', self.selectedLink.Name+'.' )
@@ -520,6 +528,29 @@ class placeLinkUI():
         self.RotXButton.clicked.connect( self.onRotX )
         self.RotYButton.clicked.connect( self.onRotY )
         self.RotZButton.clicked.connect( self.onRotZ)
+
+
+
+"""
+    +-----------------------------------------------+
+    |            selection observer                 |
+    +-----------------------------------------------+
+"""
+class Asm4SelObserver:
+    def addSelection(self,doc,obj,sub,pnt):               # Selection object
+        # Since both 3D view clicks and manual tree selection gets into the same callback
+        # we will determine by clicked coordinates, for manual tree selections the coordinates are (0,0,0)
+        if pnt != (0,0,0):
+            # 3D view click
+            # Get linked object name that handles sub-sub-assembly
+            subObjName = Asm4.getLinkedObjectName(doc, obj, sub)
+            if subObjName != '':
+                Gui.Selection.clearSelection()
+                Gui.Selection.addSelection(doc, obj, subObjName)
+
+
+observer = Asm4SelObserver();
+
 
 
 """

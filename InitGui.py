@@ -31,7 +31,7 @@ asm4wb_icons_path = os.path.join( asm4wbPath, 'Resources/icons')
 global main_Assembly4WB_Icon
 main_Assembly4WB_Icon = os.path.join( asm4wb_icons_path , 'Assembly4.svg' )
 
-import treeSelectionOverride as selectionOverride
+# import treeSelectionOverride as selectionOverride
 
 """
     +-----------------------------------------------+
@@ -64,7 +64,7 @@ class dropDownCmdGroup:
 class Assembly4Workbench(Workbench):
 
     global main_Assembly4WB_Icon
-    global selectionOverride
+    #global selectionOverride
     MenuText = "Assembly 4"
     ToolTip = "Assembly 4 workbench"
     Icon = main_Assembly4WB_Icon
@@ -75,12 +75,12 @@ class Assembly4Workbench(Workbench):
 
     def Activated(self):
         "This function is executed when the workbench is activated"
-        selectionOverride.Activate()
+        #selectionOverride.Activate()
         return
 
     def Deactivated(self):
         "This function is executed when the workbench is deactivated"
-        selectionOverride.Deactivate()
+        #selectionOverride.Deactivate()
         return 
 
     def GetClassName(self): 
