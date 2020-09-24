@@ -16,14 +16,8 @@ class asm4SelObserver:
         # we will determine by clicked coordinates, for manual tree selections the coordinates are (0,0,0)
         if pnt != (0,0,0):
             # 3D view click
-            # Get list of objects from the top document to the clicked feature
-            objList = App.getDocument(doc).getObject(obj).getSubObjectList(sub)
-
-            # Build the name of the selected sub-object for multiple sub-assembly levels
-            subObjName = ''
-            for subObj in objList:
-                if subObj.TypeId == 'App::Link':
-                    subObjName = subObjName + subObj.Name + '.'
+            # Get linked object name that handles sub-sub-assembly
+            subObjName = Asm4.getLinkedObjectName(doc, obj, sub)
 
             if subObjName != '':
                 Gui.Selection.clearSelection()

@@ -14,6 +14,15 @@ from FreeCAD import Console as FCC
 import libAsm4 as Asm4
 
 
+
+
+"""
+    +-----------------------------------------------+
+    |                Global variables               |
+    +-----------------------------------------------+
+"""
+global taskUI
+
 # selection view properties overrides
 DrawStyle = 'Solid'
 LineWidth = 3.0
@@ -45,6 +54,10 @@ class placeLinkCmd():
 
     def Activated(self):
         #time.sleep(1.0)
+        global observer
+        # add the listener, 0 forces to resolve the links
+        Gui.Selection.addObserver(observer, 0)
+        # launch the UI in the task panel
         Gui.Control.showDialog(placeLinkUI())
 
 
@@ -89,6 +102,8 @@ class placeLinkUI():
 
         # draw the GUI, objects are defined later down
         self.drawUI()
+        global taskUI
+        taskUI = self
 
         # get the current active document to avoid errors if user changes tab
         self.activeDoc = App.activeDocument()
@@ -195,6 +210,10 @@ class placeLinkUI():
 
     # Close
     def finish(self):
+        # removde the  observer
+        global observer
+        Gui.Selection.removeObserver(observer) 
+
         self.restoreView()
         Gui.Selection.clearSelection()
         Gui.Selection.addSelection( self.activeDoc.Name, 'Model', self.selectedLink.Name+'.' )
@@ -520,6 +539,49 @@ class placeLinkUI():
         self.RotXButton.clicked.connect( self.onRotX )
         self.RotYButton.clicked.connect( self.onRotY )
         self.RotZButton.clicked.connect( self.onRotZ)
+
+
+
+"""
+    +-----------------------------------------------+
+    |            selection observer                 |
+    +-----------------------------------------------+
+"""
+class linkSelObserver:
+    def addSelection(self,doc,obj,sub,pnt):               # Selection object
+        # Since both 3D view clicks and manual tree selection gets into the same callback
+        # we will determine by clicked coordinates, for manual tree selections the coordinates are (0,0,0)
+        if pnt != (0,0,0):
+            # 3D view click
+            # Get linked object name that handles sub-sub-assembly
+            subObjName = Asm4.getLinkedObjectName(doc, obj, sub)
+            if subObjName != '':
+                # set the selection to the selected object
+                Gui.Selection.clearSelection()
+                Gui.Selection.addSelection(doc, obj, subObjName)
+                # set the selected object drop-down to this object
+                global taskUI
+                link = App.ActiveDocument.getObject(subObjName[0:-1])
+                #FCC.PrintMessage('LinkedObject = '+link.LinkedObject.Name+'\n')
+                # try to find this link in the parents 
+                parent_found = False
+                parent_index = 1
+                for item in taskUI.parentTable[1:]:
+                    if item.Name == link.Name:
+                        parent_found = True
+                        break
+                    else:
+                        parent_index = parent_index +1
+                if not parent_found:
+                    parent_index = 0
+                taskUI.parentList.setCurrentIndex( parent_index )
+            # select the Parent Assembly
+            else:
+                taskUI.parentList.setCurrentIndex( 1 )
+
+
+observer = linkSelObserver();
+
 
 
 """

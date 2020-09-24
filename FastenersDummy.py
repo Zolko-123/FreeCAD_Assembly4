@@ -43,6 +43,10 @@ class insertFastener:
         elif self.fastenerType=='Washer':
             self.menutext = "Insert Washer"
             self.icon = os.path.join( Asm4.iconPath , 'Asm4_Washer.svg')
+        # threaded rod:
+        elif self.fastenerType=='ThreadedRod':
+            self.menutext = "Insert threaded rod"
+            self.icon = os.path.join( Asm4.iconPath , 'Asm4_Rod.svg')
 
 
     def GetResources(self):
@@ -85,6 +89,29 @@ class placeFastenerCmd():
 
     def Activated(self):
         return
+    
+    
+"""
+    +-----------------------------------------------+
+    |                dummy parameters               |
+    +-----------------------------------------------+
+"""
+class changeFSparametersCmd():
+    def __init__(self):
+        super(changeFSparametersCmd,self).__init__()
+
+    def GetResources(self):
+        return {"MenuText": "Change Fastener parameters",
+                "ToolTip": "Change Fastener parameters",
+                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_FSparams.svg')
+                }
+
+    def IsActive(self):
+        # it's a dummy, always inactive
+        return False 
+
+    def Activated(self):
+        return
 
 
 
@@ -96,4 +123,6 @@ class placeFastenerCmd():
 Gui.addCommand( 'Asm4_insertScrew',    insertFastener('Screw') )
 Gui.addCommand( 'Asm4_insertNut',      insertFastener('Nut') )
 Gui.addCommand( 'Asm4_insertWasher',   insertFastener('Washer') )
+Gui.addCommand( 'Asm4_insertRod',      insertFastener('ThreadedRod') )
 Gui.addCommand( 'Asm4_placeFastener',  placeFastenerCmd() )
+Gui.addCommand( 'Asm4_FSparameters',   changeFSparametersCmd()  )

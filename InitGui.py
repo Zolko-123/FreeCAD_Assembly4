@@ -31,7 +31,7 @@ asm4wb_icons_path = os.path.join( asm4wbPath, 'Resources/icons')
 global main_Assembly4WB_Icon
 main_Assembly4WB_Icon = os.path.join( asm4wb_icons_path , 'Assembly4.svg' )
 
-import treeSelectionOverride as selectionOverride
+# import treeSelectionOverride as selectionOverride
 
 """
     +-----------------------------------------------+
@@ -64,7 +64,7 @@ class dropDownCmdGroup:
 class Assembly4Workbench(Workbench):
 
     global main_Assembly4WB_Icon
-    global selectionOverride
+    #global selectionOverride
     MenuText = "Assembly 4"
     ToolTip = "Assembly 4 workbench"
     Icon = main_Assembly4WB_Icon
@@ -75,12 +75,12 @@ class Assembly4Workbench(Workbench):
 
     def Activated(self):
         "This function is executed when the workbench is activated"
-        selectionOverride.Activate()
+        #selectionOverride.Activate()
         return
 
     def Deactivated(self):
         "This function is executed when the workbench is deactivated"
-        selectionOverride.Deactivate()
+        #selectionOverride.Deactivate()
         return 
 
     def GetClassName(self): 
@@ -109,7 +109,8 @@ class Assembly4Workbench(Workbench):
         import makeBomCmd          # creates the parts list
         import HelpCmd             # shows a basic help window
         import showHideLcsCmd      # shows/hides all the LCSs
-        
+        import configurationEngine  # save/restore configuration
+
         # create the toolbars and menus, nearly empty, to decide about their position
         self.appendToolbar("Assembly",["Asm4_newModel"])
         # self.appendToolbar("Design",["Asm4_newPart"])
@@ -171,7 +172,6 @@ class Assembly4Workbench(Workbench):
         # commands to appear in the Assembly4 menu 'Assembly'
         self.itemsAssemblyMenu = [ "Asm4_newPart", 
                                 "Asm4_newBody", 
-                                "Part_Import",
                                 "Asm4_insertLink", 
                                 "Asm4_insertScrew", 
                                 "Asm4_insertNut", 
@@ -247,7 +247,10 @@ class Assembly4Workbench(Workbench):
                                 'Asm4_placeFastener' ,
                                 'Separator'          ,
                                 'Asm4_showLcs'       ,
-                                'Asm4_hideLcs']
+                                'Asm4_hideLcs'       ,
+                                'Separator'          ,
+                                'Asm4_saveConfiguration',
+                                'Asm4_restoreConfiguration']
         # commands to appear in the 'Create' sub-menu in the contextual menu (right-click)
         self.itemsCreateMenu = ["Asm4_newSketch",  
                                 "Asm4_newBody", 
