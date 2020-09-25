@@ -67,8 +67,8 @@ class placeFastenerCmd():
         super(placeFastenerCmd,self).__init__()
 
     def GetResources(self):
-        return {"MenuText": "Edit Attachment of a Fastener",
-                "ToolTip": "Edit Attachment of a Fastener",
+        return {"MenuText": "Edit Placement of a Fastener",
+                "ToolTip": "Edit Placement of a Fastener",
                 "Pixmap" : iconFile
                 }
 
@@ -690,3 +690,11 @@ Gui.addCommand( 'Asm4_insertWasher',   insertFastener('Washer') )
 Gui.addCommand( 'Asm4_insertRod',      insertFastener('ThreadedRod') )
 Gui.addCommand( 'Asm4_placeFastener',  placeFastenerCmd()       )
 Gui.addCommand( 'Asm4_FSparameters',   changeFSparametersCmd()  )
+
+# defines the drop-down button for Fasteners:
+FastenersCmdList = [    'Asm4_insertScrew', 
+                        'Asm4_insertNut', 
+                        'Asm4_insertWasher', 
+                        'Asm4_insertRod', 
+                        'Asm4_FSparameters'] 
+Gui.addCommand( 'Asm4_Fasteners', Asm4.dropDownCmd( FastenersCmdList, 'Fasteners'))

@@ -11,10 +11,13 @@ import FreeCAD as App
 import libAsm4 as Asm4
 
 
+# Already processed links cache, no need to process the same part if its linked multiple times
+processedLinks = []
+
 
 """
     +-----------------------------------------------+
-    |                  main class                   |
+    |                    Show                       |
     +-----------------------------------------------+
 """
 class showLcsCmd:
@@ -30,14 +33,11 @@ class showLcsCmd:
     def IsActive(self):
         # Will handle LCSs only for the Assembly4 model
         if Asm4.getSelection() or Asm4.getModelSelected():
+        # treats all container types : Body and Part
+        #if Asm4.getSelectedContainer() or Asm4.checkModel() or Asm4.getSelectedLink():
             return True
         return False
 
-    """
-    +-----------------------------------------------+
-    |                 the real stuff                |
-    +-----------------------------------------------+
-    """
     def Activated(self):
         global processedLinks
         # reset processed links cache
@@ -51,6 +51,11 @@ class showLcsCmd:
             ShowChildLCSs(Asm4.getSelection(), True)
 
 
+"""
+    +-----------------------------------------------+
+    |                      Hide                     |
+    +-----------------------------------------------+
+"""
 class hideLcsCmd:
     def __init__(self):
         super(hideLcsCmd,self).__init__()
@@ -67,11 +72,6 @@ class hideLcsCmd:
             return True
         return False
 
-    """
-    +-----------------------------------------------+
-    |                 the real stuff                |
-    +-----------------------------------------------+
-    """
     def Activated(self):
         global processedLinks
         # reset processed links cache
@@ -85,17 +85,26 @@ class hideLcsCmd:
             ShowChildLCSs(Asm4.getSelection(), False)
 
 
-# Already processed links cache, no need to process the same part if its linked multiple times
-processedLinks = []
 
-# Show/Hide the LCSs in the provided object and all linked children
+"""
+    +-----------------------------------------------+
+    |              Show/Hide the LCSs in            |
+    |  the provided object and all linked children  |
+    +-----------------------------------------------+
+"""
 def ShowChildLCSs(obj, show):
     global processedLinks
 
-    if obj.TypeId == 'App::Link' and obj.Name not in processedLinks:
+    # if its a datum apply the visibility
+    if obj.TypeId in Asm4.datumTypes:
+        obj.Visibility = show
+    # if it's a link, look for subObjects
+    elif obj.TypeId == 'App::Link' and obj.Name not in processedLinks:
         processedLinks.append(obj.Name)
-        for linkObj in obj.LinkedObject.Document.Objects:
+        for objName in obj.LinkedObject.getSubObjects():
+            linkObj = obj.LinkedObject.Document.getObject(objName[0:-1])
             ShowChildLCSs(linkObj, show)
+    # if it's a container
     else:
         if obj.TypeId in Asm4.containerTypes:
             for subObjName in obj.getSubObjects():
@@ -103,6 +112,8 @@ def ShowChildLCSs(obj, show):
                 if subObj != None:
                     if subObj.TypeId in Asm4.datumTypes:
                         subObj.Visibility = show
+
+
 
 """
     +-----------------------------------------------+

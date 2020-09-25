@@ -7,7 +7,7 @@
 # VariablesLib.py
 
 
-import math, re, os
+import os
 
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
@@ -335,3 +335,5 @@ class delVariable():
 """
 Gui.addCommand( 'Asm4_addVariable', addVariable() )
 Gui.addCommand( 'Asm4_delVariable', delVariable() )
+variablesCmdList = [ 'Asm4_addVariable', 'Asm4_delVariable' ]
+Gui.addCommand( 'Asm4_variablesCmd', Asm4.dropDownCmd( variablesCmdList, 'Variables'))
