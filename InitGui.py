@@ -58,7 +58,7 @@ class Assembly4Workbench(Workbench):
 
     def Deactivated(self):
         "This function is executed when the workbench is deactivated"
-        selectionOverride.Deactivate()
+        selectionOverride.Disable()
         return 
 
     def GetClassName(self): 

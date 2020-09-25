@@ -44,41 +44,6 @@ containerTypes = [  'App::Part', \
 
 
 
-"""
-    +-----------------------------------------------+
-    |               observer class                  |
-    +-----------------------------------------------+
-"""
-class selObserver3DView:
-    # selects the App::Link object when clicked on in the 3D view
-    def addSelection(self,doc,obj,sub,pnt):               # Selection object
-        # Since both 3D view clicks and manual tree selection gets into the same callback
-        # we will determine by clicked coordinates, for manual tree selections the coordinates are (0,0,0)
-        if pnt != (0,0,0):
-            # 3D view click
-            # Get linked object name that handles sub-sub-assembly
-            #subObjName = getLinkedObjectName(doc, obj, sub)
-            objList = App.getDocument(doc).getObject(obj).getSubObjectList(sub)
-            # Build the name of the selected sub-object for multiple sub-assembly levels
-            subObjName = ''
-            for subObj in objList:
-                if subObj.TypeId == 'App::Link':
-                    subObjName = subObjName + subObj.Name + '.'
-            if subObjName != '':
-                Gui.Selection.clearSelection()
-                Gui.Selection.addSelection(doc, obj, subObjName)
-
-"""
-def getLinkedObjectName(doc, obj, sub):
-    # Get list of objects from the top document to the clicked feature
-    objList = App.getDocument(doc).getObject(obj).getSubObjectList(sub)
-    # Build the name of the selected sub-object for multiple sub-assembly levels
-    name = ''
-    for subObj in objList:
-        if subObj.TypeId == 'App::Link':
-            name = name + subObj.Name + '.'
-    return name
-"""
 
 """
     +-----------------------------------------------+
