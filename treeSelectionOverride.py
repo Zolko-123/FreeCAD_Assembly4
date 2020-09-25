@@ -9,6 +9,8 @@ import os
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
+from FreeCAD import Console as FCC
+
 import libAsm4 as Asm4
 
 """
@@ -22,8 +24,10 @@ class treeSelectionOverrideCmd( QtGui.QDialog):
 
 
     def GetResources(self):
-        return {"MenuText": "Enable/Disable Link selection mode",
-                "ToolTip": "Enable/Disable Link selection mode",
+        return {"MenuText": "Enable/Disable 3D View selection mode",
+                "ToolTip": "Enable/Disable 3D View selection mode\n\n"    + \
+                "Allows to select a Link object in the 3D view\n" + \
+                "window instead of the Model tree",
                 "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_enableLinkSelection.svg')
                 }
 
@@ -31,26 +35,32 @@ class treeSelectionOverrideCmd( QtGui.QDialog):
     def IsActive(self):
         return True
 
-    """
-    +-----------------------------------------------+
-    |                 the real stuff                |
-    +-----------------------------------------------+
-    """
+
     def Activated(self):
         global observer
         # This function is executed when the command is activated
         if observer is None:
-            Activate()
+            self.Enable()
         else:
-            Deactivate()
+            self.Disable()
 
-    """
-    +-----------------------------------------------+
-    |                 some functions                |
-    +-----------------------------------------------+
-    """
-    def onCancel(self):
-        self.close()
+
+    def Enable(self):
+        global observer
+        observer = Asm4.selObserver3DView();
+        # add the listener, 0 forces to resolve the links
+        Gui.Selection.addObserver(observer, 0)
+        #print("3D view link selection mode is now enabled")
+        FCC.PrintMessage("3D view link selection mode is now enabled\n")
+
+
+    def Disable(self):
+        global observer
+        Gui.Selection.removeObserver(observer) 
+        observer = None
+        #print("3D view link selection mode is now disabled")
+        FCC.PrintMessage("3D view link selection mode is now disabled\n")
+    
 
 
 
@@ -58,7 +68,7 @@ class treeSelectionOverrideCmd( QtGui.QDialog):
     +-----------------------------------------------+
     |               observer class                  |
     +-----------------------------------------------+
-"""
+
 class asm4SelObserver:
     def addSelection(self,doc,obj,sub,pnt):               # Selection object
         # Since both 3D view clicks and manual tree selection gets into the same callback
@@ -67,27 +77,20 @@ class asm4SelObserver:
             # 3D view click
             # Get linked object name that handles sub-sub-assembly
             subObjName = Asm4.getLinkedObjectName(doc, obj, sub)
-
             if subObjName != '':
                 Gui.Selection.clearSelection()
                 Gui.Selection.addSelection(doc, obj, subObjName)
+"""
 
 observer = None
 
-def Activate():
-    global observer
-
-    observer = asm4SelObserver();
-    # add the listener, 0 forces to resolve the links
-    Gui.Selection.addObserver(observer, 0)
-    print("3D view link selection mode is now enabled")
-
 def Deactivate():
     global observer
-
     Gui.Selection.removeObserver(observer) 
     observer = None
-    print("3D view link selection mode is now disabled")
+    #print("3D view link selection mode is now disabled")
+    FCC.PrintMessage("3D view link selection mode is now disabled\n")
+
 
 
 """
