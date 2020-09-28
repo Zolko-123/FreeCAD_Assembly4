@@ -82,10 +82,16 @@ def Enable():
 
 def Disable():
     global observer
+    # only print to Console if the observer was there
+    if observer:
+        print_disable = True
+    else:
+        print_disable = False
     Gui.Selection.removeObserver(observer) 
     observer = None
     #print("3D view link selection mode is now disabled")
-    FCC.PrintMessage("3D view link selection mode is now DISABLED\n")
+    if print_disable:
+        FCC.PrintMessage("3D view link selection mode is now DISABLED\n")
 
 
 
