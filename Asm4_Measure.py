@@ -445,6 +445,14 @@ class selectionObserver():
         self.Pt2  = None
         PtS       = None
 
+    def render_distance(self, distance: int) -> str:
+        return App.Units.schemaTranslate(
+            App.Units.Quantity(str(distance) + " mm"),
+            App.ParamGet(
+                "User parameter:BaseApp/Preferences/Units",
+            ).GetInt("UserSchema"),
+        )[0]
+
     # add the dim to the global addedDims table to be able to remove it
     # add it also the the "Measures" group
     def addToDims( self, dim ):
@@ -708,10 +716,10 @@ class selectionObserver():
             dy = pt1[1]-pt2[1]
             dz = pt1[2]-pt2[2]
             dist = math.sqrt(dx*dx + dy*dy + dz*dz)
-            text =  'Distance = '+str(dist)+'\n'
-            text += "ΔX : "+str(dx)+"\n"
-            text += 'ΔY : '+str(dy)+'\n'
-            text += 'ΔZ : '+str(dz)
+            text = 'Distance = '+self.render_distance(dist)+'\n'
+            text += "ΔX : "+self.render_distance(dx)+"\n"
+            text += 'ΔY : '+self.render_distance(dy)+'\n'
+            text += 'ΔZ : '+self.render_distance(dz)
             # self.printResult( 'Measuring length of\n'+str(line) )
             self.printResult( text )
             if taskUI.bLabel.isChecked():
