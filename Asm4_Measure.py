@@ -445,12 +445,6 @@ class selectionObserver():
         self.Pt2  = None
         PtS       = None
 
-    def render_distance(self, distance: int) -> str:
-        return App.Units.schemaTranslate(
-            App.Units.Quantity(str(distance) + " mm"),
-            App.Units.getSchema(),
-        )[0]
-
     # add the dim to the global addedDims table to be able to remove it
     # add it also the the "Measures" group
     def addToDims( self, dim ):
@@ -686,10 +680,10 @@ class selectionObserver():
             dy = pt1[1]-pt2[1]
             dz = pt1[2]-pt2[2]
             length = line.Length
-            text = 'Length = '+self.render_distance(length)+'\n'
-            text += "ΔX = "+self.render_distance(dx)+"\n"
-            text += 'ΔY = '+self.render_distance(dy)+'\n'
-            text += 'ΔZ = '+self.render_distance(dz)
+            text =  'Length = '+str(length)+'\n'
+            text += "ΔX = "+str(dx)+"\n"
+            text += 'ΔY = '+str(dy)+'\n'
+            text += 'ΔZ = '+str(dz)
             # self.printResult( 'Measuring length of\n'+str(line) )
             self.printResult( text )
             if taskUI.bLabel.isChecked():
@@ -698,7 +692,7 @@ class selectionObserver():
                     anno = ['L  = '+self.arrondi(length),'ΔX = '+self.arrondi(dx), \
                             'ΔY = '+self.arrondi(dy),    'ΔZ = '+self.arrondi(dz) ]
                 else:
-                    anno = ['L = '+self.render_distance(length)]
+                    anno = ['L = '+self.arrondi(length)]
                 self.drawAnnotation( mid, anno )
         else:
             self.printResult( 'Not a valid Line\n'+str(line) )
@@ -714,18 +708,18 @@ class selectionObserver():
             dy = pt1[1]-pt2[1]
             dz = pt1[2]-pt2[2]
             dist = math.sqrt(dx*dx + dy*dy + dz*dz)
-            text = 'Distance = '+self.render_distance(dist)+'\n'
-            text += "ΔX : "+self.render_distance(dx)+"\n"
-            text += 'ΔY : '+self.render_distance(dy)+'\n'
-            text += 'ΔZ : '+self.render_distance(dz)
+            text =  'Distance = '+str(dist)+'\n'
+            text += "ΔX : "+str(dx)+"\n"
+            text += 'ΔY : '+str(dy)+'\n'
+            text += 'ΔZ : '+str(dz)
             # self.printResult( 'Measuring length of\n'+str(line) )
             self.printResult( text )
             if taskUI.bLabel.isChecked():
                 if taskUI.Components.isChecked():
-                    anno = ['D  = '+self.render_distance(dist), 'ΔX = '+self.arrondi(dx),
+                    anno = ['D  = '+self.arrondi(dist),'ΔX = '+self.arrondi(dx), \
                             'ΔY = '+self.arrondi(dy),  'ΔZ = '+self.arrondi(dz) ]
                 else:
-                    anno = ['D = '+self.render_distance(dist)]
+                    anno = ['D = '+self.arrondi(dist)]
                 self.drawAnnotation( mid, anno )
         else:
             self.printResult( 'Not valid Points' )
@@ -739,9 +733,9 @@ class selectionObserver():
             axis   = circle.Curve.Axis
             Gui.Selection.clearSelection()
             self.drawCircle( radius, center, axis )
-            text = 'Radius : '+self.render_distance(radius)+"\n"
+            text =  'Radius : '+str(radius)+"\n"
             # if annotation is checked, show label with R = radius
-            text += "Diameter : "+self.render_distance(radius*2)+"\n"
+            text += "Diameter : "+self.arrondi(radius*2)+"\n"
             text += 'Center : \n'
             text += '  ( '+self.arrondi(center.x)+", "+self.arrondi(center.y)+", "+self.arrondi(center.z)+" )\n"
             text += 'Axis : \n'
@@ -750,7 +744,7 @@ class selectionObserver():
             if taskUI.bLabel.isChecked():
                 pt = circle.Vertexes[0].Point
                 self.drawLine(center,pt,'Radius')
-                self.drawAnnotation(pt, ['R = '+self.render_distance(radius)])
+                self.drawAnnotation( pt, ['R = '+self.arrondi(radius)] )
             else:
                 PtS = self.drawPoint(center)
         else:
