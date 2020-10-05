@@ -111,7 +111,13 @@ def ShowChildLCSs(obj, show):
                 subObj = obj.getSubObject(subObjName, 1)    # 1 for returning the real object
                 if subObj != None:
                     if subObj.TypeId in Asm4.datumTypes:
-                        subObj.Visibility = show
+                        #subObj.Visibility = show
+                        # Aparently obj.Visibility API is very slow
+                        # Using the ViewObject.show() and ViewObject.hide() API runs at least twice faster
+                        if show:
+                            subObj.ViewObject.show()
+                        else:
+                            subObj.ViewObject.hide()
 
 
 
