@@ -236,3 +236,10 @@ Gui.addCommand( 'Asm4_newLCS',   newDatum('LCS')   )
 Gui.addCommand( 'Asm4_newSketch',newDatum('Sketch'))
 Gui.addCommand( 'Asm4_newHole',  newHole()         )
 
+# defines the drop-down button for Datum objects
+createDatumList = [     'Asm4_newLCS', 
+                        'Asm4_newPlane', 
+                        'Asm4_newAxis', 
+                        'Asm4_newPoint', 
+                        'Asm4_newHole' ]
+Gui.addCommand( 'Asm4_createDatum', Asm4.dropDownCmd( createDatumList, 'Create Datum Object'))

@@ -67,8 +67,8 @@ class placeFastenerCmd():
         super(placeFastenerCmd,self).__init__()
 
     def GetResources(self):
-        return {"MenuText": "Edit Attachment of a Fastener",
-                "ToolTip": "Edit Attachment of a Fastener",
+        return {"MenuText": "Edit Placement of a Fastener",
+                "ToolTip": "Edit Placement of a Fastener",
                 "Pixmap" : iconFile
                 }
 
@@ -422,13 +422,15 @@ class placeFastenerUI():
             #a_LCS = self.attLCSlist.selectedItems()[0].text()
             a_LCS = self.attLCStable[ self.attLCSlist.currentRow() ].Name
             # get the part where the selected LCS is
-            a_Part = self.parentList.currentText()
+            #a_Part = self.parentList.currentText()
+            a_Part = self.parentTable[ self.parentList.currentIndex() ]
             # parent assembly and sister part need a different treatment
             if a_Part == 'Parent Assembly':
                 linkDot = ''
             else:
                 linkDot = a_Part+'.'
             Gui.Selection.addSelection( self.activeDoc.Name, 'Model', linkDot+a_LCS+'.')
+            FCC.PrintMessage("selection: "+ linkDot+a_LCS+'.' +"\n")
         # show the resulting placement
         self.onApply()
 
@@ -516,7 +518,8 @@ class placeFastenerUI():
 
         # Actions
         self.parentList.currentIndexChanged.connect( self.onParentList )
-        self.attLCSlist.itemClicked.connect( self.onDatumClicked )
+        ##self.attLCSlist.itemClicked.connect( self.onDatumClicked )
+        self.attLCSlist.itemClicked.connect( self.onApply )
         self.RotXButton.clicked.connect( self.onRotX )
         self.RotYButton.clicked.connect( self.onRotY )
         self.RotZButton.clicked.connect( self.onRotZ)
@@ -690,3 +693,11 @@ Gui.addCommand( 'Asm4_insertWasher',   insertFastener('Washer') )
 Gui.addCommand( 'Asm4_insertRod',      insertFastener('ThreadedRod') )
 Gui.addCommand( 'Asm4_placeFastener',  placeFastenerCmd()       )
 Gui.addCommand( 'Asm4_FSparameters',   changeFSparametersCmd()  )
+
+# defines the drop-down button for Fasteners:
+FastenersCmdList = [    'Asm4_insertScrew', 
+                        'Asm4_insertNut', 
+                        'Asm4_insertWasher', 
+                        'Asm4_insertRod', 
+                        'Asm4_FSparameters'] 
+Gui.addCommand( 'Asm4_Fasteners', Asm4.dropDownCmd( FastenersCmdList, 'Fasteners'))

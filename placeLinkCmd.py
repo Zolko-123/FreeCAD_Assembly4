@@ -53,10 +53,11 @@ class placeLinkCmd():
         return False
 
     def Activated(self):
-        #time.sleep(1.0)
-        global observer
+        # enable the local link selection observer
+        global linkObserver
+        linkObserver = linkSelObserver();
         # add the listener, 0 forces to resolve the links
-        Gui.Selection.addObserver(observer, 0)
+        Gui.Selection.addObserver(linkObserver, 0)
         # launch the UI in the task panel
         Gui.Control.showDialog(placeLinkUI())
 
@@ -210,9 +211,9 @@ class placeLinkUI():
 
     # Close
     def finish(self):
-        # removde the  observer
-        global observer
-        Gui.Selection.removeObserver(observer) 
+        # remove the  observer
+        global linkObserver
+        Gui.Selection.removeObserver(linkObserver) 
 
         self.restoreView()
         Gui.Selection.clearSelection()
@@ -554,7 +555,14 @@ class linkSelObserver:
         if pnt != (0,0,0):
             # 3D view click
             # Get linked object name that handles sub-sub-assembly
-            subObjName = Asm4.getLinkedObjectName(doc, obj, sub)
+            #subObjName = Asm4.getLinkedObjectName(doc, obj, sub)
+            objList = App.getDocument(doc).getObject(obj).getSubObjectList(sub)
+            # Build the name of the selected sub-object for multiple sub-assembly levels
+            subObjName = ''
+            for subObj in objList:
+                if subObj.TypeId == 'App::Link':
+                    subObjName = subObjName + subObj.Name + '.'
+
             if subObjName != '':
                 # set the selection to the selected object
                 Gui.Selection.clearSelection()
@@ -579,8 +587,6 @@ class linkSelObserver:
             else:
                 taskUI.parentList.setCurrentIndex( 1 )
 
-
-observer = linkSelObserver();
 
 
 

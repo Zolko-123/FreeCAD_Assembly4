@@ -7,7 +7,7 @@
 # VariablesLib.py
 
 
-import math, re, os
+import os
 
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
@@ -74,7 +74,7 @@ class addVariable():
 
     def IsActive(self):
         # if there is an Asm4 Model in the ActiveDocument, or if an App::Part is selected
-        if Asm4.checkModel() or checkPart() or getVariables():
+        if App.ActiveDocument:
             return True
         return False
    
@@ -84,11 +84,18 @@ class addVariable():
         self.Variables = App.ActiveDocument.getObject('Variables')
         # if it doesn't exist then create it (for older Asm4 documents)
         if not self.Variables:
+            part = None
+            # if an App::Part is selected:
             if checkPart():
                 part = checkPart()
+            # if an Asm4 Model is present:
+            elif Asm4.checkModel():
+                part = Asm4.checkModel()
+            if part:
+                self.Variables =  part.newObject('App::FeaturePython','Variables')
+            # create the Variables in the document
             else:
-                part = App.ActiveDocument.getObject('Model')
-            self.Variables =  part.newObject('App::FeaturePython','Variables')
+                self.Variables = App.ActiveDocument.addObject('App::FeaturePython','Variables')
 
         # (re-)initialise the UI
         self.typeList.clear()
@@ -335,3 +342,5 @@ class delVariable():
 """
 Gui.addCommand( 'Asm4_addVariable', addVariable() )
 Gui.addCommand( 'Asm4_delVariable', delVariable() )
+variablesCmdList = [ 'Asm4_addVariable', 'Asm4_delVariable' ]
+Gui.addCommand( 'Asm4_variablesCmd', Asm4.dropDownCmd( variablesCmdList, 'Variables'))

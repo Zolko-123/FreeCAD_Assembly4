@@ -42,6 +42,9 @@ partInfo =[     'Description',                  \
 containerTypes = [  'App::Part', \
                     'PartDesign::Body' ]
 
+
+
+
 """
     +-----------------------------------------------+
     |      Create default Assembly4 properties      |
@@ -290,6 +293,28 @@ def confirmBox( text ):
     return False
 
 
+"""
+    +-----------------------------------------------+
+    |        Drop-down menu to group buttons        |
+    +-----------------------------------------------+
+"""
+# from https://github.com/HakanSeven12/FreeCAD-Geomatics-Workbench/commit/d82d27b47fcf794bf6f9825405eacc284de18996
+class dropDownCmd:
+    def __init__(self, cmdlist, menu, tooltip = None, icon = None):
+        self.cmdlist = cmdlist
+        self.menu = menu
+        if tooltip is None:
+            self.tooltip = menu
+        else:
+            self.tooltip = tooltip
+
+    def GetCommands(self):
+        return tuple(self.cmdlist)
+
+    def GetResources(self):
+        return { 'MenuText': self.menu, 'ToolTip': self.tooltip }
+    
+    
 
 """
     +-----------------------------------------------+
@@ -507,27 +532,16 @@ def getModelSelected():
 
 def getSelection():
     # check that there is an App::Part called 'Model'
-    if App.ActiveDocument.getObject('Model') and App.ActiveDocument.Model.TypeId == 'App::Part':
+    #if App.ActiveDocument.getObject('Model') and App.ActiveDocument.Model.TypeId == 'App::Part':
+    if checkModel():
         selection = Gui.Selection.getSelection()
         if len(selection)==1:
             selObj = selection[0]
             # it's an App::Link
-            if selObj.isDerivedFrom('App::Link') and selObj.LinkedObject.TypeId in linkedObjTypes:
+            if selObj.isDerivedFrom('App::Link') and selObj.LinkedObject.TypeId in containerTypes:
                 return selObj
     return None
 
 
-def getLinkedObjectName(doc, obj, sub):
-    # Get list of objects from the top document to the clicked feature
-    objList = App.getDocument(doc).getObject(obj).getSubObjectList(sub)
-    # Build the name of the selected sub-object for multiple sub-assembly levels
-    name = ''
-    for subObj in objList:
-        if subObj.TypeId == 'App::Link':
-            name = name + subObj.Name + '.'
-    return name
 
-
-# type of App::Link target objects we're dealing with
-linkedObjTypes = [ 'App::Part', 'PartDesign::Body' ]
 
