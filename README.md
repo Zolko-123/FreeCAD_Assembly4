@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.9.9, 2020-09-24
+Current version 0.9.10, 2020-11-01
 
 
 
@@ -51,6 +51,10 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 
 ## Release notes
+
+* 2020.11.01 (**0.9.10**) :  
+Bugfixe in placement of Fastener on "Hole Axis"  
+small usability improvements  
 
 * 2020.09.24 (**0.9.9**) :  
 Small bugfixes and usability improvements  

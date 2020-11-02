@@ -41,12 +41,8 @@ class animateVariable():
 
     def IsActive(self):
         # is there an active document ?
-        if App.ActiveDocument:
-            # is this an Assembly4 Model ?
-            if App.ActiveDocument.getObject('Model'):
-                # are there Variables ?
-                if App.ActiveDocument.getObject('Variables'):
-                    return True
+        if Asm4.checkModel() and App.ActiveDocument.getObject('Variables'):
+            return True
         return False 
 
 
@@ -120,29 +116,6 @@ class animateVariable():
                     self.runBwd(varName)
             else:
                 self.runFwd(varName)
-            '''
-            varValue = begin
-            # if we go forwards ...
-            if end>begin and step>0:
-                while varValue <= end and self.Run:
-                    #setattr( self.Variables, varName, varValue )
-                    #App.ActiveDocument.Model.recompute('True')
-                    #Gui.updateGui()
-                    self.setVarValue(varName,varValue)
-                    self.slider.setValue(varValue)
-                    varValue += step
-                    time.sleep(sleep)
-            # ... or backwards
-            elif end<begin and step<0:
-                while varValue >= end and self.Run:
-                    #setattr( self.Variables, varName, varValue )
-                    #App.ActiveDocument.Model.recompute('True')
-                    #Gui.updateGui()
-                    self.setVarValue(varName,varValue)
-                    self.slider.setValue(varValue)
-                    varValue += step
-                    time.sleep(sleep)
-            '''
         return
 
 
@@ -191,12 +164,14 @@ class animateVariable():
 
 
     def onLoop(self):
+        self.Run = False
         if self.Pendulum.isChecked() and self.Loop.isChecked():
             self.Pendulum.setChecked(False)
         return
 
 
     def onPendulum(self):
+        self.Run = False
         if self.Loop.isChecked() and self.Pendulum.isChecked():
             self.Loop.setChecked(False)
         return
@@ -225,6 +200,7 @@ class animateVariable():
 
 
     def onValuesChanged(self):
+        self.Run = False
         self.sliderMinValue.setText( str(self.minValue.value()) )
         self.sliderMaxValue.setText( str(self.maxValue.value()) )
         self.slider.setRange( self.minValue.value(), self.maxValue.value() )

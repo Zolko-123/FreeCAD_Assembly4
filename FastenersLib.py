@@ -422,13 +422,15 @@ class placeFastenerUI():
             #a_LCS = self.attLCSlist.selectedItems()[0].text()
             a_LCS = self.attLCStable[ self.attLCSlist.currentRow() ].Name
             # get the part where the selected LCS is
-            a_Part = self.parentList.currentText()
+            #a_Part = self.parentList.currentText()
+            a_Part = self.parentTable[ self.parentList.currentIndex() ]
             # parent assembly and sister part need a different treatment
             if a_Part == 'Parent Assembly':
                 linkDot = ''
             else:
                 linkDot = a_Part+'.'
             Gui.Selection.addSelection( self.activeDoc.Name, 'Model', linkDot+a_LCS+'.')
+            FCC.PrintMessage("selection: "+ linkDot+a_LCS+'.' +"\n")
         # show the resulting placement
         self.onApply()
 
@@ -516,7 +518,8 @@ class placeFastenerUI():
 
         # Actions
         self.parentList.currentIndexChanged.connect( self.onParentList )
-        self.attLCSlist.itemClicked.connect( self.onDatumClicked )
+        ##self.attLCSlist.itemClicked.connect( self.onDatumClicked )
+        self.attLCSlist.itemClicked.connect( self.onApply )
         self.RotXButton.clicked.connect( self.onRotX )
         self.RotYButton.clicked.connect( self.onRotY )
         self.RotZButton.clicked.connect( self.onRotZ)

@@ -87,6 +87,7 @@ class Assembly4Workbench(Workbench):
         import HelpCmd             # shows a basic help window
         import showHideLcsCmd      # shows/hides all the LCSs
         import configurationEngine  # save/restore configuration
+        #import DraftTools
 
         # check whether the Fasteners workbench is installed
         if self.checkWorkbench('FastenersWorkbench'):
@@ -157,6 +158,7 @@ class Assembly4Workbench(Workbench):
                                 "Asm4_placeDatum", 
                                 "Separator",
                                 #"Asm4_makeLinkArray",
+                                #"Draft_PolarArray",
                                 "Asm4_treeSelectionOverrideCmd",
                                 "Asm4_makeBOM", 
                                 "Asm4_Measure", 
