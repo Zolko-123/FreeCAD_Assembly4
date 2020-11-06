@@ -395,14 +395,12 @@ class placeLinkUI():
 
             # select attachment LCS in the list of Datums in the linked part according to second selected LCS
             lcs_found = self.attLCSlist.findItems( Asm4.nameLabel(self.selectedLCSB), QtCore.Qt.MatchExactly )
-            if lcs_found:
-                # ... and select it
-                self.attLCSlist.setCurrentItem( lcs_found[0] )
 
-            # find the old attachment Datum in the list of the Datums in the linked part...
-            lcs_found = self.attLCSlist.findItems( old_attLCS, QtCore.Qt.MatchExactly )
+            # else find the old attachment Datum in the list of the Datums in the linked part...
             if not lcs_found:
-                lcs_found = self.attLCSlist.findItems( old_attLCS+' (', QtCore.Qt.MatchStartsWith )
+                lcs_found = self.attLCSlist.findItems( old_attLCS, QtCore.Qt.MatchExactly )
+                if not lcs_found:
+                    lcs_found = self.attLCSlist.findItems( old_attLCS+' (', QtCore.Qt.MatchStartsWith )
             if lcs_found:
                 # ... and select it
                 self.attLCSlist.setCurrentItem( lcs_found[0] )
