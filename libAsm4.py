@@ -161,6 +161,40 @@ def getLinkAndDatum():
     return retval
 
 
+# get from the selected datum the corresponding link
+def getLinkAndDatum():
+    retval = (None,None)
+    # only for Asm4 
+    if checkModel() and len(Gui.Selection.getSelection())==1:
+        parentAssembly = App.ActiveDocument.Model
+        # find all the links to Part or Body objects
+        childrenTable = []
+        for objStr in parentAssembly.getSubObjects():
+            # the string ends with a . that must be removed
+            obj = App.ActiveDocument.getObject( objStr[0:-1] )
+            if isLinkToPart(obj):
+                # add it to our tree table if it's a link to an App::Part ...
+                childrenTable.append( obj )
+
+        selObj = Gui.Selection.getSelection()[0]
+        # a datum is selected
+        if selObj.TypeId in datumTypes:
+            # this returns the selection hierarchy in the form 'linkName.datumName.'
+            selTree = Gui.Selection.getSelectionEx("", 0)[0].SubElementNames[0]
+            (parents, toto, dot) = selTree.partition('.'+selObj.Name)
+            link = App.ActiveDocument.getObject( parents )
+            if dot =='.' and link in childrenTable:
+                retval = (link,selObj)
+            else:
+                # see whether the datum is in a group, some people like to do that
+                (parents2, dot, groupName) = parents.partition('.')
+                link2 = App.ActiveDocument.getObject( parents2 )
+                group = App.ActiveDocument.getObject( groupName )
+                if link2 in childrenTable and group.TypeId=='App::DocumentObjectGroup':
+                    retval = (link2,selObj)
+    return retval
+
+
 # get all datums in a part
 def getPartLCS( part ):
     partLCS = [ ]
