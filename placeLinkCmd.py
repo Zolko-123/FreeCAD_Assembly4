@@ -50,7 +50,7 @@ class placeLinkCmd():
 
     def IsActive(self):
         # We only insert a link into an Asm4  Model
-        if (App.ActiveDocument and (Asm4.getSelection() or (all(Asm4.getLinkAndDatum2())))):
+        if App.ActiveDocument and Asm4.getSelectedLink() :
             return True
         return False
 
@@ -85,8 +85,8 @@ class placeLinkUI():
         self.selectedLCSA = None
         self.selectedLinkB = None
         self.selectedLCSB = None
-        selection = Asm4.getSelection()
-        selectedLCSPair = Asm4.getLinkAndDatum2()
+        selection = Asm4.getSelectedLink()
+        #selectedLCSPair = Asm4.getLinkAndDatum2()
         self.Xtranslation = 0.00
         self.Ytranslation = 0.00
         self.Ztranslation = 0.00
@@ -98,315 +98,146 @@ class placeLinkUI():
         self.drawUI()
         global taskUI
         taskUI = self
-      
-        if not all(selectedLCSPair):
-            #Handle single selected App::Link
-            if not selection :
-                # This shouldn't happen
-                FCC.PrintWarning("This is not an error message you are supposed to see, something went wrong\n")
-                Gui.Control.closeDialog()
-            else:
-                self.selectedLink = selection
-                Asm4.makeAsmProperties(self.selectedLink)
 
-            #save original AttachmentOffset of linked part
-            self.old_LinkAttachmentOffset = self.selectedLink.AttachmentOffset
-            self.old_LinkRotation = self.selectedLink.AttachmentOffset.Rotation
-            self.old_LinkPosition = self.selectedLink.AttachmentOffset.Base
-            # default values correspond to original AttachmentOffset of linked part
-            self.Xtranslation = self.old_LinkPosition[0]
-            self.Ytranslation = self.old_LinkPosition[1]
-            self.Ztranslation = self.old_LinkPosition[2]
-            self.XrotationAngle = self.old_LinkRotation.toEuler()[0]
-            self.YrotationAngle = self.old_LinkRotation.toEuler()[1]
-            self.ZrotationAngle = self.old_LinkRotation.toEuler()[2]
-            self.XrotAngleSpinBox.setValue(self.XrotationAngle)
-            self.YrotAngleSpinBox.setValue(self.YrotationAngle)
-            self.ZrotAngleSpinBox.setValue(self.ZrotationAngle)
-            self.XtranslSpinBox.setValue(self.old_LinkPosition[0])
-            self.YtranslSpinBox.setValue(self.old_LinkPosition[1])
-            self.ZtranslSpinBox.setValue(self.old_LinkPosition[2])
-            
-            # save previous view properties
-            self.old_OverrideMaterial = self.selectedLink.ViewObject.OverrideMaterial
-            self.old_DrawStyle = self.selectedLink.ViewObject.DrawStyle
-            self.old_LineWidth = self.selectedLink.ViewObject.LineWidth
-            self.old_DiffuseColor = self.selectedLink.ViewObject.ShapeMaterial.DiffuseColor
-            self.old_Transparency = self.selectedLink.ViewObject.ShapeMaterial.Transparency
-            # set new view properties
-            self.selectedLink.ViewObject.OverrideMaterial = True
-            self.selectedLink.ViewObject.DrawStyle = DrawStyle
-            self.selectedLink.ViewObject.LineWidth = LineWidth
-            self.selectedLink.ViewObject.ShapeMaterial.DiffuseColor = DiffuseColor
-            self.selectedLink.ViewObject.ShapeMaterial.Transparency = Transparency
-
-            # get the current active document to avoid errors if user changes tab
-            self.activeDoc = App.activeDocument()
-            # the parent (top-level) assembly is the App::Part called Model (hard-coded)
-            self.parentAssembly = self.activeDoc.Model
-
-            # check that the link is an Asm4 link:
-            self.isAsm4EE = False
-            if hasattr(self.selectedLink,'AssemblyType'):
-                if self.selectedLink.AssemblyType == 'Asm4EE' or self.selectedLink.AssemblyType == '' :
-                    self.isAsm4EE = True
-                else:
-                    Asm4.warningBox("This Link's assembly type doesn't correspond to this WorkBench")
-                    return
-
-            # initialize the UI with the current data
-            self.attLCStable = []
-            self.initUI()
-            # now self.parentList and self.parentTable are available
-
-            # find all the linked parts in the assembly
-            for objName in self.parentAssembly.getSubObjects():
-                # remove the trailing .
-                obj = self.activeDoc.getObject(objName[0:-1])
-                if obj.TypeId=='App::Link' and hasattr(obj.LinkedObject,'isDerivedFrom'):
-                    if obj.LinkedObject.isDerivedFrom('App::Part') or obj.LinkedObject.isDerivedFrom('PartDesign::Body'):
-                    # ... except if it's the selected link itself
-                        if obj != self.selectedLink:
-                            self.parentTable.append( obj )
-                            # add to the drop-down combo box with the assembly tree's parts
-                            objIcon = obj.LinkedObject.ViewObject.Icon
-                            objText = Asm4.nameLabel(obj)
-                            self.parentList.addItem( objIcon, objText, obj)
-
-            # find all the LCS in the selected link
-            self.partLCStable = Asm4.getPartLCS( self.selectedLink.LinkedObject )
-            # build the list
-            self.partLCSlist.clear()
-            for lcs in self.partLCStable:
-                newItem = QtGui.QListWidgetItem()
-                newItem.setText(Asm4.nameLabel(lcs))
-                newItem.setIcon( lcs.ViewObject.Icon )
-                self.partLCSlist.addItem(newItem)
-
-            # get the old values
-            if self.isAsm4EE:
-                self.old_AO = self.selectedLink.AttachmentOffset
-                self.old_linkLCS = self.selectedLink.AttachedBy[1:]
-                (self.old_Parent, separator, self.old_parentLCS) = self.selectedLink.AttachedTo.partition('#')
-            else:
-                self.old_AO = []
-                self.old_Parent = ''
-
-            self.old_EE = ''
-            # get and store the current expression engine:
-            self.old_EE = Asm4.placementEE(self.selectedLink.ExpressionEngine)
-
-            # decode the old ExpressionEngine
-            old_Parent = ''
-            old_ParentPart = ''
-            old_attLCS = ''
-            constrName = ''
-            linkedDoc = ''
-            old_linkLCS = ''
-            # if the decode is unsuccessful, old_Expression is set to False and the other things are set to 'None'
-            ( old_Parent, old_attLCS, old_linkLCS ) = Asm4.splitExpressionLink( self.old_EE, self.old_Parent )
-
-            # find the old LCS in the list of LCS of the linked part...
-            # MatchExactly, MatchContains, MatchEndsWith ...
-            lcs_found = self.partLCSlist.findItems( old_linkLCS, QtCore.Qt.MatchExactly )
-            if not lcs_found:
-                lcs_found = self.partLCSlist.findItems( old_linkLCS+' (', QtCore.Qt.MatchStartsWith )
-            if lcs_found:
-                # ... and select it
-                self.partLCSlist.setCurrentItem( lcs_found[0] )
-
-
-            # find the oldPart in the part list...
-            if old_Parent == 'Parent Assembly':
-                parent_found = True
-                parent_index = 1
-            else:
-                parent_found = False
-                parent_index = 1
-                for item in self.parentTable[1:]:
-                    if item.Name == old_Parent:
-                        parent_found = True
-                        break
-                    else:
-                        parent_index = parent_index +1
-            if not parent_found:
-                parent_index = 0
-            self.parentList.setCurrentIndex( parent_index )
-            # this should have triggered self.getPartLCS() to fill the LCS list
-
-            # find the old attachment Datum in the list of the Datums in the linked part...
-            lcs_found = self.attLCSlist.findItems( old_attLCS, QtCore.Qt.MatchExactly )
-            if not lcs_found:
-                lcs_found = self.attLCSlist.findItems( old_attLCS+' (', QtCore.Qt.MatchStartsWith )
-            if lcs_found:
-                # ... and select it
-                self.attLCSlist.setCurrentItem( lcs_found[0] )
-
-                
+        #Handle single selected App::Link
+        if not selection :
+            # This shouldn't happen
+            FCC.PrintWarning("This is not an error message you are supposed to see, something went wrong\n")
+            Gui.Control.closeDialog()
         else:
-            #Handle pair of selected LCS
-            self.selectedLink = selectedLCSPair[0]
-            self.selectedLCSA = selectedLCSPair[1]
-            self.selectedLinkB = selectedLCSPair[2]
-            self.selectedLCSB = selectedLCSPair[3]
+            self.selectedLink = selection
+            Asm4.makeAsmProperties(self.selectedLink)
 
-            #save original AttachmentOffset of linked part
-            self.old_LinkAttachmentOffset = self.selectedLink.AttachmentOffset
-            self.old_LinkRotation = self.selectedLink.AttachmentOffset.Rotation
-            self.old_LinkPosition = self.selectedLink.AttachmentOffset.Base
-            # default values correspond to original AttachmentOffset of linked part
-            self.Xtranslation = self.old_LinkPosition[0]
-            self.Ytranslation = self.old_LinkPosition[1]
-            self.Ztranslation = self.old_LinkPosition[2]
-            self.XrotationAngle = self.old_LinkRotation.toEuler()[0]
-            self.YrotationAngle = self.old_LinkRotation.toEuler()[1]
-            self.ZrotationAngle = self.old_LinkRotation.toEuler()[2]
-            self.XrotAngleSpinBox.setValue(self.XrotationAngle)
-            self.YrotAngleSpinBox.setValue(self.YrotationAngle)
-            self.ZrotAngleSpinBox.setValue(self.ZrotationAngle)
-            self.XtranslSpinBox.setValue(self.old_LinkPosition[0])
-            self.YtranslSpinBox.setValue(self.old_LinkPosition[1])
-            self.ZtranslSpinBox.setValue(self.old_LinkPosition[2])
-            
-            # save previous view properties
-            self.old_OverrideMaterial = self.selectedLink.ViewObject.OverrideMaterial
-            self.old_OverrideMaterialB = self.selectedLinkB.ViewObject.OverrideMaterial
-            self.old_DrawStyle = self.selectedLink.ViewObject.DrawStyle
-            self.old_DrawStyleB = self.selectedLinkB.ViewObject.DrawStyle
-            self.old_LineWidth = self.selectedLink.ViewObject.LineWidth
-            self.old_LineWidthB = self.selectedLinkB.ViewObject.LineWidth
-            self.old_DiffuseColor = self.selectedLink.ViewObject.ShapeMaterial.DiffuseColor
-            self.old_DiffuseColorB = self.selectedLinkB.ViewObject.ShapeMaterial.DiffuseColor
-            self.old_Transparency = self.selectedLink.ViewObject.ShapeMaterial.Transparency
-            self.old_TransparencyB = self.selectedLinkB.ViewObject.ShapeMaterial.Transparency
-            # set new view properties
-            self.selectedLink.ViewObject.OverrideMaterial = True
-            self.selectedLinkB.ViewObject.OverrideMaterial = True
-            self.selectedLink.ViewObject.DrawStyle = DrawStyle
-            self.selectedLinkB.ViewObject.DrawStyle = DrawStyle
-            self.selectedLink.ViewObject.LineWidth = LineWidth
-            self.selectedLinkB.ViewObject.LineWidth = LineWidth
-            self.selectedLink.ViewObject.ShapeMaterial.DiffuseColor = DiffuseColor
-            self.selectedLinkB.ViewObject.ShapeMaterial.DiffuseColor = DiffuseColor
-            self.selectedLink.ViewObject.ShapeMaterial.Transparency = Transparency
-            self.selectedLinkB.ViewObject.ShapeMaterial.Transparency = Transparency
+        #save original AttachmentOffset of linked part
+        self.old_LinkAttachmentOffset = self.selectedLink.AttachmentOffset
+        self.old_LinkRotation = self.selectedLink.AttachmentOffset.Rotation
+        self.old_LinkPosition = self.selectedLink.AttachmentOffset.Base
+        # default values correspond to original AttachmentOffset of linked part
+        self.Xtranslation = self.old_LinkPosition[0]
+        self.Ytranslation = self.old_LinkPosition[1]
+        self.Ztranslation = self.old_LinkPosition[2]
+        self.XrotationAngle = self.old_LinkRotation.toEuler()[0]
+        self.YrotationAngle = self.old_LinkRotation.toEuler()[1]
+        self.ZrotationAngle = self.old_LinkRotation.toEuler()[2]
+        self.XtranslSpinBox.setValue(self.old_LinkPosition[0])
+        self.YtranslSpinBox.setValue(self.old_LinkPosition[1])
+        self.ZtranslSpinBox.setValue(self.old_LinkPosition[2])
+        
+        # save previous view properties
+        self.old_OverrideMaterial = self.selectedLink.ViewObject.OverrideMaterial
+        self.old_DrawStyle = self.selectedLink.ViewObject.DrawStyle
+        self.old_LineWidth = self.selectedLink.ViewObject.LineWidth
+        self.old_DiffuseColor = self.selectedLink.ViewObject.ShapeMaterial.DiffuseColor
+        self.old_Transparency = self.selectedLink.ViewObject.ShapeMaterial.Transparency
+        # set new view properties
+        self.selectedLink.ViewObject.OverrideMaterial = True
+        self.selectedLink.ViewObject.DrawStyle = DrawStyle
+        self.selectedLink.ViewObject.LineWidth = LineWidth
+        self.selectedLink.ViewObject.ShapeMaterial.DiffuseColor = DiffuseColor
+        self.selectedLink.ViewObject.ShapeMaterial.Transparency = Transparency
 
-            # get the current active document to avoid errors if user changes tab
-            self.activeDoc = App.activeDocument()
-            # the parent (top-level) assembly is the App::Part called Model (hard-coded)
-            self.parentAssembly = self.activeDoc.Model
+        # get the current active document to avoid errors if user changes tab
+        self.activeDoc = App.activeDocument()
+        # the parent (top-level) assembly is the App::Part called Model (hard-coded)
+        self.parentAssembly = self.activeDoc.Model
 
-            # check that the link is an Asm4 link:
-            self.isAsm4EE = False
-            if ((hasattr(self.selectedLink,'AssemblyType')) and (hasattr(self.selectedLinkB,'AssemblyType'))):
-                if ((self.selectedLink.AssemblyType == 'Asm4EE' or self.selectedLink.AssemblyType == '') and (self.selectedLinkB.AssemblyType == 'Asm4EE' or self.selectedLinkB.AssemblyType == '')) :
-                    self.isAsm4EE = True
+        # check that the link is an Asm4 link:
+        self.isAsm4EE = False
+        if hasattr(self.selectedLink,'AssemblyType'):
+            if self.selectedLink.AssemblyType == 'Asm4EE' or self.selectedLink.AssemblyType == '' :
+                self.isAsm4EE = True
+            else:
+                Asm4.warningBox("This Link's assembly type doesn't correspond to this WorkBench")
+                return
+
+        # initialize the UI with the current data
+        self.attLCStable = []
+        self.initUI()
+        # now self.parentList and self.parentTable are available
+
+        # find all the linked parts in the assembly
+        for objName in self.parentAssembly.getSubObjects():
+            # remove the trailing .
+            obj = self.activeDoc.getObject(objName[0:-1])
+            if obj.TypeId=='App::Link' and hasattr(obj.LinkedObject,'isDerivedFrom'):
+                if obj.LinkedObject.isDerivedFrom('App::Part') or obj.LinkedObject.isDerivedFrom('PartDesign::Body'):
+                # ... except if it's the selected link itself
+                    if obj != self.selectedLink:
+                        self.parentTable.append( obj )
+                        # add to the drop-down combo box with the assembly tree's parts
+                        objIcon = obj.LinkedObject.ViewObject.Icon
+                        objText = Asm4.nameLabel(obj)
+                        self.parentList.addItem( objIcon, objText, obj)
+
+        # find all the LCS in the selected link
+        self.partLCStable = Asm4.getPartLCS( self.selectedLink.LinkedObject )
+        # build the list
+        self.partLCSlist.clear()
+        for lcs in self.partLCStable:
+            newItem = QtGui.QListWidgetItem()
+            newItem.setText(Asm4.nameLabel(lcs))
+            newItem.setIcon( lcs.ViewObject.Icon )
+            self.partLCSlist.addItem(newItem)
+
+        # get the old values
+        if self.isAsm4EE:
+            self.old_AO = self.selectedLink.AttachmentOffset
+            self.old_linkLCS = self.selectedLink.AttachedBy[1:]
+            (self.old_Parent, separator, self.old_parentLCS) = self.selectedLink.AttachedTo.partition('#')
+        else:
+            self.old_AO = []
+            self.old_Parent = ''
+
+        self.old_EE = ''
+        # get and store the current expression engine:
+        self.old_EE = Asm4.placementEE(self.selectedLink.ExpressionEngine)
+
+        # decode the old ExpressionEngine
+        old_Parent = ''
+        old_ParentPart = ''
+        old_attLCS = ''
+        constrName = ''
+        linkedDoc = ''
+        old_linkLCS = ''
+        # if the decode is unsuccessful, old_Expression is set to False and the other things are set to 'None'
+        ( old_Parent, old_attLCS, old_linkLCS ) = Asm4.splitExpressionLink( self.old_EE, self.old_Parent )
+
+        # find the old LCS in the list of LCS of the linked part...
+        # MatchExactly, MatchContains, MatchEndsWith ...
+        lcs_found = self.partLCSlist.findItems( old_linkLCS, QtCore.Qt.MatchExactly )
+        if not lcs_found:
+            lcs_found = self.partLCSlist.findItems( old_linkLCS+' (', QtCore.Qt.MatchStartsWith )
+        if lcs_found:
+            # ... and select it
+            self.partLCSlist.setCurrentItem( lcs_found[0] )
+
+
+        # find the oldPart in the part list...
+        if old_Parent == 'Parent Assembly':
+            parent_found = True
+            parent_index = 1
+        else:
+            parent_found = False
+            parent_index = 1
+            for item in self.parentTable[1:]:
+                if item.Name == old_Parent:
+                    parent_found = True
+                    break
                 else:
-                    Asm4.warningBox("This Link's assembly type doesn't correspond to this WorkBench")
-                    return
+                    parent_index = parent_index +1
+        if not parent_found:
+            parent_index = 0
+        self.parentList.setCurrentIndex( parent_index )
+        # this should have triggered self.getPartLCS() to fill the LCS list
 
-            # initialize the UI with the current data
-            self.attLCStable = []
-            self.initUI()
-            # now self.parentList and self.parentTable are available
+        # find the old attachment Datum in the list of the Datums in the linked part...
+        lcs_found = self.attLCSlist.findItems( old_attLCS, QtCore.Qt.MatchExactly )
+        if not lcs_found:
+            lcs_found = self.attLCSlist.findItems( old_attLCS+' (', QtCore.Qt.MatchStartsWith )
+        if lcs_found:
+            # ... and select it
+            self.attLCSlist.setCurrentItem( lcs_found[0] )
 
-            # find all the linked parts in the assembly
-            for objName in self.parentAssembly.getSubObjects():
-                # remove the trailing .
-                obj = self.activeDoc.getObject(objName[0:-1])
-                if obj.TypeId=='App::Link' and hasattr(obj.LinkedObject,'isDerivedFrom'):
-                    if obj.LinkedObject.isDerivedFrom('App::Part') or obj.LinkedObject.isDerivedFrom('PartDesign::Body'):
-                    # ... except if it's the selected link itself
-                        if obj != self.selectedLink:
-                            self.parentTable.append( obj )
-                            # add to the drop-down combo box with the assembly tree's parts
-                            objIcon = obj.LinkedObject.ViewObject.Icon
-                            objText = Asm4.nameLabel(obj)
-                            self.parentList.addItem( objIcon, objText, obj)
-
-            # find all the LCS in the selected link A
-            self.partLCStable = Asm4.getPartLCS( self.selectedLink.LinkedObject )
-            # build the list
-            self.partLCSlist.clear()
-            for lcs in self.partLCStable:
-                newItem = QtGui.QListWidgetItem()
-                newItem.setText(Asm4.nameLabel(lcs))
-                newItem.setIcon( lcs.ViewObject.Icon )
-                self.partLCSlist.addItem(newItem)
-
-            # get the old values
-            if self.isAsm4EE:
-                self.old_AO = self.selectedLink.AttachmentOffset
-                self.old_linkLCS = self.selectedLink.AttachedBy[1:]
-                (self.old_Parent, separator, self.old_parentLCS) = self.selectedLink.AttachedTo.partition('#')
-            else:
-                self.old_AO = []
-                self.old_Parent = ''
-
-            self.old_EE = ''
-            # get and store the current expression engine:
-            self.old_EE = Asm4.placementEE(self.selectedLink.ExpressionEngine)
-
-            # decode the old ExpressionEngine
-            old_Parent = ''
-            old_ParentPart = ''
-            old_attLCS = ''
-            constrName = ''
-            linkedDoc = ''
-            old_linkLCS = ''
-            # if the decode is unsuccessful, old_Expression is set to False and the other things are set to 'None'
-            ( old_Parent, old_attLCS, old_linkLCS ) = Asm4.splitExpressionLink( self.old_EE, self.old_Parent )
-            # select LCS in the list of LCS in the linked part according to selectedLCSPair[1]
-            lcs_found = self.partLCSlist.findItems( self.selectedLCSA.Label, QtCore.Qt.MatchExactly )
-            if not lcs_found:
-                # find the old LCS in the list of LCS of the linked part...
-                # MatchExactly, MatchContains, MatchEndsWith ...
-                lcs_found = self.partLCSlist.findItems( old_linkLCS, QtCore.Qt.MatchExactly )
-                if not lcs_found:
-                    lcs_found = self.partLCSlist.findItems( old_linkLCS+' (', QtCore.Qt.MatchStartsWith )
-            if lcs_found:
-                # ... and select it
-                self.partLCSlist.setCurrentItem( lcs_found[0] )
-
-
-            # find the oldPart in the part list...
-            if self.selectedLCSB is not None:
-                parent_found = False
-                parent_index = 1
-                for item in self.parentTable[1:]:
-                    if item.Name == self.selectedLinkB.Name:
-                        parent_found = True
-                        break
-                    else:
-                        parent_index = parent_index + 1
-            elif old_Parent == 'Parent Assembly':
-                parent_found = True
-                parent_index = 1
-            else:
-                parent_found = False
-                parent_index = 1
-                for item in self.parentTable[1:]:
-                    if item.Name == old_Parent:
-                        parent_found = True
-                        break
-                    else:
-                        parent_index = parent_index + 1
-            if not parent_found:
-                parent_index = 0
-            self.parentList.setCurrentIndex( parent_index )
-            # this should have triggered self.getPartLCS() to fill the LCS list
-
-            # select attachment LCS in the list of Datums in the linked part according to second selected LCS
-            lcs_found = self.attLCSlist.findItems( Asm4.nameLabel(self.selectedLCSB), QtCore.Qt.MatchExactly )
-
-            # else find the old attachment Datum in the list of the Datums in the linked part...
-            if not lcs_found:
-                lcs_found = self.attLCSlist.findItems( old_attLCS, QtCore.Qt.MatchExactly )
-                if not lcs_found:
-                    lcs_found = self.attLCSlist.findItems( old_attLCS+' (', QtCore.Qt.MatchStartsWith )
-            if lcs_found:
-                # ... and select it
-                self.attLCSlist.setCurrentItem( lcs_found[0] )
 
     # Close
     def finish(self):
@@ -427,12 +258,14 @@ class placeLinkUI():
         self.selectedLink.ViewObject.LineWidth    = self.old_LineWidth
         self.selectedLink.ViewObject.ShapeMaterial.DiffuseColor = self.old_DiffuseColor
         self.selectedLink.ViewObject.ShapeMaterial.Transparency = self.old_Transparency
+        '''
         if self.selectedLinkB:
             self.selectedLinkB.ViewObject.OverrideMaterial = False
             self.selectedLinkB.ViewObject.DrawStyle    = self.old_DrawStyleB
             self.selectedLinkB.ViewObject.LineWidth    = self.old_LineWidthB
             self.selectedLinkB.ViewObject.ShapeMaterial.DiffuseColor = self.old_DiffuseColorB
             self.selectedLinkB.ViewObject.ShapeMaterial.Transparency = self.old_TransparencyB
+        '''
 
     # standard FreeCAD Task panel buttons
     def getStandardButtons(self):
@@ -618,8 +451,6 @@ class placeLinkUI():
         return
 
 
-
-
     # Reorientation
     def reorientLink( self ):
         moveXYZ = App.Placement( App.Vector(self.Xtranslation,self.Ytranslation,self.Ztranslation), self.old_LinkRotation )
@@ -631,6 +462,7 @@ class placeLinkUI():
         self.selectedLink.AttachmentOffset = moveXYZ * rotationX * rotationY * rotationZ
         self.selectedLink.recompute()
 
+    '''
     def onXRotValChanged(self):
         self.XrotationAngle = self.XrotAngleSpinBox.value()
         self.reorientLink()
@@ -642,6 +474,7 @@ class placeLinkUI():
     def onZRotValChanged(self):
         self.ZrotationAngle = self.ZrotAngleSpinBox.value()
         self.reorientLink()
+    '''
         
     def onXTranslValChanged(self):
         self.Xtranslation = self.XtranslSpinBox.value()
@@ -702,6 +535,11 @@ class placeLinkUI():
         parentIcon = self.parentAssembly.ViewObject.Icon
         self.parentList.addItem( parentIcon, 'Parent Assembly', self.parentAssembly )
 
+        '''
+        self.XrotAngleSpinBox.setValue(self.XrotationAngle)
+        self.YrotAngleSpinBox.setValue(self.YrotationAngle)
+        self.ZrotAngleSpinBox.setValue(self.ZrotationAngle)
+        '''
 
     # defines the UI, only static elements
     def drawUI(self):
@@ -763,7 +601,7 @@ class placeLinkUI():
 
         # X Translation Value
         self.XoffsetLayout = QtGui.QHBoxLayout()
-        self.XtranslSpinBoxLabel = self.XoffsetLayout.addWidget(QtGui.QLabel("Translation along X :"))
+        self.XtranslSpinBoxLabel = self.XoffsetLayout.addWidget(QtGui.QLabel("X Translation :"))
         self.XtranslSpinBox = QtGui.QDoubleSpinBox()
         self.XtranslSpinBox.setRange(-999999.00, 999999.00)
         self.XtranslSpinBox.setValue(self.Xtranslation)
@@ -776,6 +614,41 @@ class placeLinkUI():
         self.XoffsetLayout.addWidget(self.RotXButton)
         self.mainLayout.addLayout(self.XoffsetLayout)
 
+
+        # Y Translation Value
+        self.YoffsetLayout = QtGui.QHBoxLayout()
+        self.YtranslSpinBoxLabel = self.YoffsetLayout.addWidget(QtGui.QLabel("Y Translation :"))
+        self.YtranslSpinBox = QtGui.QDoubleSpinBox()
+        self.YtranslSpinBox.setRange(-999999.00, 999999.00)
+        self.YtranslSpinBox.setValue(self.Ytranslation)
+        self.YtranslSpinBox.setToolTip("Translation along Y")
+        self.RotYButton = QtGui.QPushButton('Rotate Y +90°')
+        self.RotYButton.setToolTip("Rotate 90 deg around Y axis")
+        # add the QLDoubleSpinBox
+        self.YoffsetLayout.addWidget(self.YtranslSpinBox)
+        self.YoffsetLayout.addStretch()
+        self.YoffsetLayout.addWidget(self.RotYButton)
+        self.mainLayout.addLayout(self.YoffsetLayout)
+
+        # Z Translation Value
+        self.ZoffsetLayout = QtGui.QHBoxLayout()
+        self.ZtranslSpinBoxLabel = self.ZoffsetLayout.addWidget(QtGui.QLabel("Z Translation :"))
+        self.ZtranslSpinBox = QtGui.QDoubleSpinBox()
+        self.ZtranslSpinBox.setRange(-999999.00, 999999.00)
+        self.ZtranslSpinBox.setValue(self.Ztranslation)
+        self.ZtranslSpinBox.setToolTip("Translation along Z:")
+        self.RotZButton = QtGui.QPushButton('Rotate Z +90°')
+        self.RotZButton.setToolTip("Rotate 90 deg around Z axis")
+        # add to the layout
+        self.ZoffsetLayout.addWidget(self.ZtranslSpinBox)
+        self.ZoffsetLayout.addStretch()
+        self.ZoffsetLayout.addWidget(self.RotZButton)
+        self.mainLayout.addLayout(self.ZoffsetLayout)
+
+        # apply the layout to the main window
+        self.form.setLayout(self.mainLayout)
+
+        '''
         # X Rotation Value
         self.XrotAngleSpinBoxLayout = QtGui.QHBoxLayout()
         self.XrotAngleSpinBox = QtGui.QDoubleSpinBox()
@@ -789,21 +662,6 @@ class placeLinkUI():
         #self.XrotAngleSpinBoxLayout.addWidget(self.RotXButton)
         #self.mainLayout.addLayout(self.XrotAngleSpinBoxLayout)
 
-        # Y Translation Value
-        self.YoffsetLayout = QtGui.QHBoxLayout()
-        self.YtranslSpinBoxLabel = self.YoffsetLayout.addWidget(QtGui.QLabel("Translation along Y :"))
-        self.YtranslSpinBox = QtGui.QDoubleSpinBox()
-        self.YtranslSpinBox.setRange(-999999.00, 999999.00)
-        self.YtranslSpinBox.setValue(self.Ytranslation)
-        self.YtranslSpinBox.setToolTip("Translation along Y")
-        self.RotYButton = QtGui.QPushButton('Rotate Y +90°')
-        self.RotYButton.setToolTip("Rotate 90 deg around Y axis")
-        # add the QLDoubleSpinBox
-        self.YoffsetLayout.addWidget(self.YtranslSpinBox)
-        self.YoffsetLayout.addStretch()
-        self.YoffsetLayout.addWidget(self.RotYButton)
-        self.mainLayout.addLayout(self.YoffsetLayout)
-
         # Y Rotation Value
         self.YrotAngleSpinBoxLayout = QtGui.QHBoxLayout()
         self.YrotAngleSpinBox = QtGui.QDoubleSpinBox()
@@ -815,22 +673,6 @@ class placeLinkUI():
         self.YrotAngleSpinBoxLabel = self.YrotAngleSpinBoxLayout.addWidget(QtGui.QLabel("Rotation around y-axis in deg.: "))
         self.YrotAngleSpinBoxLayout.addWidget(self.YrotAngleSpinBox)
         #self.mainLayout.addLayout(self.YrotAngleSpinBoxLayout)
-
-
-        # Z Translation Value
-        self.ZoffsetLayout = QtGui.QHBoxLayout()
-        self.ZtranslSpinBoxLabel = self.ZoffsetLayout.addWidget(QtGui.QLabel("Translation along Z :"))
-        self.ZtranslSpinBox = QtGui.QDoubleSpinBox()
-        self.ZtranslSpinBox.setRange(-999999.00, 999999.00)
-        self.ZtranslSpinBox.setValue(self.Ztranslation)
-        self.ZtranslSpinBox.setToolTip("Translation along Z:")
-        self.RotZButton = QtGui.QPushButton('Rotate Z +90°')
-        self.RotZButton.setToolTip("Rotate 90 deg around Z axis")
-        # add to the layout
-        self.ZoffsetLayout.addWidget(self.ZtranslSpinBox)
-        self.ZoffsetLayout.addStretch()
-        self.ZoffsetLayout.addWidget(self.RotZButton)
-        self.mainLayout.addLayout(self.ZoffsetLayout)
 
         # Z Rotation Value
         self.ZrotAngleSpinBoxLayout = QtGui.QHBoxLayout()
@@ -844,9 +686,8 @@ class placeLinkUI():
         self.ZrotAngleSpinBoxLabel = self.ZrotAngleSpinBoxLayout.addWidget(QtGui.QLabel("Rotation around z-axis in deg.: "))
         #self.ZrotAngleSpinBoxLayout.addWidget(self.ZrotAngleSpinBox)
         #self.mainLayout.addLayout(self.ZrotAngleSpinBoxLayout)
+        '''
 
-        # apply the layout to the main window
-        self.form.setLayout(self.mainLayout)
 
         # Actions
         self.parentList.currentIndexChanged.connect( self.onParentSelected )
@@ -855,12 +696,12 @@ class placeLinkUI():
         self.RotXButton.clicked.connect( self.onRotX )
         self.RotYButton.clicked.connect( self.onRotY )
         self.RotZButton.clicked.connect( self.onRotZ )
-        #self.XrotAngleSpinBox.valueChanged.connect(self.onXRotValChanged)
-        #self.YrotAngleSpinBox.valueChanged.connect(self.onYRotValChanged)
-        #self.ZrotAngleSpinBox.valueChanged.connect(self.onZRotValChanged)
         self.XtranslSpinBox.valueChanged.connect(self.onXTranslValChanged)
         self.YtranslSpinBox.valueChanged.connect(self.onYTranslValChanged)
         self.ZtranslSpinBox.valueChanged.connect(self.onZTranslValChanged)
+        #self.XrotAngleSpinBox.valueChanged.connect(self.onXRotValChanged)
+        #self.YrotAngleSpinBox.valueChanged.connect(self.onYRotValChanged)
+        #self.ZrotAngleSpinBox.valueChanged.connect(self.onZRotValChanged)
 
 
 

@@ -32,7 +32,7 @@ class showLcsCmd:
 
     def IsActive(self):
         # Will handle LCSs only for the Assembly4 model
-        if Asm4.getSelection() or Asm4.getModelSelected():
+        if Asm4.getSelectedLink() or Asm4.getModelSelected():
         # treats all container types : Body and Part
         #if Asm4.getSelectedContainer() or Asm4.checkModel() or Asm4.getSelectedLink():
             return True
@@ -48,7 +48,7 @@ class showLcsCmd:
             for objName in model.getSubObjects():
                 Asm4.showChildLCSs(model.getSubObject(objName, 1), True, processedLinks)
         else:
-            Asm4.showChildLCSs(Asm4.getSelection(), True, processedLinks)
+            Asm4.showChildLCSs(Asm4.getSelectedLink(), True, processedLinks)
 
 
 """
@@ -68,7 +68,7 @@ class hideLcsCmd:
 
     def IsActive(self):
         # Will handle LCSs only for the Assembly4 model
-        if Asm4.getSelection() or Asm4.getModelSelected():
+        if Asm4.getSelectedLink() or Asm4.getModelSelected():
             return True
         return False
 
@@ -82,7 +82,7 @@ class hideLcsCmd:
             for objName in model.getSubObjects():
                 Asm4.showChildLCSs(model.getSubObject(objName, 1), False, processedLinks)
         else:
-            Asm4.showChildLCSs(Asm4.getSelection(), False, processedLinks)
+            Asm4.showChildLCSs(Asm4.getSelectedLink(), False, processedLinks)
 
 
 

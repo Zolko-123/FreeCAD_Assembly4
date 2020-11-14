@@ -41,7 +41,7 @@ class saveConfigurationCmd:
 
     def IsActive(self):
         # Will handle LCSs only for the Assembly4 model
-        if Asm4.getSelection() or Asm4.getModelSelected():
+        if Asm4.getSelectedLink() or Asm4.getModelSelected():
             return True
         return False
 
@@ -75,7 +75,7 @@ class restoreConfigurationCmd:
 
     def IsActive(self):
         # Will handle LCSs only for the Assembly4 model
-        if Asm4.getSelection() or Asm4.getModelSelected():
+        if Asm4.getSelectedLink() or Asm4.getModelSelected():
             return True
         return False
 
@@ -110,7 +110,7 @@ def RestoreConfiguration(docName):
     if model:
         RestoreSubObjects(doc, model)
     else:
-        RestoreObject(doc, Asm4.getSelection())
+        RestoreObject(doc, Asm4.getSelectedLink())
     App.ActiveDocument.recompute()
 
 
@@ -131,7 +131,7 @@ def SaveConfiguration(docName, description):
     if model:
         SaveSubObjects(doc, model)
     else:
-        SaveObject(doc, Asm4.getSelection())
+        SaveObject(doc, Asm4.getSelectedLink())
     doc.recompute(True)
 
 

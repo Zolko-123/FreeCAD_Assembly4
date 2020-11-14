@@ -39,8 +39,7 @@ partInfo =[     'Description',                  \
                 'SupplierDescription',          \
                 'SupplierReference' ]
 
-containerTypes = [  'App::Part', \
-                    'PartDesign::Body' ]
+containerTypes = [  'App::Part', 'PartDesign::Body' ]
 
 
 
@@ -156,7 +155,7 @@ def getLinkAndDatum():
                 (parents2, dot, groupName) = parents.partition('.')
                 link2 = App.ActiveDocument.getObject( parents2 )
                 group = App.ActiveDocument.getObject( groupName )
-                if link2 in childrenTable and group.TypeId=='App::DocumentObjectGroup':
+                if link2 and group and link2 in childrenTable and group.TypeId=='App::DocumentObjectGroup':
                     retval = (link2,selObj)
     return retval
 
@@ -572,7 +571,7 @@ def getModelSelected():
     return None
 
 
-def getSelection():
+def getSelectedLink():
     # check that there is an App::Part called 'Model'
     #if App.ActiveDocument.getObject('Model') and App.ActiveDocument.Model.TypeId == 'App::Part':
     if checkModel():
@@ -584,6 +583,17 @@ def getSelection():
                 return selObj
     return None
 
+
+def getSelectedDatum():    
+    selectedObj = None
+    # check that something is selected
+    if len(Gui.Selection.getSelection())==1:
+        selection = Gui.Selection.getSelection()[0]
+        # check that it's a datum
+        if selection.TypeId in datumTypes:
+            selectedObj = selection
+    # now we should be safe
+    return selectedObj
 
 
 

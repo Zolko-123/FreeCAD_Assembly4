@@ -24,25 +24,6 @@ import libAsm4 as Asm4
     |               Helper functions                |
     +-----------------------------------------------+
 """
-def getSelection():
-    # check that there is an App::Part called 'Model'
-    if Asm4.checkModel is None:
-        return None
-    # if something is selected ...
-    if len(Gui.Selection.getSelection())==1:
-        selectedObj = Gui.Selection.getSelection()[0]
-        # if it's a datum object we return it
-        if selectedObj.TypeId in datumTypes:
-            return selectedObj            
-    return None
-
-
-# Types of objects to import
-datumTypes = [  'PartDesign::CoordinateSystem', \
-                'PartDesign::Plane',            \
-                'PartDesign::Line',             \
-                'PartDesign::Point']
-
 
 # icon to show in the Menu, toolbar and widget window
 iconFile = os.path.join( Asm4.iconPath , 'Import_Datum.svg')
@@ -65,45 +46,18 @@ class importDatumCmd():
                 }
 
     def IsActive(self):
-        if App.ActiveDocument and getSelection():
+        if App.ActiveDocument and Asm4.getSelectedDatum():
             return True
         return False
 
     def Activated(self):
-        Gui.Control.showDialog( importDatumUI() )
-        # Before calling the UI, we make some checks:
-        # We get all the App::Link parts in the assembly 
-        '''
-        parentAssembly = App.ActiveDocument.Model
-        childrenTable = []
-        for objStr in parentAssembly.getSubObjects():
-            # the string ends with a . that must be removed
-            obj = App.ActiveDocument.getObject( objStr[0:-1] )
-            if obj.TypeId == 'App::Link' and hasattr(obj.LinkedObject,'isDerivedFrom'):
-                if  obj.LinkedObject.isDerivedFrom('App::Part') or obj.LinkedObject.isDerivedFrom('PartDesign::Body'):
-                    # add it to our tree table if it's a link to an App::Part ...
-                    childrenTable.append( obj )
-
-        targetDatum = getSelection()
-        # this returns the selection hierarchy in the form 'linkName.datumName.'
-        selectionTree = Gui.Selection.getSelectionEx("", 0)[0].SubElementNames[0]
-        (targetLinkName, sel, dot) = selectionTree.partition('.'+targetDatum.Name)
-        targetLink = App.ActiveDocument.getObject( targetLinkName )
-        # If the selected datum is at the root of the link. Else we don't consider it
-        if dot =='.' and targetLink in childrenTable:
+        # check that our selection is correct
+        ( link, datum ) = Asm4.getLinkAndDatum()
+        if not link :
+            Asm4.warningBox( 'The selected datum object cannot be imported into this assembly' )
+        else :
             Gui.Control.showDialog( importDatumUI() )
-        else:
-            # see whether the datum is in a group, some people like to do that
-            (targetLinkName, dot, groupName) = targetLink.partition('.')
-            targetLink = App.ActiveDocument.getObject( targetLinkName )
-            group = App.ActiveDocument.getObject( groupName )
-            if targetLink in childrenTable and group.TypeId=='App::DocumentObjectGroup':
-                Gui.Control.showDialog( importDatumUI() )
-            else:
-                # something fishy, abort
-                FCC.PrintWarning('The selected datum object cannot be imported into this assembly\n')
-                return
-        '''
+
 
 
 """
@@ -114,7 +68,7 @@ class importDatumCmd():
 class importDatumUI():
     def __init__(self):
         ( link, datum ) = Asm4.getLinkAndDatum()
-        if not link is None:
+        if link :
             self.targetDatum = datum
             self.targetLink  = link
             
@@ -126,14 +80,6 @@ class importDatumUI():
             # get the current active document to avoid errors if user changes tab
             self.activeDoc = App.ActiveDocument
             self.parentAssembly = self.activeDoc.Model
-
-            '''
-            # this has been checked before calling
-            self.targetDatum = getSelection()
-            selectionTree = Gui.Selection.getSelectionEx("", 0)[0].SubElementNames[0]
-            (targetLinkName, sel, dot) = selectionTree.partition('.'+self.targetDatum.Name)
-            self.targetLink = self.activeDoc.getObject( targetLinkName )
-            '''
 
             # make and initialize UI
             self.drawUI()

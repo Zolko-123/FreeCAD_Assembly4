@@ -44,7 +44,7 @@ class insertLink( QtGui.QDialog ):
             return True
         return False
 
-
+    '''
     def getSelection(self):
         selectedObj = None
         # check that there is an App::Part called 'Model'
@@ -59,7 +59,7 @@ class insertLink( QtGui.QDialog ):
             if selObj.isDerivedFrom('App::Link'):
                 selectedObj = selObj
         return selectedObj
-
+    '''
 
 
     """
