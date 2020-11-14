@@ -23,11 +23,13 @@ import libAsm4 as Asm4
 """
 global taskUI
 
-# selection view properties overrides
+# link being placed view properties overrides
 DrawStyle = 'Solid'
 LineWidth = 3.0
 DiffuseColor = (1.0, 1.0, 1.0, 0.0)
 Transparency = 0.50
+
+LineHighlight = (1.0, 1.0, 0.0, 0.0)
 
 
 
@@ -105,6 +107,7 @@ class placeLinkUI():
                 Gui.Control.closeDialog()
             else:
                 self.selectedLink = selection
+                Asm4.makeAsmProperties(self.selectedLink)
 
             #save original AttachmentOffset of linked part
             self.old_LinkAttachmentOffset = self.selectedLink.AttachmentOffset
@@ -599,6 +602,7 @@ class placeLinkUI():
                 self.parentDoc.setText( dText + pText )
                 # highlight the selected part:
                 Gui.Selection.addSelection( parentPart.Document.Name, 'Model', parentPart.Name+'.' )
+                Asm4.showChildLCSs(parentPart, True, [])
         # something wrong
         else:
             return
@@ -654,21 +658,24 @@ class placeLinkUI():
     # Rotations
     def onRotX(self):
         if self.XrotationAngle > 270.0: 
-            self.XrotAngleSpinBox.setValue(self.XrotationAngle - 270.0)
+            self.XrotationAngle = self.XrotationAngle - 270.0
         else:
-            self.XrotAngleSpinBox.setValue(self.XrotationAngle + 90.0)
+            self.XrotationAngle = self.XrotationAngle + 90.0
+        self.reorientLink()
 
     def onRotY(self):
         if self.YrotationAngle > 270.0: 
-            self.YrotAngleSpinBox.setValue(self.YrotationAngle - 270.0)
+            self.YrotationAngle = self.YrotationAngle - 270.0
         else:
-            self.YrotAngleSpinBox.setValue(self.YrotationAngle + 90.0)
+            self.YrotationAngle = self.YrotationAngle + 90.0
+        self.reorientLink()
 
     def onRotZ(self):
         if self.ZrotationAngle > 270.0: 
-            self.ZrotAngleSpinBox.setValue(self.ZrotationAngle - 270.0)
+            self.ZrotationAngle = self.ZrotationAngle - 270.0
         else:
-            self.ZrotAngleSpinBox.setValue(self.ZrotationAngle + 90.0)
+            self.ZrotationAngle = self.ZrotationAngle + 90.0
+        self.reorientLink()
 
     # initialize the UI for the selected link
     def initUI(self):
@@ -755,40 +762,19 @@ class placeLinkUI():
         self.mainLayout.addLayout(self.columnsLayout)
 
         # X Translation Value
-        self.XtranslSpinBoxLayout = QtGui.QHBoxLayout()
+        self.XoffsetLayout = QtGui.QHBoxLayout()
+        self.XtranslSpinBoxLabel = self.XoffsetLayout.addWidget(QtGui.QLabel("Translation along X :"))
         self.XtranslSpinBox = QtGui.QDoubleSpinBox()
         self.XtranslSpinBox.setRange(-999999.00, 999999.00)
         self.XtranslSpinBox.setValue(self.Xtranslation)
-        self.XtranslSpinBox.setToolTip("X translation in mm")
+        self.XtranslSpinBox.setToolTip("Translation along X axis")
+        self.RotXButton = QtGui.QPushButton('Rotate X +90°')
+        self.RotXButton.setToolTip("Rotate 90 deg around X axis")
         # add the QLDoubleSpinBox
-        self.XtranslSpinBoxLayout.addStretch()
-        self.XtranslSpinBoxLabel = self.XtranslSpinBoxLayout.addWidget(QtGui.QLabel("X translation in mm: "))
-        self.XtranslSpinBoxLayout.addWidget(self.XtranslSpinBox)
-        self.mainLayout.addLayout(self.XtranslSpinBoxLayout)
-        
-        # Y Translation Value
-        self.YtranslSpinBoxLayout = QtGui.QHBoxLayout()
-        self.YtranslSpinBox = QtGui.QDoubleSpinBox()
-        self.YtranslSpinBox.setRange(-999999.00, 999999.00)
-        self.YtranslSpinBox.setValue(self.Ytranslation)
-        self.YtranslSpinBox.setToolTip("Y translation in mm")
-        # add the QLDoubleSpinBox
-        self.YtranslSpinBoxLayout.addStretch()
-        self.YtranslSpinBoxLabel = self.YtranslSpinBoxLayout.addWidget(QtGui.QLabel("Y translation in mm: "))
-        self.YtranslSpinBoxLayout.addWidget(self.YtranslSpinBox)
-        self.mainLayout.addLayout(self.YtranslSpinBoxLayout)
-
-        # Z Translation Value
-        self.ZtranslSpinBoxLayout = QtGui.QHBoxLayout()
-        self.ZtranslSpinBox = QtGui.QDoubleSpinBox()
-        self.ZtranslSpinBox.setRange(-999999.00, 999999.00)
-        self.ZtranslSpinBox.setValue(self.Ztranslation)
-        self.ZtranslSpinBox.setToolTip("Z translation in mm")
-        # add the QLDoubleSpinBox
-        self.ZtranslSpinBoxLayout.addStretch()
-        self.ZtranslSpinBoxLabel = self.ZtranslSpinBoxLayout.addWidget(QtGui.QLabel("Z translation in mm: "))
-        self.ZtranslSpinBoxLayout.addWidget(self.ZtranslSpinBox)
-        self.mainLayout.addLayout(self.ZtranslSpinBoxLayout)
+        self.XoffsetLayout.addWidget(self.XtranslSpinBox)
+        self.XoffsetLayout.addStretch()
+        self.XoffsetLayout.addWidget(self.RotXButton)
+        self.mainLayout.addLayout(self.XoffsetLayout)
 
         # X Rotation Value
         self.XrotAngleSpinBoxLayout = QtGui.QHBoxLayout()
@@ -796,14 +782,27 @@ class placeLinkUI():
         self.XrotAngleSpinBox.setRange(-360.00, 360.00)
         self.XrotAngleSpinBox.setValue(self.XrotationAngle)
         self.XrotAngleSpinBox.setToolTip("Rotation around x-axis in deg.")
-        self.RotXButton = QtGui.QPushButton('Rot X + 90°')
-        self.RotXButton.setToolTip("Rotate 90 deg around X axis")
         # add the QLDoubleSpinBox
         self.XrotAngleSpinBoxLayout.addStretch()
         self.XrotAngleSpinBoxLabel = self.XrotAngleSpinBoxLayout.addWidget(QtGui.QLabel("Rotation around x-axis in deg.: "))
         self.XrotAngleSpinBoxLayout.addWidget(self.XrotAngleSpinBox)
-        self.XrotAngleSpinBoxLayout.addWidget(self.RotXButton)
-        self.mainLayout.addLayout(self.XrotAngleSpinBoxLayout)
+        #self.XrotAngleSpinBoxLayout.addWidget(self.RotXButton)
+        #self.mainLayout.addLayout(self.XrotAngleSpinBoxLayout)
+
+        # Y Translation Value
+        self.YoffsetLayout = QtGui.QHBoxLayout()
+        self.YtranslSpinBoxLabel = self.YoffsetLayout.addWidget(QtGui.QLabel("Translation along Y :"))
+        self.YtranslSpinBox = QtGui.QDoubleSpinBox()
+        self.YtranslSpinBox.setRange(-999999.00, 999999.00)
+        self.YtranslSpinBox.setValue(self.Ytranslation)
+        self.YtranslSpinBox.setToolTip("Translation along Y")
+        self.RotYButton = QtGui.QPushButton('Rotate Y +90°')
+        self.RotYButton.setToolTip("Rotate 90 deg around Y axis")
+        # add the QLDoubleSpinBox
+        self.YoffsetLayout.addWidget(self.YtranslSpinBox)
+        self.YoffsetLayout.addStretch()
+        self.YoffsetLayout.addWidget(self.RotYButton)
+        self.mainLayout.addLayout(self.YoffsetLayout)
 
         # Y Rotation Value
         self.YrotAngleSpinBoxLayout = QtGui.QHBoxLayout()
@@ -811,14 +810,27 @@ class placeLinkUI():
         self.YrotAngleSpinBox.setRange(-360.00, 360.00)
         self.YrotAngleSpinBox.setValue(self.YrotationAngle)
         self.YrotAngleSpinBox.setToolTip("Rotation around y-axis in deg.")
-        self.RotYButton = QtGui.QPushButton('Rot Y + 90°')
-        self.RotYButton.setToolTip("Rotate 90 deg around Y axis")
         # add the QLDoubleSpinBox
         self.YrotAngleSpinBoxLayout.addStretch()
         self.YrotAngleSpinBoxLabel = self.YrotAngleSpinBoxLayout.addWidget(QtGui.QLabel("Rotation around y-axis in deg.: "))
         self.YrotAngleSpinBoxLayout.addWidget(self.YrotAngleSpinBox)
-        self.YrotAngleSpinBoxLayout.addWidget(self.RotYButton)
-        self.mainLayout.addLayout(self.YrotAngleSpinBoxLayout)
+        #self.mainLayout.addLayout(self.YrotAngleSpinBoxLayout)
+
+
+        # Z Translation Value
+        self.ZoffsetLayout = QtGui.QHBoxLayout()
+        self.ZtranslSpinBoxLabel = self.ZoffsetLayout.addWidget(QtGui.QLabel("Translation along Z :"))
+        self.ZtranslSpinBox = QtGui.QDoubleSpinBox()
+        self.ZtranslSpinBox.setRange(-999999.00, 999999.00)
+        self.ZtranslSpinBox.setValue(self.Ztranslation)
+        self.ZtranslSpinBox.setToolTip("Translation along Z:")
+        self.RotZButton = QtGui.QPushButton('Rotate Z +90°')
+        self.RotZButton.setToolTip("Rotate 90 deg around Z axis")
+        # add to the layout
+        self.ZoffsetLayout.addWidget(self.ZtranslSpinBox)
+        self.ZoffsetLayout.addStretch()
+        self.ZoffsetLayout.addWidget(self.RotZButton)
+        self.mainLayout.addLayout(self.ZoffsetLayout)
 
         # Z Rotation Value
         self.ZrotAngleSpinBoxLayout = QtGui.QHBoxLayout()
@@ -826,14 +838,12 @@ class placeLinkUI():
         self.ZrotAngleSpinBox.setRange(-360.00, 360.00)
         self.ZrotAngleSpinBox.setValue(self.ZrotationAngle)
         self.ZrotAngleSpinBox.setToolTip("Rotation around z-axis in deg.")
-        self.RotZButton = QtGui.QPushButton('Rot Z + 90°')
-        self.RotZButton.setToolTip("Rotate 90 deg around Z axis")
         # add the QLDoubleSpinBox and button
         self.ZrotAngleSpinBoxLayout.addStretch()
+        #self.ZrotAngleSpinBoxLabel = self.ZrotAngleSpinBoxLayout.addWidget(QtGui.QLabel("Rotation around z-axis in deg.: "))
         self.ZrotAngleSpinBoxLabel = self.ZrotAngleSpinBoxLayout.addWidget(QtGui.QLabel("Rotation around z-axis in deg.: "))
-        self.ZrotAngleSpinBoxLayout.addWidget(self.ZrotAngleSpinBox)
-        self.ZrotAngleSpinBoxLayout.addWidget(self.RotZButton)
-        self.mainLayout.addLayout(self.ZrotAngleSpinBoxLayout)
+        #self.ZrotAngleSpinBoxLayout.addWidget(self.ZrotAngleSpinBox)
+        #self.mainLayout.addLayout(self.ZrotAngleSpinBoxLayout)
 
         # apply the layout to the main window
         self.form.setLayout(self.mainLayout)
@@ -845,9 +855,9 @@ class placeLinkUI():
         self.RotXButton.clicked.connect( self.onRotX )
         self.RotYButton.clicked.connect( self.onRotY )
         self.RotZButton.clicked.connect( self.onRotZ )
-        self.XrotAngleSpinBox.valueChanged.connect(self.onXRotValChanged)
-        self.YrotAngleSpinBox.valueChanged.connect(self.onYRotValChanged)
-        self.ZrotAngleSpinBox.valueChanged.connect(self.onZRotValChanged)
+        #self.XrotAngleSpinBox.valueChanged.connect(self.onXRotValChanged)
+        #self.YrotAngleSpinBox.valueChanged.connect(self.onYRotValChanged)
+        #self.ZrotAngleSpinBox.valueChanged.connect(self.onZRotValChanged)
         self.XtranslSpinBox.valueChanged.connect(self.onXTranslValChanged)
         self.YtranslSpinBox.valueChanged.connect(self.onYTranslValChanged)
         self.ZtranslSpinBox.valueChanged.connect(self.onZTranslValChanged)

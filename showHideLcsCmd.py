@@ -12,7 +12,7 @@ import libAsm4 as Asm4
 
 
 # Already processed links cache, no need to process the same part if its linked multiple times
-processedLinks = []
+#processedLinks = []
 
 
 """
@@ -39,16 +39,16 @@ class showLcsCmd:
         return False
 
     def Activated(self):
-        global processedLinks
+        #global processedLinks
         # reset processed links cache
         processedLinks = []
 
         model = Asm4.getModelSelected()
         if model:
             for objName in model.getSubObjects():
-                ShowChildLCSs(model.getSubObject(objName, 1), True)
+                Asm4.showChildLCSs(model.getSubObject(objName, 1), True, processedLinks)
         else:
-            ShowChildLCSs(Asm4.getSelection(), True)
+            Asm4.showChildLCSs(Asm4.getSelection(), True, processedLinks)
 
 
 """
@@ -73,16 +73,16 @@ class hideLcsCmd:
         return False
 
     def Activated(self):
-        global processedLinks
+        #global processedLinks
         # reset processed links cache
         processedLinks = []
 
         model = Asm4.getModelSelected()
         if model:
             for objName in model.getSubObjects():
-                ShowChildLCSs(model.getSubObject(objName, 1), False)
+                Asm4.showChildLCSs(model.getSubObject(objName, 1), False, processedLinks)
         else:
-            ShowChildLCSs(Asm4.getSelection(), False)
+            Asm4.showChildLCSs(Asm4.getSelection(), False, processedLinks)
 
 
 
@@ -91,9 +91,9 @@ class hideLcsCmd:
     |              Show/Hide the LCSs in            |
     |  the provided object and all linked children  |
     +-----------------------------------------------+
-"""
-def ShowChildLCSs(obj, show):
-    global processedLinks
+
+def tShowChildLCSs(obj, show, processedLinks):
+    #global processedLinks
 
     # if its a datum apply the visibility
     if obj.TypeId in Asm4.datumTypes:
@@ -103,7 +103,7 @@ def ShowChildLCSs(obj, show):
         processedLinks.append(obj.Name)
         for objName in obj.LinkedObject.getSubObjects():
             linkObj = obj.LinkedObject.Document.getObject(objName[0:-1])
-            ShowChildLCSs(linkObj, show)
+            ShowChildLCSs(linkObj, show, processedLinks)
     # if it's a container
     else:
         if obj.TypeId in Asm4.containerTypes:
@@ -118,6 +118,7 @@ def ShowChildLCSs(obj, show):
                             subObj.ViewObject.show()
                         else:
                             subObj.ViewObject.hide()
+"""
 
 
 
