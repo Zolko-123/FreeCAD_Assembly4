@@ -24,11 +24,6 @@ import libAsm4 as Asm4
     |               Helper functions                |
     +-----------------------------------------------+
 """
-# Types of objects to import
-datumTypes = ['PartDesign::CoordinateSystem',
-                           'PartDesign::Plane',
-                           'PartDesign::Line',
-                           'PartDesign::Point']
 
 
 
@@ -228,7 +223,7 @@ class makeBOM:
                 Zsize = str(int((bb.ZLength * 10)+0.099)/10)
                 self.PartsList += ', Size: '+Xsize+' x '+Ysize+' x '+Zsize
         # everything else except datum objects
-        elif obj.TypeId not in datumTypes:
+        elif obj.TypeId not in Asm4.datumTypes:
             self.PartsList += indent+obj.Label
             if obj.Label2:
                 self.PartsList += ' ('+obj.Label2+')'

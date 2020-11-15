@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.9.10, 2020-11-01
+Current version 0.9.11, 2020-11-14
 
 
 
@@ -51,6 +51,13 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 
 ## Release notes
+
+* 2020.11.14 (**0.9.11**) :  
+Added Offset translation adjustment in the placeLink dialog  
+Added Configuration Engine  
+Big thanx for the help, this is really apreciated  
+Measurements obey the preferences settings  
+Some code clean-up (hopefully won't break anything, if it does please report)  
 
 * 2020.11.01 (**0.9.10**) :  
 Bugfixe in placement of Fastener on "Hole Axis"  

@@ -23,24 +23,6 @@ import libAsm4 as Asm4
     |               Helper functions                |
     +-----------------------------------------------+
 """
-def getSelection():    
-    selectedObj = None
-    # check that there is an App::Part called 'Model'
-    # if App.ActiveDocument.getObject('Model') and App.ActiveDocument.getObject('Model').TypeId=='App::Part' :
-    # check that something is selected
-    if len(Gui.Selection.getSelection())==1:
-        selection = Gui.Selection.getSelection()[0]
-        if selection.TypeId in datumTypes:
-            selectedObj = selection
-    # now we should be safe
-    return selectedObj
-
-
-# Types of objects to import
-datumTypes = [  'PartDesign::CoordinateSystem', \
-                'PartDesign::Plane',            \
-                'PartDesign::Line',             \
-                'PartDesign::Point']
 
 
 # icon to show in the Menu, toolbar and widget window
@@ -64,12 +46,12 @@ class placeDatumCmd():
                 }
 
     def IsActive(self):
-        if App.ActiveDocument and getSelection():
+        if App.ActiveDocument and Asm4.getSelectedDatum():
             return True
         return False
 
     def Activated(self):
-        selectedDatum = getSelection()
+        selectedDatum = Asm4.getSelectedDatum()
         # check if the datum object is already mapped to something
         if selectedDatum.MapMode == 'Deactivated' and Asm4.checkModel():
             Gui.Control.showDialog( placeDatumUI() )
@@ -107,7 +89,7 @@ class placeDatumUI():
         self.parentAssembly = self.activeDoc.Model
 
         # check that we have selected a PartDesign::CoordinateSystem
-        self.selectedDatum = getSelection()
+        self.selectedDatum = Asm4.getSelectedDatum()
   
         # Now we can draw the UI
         self.drawUI()
@@ -278,24 +260,6 @@ class placeDatumUI():
             Gui.Selection.addSelection( self.activeDoc.Name, 'Model', self.selectedDatum.Name +'.')
             retval = True
         return retval
-
-    '''
-    # get all datums in a part
-    def getPartLCS( self, part ):
-        partLCS = [ ]
-        # parse all objects in the part (they return strings)
-        for objName in part.getSubObjects(1):
-            # get the proper objects
-            # all object names end with a "." , this needs to be removed
-            obj = part.getObject( objName[0:-1] )
-            if obj.TypeId in datumTypes:
-                partLCS.append( obj )
-            elif obj.TypeId == 'App::DocumentObjectGroup':
-                datums = self.getPartLCS(obj)
-                for datum in datums:
-                    partLCS.append(datum)
-        return partLCS
-    '''
 
 
     # fill the LCS list when changing the parent

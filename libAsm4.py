@@ -39,8 +39,7 @@ partInfo =[     'Description',                  \
                 'SupplierDescription',          \
                 'SupplierReference' ]
 
-containerTypes = [  'App::Part', \
-                    'PartDesign::Body' ]
+containerTypes = [  'App::Part', 'PartDesign::Body' ]
 
 
 
@@ -156,10 +155,52 @@ def getLinkAndDatum():
                 (parents2, dot, groupName) = parents.partition('.')
                 link2 = App.ActiveDocument.getObject( parents2 )
                 group = App.ActiveDocument.getObject( groupName )
-                if link2 in childrenTable and group.TypeId=='App::DocumentObjectGroup':
+                if link2 and group and link2 in childrenTable and group.TypeId=='App::DocumentObjectGroup':
                     retval = (link2,selObj)
     return retval
 
+
+# get from two selected datums the corresponding links
+def getLinkAndDatum2():
+    retval = (None, None, None, None)
+    # only for Asm4 
+    if checkModel() and len(Gui.Selection.getSelection()) == 2:
+        parentAssembly = App.ActiveDocument.Model
+        # find all the links to Part or Body objects
+        childrenTable = []
+        for objStr in parentAssembly.getSubObjects():
+            # the string ends with a . that must be removed
+            obj = App.ActiveDocument.getObject( objStr[0:-1] )
+            if isLinkToPart(obj):
+                # add it to our tree table if it's a link to an App::Part ...
+                childrenTable.append( obj )
+
+        selObjA = Gui.Selection.getSelection()[0]
+        selObjB = Gui.Selection.getSelection()[1]
+        # two datum objects are selected
+        if ((selObjA.TypeId in datumTypes) and (selObjB.TypeId in datumTypes)):
+            # this returns the selection hierarchy in the form 'linkName.datumName.'
+            selTreeA = Gui.Selection.getSelectionEx("", 0)[0].SubElementNames[0]
+            selTreeB = Gui.Selection.getSelectionEx("", 0)[0].SubElementNames[1]
+            (parentsA, totoA, dotA) = selTreeA.partition('.'+selObjA.Name)
+            (parentsB, totoB, dotB) = selTreeB.partition('.'+selObjB.Name)
+            linkA = App.ActiveDocument.getObject( parentsA )
+            linkB = App.ActiveDocument.getObject( parentsB )
+            if (dotA =='.' and linkA in childrenTable) and (dotB =='.' and linkB in childrenTable):
+                retval = (linkA, selObjA, linkB, selObjB)
+
+            else:
+                # see whether the datum objects are in a group, some people like to do that
+                (parentsA2, dotA, groupNameA) = parentsA.partition('.')
+                (parentsB2, dotB, groupNameB) = parentsB.partition('.')
+                linkA2 = App.ActiveDocument.getObject( parentsA2 )
+                linkB2 = App.ActiveDocument.getObject( parentsB2 )
+                groupA = App.ActiveDocument.getObject( groupNameA )
+                groupB = App.ActiveDocument.getObject( groupNameB )
+                if ((linkA2 in childrenTable and groupA.TypeId=='App::DocumentObjectGroup') and (linkB2 in childrenTable and groupB.TypeId=='App::DocumentObjectGroup')):
+                    retval = (linkA2,selObjA,linkB2,selObjB)
+
+    return retval
 
 # get all datums in a part
 def getPartLCS( part ):
@@ -530,7 +571,7 @@ def getModelSelected():
     return None
 
 
-def getSelection():
+def getSelectedLink():
     # check that there is an App::Part called 'Model'
     #if App.ActiveDocument.getObject('Model') and App.ActiveDocument.Model.TypeId == 'App::Part':
     if checkModel():
@@ -543,5 +584,50 @@ def getSelection():
     return None
 
 
+def getSelectedDatum():    
+    selectedObj = None
+    # check that something is selected
+    if len(Gui.Selection.getSelection())==1:
+        selection = Gui.Selection.getSelection()[0]
+        # check that it's a datum
+        if selection.TypeId in datumTypes:
+            selectedObj = selection
+    # now we should be safe
+    return selectedObj
 
+
+
+
+"""
+    +-----------------------------------------------+
+    |              Show/Hide the LCSs in            |
+    |  the provided object and all linked children  |
+    +-----------------------------------------------+
+"""
+def showChildLCSs(obj, show, processedLinks):
+    #global processedLinks
+
+    # if its a datum apply the visibility
+    if obj.TypeId in datumTypes:
+        obj.Visibility = show
+    # if it's a link, look for subObjects
+    elif obj.TypeId == 'App::Link' and obj.Name not in processedLinks:
+        processedLinks.append(obj.Name)
+        for objName in obj.LinkedObject.getSubObjects():
+            linkObj = obj.LinkedObject.Document.getObject(objName[0:-1])
+            showChildLCSs(linkObj, show, processedLinks)
+    # if it's a container
+    else:
+        if obj.TypeId in containerTypes:
+            for subObjName in obj.getSubObjects():
+                subObj = obj.getSubObject(subObjName, 1)    # 1 for returning the real object
+                if subObj != None:
+                    if subObj.TypeId in datumTypes:
+                        #subObj.Visibility = show
+                        # Aparently obj.Visibility API is very slow
+                        # Using the ViewObject.show() and ViewObject.hide() API runs at least twice faster
+                        if show:
+                            subObj.ViewObject.show()
+                        else:
+                            subObj.ViewObject.hide()
 

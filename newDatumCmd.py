@@ -28,8 +28,7 @@ class newDatum:
     "My tool object"
     def __init__(self, datumName):
         self.datumName = datumName
-        # recognised types
-        self.datumTypes = ['PartDesign::Point','PartDesign::Line','PartDesign::Plane','PartDesign::CoordinateSystem']
+        # recognised containers (not the same as Asm4.containerTypes !)
         self.containers = [ 'App::Part', 'PartDesign::Body', 'App::DocumentObjectGroup']
         if self.datumName   == 'Point':
             self.datumType   = 'PartDesign::Point'
@@ -87,7 +86,7 @@ class newDatum:
         if Gui.Selection.getSelection():
             selectedObj = Gui.Selection.getSelection()[0]
             # ... and it's an App::Part or an datum object
-            if selectedObj.TypeId in self.containers or selectedObj.TypeId in self.datumTypes:
+            if selectedObj.TypeId in self.containers or selectedObj.TypeId in Asm4.datumTypes:
                 return(selectedObj)
         # or of nothing is selected ...
         elif App.ActiveDocument.getObject('Model'):
@@ -111,7 +110,7 @@ class newDatum:
         if selectedObj.TypeId in self.containers:
             parentContainer = selectedObj
         # if a datum object is selected we try to find the parent container
-        elif selectedObj.TypeId in self.datumTypes:
+        elif selectedObj.TypeId in Asm4.datumTypes:
             parent = selectedObj.getParentGeoFeatureGroup()
             if parent.TypeId in self.containers:
                 parentContainer = parent
@@ -162,13 +161,13 @@ class newHole:
                 }
 
     def IsActive(self):
-        selection = self.getSelection()
+        selection = self.getSelectedEdge()
         if selection == None:
             return False
         else:
             return True
 
-    def getSelection(self):
+    def getSelectedEdge(self):
         # check that we have selected a circular edge
         selection = None
         if App.ActiveDocument:
@@ -192,7 +191,7 @@ class newHole:
     +-----------------------------------------------+
     """
     def Activated(self):
-        ( selectedObj, edge ) = self.getSelection()
+        ( selectedObj, edge ) = self.getSelectedEdge()
         edgeName = edge.SubElementNames[0]
         parentPart = selectedObj.getParentGeoFeatureGroup()
         # if the solid having the edge is indeed in an App::Part
