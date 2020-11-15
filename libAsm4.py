@@ -33,11 +33,10 @@ datumTypes = [  'PartDesign::CoordinateSystem', \
                 'PartDesign::Point']
 
 
-partInfo =[     'Description',                  \
-                'Reference',                    \
-                'Supplier',                     \
-                'SupplierDescription',          \
-                'SupplierReference' ]
+partInfo =[     'PartID',                       \
+                'PartName',                     \
+                'PartDescription',              \
+                'PartSupplier']
 
 containerTypes = [  'App::Part', 'PartDesign::Body' ]
 

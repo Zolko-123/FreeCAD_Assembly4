@@ -92,15 +92,17 @@ class saveConfigurationUI():
 
     # OK
     def accept(self):
-        if self.configurationName.text().strip() == '':
+        confName = self.configurationName.text().strip()
+        confDescr = self.configurationDescription.text().strip()
+        if confName == '':
             Asm4.warningBox('Please specify configuration name!')
             self.configurationName.setFocus()
             return
         # if no description provided, set the name as description
-        if self.configurationDescription.text().strip() == '':
-            self.configurationDescription.setText( self.configurationName.text().strip() )
+        if confDescr == '':
+            confDescr = ' '
         
-        self.SaveConfiguration(self.configurationName.text().strip(), self.configurationDescription.text().strip())
+        self.SaveConfiguration( confName, confDescr )
         Gui.Control.closeDialog()
 
 
@@ -388,7 +390,7 @@ def setConfigDescription(conf, description):
 
 
 def getConfigDescription(conf):
-    return str(conf.get(DESCRIPTION_CELL))
+    return str(conf.get(DESCRIPTION_CELL)).strip()
 
 
 def GetValidAlias(str):
