@@ -13,8 +13,7 @@ import os
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
-#from FreeCAD import Console as FCC
-
+from FreeCAD import Console as FCC
 
 import libAsm4 as Asm4
 
@@ -79,7 +78,7 @@ class infoPartUI():
         self.form = self.base        
         iconFile = os.path.join( Asm4.iconPath , 'Asm4_PartInfo.svg')
         self.form.setWindowIcon(QtGui.QIcon( iconFile ))
-        self.form.setWindowTitle('Edit Part Information')
+        self.form.setWindowTitle("Edit Part Information (Doesn't work yet)")
        
         # hey-ho, let's go
         self.part = checkPart()
@@ -119,6 +118,8 @@ class infoPartUI():
 
     # OK: we insert the selected part
     def accept(self):
+        for prop in self.infoTable:
+            prop[1] = str()
         self.finish()
 
 
@@ -131,7 +132,7 @@ class infoPartUI():
         for prop in self.infoTable:
             checkLayout = QtGui.QHBoxLayout()
             propValue   = QtGui.QLineEdit()
-            propValue.setText( prop[1] )
+            propValue.setText( str(prop[1]) )
             checked     = QtGui.QCheckBox()
             checkLayout.addWidget(propValue)
             checkLayout.addWidget(checked)

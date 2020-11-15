@@ -433,9 +433,13 @@ class placeLinkUI():
                 # if the linked part has been renamed by the user
                 pText = Asm4.nameLabel( parentPart.LinkedObject )
                 self.parentDoc.setText( dText + pText )
-                # highlight the selected part:
-                Gui.Selection.addSelection( parentPart.Document.Name, 'Model', parentPart.Name+'.' )
+                # show all datums in selected parent
                 Asm4.showChildLCSs(parentPart, True, [])
+                # highlight the selected part:
+                Gui.Selection.addSelection( \
+                        parentPart.Document.Name, 'Model', parentPart.Name+'.' )
+                QtCore.QTimer.singleShot(1500, lambda:Gui.Selection.removeSelection( \
+                        parentPart.Document.Name, 'Model', parentPart.Name+'.' ) )
         # something wrong
         else:
             return
@@ -691,6 +695,7 @@ class placeLinkUI():
 
         # Actions
         self.parentList.currentIndexChanged.connect( self.onParentSelected )
+        self.parentList.activated.connect( self.onParentSelected )
         self.attLCSlist.itemClicked.connect( self.Apply )
         self.partLCSlist.itemClicked.connect( self.Apply )
         self.RotXButton.clicked.connect( self.onRotX )
@@ -714,6 +719,7 @@ class linkSelObserver:
     def addSelection(self,doc,obj,sub,pnt):               # Selection object
         # Since both 3D view clicks and manual tree selection gets into the same callback
         # we will determine by clicked coordinates, for manual tree selections the coordinates are (0,0,0)
+        FCC.PrintMessage('Clicked on :'+obj+'@'+sub+'\n')
         if pnt != (0,0,0):
             # 3D view click
             # Get linked object name that handles sub-sub-assembly
