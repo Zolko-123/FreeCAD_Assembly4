@@ -7,7 +7,7 @@
 # VariablesLib.py
 
 
-import os
+import os, re
 
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
@@ -118,6 +118,9 @@ class addVariable():
             self.typeList.setCurrentIndex( 0 )
         else:
             self.typeList.setCurrentIndex( propFloat )
+        
+        # set focus on the variable name
+        self.varName.setFocus()
 
 
     def onOK(self):
@@ -133,6 +136,8 @@ class addVariable():
             #if varValue and propType=='App::PropertyFloat':
             if varValue and propType=='Float':
                 setattr( self.Variables, varName, varValue )
+        # select the Variables placeholder so we can see our entry
+        Gui.Selection.addSelection(self.Variables)
         self.UI.close()
 
 
