@@ -173,6 +173,8 @@ class placeFastenerUI():
         # find the oldLCS in the list of LCS of the linked part...
         lcs_found = []
         lcs_found = self.attLCSlist.findItems( old_parentLCS, QtCore.Qt.MatchExactly )
+        if not lcs_found:
+            lcs_found = self.attLCSlist.findItems( old_parentLCS+' (', QtCore.Qt.MatchStartsWith )
         if lcs_found:
             # ... and select it
             self.attLCSlist.setCurrentItem( lcs_found[0] )
@@ -395,7 +397,11 @@ class placeFastenerUI():
                 pText = Asm4.nameLabel( parentPart.LinkedObject )
                 self.parentDoc.setText( dText + pText )
                 # highlight the selected part:
-                Gui.Selection.addSelection( parentPart.Document.Name, 'Model', parentPart.Name+'.' )
+                Gui.Selection.addSelection( \
+                        parentPart.Document.Name, 'Model', parentPart.Name+'.' )
+                QtCore.QTimer.singleShot(1500, lambda:Gui.Selection.removeSelection( \
+                        parentPart.Document.Name, 'Model', parentPart.Name+'.' ) )
+
         # something wrong
         else:
             return
@@ -455,6 +461,13 @@ class placeFastenerUI():
     def onRotZ(self):
         self.rotAxis(Asm4.rotZ)
 
+    # Translations
+    def movePart( self ):
+        x = self.XtranslSpinBox.value()
+        y = self.YtranslSpinBox.value()
+        z = self.ZtranslSpinBox.value()
+        self.selectedFastener.AttachmentOffset.Base = App.Vector(x,y,z)
+        self.selectedFastener.recompute()
 
     # fill in the GUI
     def initUI(self):
@@ -469,6 +482,10 @@ class placeFastenerUI():
         self.parentTable.append( self.parentAssembly )
         parentIcon = self.parentAssembly.ViewObject.Icon
         self.parentList.addItem( parentIcon, 'Parent Assembly', self.parentAssembly )
+        # set the old position values
+        self.XtranslSpinBox.setValue( self.selectedFastener.AttachmentOffset.Base.x )
+        self.YtranslSpinBox.setValue( self.selectedFastener.AttachmentOffset.Base.y )
+        self.ZtranslSpinBox.setValue( self.selectedFastener.AttachmentOffset.Base.z )
 
 
     # defines the UI, only static elements
@@ -483,6 +500,7 @@ class placeFastenerUI():
         self.formLayout.addRow(QtGui.QLabel('Fastener :'),self.FStype)
         # combobox showing all available App::Link
         self.parentList = QtGui.QComboBox()
+        self.parentList.setMaximumWidth(300)
         self.formLayout.addRow(QtGui.QLabel('Attach to :'),self.parentList)
         self.mainLayout.addLayout(self.formLayout)
 
@@ -497,32 +515,62 @@ class placeFastenerUI():
         self.attLCSlist = QtGui.QListWidget()
         self.mainLayout.addWidget(self.attLCSlist)
 
-        # Rotation Buttons
-        self.rotButtonsLayout = QtGui.QHBoxLayout()
-        self.RotXButton = QtGui.QPushButton('Rot X')
-        self.RotXButton.setToolTip("Rotate the instance around the X axis by 90deg")
-        self.RotYButton = QtGui.QPushButton('Rot Y')
-        self.RotYButton.setToolTip("Rotate the instance around the Y axis by 90deg")
-        self.RotZButton = QtGui.QPushButton('Rot Z')
-        self.RotZButton.setToolTip("Rotate the instance around the Z axis by 90deg")
-        # add the buttons
-        self.rotButtonsLayout.addStretch()
-        self.rotButtonsLayout.addWidget(self.RotXButton)
-        self.rotButtonsLayout.addWidget(self.RotYButton)
-        self.rotButtonsLayout.addWidget(self.RotZButton)
-        self.rotButtonsLayout.addStretch()
-        self.mainLayout.addLayout(self.rotButtonsLayout)
+        # X Translation Value
+        self.XoffsetLayout = QtGui.QHBoxLayout()
+        self.XtranslSpinBoxLabel = self.XoffsetLayout.addWidget(QtGui.QLabel("X Translation :"))
+        self.XtranslSpinBox = QtGui.QDoubleSpinBox()
+        self.XtranslSpinBox.setRange(-999999.00, 999999.00)
+        self.XtranslSpinBox.setToolTip("Translation along X axis")
+        self.RotXButton = QtGui.QPushButton('Rotate X +90°')
+        self.RotXButton.setToolTip("Rotate 90 deg around X axis")
+        # add the QLDoubleSpinBox
+        self.XoffsetLayout.addWidget(self.XtranslSpinBox)
+        self.XoffsetLayout.addStretch()
+        self.XoffsetLayout.addWidget(self.RotXButton)
+        self.mainLayout.addLayout(self.XoffsetLayout)
+
+        # Y Translation Value
+        self.YoffsetLayout = QtGui.QHBoxLayout()
+        self.YtranslSpinBoxLabel = self.YoffsetLayout.addWidget(QtGui.QLabel("Y Translation :"))
+        self.YtranslSpinBox = QtGui.QDoubleSpinBox()
+        self.YtranslSpinBox.setRange(-999999.00, 999999.00)
+        self.YtranslSpinBox.setToolTip("Translation along Y")
+        self.RotYButton = QtGui.QPushButton('Rotate Y +90°')
+        self.RotYButton.setToolTip("Rotate 90 deg around Y axis")
+        # add the QLDoubleSpinBox
+        self.YoffsetLayout.addWidget(self.YtranslSpinBox)
+        self.YoffsetLayout.addStretch()
+        self.YoffsetLayout.addWidget(self.RotYButton)
+        self.mainLayout.addLayout(self.YoffsetLayout)
+
+        # Z Translation Value
+        self.ZoffsetLayout = QtGui.QHBoxLayout()
+        self.ZtranslSpinBoxLabel = self.ZoffsetLayout.addWidget(QtGui.QLabel("Z Translation :"))
+        self.ZtranslSpinBox = QtGui.QDoubleSpinBox()
+        self.ZtranslSpinBox.setRange(-999999.00, 999999.00)
+        self.ZtranslSpinBox.setToolTip("Translation along Z:")
+        self.RotZButton = QtGui.QPushButton('Rotate Z +90°')
+        self.RotZButton.setToolTip("Rotate 90 deg around Z axis")
+        # add to the layout
+        self.ZoffsetLayout.addWidget(self.ZtranslSpinBox)
+        self.ZoffsetLayout.addStretch()
+        self.ZoffsetLayout.addWidget(self.RotZButton)
+        self.mainLayout.addLayout(self.ZoffsetLayout)
 
         # apply the layout to the main window
         self.form.setLayout(self.mainLayout)
 
         # Actions
         self.parentList.currentIndexChanged.connect( self.onParentList )
+        self.parentList.activated.connect( self.onParentList )
         ##self.attLCSlist.itemClicked.connect( self.onDatumClicked )
         self.attLCSlist.itemClicked.connect( self.onApply )
         self.RotXButton.clicked.connect( self.onRotX )
         self.RotYButton.clicked.connect( self.onRotY )
         self.RotZButton.clicked.connect( self.onRotZ)
+        self.XtranslSpinBox.valueChanged.connect(self.movePart)
+        self.YtranslSpinBox.valueChanged.connect(self.movePart)
+        self.ZtranslSpinBox.valueChanged.connect(self.movePart)
 
 
 

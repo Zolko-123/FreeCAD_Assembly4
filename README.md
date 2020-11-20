@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.9.11, 2020-11-14
+Current version 0.9.12, 2020-11-20
 
 
 
@@ -51,6 +51,10 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 
 ## Release notes
+
+* 2020.11.20 (**0.9.12**) :  
+placeFasteners update  
+parent combo-box width corrected  
 
 * 2020.11.14 (**0.9.11**) :  
 Added Offset translation adjustment in the placeLink dialog  
