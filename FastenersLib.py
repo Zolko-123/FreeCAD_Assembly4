@@ -19,6 +19,8 @@ import libAsm4 as Asm4
 
 
 
+logger = App.Logger('Asm4_Fstnr')
+
 
 """
     +-----------------------------------------------+
@@ -45,6 +47,45 @@ def getSelectionFS():
 iconFile = os.path.join( Asm4.iconPath , 'Asm4_mvFastener.svg')
 
 
+"""
++-----------------------------------------------+
+|         populate the ExpressionEngine         |
+|               for a Datum object              |
+|       linked to an LCS in a sister part       |
++-----------------------------------------------+
+"""
+def makeExpressionFastener( attLink, attPart, attLCS ):
+    # check that everything is defined
+    if attLink and attLCS:
+        # expr = Link.Placement * LinkedPart#LCS.Placement
+        expr = attLCS +'.Placement * AttachmentOffset'
+        if attPart:
+            expr = attLink+'.Placement * '+attPart+'#'+expr
+    else:
+        expr = False
+    return expr
+ 
+ 
+def placeFastenerToLCS( attFstnr, attLink, attPart, attLCS ):
+    expr = makeExpressionFastener( attLink, attPart, attLCS )
+    # indicate the this fastener has been placed with the Assembly4 workbench
+    if not hasattr(attFstnr,'AssemblyType'):
+        Asm4.makeAsmProperties(attFstnr)
+    attFstnr.AssemblyType = 'Asm4EE'
+    # the fastener is attached by its Origin, no extra LCS
+    attFstnr.AttachedBy = 'Origin'
+    # store the part where we're attached to in the constraints object
+    attFstnr.AttachedTo = attLink+'#'+attLCS
+    # load the built expression into the Expression field of the constraint
+    attFstnr.setExpression( 'Placement', expr )
+    # recompute the object to apply the placement:
+    attFstnr.recompute()
+    container = attFstnr.getParentGeoFeatureGroup()
+    if container:
+        container.recompute()
+    if attFstnr.Document:
+        attFstnr.Document.recompute()
+
 
 def isFastener( obj):
     if not obj:
@@ -52,9 +93,88 @@ def isFastener( obj):
     if (hasattr(obj,'Proxy') and isinstance(obj.Proxy, FSBaseObject)):
         return True
     return False
-    
-    
 
+
+def isHoleAxis(obj):
+    if not obj:
+        return False
+    if hasattr(obj, 'AttacherType'):
+        if obj.AttacherType == 'Attacher::AttachEngineLine':
+            return True
+    return False
+
+
+def getSelectedAxes():
+    holeAxes = []
+    fstnr = None
+    if Gui.Selection.getSelection() and (len(Gui.Selection.getSelection()) > 1):
+        for so in Gui.Selection.getSelection():
+            if isHoleAxis(so):
+                holeAxes.append(so)
+            elif isFastener(so):
+                if fstnr is None:
+                    fstnr = so
+                else:
+                    return(None)
+    if fstnr and (len(holeAxes) > 0):
+        return (fstnr, holeAxes)
+    else:
+        return(None)
+
+
+def findObjectLink(obj, doc = App.ActiveDocument):
+    for o in doc.Objects:
+        if hasattr(o, 'LinkedObject'):
+            if o.LinkedObject == obj:
+                return o
+    return(None)
+
+
+def cloneFastener(fstnr):
+    container = fstnr.getParentGeoFeatureGroup()
+    result = None
+    if fstnr.Document and container:
+        result = fstnr.Document.copyObject(fstnr, False)
+        container.addObject(result)
+        result.recompute()
+        container = result.getParentGeoFeatureGroup()
+        if container:
+            container.recompute()
+        if result.Document:
+            result.Document.recompute()
+    return result
+
+
+
+class cloneFastenersToAcesCmd():
+    
+    def __init__(self):
+        super(cloneFastenersToAcesCmd,self).__init__()
+    
+    def GetResources(self):
+        return {"MenuText": "Clone Fastener to Axes",
+                "ToolTip": "Clone Fastener to Axes",
+                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_cloneFasteners.svg')
+                }
+    
+    def IsActive(self):
+        self.selection = getSelectedAxes()
+        if Asm4.checkModel() and self.selection:
+            return True
+        return False
+
+    def Activated(self):
+        (fstnr, axes) = self.selection
+        if fstnr.Document:
+            for axis in axes:
+                axisParent = axis.getParentGeoFeatureGroup()
+                if axisParent and axisParent.Document:
+                    axisParentLink = findObjectLink(axisParent, fstnr.Document)
+                    if axisParentLink:
+                        newFstnr = cloneFastener(fstnr)
+                        placeFastenerToLCS(newFstnr, axisParentLink.Name, axisParent.Document.Name, axis.Name)
+            Gui.Selection.clearSelection()
+            Gui.Selection.addSelection( fstnr.Document.Name, 'Model', fstnr.Name +'.')
 
 """
     +-----------------------------------------------+
@@ -271,47 +391,15 @@ class placeFastenerUI():
         if a_Link and a_LCS :
             # <<LinkName>>.Placement.multiply( <<LinkName>>.<<LCS.>>.Placement )
             # expr = '<<'+ a_Part +'>>.Placement.multiply( <<'+ a_Part +'>>.<<'+ a_LCS +'.>>.Placement )'
-            expr = self.makeExpressionFastener( a_Link, a_Part, a_LCS )
-            # indicate the this fastener has been placed with the Assembly4 workbench
-            if not hasattr(self.selectedFastener,'AssemblyType'):
-                Asm4.makeAsmProperties(self.selectedFastener)
-            self.selectedFastener.AssemblyType = 'Asm4EE'
-            # the fastener is attached by its Origin, no extra LCS
-            self.selectedFastener.AttachedBy = 'Origin'
-            # store the part where we're attached to in the constraints object
-            self.selectedFastener.AttachedTo = a_Link+'#'+a_LCS
-            # load the built expression into the Expression field of the constraint
-            self.selectedFastener.setExpression( 'Placement', expr )
-            # recompute the object to apply the placement:
-            self.selectedFastener.recompute()
-            self.parentAssembly.recompute()
-            self.activeDoc.recompute()
+            
+            placeFastenerToLCS(self.selectedFastener, a_Link, a_Part, a_LCS)
+            
             # highlight the selected fastener in its new position
             Gui.Selection.clearSelection()
             Gui.Selection.addSelection( self.activeDoc.Name, 'Model', self.selectedFastener.Name +'.')
         else:
             FCC.PrintWarning("Problem in selections\n")
         return
-
-
-
-    """
-    +-----------------------------------------------+
-    |         populate the ExpressionEngine         |
-    |               for a Datum object              |
-    |       linked to an LCS in a sister part       |
-    +-----------------------------------------------+
-    """
-    def makeExpressionFastener( self, attLink, attPart, attLCS ):
-        # check that everything is defined
-        if attLink and attLCS:
-            # expr = Link.Placement * LinkedPart#LCS.Placement
-            expr = attLCS +'.Placement * AttachmentOffset'
-            if attPart:
-                expr = attLink+'.Placement * '+attPart+'#'+expr
-        else:
-            expr = False
-        return expr
 
 
 
@@ -740,6 +828,7 @@ Gui.addCommand( 'Asm4_insertNut',      insertFastener('Nut')    )
 Gui.addCommand( 'Asm4_insertWasher',   insertFastener('Washer') )
 Gui.addCommand( 'Asm4_insertRod',      insertFastener('ThreadedRod') )
 Gui.addCommand( 'Asm4_placeFastener',  placeFastenerCmd()       )
+Gui.addCommand( 'Asm4_cloneFastenersToAxes',  cloneFastenersToAcesCmd() )
 Gui.addCommand( 'Asm4_FSparameters',   changeFSparametersCmd()  )
 
 # defines the drop-down button for Fasteners:

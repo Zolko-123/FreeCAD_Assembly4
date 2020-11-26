@@ -128,6 +128,7 @@ class Assembly4Workbench(Workbench):
                                 "Separator",
                                 "Asm4_placeLink", 
                                 "Asm4_placeFastener", 
+                                "Asm4_cloneFastenersToAxes", 
                                 "Asm4_placeDatum", 
                                 "Asm4_releaseAttachment", 
                                 #"Asm4_makeLinkArray",
@@ -155,6 +156,7 @@ class Assembly4Workbench(Workbench):
                                 "Separator",
                                 "Asm4_placeLink", 
                                 'Asm4_placeFastener',
+                                'Asm4_cloneFastenersToAxes',
                                 "Asm4_placeDatum", 
                                 "Separator",
                                 #"Asm4_makeLinkArray",
@@ -186,6 +188,7 @@ class Assembly4Workbench(Workbench):
                         "Asm4_placeDatum"    ,
                         'Asm4_FSparameters'  ,
                         'Asm4_placeFastener' ,
+                        'Asm4_cloneFastenersToAxes' ,
                         'Separator'          ,
                         'Asm4_saveConfiguration',
                         'Asm4_restoreConfiguration']
