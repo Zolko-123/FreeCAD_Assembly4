@@ -134,7 +134,10 @@ def cloneFastener(fstnr):
     container = fstnr.getParentGeoFeatureGroup()
     result = None
     if fstnr.Document and container:
-        result = fstnr.Document.copyObject(fstnr, False)
+        #result = fstnr.Document.copyObject(fstnr, False)
+        result = fstnr.Document.addObject('App::Link', fstnr.Name)
+        result.LinkedObject = fstnr
+        result.Label = fstnr.Label
         container.addObject(result)
         result.recompute()
         container = result.getParentGeoFeatureGroup()
