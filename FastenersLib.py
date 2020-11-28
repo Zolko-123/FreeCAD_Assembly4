@@ -19,9 +19,6 @@ import libAsm4 as Asm4
 
 
 
-logger = App.Logger('Asm4_Fstnr')
-
-
 """
     +-----------------------------------------------+
     |               Helper functions                |
@@ -32,12 +29,12 @@ def getSelectionFS():
     # check that something is selected
     if len(Gui.Selection.getSelection())==1:
         obj = Gui.Selection.getSelection()[0]
-        if isFastener(obj):
+        if Asm4.isFastener(obj):
             selectedObj = obj
         else:
             for selObj in Gui.Selection.getSelectionEx():
                 obj = selObj.Object
-                if isFastener(obj):
+                if Asm4.isFastener(obj):
                     selectedObj = obj
     # now we should be safe
     return selectedObj
@@ -47,105 +44,37 @@ def getSelectionFS():
 iconFile = os.path.join( Asm4.iconPath , 'Asm4_mvFastener.svg')
 
 
-"""
-+-----------------------------------------------+
-|         populate the ExpressionEngine         |
-|               for a Datum object              |
-|       linked to an LCS in a sister part       |
-+-----------------------------------------------+
-"""
-def makeExpressionFastener( attLink, attPart, attLCS ):
-    # check that everything is defined
-    if attLink and attLCS:
-        # expr = Link.Placement * LinkedPart#LCS.Placement
-        expr = attLCS +'.Placement * AttachmentOffset'
-        if attPart:
-            expr = attLink+'.Placement * '+attPart+'#'+expr
-    else:
-        expr = False
-    return expr
- 
- 
-def placeFastenerToLCS( attFstnr, attLink, attPart, attLCS ):
-    expr = makeExpressionFastener( attLink, attPart, attLCS )
-    # indicate the this fastener has been placed with the Assembly4 workbench
-    if not hasattr(attFstnr,'AssemblyType'):
-        Asm4.makeAsmProperties(attFstnr)
-    attFstnr.AssemblyType = 'Asm4EE'
-    # the fastener is attached by its Origin, no extra LCS
-    attFstnr.AttachedBy = 'Origin'
-    # store the part where we're attached to in the constraints object
-    attFstnr.AttachedTo = attLink+'#'+attLCS
-    # load the built expression into the Expression field of the constraint
-    attFstnr.setExpression( 'Placement', expr )
-    # recompute the object to apply the placement:
-    attFstnr.recompute()
-    container = attFstnr.getParentGeoFeatureGroup()
-    if container:
-        container.recompute()
-    if attFstnr.Document:
-        attFstnr.Document.recompute()
-
-
-def isFastener( obj):
-    if not obj:
-        return False
-    if (hasattr(obj,'Proxy') and isinstance(obj.Proxy, FSBaseObject)):
-        return True
-    return False
-
-
-def isHoleAxis(obj):
-    if not obj:
-        return False
-    if hasattr(obj, 'AttacherType'):
-        if obj.AttacherType == 'Attacher::AttachEngineLine':
-            return True
-    return False
-
-
 def getSelectedAxes():
     holeAxes = []
     fstnr = None
-    if Gui.Selection.getSelection() and (len(Gui.Selection.getSelection()) > 1):
-        for so in Gui.Selection.getSelection():
-            if isHoleAxis(so):
-                holeAxes.append(so)
-            elif isFastener(so):
-                if fstnr is None:
-                    fstnr = so
-                else:
-                    return(None)
+    selection = Gui.Selection.getSelectionEx('', 0)
+    
+    if selection:
+        for s in selection:
+            for seNames in s.SubElementNames:
+                seObj = s.Object
+                for se in seNames.split('.'):
+                    if se and (len(se) > 0):
+                        seObj = seObj.getObject(se)
+                        if Asm4.isAppLink(seObj):
+                            seObj = seObj.getLinkedObject()
+                        if Asm4.isHoleAxis(seObj):
+                            holeAxes.append(Asm4.getSelectionPath(s.Document.Name, s.ObjectName, seNames))
+                            break
+                        elif Asm4.isFastener(seObj):
+                            if fstnr is None:
+                                fstnr = seObj
+                                break
+                            else:
+                                return(None)
+                            
+                    else:
+                        break
+
     if fstnr and (len(holeAxes) > 0):
         return (fstnr, holeAxes)
     else:
         return(None)
-
-
-def findObjectLink(obj, doc = App.ActiveDocument):
-    for o in doc.Objects:
-        if hasattr(o, 'LinkedObject'):
-            if o.LinkedObject == obj:
-                return o
-    return(None)
-
-
-def cloneFastener(fstnr):
-    container = fstnr.getParentGeoFeatureGroup()
-    result = None
-    if fstnr.Document and container:
-        #result = fstnr.Document.copyObject(fstnr, False)
-        result = fstnr.Document.addObject('App::Link', fstnr.Name)
-        result.LinkedObject = fstnr
-        result.Label = fstnr.Label
-        container.addObject(result)
-        result.recompute()
-        container = result.getParentGeoFeatureGroup()
-        if container:
-            container.recompute()
-        if result.Document:
-            result.Document.recompute()
-    return result
 
 
 
@@ -169,13 +98,21 @@ class cloneFastenersToAcesCmd():
     def Activated(self):
         (fstnr, axes) = self.selection
         if fstnr.Document:
-            for axis in axes:
-                axisParent = axis.getParentGeoFeatureGroup()
-                if axisParent and axisParent.Document:
-                    axisParentLink = findObjectLink(axisParent, fstnr.Document)
-                    if axisParentLink:
-                        newFstnr = cloneFastener(fstnr)
-                        placeFastenerToLCS(newFstnr, axisParentLink.Name, axisParent.Document.Name, axis.Name)
+            for axisData in axes:
+                if len(axisData) > 3: # DocName/ModelName/AppLinkName/AxisName
+                    docName = axisData[0]
+                    doc = App.getDocument(docName)
+                    if doc:
+                        model = doc.getObject(axisData[1])
+                        if model:
+                            objLink = model.getObject(axisData[2])
+                            if objLink:
+                                obj = objLink.getLinkedObject()
+                                axis = obj.getObject(axisData[3])
+                                if axis and axis.Document:
+                                    newFstnr = Asm4.cloneFastener(fstnr)
+                                    Asm4.placeFastenerToLCS(newFstnr, axisData[2], axis.Document.Name, axisData[3])
+                                    
             Gui.Selection.clearSelection()
             Gui.Selection.addSelection( fstnr.Document.Name, 'Model', fstnr.Name +'.')
 
@@ -229,6 +166,7 @@ class placeFastenerCmd():
     +-----------------------------------------------+
 """
 class placeFastenerUI():
+    
     def __init__(self):
         self.base = QtGui.QWidget()
         self.form = self.base        
@@ -395,7 +333,7 @@ class placeFastenerUI():
             # <<LinkName>>.Placement.multiply( <<LinkName>>.<<LCS.>>.Placement )
             # expr = '<<'+ a_Part +'>>.Placement.multiply( <<'+ a_Part +'>>.<<'+ a_LCS +'.>>.Placement )'
             
-            placeFastenerToLCS(self.selectedFastener, a_Link, a_Part, a_LCS)
+            Asm4.placeFastenerToLCS(self.selectedFastener, a_Link, a_Part, a_LCS)
             
             # highlight the selected fastener in its new position
             Gui.Selection.clearSelection()
@@ -530,7 +468,7 @@ class placeFastenerUI():
             FCC.PrintMessage("selection: "+ linkDot+a_LCS+'.' +"\n")
         # show the resulting placement
         self.onApply()
-
+    
 
     # Rotations
     def rotAxis( self, placement ):
@@ -735,7 +673,7 @@ class insertFastener:
             if selectedObj.TypeId=='App::Part':
                 return( selectedObj )
             # if a previous fastener is selected, we return its parent container
-            if isFastener(selectedObj):
+            if Asm4.isFastener(selectedObj):
                 parent = selectedObj.getParentGeoFeatureGroup()
                 if parent and parent.TypeId == 'App::Part':
                     return( parent )
