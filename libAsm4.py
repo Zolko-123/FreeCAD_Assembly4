@@ -23,6 +23,7 @@ libPath  = os.path.join( wbPath, 'Resources/library' )
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
+from FastenerBase import FSBaseObject
 
 
 
@@ -39,6 +40,88 @@ partInfo =[     'PartID',                       \
                 'PartSupplier']
 
 containerTypes = [  'App::Part', 'PartDesign::Body' ]
+
+
+
+
+def findObjectLink(obj, doc = App.ActiveDocument):
+    for o in doc.Objects:
+        if hasattr(o, 'LinkedObject'):
+            if o.LinkedObject == obj:
+                return o
+    return(None)
+
+
+def getSelectionPath(docName, objName, subObjName):
+        val = []
+        if (docName is None) or (docName == ''):
+            docName = App.ActiveDocument.Name
+        val.append(docName)
+        if objName and (objName != ''):
+            val.append(objName)
+            if subObjName and (subObjName != ''):
+                for son in subObjName.split('.'):
+                    if son and (son != ''):
+                        val.append(son)
+        
+        return val
+
+
+"""
+    +-----------------------------------------------+
+    |           Fastener helper functions           |
+    +-----------------------------------------------+
+"""
+
+def cloneFastener(fstnr):
+    container = fstnr.getParentGeoFeatureGroup()
+    result = None
+    if fstnr.Document and container:
+        #result = fstnr.Document.copyObject(fstnr, False)
+        result = fstnr.Document.addObject('App::Link', fstnr.Name)
+        result.LinkedObject = fstnr
+        result.Label = fstnr.Label
+        container.addObject(result)
+        result.recompute()
+        container = result.getParentGeoFeatureGroup()
+        if container:
+            container.recompute()
+        if result.Document:
+            result.Document.recompute()
+    return result
+
+
+def makeExpressionFastener( attLink, attDoc, attLCS ):
+    # check that everything is defined
+    if attLink and attLCS:
+        # expr = Link.Placement * LinkedPart#LCS.Placement
+        expr = attLCS +'.Placement * AttachmentOffset'
+        if attDoc:
+            expr = attLink+'.Placement * '+attDoc+'#'+expr
+    else:
+        expr = False
+    return expr
+ 
+ 
+def placeFastenerToLCS( attFstnr, attLink, attDoc, attLCS ):
+    expr = makeExpressionFastener( attLink, attDoc, attLCS )
+    # indicate the this fastener has been placed with the Assembly4 workbench
+    if not hasattr(attFstnr,'AssemblyType'):
+        Asm4.makeAsmProperties(attFstnr)
+    attFstnr.AssemblyType = 'Asm4EE'
+    # the fastener is attached by its Origin, no extra LCS
+    attFstnr.AttachedBy = 'Origin'
+    # store the part where we're attached to in the constraints object
+    attFstnr.AttachedTo = attLink+'#'+attLCS
+    # load the built expression into the Expression field of the constraint
+    attFstnr.setExpression( 'Placement', expr )
+    # recompute the object to apply the placement:
+    attFstnr.recompute()
+    container = attFstnr.getParentGeoFeatureGroup()
+    if container:
+        container.recompute()
+    if attFstnr.Document:
+        attFstnr.Document.recompute()
 
 
 
@@ -300,6 +383,41 @@ def isFlatFace(shape):
     return False
 
 
+def isFastener(obj):
+    if not obj:
+        return False
+    if (hasattr(obj,'Proxy') and isinstance(obj.Proxy, FSBaseObject)):
+        return True
+    return False
+
+
+def isHoleAxis(obj):
+    if not obj:
+        return False
+    if hasattr(obj, 'AttacherType'):
+        if obj.AttacherType == 'Attacher::AttachEngineLine':
+            return True
+    return False
+
+
+def isPart(obj):
+    if not obj:
+        return False
+    if hasattr(obj, 'TypeId'):
+        if obj.TypeId == 'App::Part':
+            return True
+    return False
+
+
+def isAppLink(obj):
+    if not obj:
+        return False
+    if hasattr(obj, 'TypeId'):
+        if obj.TypeId == 'App::Link':
+            return True
+    return False
+    
+
 """
     +-----------------------------------------------+
     |           Shows a Warning message box         |
@@ -336,7 +454,13 @@ def confirmBox( text ):
 """
     +-----------------------------------------------+
     |        Drop-down menu to group buttons        |
-    +-----------------------------------------------+
+    +----def findObjectLink(obj, doc = App.ActiveDocument):
+    for o in doc.Objects:
+        if hasattr(o, 'LinkedObject'):
+            if o.LinkedObject == obj:
+                return o
+    return(None)
+-------------------------------------------+
 """
 # from https://github.com/HakanSeven12/FreeCAD-Geomatics-Workbench/commit/d82d27b47fcf794bf6f9825405eacc284de18996
 class dropDownCmd:
@@ -391,7 +515,7 @@ def nameLabel( obj ):
     |             for a linked App::Part            |
     +-----------------------------------------------+
 """
-def makeExpressionPart( attLink, attPart, attLCS, linkedDoc, linkLCS ):
+def makeExpressionPart( attLink, attDoc, attLCS, linkedDoc, linkLCS ):
     # if everything is defined
     if attLink and attLCS and linkedDoc and linkLCS:
         # this is where all the magic is, see:
@@ -407,8 +531,8 @@ def makeExpressionPart( attLink, attPart, attLCS, linkedDoc, linkLCS ):
         expr = attLCS+'.Placement * AttachmentOffset * '+linkedDoc+'#'+linkLCS+'.Placement ^ -1'
         # if we're attached to another sister part (and not the Parent Assembly)
         # we need to take into account the Placement of that Part.
-        if attPart:
-            expr = attLink+'.Placement * '+attPart+'#'+expr
+        if attDoc:
+            expr = attLink+'.Placement * '+attDoc+'#'+expr
     else:
         expr = False
     return expr
