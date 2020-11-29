@@ -152,6 +152,21 @@ def makeAsmProperties( obj, reset=False ):
     return
 
 
+# the Variables container
+def createVariables():
+    retval = None
+    # check whether there already is a Variables object
+    variables = App.ActiveDocument.getObject('Variables')
+    if variables:
+        retval = variables
+    # there is none, so we create it
+    else:
+        variables = App.ActiveDocument.addObject('App::FeaturePython','Variables')
+        variables.ViewObject.Proxy = setCustomIcon(object,'Asm4_Variables.svg')
+        retval = variables
+    return retval
+
+
 # custum icon
 # views/view_custom.py
 # https://wiki.freecadweb.org/Viewprovider
