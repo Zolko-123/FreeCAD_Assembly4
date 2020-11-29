@@ -47,6 +47,7 @@ def isFastener(obj):
         return True
     return False
 
+
 # icon to show in the Menu, toolbar and widget window
 iconFile = os.path.join( Asm4.iconPath , 'Asm4_mvFastener.svg')
 
@@ -252,10 +253,14 @@ class placeFastenerUI():
             if lcs_found:
                 self.attLCSlist.setCurrentItem( lcs_found[0] )
 
+        Gui.Selection.addObserver(self, 0)
 
 
     # this is the end ...
     def finish(self):
+        # remove the  observer
+        Gui.Selection.removeObserver(self)
+        
         Gui.Control.closeDialog()
 
 
@@ -609,6 +614,22 @@ class placeFastenerUI():
         self.ZtranslSpinBox.valueChanged.connect(self.movePart)
 
 
+    def addSelection(self, doc, obj, sub, pnt):
+        selPath = Asm4.getSelectionPath(doc, obj, sub)
+        if len(selPath) > 2:
+            selLinkName = selPath[2]
+            idx = self.parentList.findText(selLinkName)
+            if idx >= 0:
+                self.parentList.setCurrentIndex(idx)
+                selObj = Gui.Selection.getSelection()[0]
+                if selObj:
+                    found = self.attLCSlist.findItems(Asm4.nameLabel(selObj), QtCore.Qt.MatchExactly)
+                    if len(found) > 0:
+                        self.attLCSlist.clearSelection()
+                        found[0].setSelected(True)
+                        self.attLCSlist.scrollToItem(found[0])
+                        self.attLCSlist.setCurrentRow(self.attLCSlist.row(found[0]))
+                        self.onApply()
 
 """
     +-----------------------------------------------+

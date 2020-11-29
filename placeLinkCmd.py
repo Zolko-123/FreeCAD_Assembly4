@@ -56,10 +56,8 @@ class placeLinkCmd():
 
     def Activated(self):
         # enable the local link selection observer
-        global linkObserver
-        linkObserver = linkSelObserver();
         # add the listener, 0 forces to resolve the links
-        Gui.Selection.addObserver(linkObserver, 0)
+        #Gui.Selection.addObserver(linkObserver, 0)
         # launch the UI in the task panel
         Gui.Control.showDialog(placeLinkUI())
 
@@ -234,13 +232,14 @@ class placeLinkUI():
         if lcs_found:
             # ... and select it
             self.attLCSlist.setCurrentItem( lcs_found[0] )
+        
+        Gui.Selection.addObserver(self, 0)
 
 
     # Close
     def finish(self):
         # remove the  observer
-        global linkObserver
-        Gui.Selection.removeObserver(linkObserver) 
+        Gui.Selection.removeObserver(self)
 
         self.restoreView()
         Gui.Selection.clearSelection()
@@ -349,7 +348,7 @@ class placeLinkUI():
             l_LCS = self.partLCStable[ self.partLCSlist.currentRow() ].Name
         else:
             l_LCS = None
-
+            
         # check that all of them have something in
         # constrName has been checked at the beginning
         if a_Link and a_LCS and l_Part and l_LCS :
@@ -625,55 +624,38 @@ class placeLinkUI():
         self.ZtranslSpinBox.valueChanged.connect(self.onZTranslValChanged)
 
 
-
-"""
-    +-----------------------------------------------+
-    |            selection observer                 |
-    +-----------------------------------------------+
-"""
-class linkSelObserver:
-    def addSelection(self,doc,obj,sub,pnt):               # Selection object
-        # Since both 3D view clicks and manual tree selection gets into the same callback
-        # we will determine by clicked coordinates, for manual tree selections the coordinates are (0,0,0)
-        FCC.PrintMessage('Clicked on :'+obj+'@'+sub+'\n')
-        if pnt != (0,0,0):
-            # 3D view click
-            # Get linked object name that handles sub-sub-assembly
-            #subObjName = Asm4.getLinkedObjectName(doc, obj, sub)
-            objList = App.getDocument(doc).getObject(obj).getSubObjectList(sub)
-            # Build the name of the selected sub-object for multiple sub-assembly levels
-            subObjName = ''
-            for subObj in objList:
-                if subObj.TypeId == 'App::Link':
-                    subObjName = subObjName + subObj.Name + '.'
-
-            if subObjName != '':
-                # set the selection to the selected object
-                Gui.Selection.clearSelection()
-                Gui.Selection.addSelection(doc, obj, subObjName)
-                # set the selected object drop-down to this object
-                global taskUI
-                link = App.ActiveDocument.getObject(subObjName[0:-1])
-                #FCC.PrintMessage('LinkedObject = '+link.LinkedObject.Name+'\n')
-                # try to find this link in the parents 
-                parent_found = False
-                parent_index = 1
-                for item in taskUI.parentTable[1:]:
-                    if item.Name == link.Name:
-                        parent_found = True
-                        break
-                    else:
-                        parent_index = parent_index +1
-                if not parent_found:
-                    parent_index = 0
-                taskUI.parentList.setCurrentIndex( parent_index )
-            # select the Parent Assembly
+    def addSelection(self, doc, obj, sub, pnt):
+        selPath = Asm4.getSelectionPath(doc, obj, sub)
+        if len(selPath) > 2:
+            selLinkName = selPath[2]
+            # check: 'Selected Link' widget == selection link name
+            if self.linkName.text() == selLinkName:
+                selObj = Gui.Selection.getSelection()[0]
+                if selObj:
+                    found = self.partLCSlist.findItems(Asm4.nameLabel(selObj), QtCore.Qt.MatchExactly)
+                    if len(found) > 0:
+                        self.partLCSlist.clearSelection()
+                        found[0].setSelected(True)
+                        self.partLCSlist.scrollToItem(found[0])
+                        self.partLCSlist.setCurrentRow(self.partLCSlist.row(found[0]))
+                        self.Apply()
             else:
-                taskUI.parentList.setCurrentIndex( 1 )
-
-
-
-
+                idx = self.parentList.findText(selLinkName)
+                if idx >= 0:
+                    self.parentList.setCurrentIndex(idx)
+                    selObj = Gui.Selection.getSelection()[0]
+                    if selObj:
+                        found = self.attLCSlist.findItems(Asm4.nameLabel(selObj), QtCore.Qt.MatchExactly)
+                        if len(found) > 0:
+                            self.attLCSlist.clearSelection()
+                            found[0].setSelected(True)
+                            self.attLCSlist.scrollToItem(found[0])
+                            self.attLCSlist.setCurrentRow(self.attLCSlist.row(found[0]))
+                            self.Apply()
+        else:
+            self.parentList.setCurrentIndex( 1 )
+    
+    
 """
     +-----------------------------------------------+
     |       add the command to the workbench        |
