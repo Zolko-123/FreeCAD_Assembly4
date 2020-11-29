@@ -29,15 +29,23 @@ def getSelectionFS():
     # check that something is selected
     if len(Gui.Selection.getSelection())==1:
         obj = Gui.Selection.getSelection()[0]
-        if Asm4.isFastener(obj):
+        if isFastener(obj):
             selectedObj = obj
         else:
             for selObj in Gui.Selection.getSelectionEx():
                 obj = selObj.Object
-                if Asm4.isFastener(obj):
+                if isFastener(obj):
                     selectedObj = obj
     # now we should be safe
     return selectedObj
+
+
+def isFastener(obj):
+    if not obj:
+        return False
+    if (hasattr(obj,'Proxy') and isinstance(obj.Proxy, FSBaseObject)):
+        return True
+    return False
 
 
 # icon to show in the Menu, toolbar and widget window
@@ -61,7 +69,7 @@ def getSelectedAxes():
                         if Asm4.isHoleAxis(seObj):
                             holeAxes.append(Asm4.getSelectionPath(s.Document.Name, s.ObjectName, seNames))
                             break
-                        elif Asm4.isFastener(seObj):
+                        elif isFastener(seObj):
                             if fstnr is None:
                                 fstnr = seObj
                                 break
@@ -110,8 +118,8 @@ class cloneFastenersToAcesCmd():
                                 obj = objLink.getLinkedObject()
                                 axis = obj.getObject(axisData[3])
                                 if axis and axis.Document:
-                                    newFstnr = Asm4.cloneFastener(fstnr)
-                                    Asm4.placeFastenerToLCS(newFstnr, axisData[2], axis.Document.Name, axisData[3])
+                                    newFstnr = Asm4.cloneObject(fstnr)
+                                    Asm4.placeObjectToLCS(newFstnr, axisData[2], axis.Document.Name, axisData[3])
                                     
             Gui.Selection.clearSelection()
             Gui.Selection.addSelection( fstnr.Document.Name, 'Model', fstnr.Name +'.')
@@ -245,10 +253,14 @@ class placeFastenerUI():
             if lcs_found:
                 self.attLCSlist.setCurrentItem( lcs_found[0] )
 
+        Gui.Selection.addObserver(self, 0)
 
 
     # this is the end ...
     def finish(self):
+        # remove the  observer
+        Gui.Selection.removeObserver(self)
+        
         Gui.Control.closeDialog()
 
 
@@ -333,7 +345,7 @@ class placeFastenerUI():
             # <<LinkName>>.Placement.multiply( <<LinkName>>.<<LCS.>>.Placement )
             # expr = '<<'+ a_Part +'>>.Placement.multiply( <<'+ a_Part +'>>.<<'+ a_LCS +'.>>.Placement )'
             
-            Asm4.placeFastenerToLCS(self.selectedFastener, a_Link, a_Part, a_LCS)
+            Asm4.placeObjectToLCS(self.selectedFastener, a_Link, a_Part, a_LCS)
             
             # highlight the selected fastener in its new position
             Gui.Selection.clearSelection()
@@ -602,6 +614,22 @@ class placeFastenerUI():
         self.ZtranslSpinBox.valueChanged.connect(self.movePart)
 
 
+    def addSelection(self, doc, obj, sub, pnt):
+        selPath = Asm4.getSelectionPath(doc, obj, sub)
+        if len(selPath) > 2:
+            selLinkName = selPath[2]
+            idx = self.parentList.findText(selLinkName)
+            if idx >= 0:
+                self.parentList.setCurrentIndex(idx)
+                selObj = Gui.Selection.getSelection()[0]
+                if selObj:
+                    found = self.attLCSlist.findItems(Asm4.nameLabel(selObj), QtCore.Qt.MatchExactly)
+                    if len(found) > 0:
+                        self.attLCSlist.clearSelection()
+                        found[0].setSelected(True)
+                        self.attLCSlist.scrollToItem(found[0])
+                        self.attLCSlist.setCurrentRow(self.attLCSlist.row(found[0]))
+                        self.onApply()
 
 """
     +-----------------------------------------------+
@@ -673,7 +701,7 @@ class insertFastener:
             if selectedObj.TypeId=='App::Part':
                 return( selectedObj )
             # if a previous fastener is selected, we return its parent container
-            if Asm4.isFastener(selectedObj):
+            if isFastener(selectedObj):
                 parent = selectedObj.getParentGeoFeatureGroup()
                 if parent and parent.TypeId == 'App::Part':
                     return( parent )

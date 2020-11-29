@@ -23,7 +23,6 @@ libPath  = os.path.join( wbPath, 'Resources/library' )
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
-from FastenerBase import FSBaseObject
 
 
 
@@ -69,18 +68,18 @@ def getSelectionPath(docName, objName, subObjName):
 
 """
     +-----------------------------------------------+
-    |           Fastener helper functions           |
+    |           Object helper functions           |
     +-----------------------------------------------+
 """
 
-def cloneFastener(fstnr):
-    container = fstnr.getParentGeoFeatureGroup()
+def cloneObject(obj):
+    container = obj.getParentGeoFeatureGroup()
     result = None
-    if fstnr.Document and container:
-        #result = fstnr.Document.copyObject(fstnr, False)
-        result = fstnr.Document.addObject('App::Link', fstnr.Name)
-        result.LinkedObject = fstnr
-        result.Label = fstnr.Label
+    if obj.Document and container:
+        #result = obj.Document.copyObject(obj, False)
+        result = obj.Document.addObject('App::Link', obj.Name)
+        result.LinkedObject = obj
+        result.Label = obj.Label
         container.addObject(result)
         result.recompute()
         container = result.getParentGeoFeatureGroup()
@@ -89,39 +88,27 @@ def cloneFastener(fstnr):
         if result.Document:
             result.Document.recompute()
     return result
-
-
-def makeExpressionFastener( attLink, attDoc, attLCS ):
-    # check that everything is defined
-    if attLink and attLCS:
-        # expr = Link.Placement * LinkedPart#LCS.Placement
-        expr = attLCS +'.Placement * AttachmentOffset'
-        if attDoc:
-            expr = attLink+'.Placement * '+attDoc+'#'+expr
-    else:
-        expr = False
-    return expr
  
  
-def placeFastenerToLCS( attFstnr, attLink, attDoc, attLCS ):
-    expr = makeExpressionFastener( attLink, attDoc, attLCS )
+def placeObjectToLCS( attObj, attLink, attDoc, attLCS ):
+    expr = makeExpressionDatum( attLink, attDoc, attLCS )
     # indicate the this fastener has been placed with the Assembly4 workbench
-    if not hasattr(attFstnr,'AssemblyType'):
-        Asm4.makeAsmProperties(attFstnr)
-    attFstnr.AssemblyType = 'Asm4EE'
+    if not hasattr(attObj,'AssemblyType'):
+        Asm4.makeAsmProperties(attObj)
+    attObj.AssemblyType = 'Asm4EE'
     # the fastener is attached by its Origin, no extra LCS
-    attFstnr.AttachedBy = 'Origin'
+    attObj.AttachedBy = 'Origin'
     # store the part where we're attached to in the constraints object
-    attFstnr.AttachedTo = attLink+'#'+attLCS
+    attObj.AttachedTo = attLink+'#'+attLCS
     # load the built expression into the Expression field of the constraint
-    attFstnr.setExpression( 'Placement', expr )
+    attObj.setExpression( 'Placement', expr )
     # recompute the object to apply the placement:
-    attFstnr.recompute()
-    container = attFstnr.getParentGeoFeatureGroup()
+    attObj.recompute()
+    container = attObj.getParentGeoFeatureGroup()
     if container:
         container.recompute()
-    if attFstnr.Document:
-        attFstnr.Document.recompute()
+    if attObj.Document:
+        attObj.Document.recompute()
 
 
 
@@ -374,19 +361,12 @@ def isSegment(shape):
         return True
     return False
 
+
 def isFlatFace(shape):
     if shape.isValid()  and hasattr(shape,'Area')   \
                         and shape.Area > 1.0e-6     \
                         and hasattr(shape,'Volume') \
                         and shape.Volume < 1.0e-9:
-        return True
-    return False
-
-
-def isFastener(obj):
-    if not obj:
-        return False
-    if (hasattr(obj,'Proxy') and isinstance(obj.Proxy, FSBaseObject)):
         return True
     return False
 
@@ -619,13 +599,14 @@ def splitExpressionLink( expr, parent ):
 """
 def makeExpressionDatum( attLink, attPart, attLCS ):
     # check that everything is defined
-    if attLink and attPart and attLCS:
+    if attLink and attLCS:
         # expr = Link.Placement * LinkedPart#LCS.Placement
-        expr = attLink +'.Placement * '+ attPart +'#'+ attLCS +'.Placement * AttachmentOffset'
+        expr = attLCS +'.Placement * AttachmentOffset'
+        if attPart:
+            expr = attLink+'.Placement * '+attPart+'#'+expr
     else:
         expr = False
     return expr
-
 
 
 """
