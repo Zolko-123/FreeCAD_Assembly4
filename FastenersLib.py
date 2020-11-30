@@ -29,16 +29,23 @@ def getSelectionFS():
     # check that something is selected
     if len(Gui.Selection.getSelection())==1:
         obj = Gui.Selection.getSelection()[0]
-        if Asm4.isFastener(obj):
+        if isFastener(obj):
             selectedObj = obj
         else:
             for selObj in Gui.Selection.getSelectionEx():
                 obj = selObj.Object
-                if Asm4.isFastener(obj):
+                if isFastener(obj):
                     selectedObj = obj
     # now we should be safe
     return selectedObj
 
+
+def isFastener(obj):
+    if not obj:
+        return False
+    if (hasattr(obj,'Proxy') and isinstance(obj.Proxy, FSBaseObject)):
+        return True
+    return False
 
 # icon to show in the Menu, toolbar and widget window
 iconFile = os.path.join( Asm4.iconPath , 'Asm4_mvFastener.svg')
@@ -61,7 +68,7 @@ def getSelectedAxes():
                         if Asm4.isHoleAxis(seObj):
                             holeAxes.append(Asm4.getSelectionPath(s.Document.Name, s.ObjectName, seNames))
                             break
-                        elif Asm4.isFastener(seObj):
+                        elif isFastener(seObj):
                             if fstnr is None:
                                 fstnr = seObj
                                 break
@@ -110,8 +117,8 @@ class cloneFastenersToAcesCmd():
                                 obj = objLink.getLinkedObject()
                                 axis = obj.getObject(axisData[3])
                                 if axis and axis.Document:
-                                    newFstnr = Asm4.cloneFastener(fstnr)
-                                    Asm4.placeFastenerToLCS(newFstnr, axisData[2], axis.Document.Name, axisData[3])
+                                    newFstnr = Asm4.cloneObject(fstnr)
+                                    Asm4.placeObjectToLCS(newFstnr, axisData[2], axis.Document.Name, axisData[3])
                                     
             Gui.Selection.clearSelection()
             Gui.Selection.addSelection( fstnr.Document.Name, 'Model', fstnr.Name +'.')
@@ -333,7 +340,7 @@ class placeFastenerUI():
             # <<LinkName>>.Placement.multiply( <<LinkName>>.<<LCS.>>.Placement )
             # expr = '<<'+ a_Part +'>>.Placement.multiply( <<'+ a_Part +'>>.<<'+ a_LCS +'.>>.Placement )'
             
-            Asm4.placeFastenerToLCS(self.selectedFastener, a_Link, a_Part, a_LCS)
+            Asm4.placeObjectToLCS(self.selectedFastener, a_Link, a_Part, a_LCS)
             
             # highlight the selected fastener in its new position
             Gui.Selection.clearSelection()
@@ -673,7 +680,7 @@ class insertFastener:
             if selectedObj.TypeId=='App::Part':
                 return( selectedObj )
             # if a previous fastener is selected, we return its parent container
-            if Asm4.isFastener(selectedObj):
+            if isFastener(selectedObj):
                 parent = selectedObj.getParentGeoFeatureGroup()
                 if parent and parent.TypeId == 'App::Part':
                     return( parent )
