@@ -679,7 +679,7 @@ def splitExpressionDatum( expr ):
     +-----------------------------------------------+
     |        Selection Helper functions             |
     +-----------------------------------------------+
-"""
+
 def getModelSelected():
     if App.ActiveDocument.getObject('Model') and App.ActiveDocument.Model.TypeId == 'App::Part':
         selection = Gui.Selection.getSelection()
@@ -687,6 +687,17 @@ def getModelSelected():
             selObj = selection[0]
             if selObj.Name == 'Model' and selObj.TypeId == 'App::Part':
                 return selObj
+    return None
+"""
+
+
+def getSelectedContainer():
+    selection = Gui.Selection.getSelection()
+    if len(selection)==1:
+        selObj = selection[0]
+        # it's an App::Link
+        if selObj.TypeId in containerTypes:
+            return selObj
     return None
 
 
@@ -716,37 +727,4 @@ def getSelectedDatum():
 
 
 
-
-"""
-    +-----------------------------------------------+
-    |              Show/Hide the LCSs in            |
-    |  the provided object and all linked children  |
-    +-----------------------------------------------+
-"""
-def showChildLCSs(obj, show, processedLinks):
-    #global processedLinks
-
-    # if its a datum apply the visibility
-    if obj.TypeId in datumTypes:
-        obj.Visibility = show
-    # if it's a link, look for subObjects
-    elif obj.TypeId == 'App::Link' and obj.Name not in processedLinks:
-        processedLinks.append(obj.Name)
-        for objName in obj.LinkedObject.getSubObjects():
-            linkObj = obj.LinkedObject.Document.getObject(objName[0:-1])
-            showChildLCSs(linkObj, show, processedLinks)
-    # if it's a container
-    else:
-        if obj.TypeId in containerTypes:
-            for subObjName in obj.getSubObjects():
-                subObj = obj.getSubObject(subObjName, 1)    # 1 for returning the real object
-                if subObj != None:
-                    if subObj.TypeId in datumTypes:
-                        #subObj.Visibility = show
-                        # Aparently obj.Visibility API is very slow
-                        # Using the ViewObject.show() and ViewObject.hide() API runs at least twice faster
-                        if show:
-                            subObj.ViewObject.show()
-                        else:
-                            subObj.ViewObject.hide()
 
