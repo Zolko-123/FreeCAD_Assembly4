@@ -31,7 +31,6 @@ asm4wb_icons_path = os.path.join( asm4wbPath, 'Resources/icons')
 global main_Assembly4WB_Icon
 main_Assembly4WB_Icon = os.path.join( asm4wb_icons_path , 'Assembly4.svg' )
 
-import treeSelectionOverride as selectionOverride
 
 
 """
@@ -65,7 +64,6 @@ class Assembly4Workbench(Workbench):
         # this function is mandatory if this is a full python workbench
         return "Gui::PythonWorkbench"
 
-
     def Initialize(self):
         import newModelCmd         # creates a new App::Part container called 'Model'
         import newDatumCmd         # creates a new LCS in 'Model'
@@ -88,6 +86,7 @@ class Assembly4Workbench(Workbench):
         import showHideLcsCmd      # shows/hides all the LCSs
         import configurationEngine  # save/restore configuration
         #import DraftTools
+        import treeSelectionOverride as selectionOverride
 
         # check whether the Fasteners workbench is installed
         if self.checkWorkbench('FastenersWorkbench'):
@@ -156,7 +155,7 @@ class Assembly4Workbench(Workbench):
                                 "Separator",
                                 "Asm4_placeLink", 
                                 'Asm4_placeFastener',
-                                'Asm4_cloneFastenersToAxes',
+                                #'Asm4_cloneFastenersToAxes',
                                 "Asm4_placeDatum", 
                                 "Separator",
                                 #"Asm4_makeLinkArray",
