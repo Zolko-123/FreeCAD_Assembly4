@@ -682,7 +682,7 @@ def splitExpressionDatum( expr ):
     |              Show/Hide the LCSs in            |
     |   the provided object and all its children    |
     +-----------------------------------------------+
-"""
+
 def showChildLCSs(obj, show, processedLinks):
     #global processedLinks
     # if its a datum apply the visibility
@@ -708,6 +708,8 @@ def showChildLCSs(obj, show, processedLinks):
                             subObj.ViewObject.show()
                         else:
                             subObj.ViewObject.hide()
+"""
+
 
 """
     +-----------------------------------------------+

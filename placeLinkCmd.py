@@ -405,8 +405,11 @@ class placeLinkUI():
                 # if the linked part has been renamed by the user
                 pText = Asm4.nameLabel( parentPart.LinkedObject )
                 self.parentDoc.setText( dText + pText )
-                # show all datums in selected parent
-                Asm4.showChildLCSs(parentPart, True, [])
+                # show all LCS in selected parent
+                for lcsName in parentPart.LinkedObject.getSubObjects(1):
+                    lcs = parentPart.LinkedObject.Document.getObject(lcsName[0:-1])
+                    if lcs.TypeId in [ 'PartDesign::CoordinateSystem', 'PartDesign::Line' ]:
+                        lcs.ViewObject.show()
                 # highlight the selected part:
                 Gui.Selection.addSelection( \
                         parentPart.Document.Name, 'Model', parentPart.Name+'.' )
