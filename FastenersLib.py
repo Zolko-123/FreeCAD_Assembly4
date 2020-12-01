@@ -86,10 +86,10 @@ def getSelectedAxes():
 
 
 
-class cloneFastenersToAcesCmd():
+class cloneFastenersToAxesCmd():
     
     def __init__(self):
-        super(cloneFastenersToAcesCmd,self).__init__()
+        super(cloneFastenersToAxesCmd,self).__init__()
     
     def GetResources(self):
         return {"MenuText": "Clone Fastener to Axes",
@@ -800,7 +800,7 @@ Gui.addCommand( 'Asm4_insertNut',      insertFastener('Nut')    )
 Gui.addCommand( 'Asm4_insertWasher',   insertFastener('Washer') )
 Gui.addCommand( 'Asm4_insertRod',      insertFastener('ThreadedRod') )
 Gui.addCommand( 'Asm4_placeFastener',  placeFastenerCmd()       )
-Gui.addCommand( 'Asm4_cloneFastenersToAxes',  cloneFastenersToAcesCmd() )
+Gui.addCommand( 'Asm4_cloneFastenersToAxes',  cloneFastenersToAxesCmd() )
 Gui.addCommand( 'Asm4_FSparameters',   changeFSparametersCmd()  )
 
 # defines the drop-down button for Fasteners:
@@ -808,5 +808,6 @@ FastenersCmdList = [    'Asm4_insertScrew',
                         'Asm4_insertNut', 
                         'Asm4_insertWasher', 
                         'Asm4_insertRod', 
+                        'Asm4_cloneFastenersToAxes',
                         'Asm4_FSparameters'] 
 Gui.addCommand( 'Asm4_Fasteners', Asm4.dropDownCmd( FastenersCmdList, 'Fasteners'))

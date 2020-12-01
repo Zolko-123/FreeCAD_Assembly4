@@ -115,6 +115,25 @@ class changeFSparametersCmd():
 
 
 
+class cloneFastenersToAxesCmd():
+    def __init__(self):
+        super(cloneFastenersToAxesCmd,self).__init__()
+
+    def GetResources(self):
+        return {"MenuText": "Clone Fastener to Axes",
+                "ToolTip": 'FastenersWorkbench is not installed.\n \nYou can install it with the FreeCAD AddonsManager:\nMenu Tools > Addon Manager > fasteners',
+                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_cloneFasteners.svg')
+                }
+
+    def IsActive(self):
+        # it's a dummy, always inactive
+        return False 
+
+    def Activated(self):
+        return
+
+
+
 """
     +-----------------------------------------------+
     |       add the commands to the workbench       |
@@ -125,4 +144,5 @@ Gui.addCommand( 'Asm4_insertNut',      insertFastener('Nut') )
 Gui.addCommand( 'Asm4_insertWasher',   insertFastener('Washer') )
 Gui.addCommand( 'Asm4_insertRod',      insertFastener('ThreadedRod') )
 Gui.addCommand( 'Asm4_placeFastener',  placeFastenerCmd() )
+Gui.addCommand( 'Asm4_cloneFastenersToAxes',  cloneFastenersToAxesCmd() )
 Gui.addCommand( 'Asm4_FSparameters',   changeFSparametersCmd()  )
