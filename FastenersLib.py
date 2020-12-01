@@ -481,6 +481,26 @@ class placeFastenerUI():
         # show the resulting placement
         self.onApply()
     
+    
+    # selection observer
+    def addSelection(self, doc, obj, sub, pnt):
+        selPath = Asm4.getSelectionPath(doc, obj, sub)
+        selObj = Gui.Selection.getSelection()[0]
+        if selObj and len(selPath) > 2:
+            selLinkName = selPath[2]
+            idx = self.parentList.findText(selLinkName)
+            if idx >= 0:
+                self.parentList.setCurrentIndex(idx)
+                #selObj = Gui.Selection.getSelection()[0]
+                #if selObj:
+                found = self.attLCSlist.findItems(Asm4.nameLabel(selObj), QtCore.Qt.MatchExactly)
+                if len(found) > 0:
+                    self.attLCSlist.clearSelection()
+                    found[0].setSelected(True)
+                    self.attLCSlist.scrollToItem(found[0])
+                    self.attLCSlist.setCurrentRow(self.attLCSlist.row(found[0]))
+                    self.onApply()
+
 
     # Rotations
     def rotAxis( self, placement ):
@@ -613,23 +633,6 @@ class placeFastenerUI():
         self.YtranslSpinBox.valueChanged.connect(self.movePart)
         self.ZtranslSpinBox.valueChanged.connect(self.movePart)
 
-
-    def addSelection(self, doc, obj, sub, pnt):
-        selPath = Asm4.getSelectionPath(doc, obj, sub)
-        if len(selPath) > 2:
-            selLinkName = selPath[2]
-            idx = self.parentList.findText(selLinkName)
-            if idx >= 0:
-                self.parentList.setCurrentIndex(idx)
-                selObj = Gui.Selection.getSelection()[0]
-                if selObj:
-                    found = self.attLCSlist.findItems(Asm4.nameLabel(selObj), QtCore.Qt.MatchExactly)
-                    if len(found) > 0:
-                        self.attLCSlist.clearSelection()
-                        found[0].setSelected(True)
-                        self.attLCSlist.scrollToItem(found[0])
-                        self.attLCSlist.setCurrentRow(self.attLCSlist.row(found[0]))
-                        self.onApply()
 
 """
     +-----------------------------------------------+

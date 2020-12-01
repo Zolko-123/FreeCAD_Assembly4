@@ -23,6 +23,7 @@ libPath  = os.path.join( wbPath, 'Resources/library' )
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
+from FreeCAD import Console as FCC
 
 
 
@@ -674,6 +675,39 @@ def splitExpressionDatum( expr ):
 """
 # is in the FastenersLib.py file
 
+
+
+"""
+    +-----------------------------------------------+
+    |              Show/Hide the LCSs in            |
+    |   the provided object and all its children    |
+    +-----------------------------------------------+
+"""
+def showChildLCSs(obj, show, processedLinks):
+    #global processedLinks
+    # if its a datum apply the visibility
+    if obj.TypeId in datumTypes:
+        obj.Visibility = show
+    # if it's a link, look for subObjects
+    elif obj.TypeId == 'App::Link' and obj.Name not in processedLinks:
+        processedLinks.append(obj.Name)
+        for objName in obj.LinkedObject.getSubObjects(1):
+            linkedObj = obj.LinkedObject.Document.getObject(objName[0:-1])
+            showChildLCSs(linkedObj, show, processedLinks)
+    # if it's a container
+    else:
+        if obj.TypeId in containerTypes:
+            for subObjName in obj.getSubObjects(1):
+                subObj = obj.getSubObject(subObjName, 1)    # 1 for returning the real object
+                if subObj != None:
+                    if subObj.TypeId in datumTypes:
+                        #subObj.Visibility = show
+                        # Aparently obj.Visibility API is very slow
+                        # Using the ViewObject.show() and ViewObject.hide() API runs at least twice faster
+                        if show:
+                            subObj.ViewObject.show()
+                        else:
+                            subObj.ViewObject.hide()
 
 """
     +-----------------------------------------------+

@@ -47,10 +47,10 @@ class showLcsCmd:
             container = Asm4.checkModel()
         link = Asm4.getSelectedLink()
         if link:
-            showChildLCSs(link, True, processedLinks)
+            Asm4.showChildLCSs(link, True, processedLinks)
         elif container:
             for objName in container.getSubObjects():
-                showChildLCSs(container.getSubObject(objName, 1), True, processedLinks)
+                Asm4.showChildLCSs(container.getSubObject(objName, 1), True, processedLinks)
 
 
 """
@@ -84,20 +84,18 @@ class hideLcsCmd:
             container = Asm4.checkModel()
         link = Asm4.getSelectedLink()
         if link:
-            showChildLCSs(link, False, processedLinks)
+            Asm4.showChildLCSs(link, False, processedLinks)
         elif container:
             for objName in container.getSubObjects():
-                showChildLCSs(container.getSubObject(objName, 1), False, processedLinks)
+                Asm4.showChildLCSs(container.getSubObject(objName, 1), False, processedLinks)
 
 
 
 """
     +-----------------------------------------------+
     |              Show/Hide the LCSs in            |
-    |  the provided object and all linked children  |
+    |   the provided object and all its children    |
     +-----------------------------------------------+
-"""
-
 def showChildLCSs(obj, show, processedLinks):
     #global processedLinks
     # if its a datum apply the visibility
@@ -123,6 +121,7 @@ def showChildLCSs(obj, show, processedLinks):
                             subObj.ViewObject.show()
                         else:
                             subObj.ViewObject.hide()
+"""
 
 
 

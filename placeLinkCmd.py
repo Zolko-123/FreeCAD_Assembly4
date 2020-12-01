@@ -427,6 +427,41 @@ class placeLinkUI():
         return
 
 
+    # selection observer
+    def addSelection(self, doc, obj, sub, pnt):
+        selPath = Asm4.getSelectionPath(doc, obj, sub)
+        selObj = Gui.Selection.getSelection()[0]
+        if selObj and len(selPath) > 2:
+            selLinkName = selPath[2]
+            # if the selected datum belongs to the part to be placed
+            if self.linkName.text() == selLinkName:
+                #selObj = Gui.Selection.getSelection()[0]
+                #if selObj:
+                found = self.partLCSlist.findItems(Asm4.nameLabel(selObj), QtCore.Qt.MatchExactly)
+                if len(found) > 0:
+                    self.partLCSlist.clearSelection()
+                    found[0].setSelected(True)
+                    self.partLCSlist.scrollToItem(found[0])
+                    self.partLCSlist.setCurrentRow(self.partLCSlist.row(found[0]))
+                    self.Apply()
+            # is the selected datum belongs to another part
+            else:
+                idx = self.parentList.findText(selLinkName)
+                if idx >= 0:
+                    self.parentList.setCurrentIndex(idx)
+                    #selObj = Gui.Selection.getSelection()[0]
+                    #if selObj:
+                    found = self.attLCSlist.findItems(Asm4.nameLabel(selObj), QtCore.Qt.MatchExactly)
+                    if len(found) > 0:
+                        self.attLCSlist.clearSelection()
+                        found[0].setSelected(True)
+                        self.attLCSlist.scrollToItem(found[0])
+                        self.attLCSlist.setCurrentRow(self.attLCSlist.row(found[0]))
+                        self.Apply()
+        else:
+            self.parentList.setCurrentIndex( 1 )
+    
+
     # Reorientation
     def reorientLink( self ):
         moveXYZ = App.Placement( App.Vector(self.Xtranslation,self.Ytranslation,self.Ztranslation), self.old_LinkRotation )
@@ -624,37 +659,6 @@ class placeLinkUI():
         self.ZtranslSpinBox.valueChanged.connect(self.onZTranslValChanged)
 
 
-    def addSelection(self, doc, obj, sub, pnt):
-        selPath = Asm4.getSelectionPath(doc, obj, sub)
-        if len(selPath) > 2:
-            selLinkName = selPath[2]
-            # check: 'Selected Link' widget == selection link name
-            if self.linkName.text() == selLinkName:
-                selObj = Gui.Selection.getSelection()[0]
-                if selObj:
-                    found = self.partLCSlist.findItems(Asm4.nameLabel(selObj), QtCore.Qt.MatchExactly)
-                    if len(found) > 0:
-                        self.partLCSlist.clearSelection()
-                        found[0].setSelected(True)
-                        self.partLCSlist.scrollToItem(found[0])
-                        self.partLCSlist.setCurrentRow(self.partLCSlist.row(found[0]))
-                        self.Apply()
-            else:
-                idx = self.parentList.findText(selLinkName)
-                if idx >= 0:
-                    self.parentList.setCurrentIndex(idx)
-                    selObj = Gui.Selection.getSelection()[0]
-                    if selObj:
-                        found = self.attLCSlist.findItems(Asm4.nameLabel(selObj), QtCore.Qt.MatchExactly)
-                        if len(found) > 0:
-                            self.attLCSlist.clearSelection()
-                            found[0].setSelected(True)
-                            self.attLCSlist.scrollToItem(found[0])
-                            self.attLCSlist.setCurrentRow(self.attLCSlist.row(found[0]))
-                            self.Apply()
-        else:
-            self.parentList.setCurrentIndex( 1 )
-    
     
 """
     +-----------------------------------------------+
