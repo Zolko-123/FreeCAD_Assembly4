@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.9.12, 2020-11-20
+Current version 0.9.13, 2020-12-01
 
 
 
@@ -52,6 +52,10 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 ## Release notes
 
+* 2020.12.01 (**0.9.13**) :  
+improved LCS selection  
+placeFasteners update  
+
 * 2020.11.20 (**0.9.12**) :  
 placeFasteners update  
 parent combo-box width corrected  
@@ -59,9 +63,9 @@ parent combo-box width corrected
 * 2020.11.14 (**0.9.11**) :  
 Added Offset translation adjustment in the placeLink dialog  
 Added Configuration Engine  
-Big thanx for the help, this is really apreciated  
 Measurements obey the preferences settings  
 Some code clean-up (hopefully won't break anything, if it does please report)  
+**Big thanx for the help, this is really apreciated**  
 
 * 2020.11.01 (**0.9.10**) :  
 Bugfixe in placement of Fastener on "Hole Axis"  

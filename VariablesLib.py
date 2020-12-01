@@ -84,6 +84,7 @@ class addVariable():
         self.Variables = App.ActiveDocument.getObject('Variables')
         # if it doesn't exist then create it (for older Asm4 documents)
         if not self.Variables:
+            self.Variables = Asm4.createVariables()
             part = None
             # if an App::Part is selected:
             if checkPart():
@@ -92,10 +93,13 @@ class addVariable():
             elif Asm4.checkModel():
                 part = Asm4.checkModel()
             if part:
-                self.Variables =  part.newObject('App::FeaturePython','Variables')
+                part.addObject(self.Variables)
+                #self.Variables =  part.newObject('App::FeaturePython','Variables')
+                #self.Variables.ViewObject.Proxy = Asm4.setCustomIcon(object,'Asm4_Variables.svg')
             # create the Variables in the document
-            else:
-                self.Variables = App.ActiveDocument.addObject('App::FeaturePython','Variables')
+            #else:
+                #self.Variables = App.ActiveDocument.addObject('App::FeaturePython','Variables')
+                #self.Variables.ViewObject.Proxy = Asm4.setCustomIcon(object,'Asm4_Variables.svg')
 
         # (re-)initialise the UI
         self.typeList.clear()
@@ -137,6 +141,7 @@ class addVariable():
             if varValue and propType=='Float':
                 setattr( self.Variables, varName, varValue )
         # select the Variables placeholder so we can see our entry
+        self.Variables.recompute()
         Gui.Selection.addSelection(self.Variables)
         self.UI.close()
 

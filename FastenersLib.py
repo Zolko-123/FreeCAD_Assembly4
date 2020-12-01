@@ -19,7 +19,6 @@ import libAsm4 as Asm4
 
 
 
-
 """
     +-----------------------------------------------+
     |               Helper functions                |
@@ -41,20 +40,89 @@ def getSelectionFS():
     return selectedObj
 
 
-# icon to show in the Menu, toolbar and widget window
-iconFile = os.path.join( Asm4.iconPath , 'Asm4_mvFastener.svg')
-
-
-
-def isFastener( obj):
+def isFastener(obj):
     if not obj:
         return False
     if (hasattr(obj,'Proxy') and isinstance(obj.Proxy, FSBaseObject)):
         return True
     return False
-    
-    
 
+
+# icon to show in the Menu, toolbar and widget window
+iconFile = os.path.join( Asm4.iconPath , 'Asm4_mvFastener.svg')
+
+
+def getSelectedAxes():
+    holeAxes = []
+    fstnr = None
+    selection = Gui.Selection.getSelectionEx('', 0)
+    
+    if selection:
+        for s in selection:
+            for seNames in s.SubElementNames:
+                seObj = s.Object
+                for se in seNames.split('.'):
+                    if se and (len(se) > 0):
+                        seObj = seObj.getObject(se)
+                        if Asm4.isAppLink(seObj):
+                            seObj = seObj.getLinkedObject()
+                        if Asm4.isHoleAxis(seObj):
+                            holeAxes.append(Asm4.getSelectionPath(s.Document.Name, s.ObjectName, seNames))
+                            break
+                        elif isFastener(seObj):
+                            if fstnr is None:
+                                fstnr = seObj
+                                break
+                            else:
+                                return(None)
+                            
+                    else:
+                        break
+
+    if fstnr and (len(holeAxes) > 0):
+        return (fstnr, holeAxes)
+    else:
+        return(None)
+
+
+
+class cloneFastenersToAcesCmd():
+    
+    def __init__(self):
+        super(cloneFastenersToAcesCmd,self).__init__()
+    
+    def GetResources(self):
+        return {"MenuText": "Clone Fastener to Axes",
+                "ToolTip": "Clone Fastener to Axes",
+                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_cloneFasteners.svg')
+                }
+    
+    def IsActive(self):
+        self.selection = getSelectedAxes()
+        if Asm4.checkModel() and self.selection:
+            return True
+        return False
+
+    def Activated(self):
+        (fstnr, axes) = self.selection
+        if fstnr.Document:
+            for axisData in axes:
+                if len(axisData) > 3: # DocName/ModelName/AppLinkName/AxisName
+                    docName = axisData[0]
+                    doc = App.getDocument(docName)
+                    if doc:
+                        model = doc.getObject(axisData[1])
+                        if model:
+                            objLink = model.getObject(axisData[2])
+                            if objLink:
+                                obj = objLink.getLinkedObject()
+                                axis = obj.getObject(axisData[3])
+                                if axis and axis.Document:
+                                    newFstnr = Asm4.cloneObject(fstnr)
+                                    Asm4.placeObjectToLCS(newFstnr, axisData[2], axis.Document.Name, axisData[3])
+                                    
+            Gui.Selection.clearSelection()
+            Gui.Selection.addSelection( fstnr.Document.Name, 'Model', fstnr.Name +'.')
 
 """
     +-----------------------------------------------+
@@ -106,6 +174,7 @@ class placeFastenerCmd():
     +-----------------------------------------------+
 """
 class placeFastenerUI():
+    
     def __init__(self):
         self.base = QtGui.QWidget()
         self.form = self.base        
@@ -184,10 +253,14 @@ class placeFastenerUI():
             if lcs_found:
                 self.attLCSlist.setCurrentItem( lcs_found[0] )
 
+        Gui.Selection.addObserver(self, 0)
 
 
     # this is the end ...
     def finish(self):
+        # remove the  observer
+        Gui.Selection.removeObserver(self)
+        
         Gui.Control.closeDialog()
 
 
@@ -271,47 +344,15 @@ class placeFastenerUI():
         if a_Link and a_LCS :
             # <<LinkName>>.Placement.multiply( <<LinkName>>.<<LCS.>>.Placement )
             # expr = '<<'+ a_Part +'>>.Placement.multiply( <<'+ a_Part +'>>.<<'+ a_LCS +'.>>.Placement )'
-            expr = self.makeExpressionFastener( a_Link, a_Part, a_LCS )
-            # indicate the this fastener has been placed with the Assembly4 workbench
-            if not hasattr(self.selectedFastener,'AssemblyType'):
-                Asm4.makeAsmProperties(self.selectedFastener)
-            self.selectedFastener.AssemblyType = 'Asm4EE'
-            # the fastener is attached by its Origin, no extra LCS
-            self.selectedFastener.AttachedBy = 'Origin'
-            # store the part where we're attached to in the constraints object
-            self.selectedFastener.AttachedTo = a_Link+'#'+a_LCS
-            # load the built expression into the Expression field of the constraint
-            self.selectedFastener.setExpression( 'Placement', expr )
-            # recompute the object to apply the placement:
-            self.selectedFastener.recompute()
-            self.parentAssembly.recompute()
-            self.activeDoc.recompute()
+            
+            Asm4.placeObjectToLCS(self.selectedFastener, a_Link, a_Part, a_LCS)
+            
             # highlight the selected fastener in its new position
             Gui.Selection.clearSelection()
             Gui.Selection.addSelection( self.activeDoc.Name, 'Model', self.selectedFastener.Name +'.')
         else:
             FCC.PrintWarning("Problem in selections\n")
         return
-
-
-
-    """
-    +-----------------------------------------------+
-    |         populate the ExpressionEngine         |
-    |               for a Datum object              |
-    |       linked to an LCS in a sister part       |
-    +-----------------------------------------------+
-    """
-    def makeExpressionFastener( self, attLink, attPart, attLCS ):
-        # check that everything is defined
-        if attLink and attLCS:
-            # expr = Link.Placement * LinkedPart#LCS.Placement
-            expr = attLCS +'.Placement * AttachmentOffset'
-            if attPart:
-                expr = attLink+'.Placement * '+attPart+'#'+expr
-        else:
-            expr = False
-        return expr
 
 
 
@@ -439,6 +480,26 @@ class placeFastenerUI():
             FCC.PrintMessage("selection: "+ linkDot+a_LCS+'.' +"\n")
         # show the resulting placement
         self.onApply()
+    
+    
+    # selection observer
+    def addSelection(self, doc, obj, sub, pnt):
+        selPath = Asm4.getSelectionPath(doc, obj, sub)
+        selObj = Gui.Selection.getSelection()[0]
+        if selObj and len(selPath) > 2:
+            selLinkName = selPath[2]
+            idx = self.parentList.findText(selLinkName)
+            if idx >= 0:
+                self.parentList.setCurrentIndex(idx)
+                #selObj = Gui.Selection.getSelection()[0]
+                #if selObj:
+                found = self.attLCSlist.findItems(Asm4.nameLabel(selObj), QtCore.Qt.MatchExactly)
+                if len(found) > 0:
+                    self.attLCSlist.clearSelection()
+                    found[0].setSelected(True)
+                    self.attLCSlist.scrollToItem(found[0])
+                    self.attLCSlist.setCurrentRow(self.attLCSlist.row(found[0]))
+                    self.onApply()
 
 
     # Rotations
@@ -571,7 +632,6 @@ class placeFastenerUI():
         self.XtranslSpinBox.valueChanged.connect(self.movePart)
         self.YtranslSpinBox.valueChanged.connect(self.movePart)
         self.ZtranslSpinBox.valueChanged.connect(self.movePart)
-
 
 
 """
@@ -740,6 +800,7 @@ Gui.addCommand( 'Asm4_insertNut',      insertFastener('Nut')    )
 Gui.addCommand( 'Asm4_insertWasher',   insertFastener('Washer') )
 Gui.addCommand( 'Asm4_insertRod',      insertFastener('ThreadedRod') )
 Gui.addCommand( 'Asm4_placeFastener',  placeFastenerCmd()       )
+Gui.addCommand( 'Asm4_cloneFastenersToAxes',  cloneFastenersToAcesCmd() )
 Gui.addCommand( 'Asm4_FSparameters',   changeFSparametersCmd()  )
 
 # defines the drop-down button for Fasteners:

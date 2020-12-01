@@ -23,6 +23,7 @@ libPath  = os.path.join( wbPath, 'Resources/library' )
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
+from FreeCAD import Console as FCC
 
 
 
@@ -39,6 +40,76 @@ partInfo =[     'PartID',                       \
                 'PartSupplier']
 
 containerTypes = [  'App::Part', 'PartDesign::Body' ]
+
+
+
+
+def findObjectLink(obj, doc = App.ActiveDocument):
+    for o in doc.Objects:
+        if hasattr(o, 'LinkedObject'):
+            if o.LinkedObject == obj:
+                return o
+    return(None)
+
+
+def getSelectionPath(docName, objName, subObjName):
+        val = []
+        if (docName is None) or (docName == ''):
+            docName = App.ActiveDocument.Name
+        val.append(docName)
+        if objName and (objName != ''):
+            val.append(objName)
+            if subObjName and (subObjName != ''):
+                for son in subObjName.split('.'):
+                    if son and (son != ''):
+                        val.append(son)
+        
+        return val
+
+
+"""
+    +-----------------------------------------------+
+    |           Object helper functions           |
+    +-----------------------------------------------+
+"""
+
+def cloneObject(obj):
+    container = obj.getParentGeoFeatureGroup()
+    result = None
+    if obj.Document and container:
+        #result = obj.Document.copyObject(obj, False)
+        result = obj.Document.addObject('App::Link', obj.Name)
+        result.LinkedObject = obj
+        result.Label = obj.Label
+        container.addObject(result)
+        result.recompute()
+        container = result.getParentGeoFeatureGroup()
+        if container:
+            container.recompute()
+        if result.Document:
+            result.Document.recompute()
+    return result
+ 
+ 
+def placeObjectToLCS( attObj, attLink, attDoc, attLCS ):
+    expr = makeExpressionDatum( attLink, attDoc, attLCS )
+    # indicate the this fastener has been placed with the Assembly4 workbench
+    if not hasattr(attObj,'AssemblyType'):
+        Asm4.makeAsmProperties(attObj)
+    attObj.AssemblyType = 'Asm4EE'
+    # the fastener is attached by its Origin, no extra LCS
+    attObj.AttachedBy = 'Origin'
+    # store the part where we're attached to in the constraints object
+    attObj.AttachedTo = attLink+'#'+attLCS
+    # load the built expression into the Expression field of the constraint
+    attObj.setExpression( 'Placement', expr )
+    # recompute the object to apply the placement:
+    attObj.recompute()
+    container = attObj.getParentGeoFeatureGroup()
+    if container:
+        container.recompute()
+    if attObj.Document:
+        attObj.Document.recompute()
 
 
 
@@ -67,6 +138,21 @@ def makeAsmProperties( obj, reset=False ):
         obj.AttachedTo = ''
         obj.AttachmentOffset = App.Placement()
     return
+
+
+# the Variables container
+def createVariables():
+    retval = None
+    # check whether there already is a Variables object
+    variables = App.ActiveDocument.getObject('Variables')
+    if variables:
+        retval = variables
+    # there is none, so we create it
+    else:
+        variables = App.ActiveDocument.addObject('App::FeaturePython','Variables')
+        variables.ViewObject.Proxy = setCustomIcon(object,'Asm4_Variables.svg')
+        retval = variables
+    return retval
 
 
 # custum icon
@@ -291,6 +377,7 @@ def isSegment(shape):
         return True
     return False
 
+
 def isFlatFace(shape):
     if shape.isValid()  and hasattr(shape,'Area')   \
                         and shape.Area > 1.0e-6     \
@@ -299,6 +386,33 @@ def isFlatFace(shape):
         return True
     return False
 
+
+def isHoleAxis(obj):
+    if not obj:
+        return False
+    if hasattr(obj, 'AttacherType'):
+        if obj.AttacherType == 'Attacher::AttachEngineLine':
+            return True
+    return False
+
+
+def isPart(obj):
+    if not obj:
+        return False
+    if hasattr(obj, 'TypeId'):
+        if obj.TypeId == 'App::Part':
+            return True
+    return False
+
+
+def isAppLink(obj):
+    if not obj:
+        return False
+    if hasattr(obj, 'TypeId'):
+        if obj.TypeId == 'App::Link':
+            return True
+    return False
+    
 
 """
     +-----------------------------------------------+
@@ -336,7 +450,13 @@ def confirmBox( text ):
 """
     +-----------------------------------------------+
     |        Drop-down menu to group buttons        |
-    +-----------------------------------------------+
+    +----def findObjectLink(obj, doc = App.ActiveDocument):
+    for o in doc.Objects:
+        if hasattr(o, 'LinkedObject'):
+            if o.LinkedObject == obj:
+                return o
+    return(None)
+-------------------------------------------+
 """
 # from https://github.com/HakanSeven12/FreeCAD-Geomatics-Workbench/commit/d82d27b47fcf794bf6f9825405eacc284de18996
 class dropDownCmd:
@@ -391,7 +511,7 @@ def nameLabel( obj ):
     |             for a linked App::Part            |
     +-----------------------------------------------+
 """
-def makeExpressionPart( attLink, attPart, attLCS, linkedDoc, linkLCS ):
+def makeExpressionPart( attLink, attDoc, attLCS, linkedDoc, linkLCS ):
     # if everything is defined
     if attLink and attLCS and linkedDoc and linkLCS:
         # this is where all the magic is, see:
@@ -407,8 +527,8 @@ def makeExpressionPart( attLink, attPart, attLCS, linkedDoc, linkLCS ):
         expr = attLCS+'.Placement * AttachmentOffset * '+linkedDoc+'#'+linkLCS+'.Placement ^ -1'
         # if we're attached to another sister part (and not the Parent Assembly)
         # we need to take into account the Placement of that Part.
-        if attPart:
-            expr = attLink+'.Placement * '+attPart+'#'+expr
+        if attDoc:
+            expr = attLink+'.Placement * '+attDoc+'#'+expr
     else:
         expr = False
     return expr
@@ -495,13 +615,14 @@ def splitExpressionLink( expr, parent ):
 """
 def makeExpressionDatum( attLink, attPart, attLCS ):
     # check that everything is defined
-    if attLink and attPart and attLCS:
+    if attLink and attLCS:
         # expr = Link.Placement * LinkedPart#LCS.Placement
-        expr = attLink +'.Placement * '+ attPart +'#'+ attLCS +'.Placement * AttachmentOffset'
+        expr = attLCS +'.Placement * AttachmentOffset'
+        if attPart:
+            expr = attLink+'.Placement * '+attPart+'#'+expr
     else:
         expr = False
     return expr
-
 
 
 """
@@ -555,11 +676,46 @@ def splitExpressionDatum( expr ):
 # is in the FastenersLib.py file
 
 
+
+"""
+    +-----------------------------------------------+
+    |              Show/Hide the LCSs in            |
+    |   the provided object and all its children    |
+    +-----------------------------------------------+
+
+def showChildLCSs(obj, show, processedLinks):
+    #global processedLinks
+    # if its a datum apply the visibility
+    if obj.TypeId in datumTypes:
+        obj.Visibility = show
+    # if it's a link, look for subObjects
+    elif obj.TypeId == 'App::Link' and obj.Name not in processedLinks:
+        processedLinks.append(obj.Name)
+        for objName in obj.LinkedObject.getSubObjects(1):
+            linkedObj = obj.LinkedObject.Document.getObject(objName[0:-1])
+            showChildLCSs(linkedObj, show, processedLinks)
+    # if it's a container
+    else:
+        if obj.TypeId in containerTypes:
+            for subObjName in obj.getSubObjects(1):
+                subObj = obj.getSubObject(subObjName, 1)    # 1 for returning the real object
+                if subObj != None:
+                    if subObj.TypeId in datumTypes:
+                        #subObj.Visibility = show
+                        # Aparently obj.Visibility API is very slow
+                        # Using the ViewObject.show() and ViewObject.hide() API runs at least twice faster
+                        if show:
+                            subObj.ViewObject.show()
+                        else:
+                            subObj.ViewObject.hide()
+"""
+
+
 """
     +-----------------------------------------------+
     |        Selection Helper functions             |
     +-----------------------------------------------+
-"""
+
 def getModelSelected():
     if App.ActiveDocument.getObject('Model') and App.ActiveDocument.Model.TypeId == 'App::Part':
         selection = Gui.Selection.getSelection()
@@ -567,6 +723,17 @@ def getModelSelected():
             selObj = selection[0]
             if selObj.Name == 'Model' and selObj.TypeId == 'App::Part':
                 return selObj
+    return None
+"""
+
+
+def getSelectedContainer():
+    selection = Gui.Selection.getSelection()
+    if len(selection)==1:
+        selObj = selection[0]
+        # it's an App::Link
+        if selObj.TypeId in containerTypes:
+            return selObj
     return None
 
 
@@ -596,37 +763,4 @@ def getSelectedDatum():
 
 
 
-
-"""
-    +-----------------------------------------------+
-    |              Show/Hide the LCSs in            |
-    |  the provided object and all linked children  |
-    +-----------------------------------------------+
-"""
-def showChildLCSs(obj, show, processedLinks):
-    #global processedLinks
-
-    # if its a datum apply the visibility
-    if obj.TypeId in datumTypes:
-        obj.Visibility = show
-    # if it's a link, look for subObjects
-    elif obj.TypeId == 'App::Link' and obj.Name not in processedLinks:
-        processedLinks.append(obj.Name)
-        for objName in obj.LinkedObject.getSubObjects():
-            linkObj = obj.LinkedObject.Document.getObject(objName[0:-1])
-            showChildLCSs(linkObj, show, processedLinks)
-    # if it's a container
-    else:
-        if obj.TypeId in containerTypes:
-            for subObjName in obj.getSubObjects():
-                subObj = obj.getSubObject(subObjName, 1)    # 1 for returning the real object
-                if subObj != None:
-                    if subObj.TypeId in datumTypes:
-                        #subObj.Visibility = show
-                        # Aparently obj.Visibility API is very slow
-                        # Using the ViewObject.show() and ViewObject.hide() API runs at least twice faster
-                        if show:
-                            subObj.ViewObject.show()
-                        else:
-                            subObj.ViewObject.hide()
 
