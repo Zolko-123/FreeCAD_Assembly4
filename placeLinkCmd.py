@@ -450,17 +450,22 @@ class placeLinkUI():
             # is the selected datum belongs to another part
             else:
                 idx = self.parentList.findText(selLinkName)
+                # the selected LCS is in a child part
                 if idx >= 0:
                     self.parentList.setCurrentIndex(idx)
-                    #selObj = Gui.Selection.getSelection()[0]
-                    #if selObj:
-                    found = self.attLCSlist.findItems(Asm4.nameLabel(selObj), QtCore.Qt.MatchExactly)
-                    if len(found) > 0:
-                        self.attLCSlist.clearSelection()
-                        found[0].setSelected(True)
-                        self.attLCSlist.scrollToItem(found[0])
-                        self.attLCSlist.setCurrentRow(self.attLCSlist.row(found[0]))
-                        self.Apply()
+                # the parent was not found in the child part list
+                # may-be the selected LCS is in the Parent Assembly
+                else:
+                    self.parentList.setCurrentIndex(1)
+                #selObj = Gui.Selection.getSelection()[0]
+                #if selObj:
+                found = self.attLCSlist.findItems(Asm4.nameLabel(selObj), QtCore.Qt.MatchExactly)
+                if len(found) > 0:
+                    self.attLCSlist.clearSelection()
+                    found[0].setSelected(True)
+                    self.attLCSlist.scrollToItem(found[0])
+                    self.attLCSlist.setCurrentRow(self.attLCSlist.row(found[0]))
+                    self.Apply()
         else:
             self.parentList.setCurrentIndex( 1 )
     
