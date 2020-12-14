@@ -449,7 +449,7 @@ class placeLinkUI():
                     self.Apply()
             # is the selected datum belongs to another part
             else:
-                idx = self.parentList.findText(selLinkName)
+                idx = self.parentList.findText(selLinkName, QtCore.Qt.MatchContains)
                 # the selected LCS is in a child part
                 if idx >= 0:
                     self.parentList.setCurrentIndex(idx)
