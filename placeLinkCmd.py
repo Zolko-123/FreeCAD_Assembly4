@@ -78,6 +78,11 @@ class placeLinkUI():
         self.form.setWindowIcon(QtGui.QIcon( iconFile ))
         self.form.setWindowTitle('Place linked Part')
 
+        # get the current active document to avoid errors if user changes tab
+        self.activeDoc = App.ActiveDocument
+        # the parent (top-level) assembly is the App::Part called Model (hard-coded)
+        self.parentAssembly = self.activeDoc.Model
+
         # check that we have selected two LCS or an App::Link object
         self.selectedLink = []
         self.selectedLCSA = None
@@ -130,11 +135,6 @@ class placeLinkUI():
         self.selectedLink.ViewObject.LineWidth = LineWidth
         self.selectedLink.ViewObject.ShapeMaterial.DiffuseColor = DiffuseColor
         self.selectedLink.ViewObject.ShapeMaterial.Transparency = Transparency
-
-        # get the current active document to avoid errors if user changes tab
-        self.activeDoc = App.activeDocument()
-        # the parent (top-level) assembly is the App::Part called Model (hard-coded)
-        self.parentAssembly = self.activeDoc.Model
 
         # check that the link is an Asm4 link:
         self.isAsm4EE = False
@@ -436,8 +436,10 @@ class placeLinkUI():
         selObj = Gui.Selection.getSelection()[0]
         if selObj and len(selPath) > 2:
             selLinkName = selPath[2]
+            selLink = self.activeDoc.getObject(selLinkName)
             # if the selected datum belongs to the part to be placed
-            if self.linkName.text() == selLinkName:
+            #if self.linkName.text() == selLinkName:
+            if self.selectedLink.Name == selLinkName:
                 #selObj = Gui.Selection.getSelection()[0]
                 #if selObj:
                 found = self.partLCSlist.findItems(Asm4.nameLabel(selObj), QtCore.Qt.MatchExactly)
@@ -449,7 +451,8 @@ class placeLinkUI():
                     self.Apply()
             # is the selected datum belongs to another part
             else:
-                idx = self.parentList.findText(selLinkName)
+                # idx = self.parentList.findText(selLinkName)
+                idx = self.parentList.findText(Asm4.nameLabel(selLink), QtCore.Qt.MatchExactly)
                 # the selected LCS is in a child part
                 if idx >= 0:
                     self.parentList.setCurrentIndex(idx)
