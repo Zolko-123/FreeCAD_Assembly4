@@ -31,7 +31,7 @@ import numpy as np
 import base64
 
 from PySide import QtGui, QtCore
-#from pivy import coin
+from pivy import coin
 
 import FreeCADGui as Gui
 import FreeCAD as App
@@ -482,12 +482,17 @@ class selectionObserver():
         # empty string means current document, '*' means all document. 
         # The second argument 1 means resolve sub-object, which is the default value. 0 means full hierarchy.
         # sel = Gui.Selection.getSelectionEx('', 0)[0].SubObjects[0]
-        sel = Gui.Selection.getSelectionEx('', 0) 
-        selobject = Gui.Selection.getSelection()
-        if len(selobject) == 1 or len(sel) == 1:# or (len(selobject) == 1 and len(sel) == 1):
+        selEx = Gui.Selection.getSelectionEx('', 0) 
+        if len(Gui.Selection.getSelection()) == 1 or len(selEx) == 1:# or (len(selobject) == 1 and len(sel) == 1):
+            selObj = Gui.Selection.getSelection()[0]
             #Faces or Edges
-            if len(sel[0].SubObjects)>0: 
-                subShape = sel[0].SubObjects[0]
+            if len(selEx[0].SubObjects)>0: 
+                subShape = selEx[0].SubObjects[0]
+                # we have selected an LCS
+                if selObj.TypeId == 'PartDesign::CoordinateSystem':
+                    base = selObj.Placement.Base
+                    PtS  = self.drawPoint( App.Vector(base.x,base.y,base.z) )
+                    subShape = PtS.Shape
                 # if valid selection
                 if subShape.isValid() and ('Face' in str(subShape) or 'Edge' in str(subShape) or 'Vertex' in str(subShape)):
                     # clear the result area
@@ -873,6 +878,30 @@ class selectionObserver():
         circle.ViewObject.PointSize = 10
         circle.ViewObject.PointColor= ( 0.0, 0.0, 1.0 )
         self.addToDims(circle)
+
+    def drawDim( self, pt1, pt2, name='aDim', width=2 ):
+        global taskUI
+        if pt1!=pt2:
+            # unit direction vector
+            vDir = App.Vector(pt2.sub(pt1))
+            uV   = vDir.multiply(1/vDir.Length)
+            #setup the contour
+            color = coin.SoBaseColor()
+            color.rgb = (1, 1, 1)
+            points=coin.SoCoordinate3()
+            lines=coin.SoLineSet()
+            points.point.values = ( (0,0,0),(10,10,10),(10,10,0) )
+
+            #feed data to separator
+            sep=coin.SoSeparator()
+            sep.addChild(points)
+            sep.addChild(color)
+            sep.addChild(lines)
+
+            #add separator to sceneGraph
+            sg = FreeCADGui.ActiveDocument.ActiveView.getSceneGraph()
+            sg.addChild(sep)
+
 
     def drawLine( self, pt1, pt2, name='aLine', width=3 ):
         global taskUI
