@@ -6,7 +6,7 @@ These instructions present the intended usage and workflow to assembly design us
 
 ## Installation
 
-The recommended way to instal Assembly4 is through FreeCAD's [Addon Manager](https://github.com/FreeCAD/FreeCAD-addons/#1-builtin-addon-manager): **Menu > Tools > Addon Manager**. It is called *Assembly4* in the addon repository. Should this fail, please read the **Installation** section in the [technical manual](TECHMANUAL.md) for possible solutions.
+The recommended way to install Assembly4 is through FreeCAD's [Addon Manager](https://github.com/FreeCAD/FreeCAD-addons/#1-builtin-addon-manager): **Menu > Tools > Addon Manager**. It is called *Assembly4* in the addon repository. Should this fail, please read the **Installation** section in the [technical manual](TECHMANUAL.md) for possible solutions.
 
 [![FreeCAD Addon manager status](https://img.shields.io/badge/FreeCAD%20addon%20manager-available-brightgreen)](https://github.com/FreeCAD/FreeCAD-addons)
 
