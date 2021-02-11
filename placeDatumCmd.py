@@ -313,7 +313,7 @@ class placeDatumUI():
         return
 
 
-    # Rotataions
+    # Rotations
     def rotAxis( self, addRotation ):
         self.selectedDatum.AttachmentOffset = self.selectedDatum.AttachmentOffset.multiply(addRotation) 
         self.selectedDatum.recompute()
@@ -328,7 +328,7 @@ class placeDatumUI():
         self.rotAxis(Asm4.rotZ)
 
 
-    # Initialises the UI once the widget has stared
+    # Initialises the UI once the widget has started
     def initUI(self):
         self.lscName.setText( Asm4.nameLabel(self.selectedDatum) )
         self.parentDoc.clear()

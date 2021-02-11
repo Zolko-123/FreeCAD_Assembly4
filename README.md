@@ -65,7 +65,7 @@ Added Offset translation adjustment in the placeLink dialog
 Added Configuration Engine  
 Measurements obey the preferences settings  
 Some code clean-up (hopefully won't break anything, if it does please report)  
-**Big thanx for the help, this is really apreciated**  
+**Big thanx for the help, this is really appreciated**  
 
 * 2020.11.01 (**0.9.10**) :  
 Bugfixe in placement of Fastener on "Hole Axis"  
@@ -130,7 +130,7 @@ added "release attachments" button
 various small fixes
 
 * 2020.01.06 (**version 0.7.7**) :  
-Moved the turorials to the Resources directory  
+Moved the tutorials to the Resources directory  
 import libAsm4 as Asm4  
 Added a Help command (dummy placeholder)  
 Ported example2 to the latest Asm4 format
