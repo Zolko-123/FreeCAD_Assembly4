@@ -505,7 +505,7 @@ class placeFastenerUI():
     # Rotations
     def rotAxis( self, placement ):
         # placement is of TypeId 'Placement'
-        # we only add the rotation, not the postion
+        # we only add the rotation, not the position
         addRotation = placement.Rotation
         oldRotation  = self.selectedFastener.AttachmentOffset.Rotation
         newRotation  = oldRotation.multiply( addRotation )

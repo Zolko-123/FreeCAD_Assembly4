@@ -702,7 +702,7 @@ def showChildLCSs(obj, show, processedLinks):
                 if subObj != None:
                     if subObj.TypeId in datumTypes:
                         #subObj.Visibility = show
-                        # Aparently obj.Visibility API is very slow
+                        # Apparently obj.Visibility API is very slow
                         # Using the ViewObject.show() and ViewObject.hide() API runs at least twice faster
                         if show:
                             subObj.ViewObject.show()

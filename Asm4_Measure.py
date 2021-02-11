@@ -152,7 +152,7 @@ class MeasureUI():
 
     # OK button
     def accept(self):
-        # update the Measure group to get rid if the smal overlay icon
+        # update the Measure group to get rid if the small overlay icon
         App.ActiveDocument.recompute()
         self.Finish()
 
@@ -708,7 +708,7 @@ class selectionObserver():
         else:
             self.printResult( 'Not a valid Line\n'+str(line) )
 
-    # mesure distance between 2 points
+    # measure distance between 2 points
     def measurePoints(self, pt1, pt2 ):
         global taskUI
         mid = self.midPoint(pt1,pt2)
