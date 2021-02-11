@@ -557,7 +557,7 @@ class selectionObserver():
                             else:
                                 self.printResult("Can't measure\n"+str(subShape))
                             # unset first selection
-                            self.Sel1 == None
+                            self.Sel1 is None
                         # if not rbRadius, launch the selection of the second element
                         elif self.Sel1 is not None:
                             #taskUI.Selection1.setEnabled(False)

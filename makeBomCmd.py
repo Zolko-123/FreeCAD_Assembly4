@@ -65,7 +65,7 @@ forbbox = ('PartDesign::Body', 'Part::Feature', 'Part::FeaturePython')
 
 def Partlist(object,level=0,tab=None):
     indent = '  '*level
-    if tab == None:
+    if tab is None:
         tab = {}
     if object.TypeId=='App::Link':
         print(indent+object.Label+' -> '+object.LinkedObject.Document.Name+'#'+object.LinkedObject.Label+' => '+object.LinkedObject.FullName)
