@@ -148,7 +148,7 @@ class placeFastenerCmd():
     def Activated(self):
         # check that we have selected a Fastener from the Fastener WB
         selection = getSelectionFS()
-        if selection == None:
+        if selection is None:
             return
         # check that the fastener is an Asm4 fastener
         if not hasattr(selection,'AssemblyType'):
@@ -784,7 +784,7 @@ class changeFSparametersCmd():
             Gui.activateWorkbench('Assembly4Workbench')
         # check that we have selected a Fastener from the Fastener WB
         selection = getSelectionFS()
-        if selection == None:
+        if selection is None:
             return
         Gui.runCommand('FSChangeParams')
 

@@ -103,12 +103,12 @@ class insertLink( QtGui.QDialog ):
                 # we don't want to link to itself to the 'Model' object
                 # other App::Part in the same document are OK 
                 # but only those at top level (not nested inside other containers)
-                if obj != self.asmModel and obj.getParentGeoFeatureGroup()==None:
+                if obj != self.asmModel and obj.getParentGeoFeatureGroup() is None:
                     self.allParts.append( obj )
                     self.partsDoc.append( doc )
             for obj in doc.findObjects("PartDesign::Body"):
                 # but only those at top level (not nested inside other containers)
-                if obj.getParentGeoFeatureGroup()==None:
+                if obj.getParentGeoFeatureGroup() is None:
                     self.allParts.append( obj )
                     self.partsDoc.append( doc )
 

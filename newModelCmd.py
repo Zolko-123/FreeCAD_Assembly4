@@ -83,12 +83,12 @@ class newModel:
             # move existing parts at the document root to the Parts group
             # not nested inside other parts, to keep hierarchy
             for obj in self.activeDoc.Objects:
-                if obj.TypeId=='App::Part' and obj.Name!='Model' and obj.getParentGeoFeatureGroup()==None:
+                if obj.TypeId=='App::Part' and obj.Name!='Model' and obj.getParentGeoFeatureGroup() is None:
                     partsGroup.addObject(obj)
             # move existing bodies at the document root to the Parts group
             # not nested inside other parts, to keep hierarchy
             for obj in self.activeDoc.Objects:
-                if obj.TypeId=='PartDesign::Body' and obj.getParentGeoFeatureGroup()==None:
+                if obj.TypeId=='PartDesign::Body' and obj.getParentGeoFeatureGroup() is None:
                     partsGroup.addObject(obj)
 
             # recompute to get rid of the small overlays

@@ -162,7 +162,7 @@ class newHole:
 
     def IsActive(self):
         selection = self.getSelectedEdge()
-        if selection == None:
+        if selection is None:
             return False
         else:
             return True
