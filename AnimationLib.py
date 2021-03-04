@@ -57,7 +57,7 @@ class animateVariable():
         # grab the Variables container
         self.Variables = App.ActiveDocument.getObject('Variables')
         self.Model = App.ActiveDocument.getObject('Model')
-        self.Run = True
+        self.setRunning(False)
 
         # Now we can draw the UI
         self.UI.show()
@@ -96,7 +96,7 @@ class animateVariable():
     +-----------------------------------------------+
     """
     def onRun(self):
-        self.Run = True
+        self.setRunning(True)
         # the selected variable
         varName = self.varList.currentText()
         begin   = self.minValue.value()
@@ -116,6 +116,7 @@ class animateVariable():
                     self.runBwd(varName)
             else:
                 self.runFwd(varName)
+        self.setRunning(False)
         return
 
 
@@ -164,14 +165,14 @@ class animateVariable():
 
 
     def onLoop(self):
-        self.Run = False
+        self.setRunning(False)
         if self.Pendulum.isChecked() and self.Loop.isChecked():
             self.Pendulum.setChecked(False)
         return
 
 
     def onPendulum(self):
-        self.Run = False
+        self.setRunning(False)
         if self.Loop.isChecked() and self.Pendulum.isChecked():
             self.Loop.setChecked(False)
         return
@@ -189,7 +190,7 @@ class animateVariable():
     +-----------------------------------------------+
     """
     def sliderMoved(self):
-        self.Run = False
+        self.setRunning(False)
         varName = self.varList.currentText()
         varValue = self.slider.value()
         self.setVarValue(varName,varValue)
@@ -200,7 +201,7 @@ class animateVariable():
 
 
     def onValuesChanged(self):
-        self.Run = False
+        self.setRunning(False)
         self.sliderMinValue.setText( str(self.minValue.value()) )
         self.sliderMaxValue.setText( str(self.maxValue.value()) )
         self.slider.setRange( self.minValue.value(), self.maxValue.value() )
@@ -215,7 +216,7 @@ class animateVariable():
     +-----------------------------------------------+
     """
     def onStop(self):
-        self.Run = False
+        self.setRunning(False)
         return
 
 
@@ -225,7 +226,7 @@ class animateVariable():
     +-----------------------------------------------+
     """
     def onClose(self):
-        self.Run = False
+        self.setRunning(False)
         self.UI.close()
 
 
@@ -330,10 +331,20 @@ class animateVariable():
         self.Loop.toggled.connect(                self.onLoop )
         self.Pendulum.toggled.connect(            self.onPendulum )
         self.CloseButton.clicked.connect(         self.onClose )
-        self.StopButton.clicked.connect(          self.onStop )
+        self.StopButton.clicked.connect(self.onStop)
         self.RunButton.clicked.connect(           self.onRun )
 
 
+
+    """
+        +-----------------------------------------------+
+        |       Helper to toggle Run State              |
+        +-----------------------------------------------+
+    """
+    def setRunning(self, state):
+        self.Run = state
+        self.RunButton.setEnabled(not state)
+        self.StopButton.setEnabled(state)
 
 """
     +-----------------------------------------------+
