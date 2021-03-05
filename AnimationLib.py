@@ -227,10 +227,12 @@ class animateVariable():
 
 
     def onValuesChanged(self):
-        self.sliderMinValue.setText(str(self.beginValue.value()))
-        self.sliderMaxValue.setText(str(self.endValue.value()))
-        self.slider.setRange(self.beginValue.value(), self.endValue.value())
-        self.slider.setSingleStep( self.stepValue.value() )
+        minVal = min(self.beginValue.value(), self.endValue.value())
+        maxVal = max(self.beginValue.value(), self.endValue.value())
+        self.sliderMinValue.setText(str(minVal))
+        self.sliderMaxValue.setText(str(maxVal))
+        self.slider.setRange(minVal, maxVal)
+        self.slider.setSingleStep(self.stepValue.value())
         return
 
     """
