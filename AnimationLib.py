@@ -17,7 +17,6 @@ import FreeCAD as App
 import libAsm4 as Asm4
 
 
-
 """
     +-----------------------------------------------+
     |                  main class                   |
@@ -84,8 +83,8 @@ class animateVariable():
             # get its value
             selectedVarValue = self.Variables.getPropertyByName(selectedVar)
             # initialise the Begin and End values with it
-            self.minValue.setValue(selectedVarValue)
-            self.maxValue.setValue(selectedVarValue)
+            self.beginValue.setValue(selectedVarValue)
+            self.endValue.setValue(selectedVarValue)
         return
 
 
@@ -99,66 +98,43 @@ class animateVariable():
         self.setRunning(True)
         # the selected variable
         varName = self.varList.currentText()
-        begin   = self.minValue.value()
-        end     = self.maxValue.value()
-        step    = self.stepValue.value()
-        sleep   = self.sleepValue.value()
+
         # basic checks
         if varName:
             # loop indefinitely
             if self.Loop.isChecked():
                 while self.Run and self.Loop.isChecked():
-                    self.runFwd(varName)
+                    self.run(varName)
             # go back-and-forth indefinitely
             elif self.Pendulum.isChecked():
                 while self.Run and self.Pendulum.isChecked():
-                    self.runFwd(varName)
-                    self.runBwd(varName)
+                    self.run(varName)
+                    self.run(varName, True)
             else:
-                self.runFwd(varName)
+                self.run(varName)
         self.setRunning(False)
         return
 
-
-    def runFwd( self, varName ):
-        begin   = self.minValue.value()
-        end     = self.maxValue.value()
-        step    = self.stepValue.value()
+    def run(self, varName, reverse=False):
+        begin   = self.beginValue.value() if not reverse else self.endValue.value()
+        end     = self.endValue.value() if not reverse else self.beginValue.value()
+        step    = abs(self.stepValue.value())
         sleep   = self.sleepValue.value()
+
+        # Actual animation loop
+        # Note that apart from the rendering update, the overall responsiveness of FreeCAD
+        # (while we're trapped in the loops below) depends on Gui.updateGui(),
+        # which is currently called via setVarValue()
         varValue = begin
-        # if we go positive ...
-        if end>begin and step>0:
+        if begin < end:
             while varValue <= end and self.Run:
-                self.setVarValue(varName,varValue)
+                self.setVarValue(varName, varValue)
                 self.slider.setValue(varValue)
                 varValue += step
                 time.sleep(sleep)
-        # ... or negative
-        elif end<begin and step<0:
+        elif begin > end:
             while varValue >= end and self.Run:
-                self.setVarValue(varName,varValue)
-                self.slider.setValue(varValue)
-                varValue += step
-                time.sleep(sleep)
-
-    
-    def runBwd( self, varName ):
-        begin   = self.minValue.value()
-        end     = self.maxValue.value()
-        step    = self.stepValue.value()
-        sleep   = self.sleepValue.value()
-        varValue = end
-        # if we went positive ...
-        if end>begin and step>0:
-            while varValue >= begin and self.Run:
-                self.setVarValue(varName,varValue)
-                self.slider.setValue(varValue)
-                varValue -= step
-                time.sleep(sleep)
-        # ... or negative
-        elif end<begin and step<0:
-            while varValue <= begin and self.Run:
-                self.setVarValue(varName,varValue)
+                self.setVarValue(varName, varValue)
                 self.slider.setValue(varValue)
                 varValue -= step
                 time.sleep(sleep)
@@ -202,9 +178,9 @@ class animateVariable():
 
     def onValuesChanged(self):
         self.setRunning(False)
-        self.sliderMinValue.setText( str(self.minValue.value()) )
-        self.sliderMaxValue.setText( str(self.maxValue.value()) )
-        self.slider.setRange( self.minValue.value(), self.maxValue.value() )
+        self.sliderMinValue.setText(str(self.beginValue.value()))
+        self.sliderMaxValue.setText(str(self.endValue.value()))
+        self.slider.setRange(self.beginValue.value(), self.endValue.value())
         self.slider.setSingleStep( self.stepValue.value() )
         return
 
@@ -252,13 +228,13 @@ class animateVariable():
         self.varList = QtGui.QComboBox()
         self.formLayout.addRow(QtGui.QLabel('Select Variable'),self.varList)
         # Range Minimum
-        self.minValue = QtGui.QDoubleSpinBox()
-        self.minValue.setRange( -1000000.0, 1000000.0 )
-        self.formLayout.addRow(QtGui.QLabel('Range Begin'),self.minValue)
+        self.beginValue = QtGui.QDoubleSpinBox()
+        self.beginValue.setRange(-1000000.0, 1000000.0)
+        self.formLayout.addRow(QtGui.QLabel('Range Begin'), self.beginValue)
         # Maximum
-        self.maxValue = QtGui.QDoubleSpinBox()
-        self.maxValue.setRange( -1000000.0, 1000000.0 )
-        self.formLayout.addRow(QtGui.QLabel('Range End'),self.maxValue)
+        self.endValue = QtGui.QDoubleSpinBox()
+        self.endValue.setRange(-1000000.0, 1000000.0)
+        self.formLayout.addRow(QtGui.QLabel('Range End'), self.endValue)
         # Step
         self.stepValue = QtGui.QDoubleSpinBox()
         self.stepValue.setRange( -10000.0, 10000.0 )
@@ -325,8 +301,8 @@ class animateVariable():
         # Actions
         self.varList.currentIndexChanged.connect( self.onSelectVar )
         self.slider.sliderMoved.connect(          self.sliderMoved)
-        self.minValue.valueChanged.connect(       self.onValuesChanged )
-        self.maxValue.valueChanged.connect(       self.onValuesChanged )
+        self.beginValue.valueChanged.connect(self.onValuesChanged)
+        self.endValue.valueChanged.connect(self.onValuesChanged)
         self.stepValue.valueChanged.connect(      self.onValuesChanged )
         self.Loop.toggled.connect(                self.onLoop )
         self.Pendulum.toggled.connect(            self.onPendulum )
