@@ -79,6 +79,7 @@ class animateVariable():
         # Initialize States and timing logic.
         self.RunState = self.AnimationState.STOPPED
         self.reverseAnimation = False  # True flags when the animation is "in reverse" for the pendulum mode.
+        self.ForceGUIUpdate = False # True Forces GUI to update on every step of the animation.
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.onTimerTick)
 
@@ -193,7 +194,8 @@ class animateVariable():
     def setVarValue(self,name,value):
         setattr( self.Variables, name, value )
         App.ActiveDocument.Model.recompute('True')
-        Gui.updateGui()
+        if self.ForceGUIUpdate:
+            Gui.updateGui()
 
     """
     +-----------------------------------------------+
@@ -210,6 +212,9 @@ class animateVariable():
         if self.Loop.isChecked() and self.Pendulum.isChecked():
             self.Loop.setChecked(False)
         return
+
+    def onForceRender(self):
+        self.ForceGUIUpdate = self.ForceRender.isChecked()
 
 
     """
@@ -312,19 +317,30 @@ class animateVariable():
         self.sliderLayout.addWidget(self.sliderMaxValue)
         self.mainLayout.addLayout(self.sliderLayout)
 
-        # loop and pendumlum tick-boxes
+
+        # ForceUpdate, loop and pendulum tick-boxes
+        self.ForceRender = QtGui.QCheckBox()
+        self.ForceRender.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.ForceRender.setToolTip("Force GUI to update on every step.")
+        self.ForceRender.setText("Force-render every step")
+        self.ForceRender.setChecked(False)
+
         self.Loop = QtGui.QCheckBox()
         self.Loop.setLayoutDirection(QtCore.Qt.RightToLeft)
         self.Loop.setToolTip("Infinite Loop")
         self.Loop.setText("Loop")
         self.Loop.setChecked(False)
-        self.mainLayout.addWidget(self.Loop)
+
         self.Pendulum = QtGui.QCheckBox()
         self.Pendulum.setLayoutDirection(QtCore.Qt.RightToLeft)
         self.Pendulum.setToolTip("Back-and-forth pendulum")
         self.Pendulum.setText("Pendulum")
         self.Pendulum.setChecked(False)
-        self.mainLayout.addWidget(self.Pendulum)
+
+        self.mainLayout.addWidget(self.Loop)
+        self.cbLayout = QtGui.QFormLayout()
+        self.cbLayout.addRow(self.ForceRender, self.Pendulum)
+        self.mainLayout.addLayout(self.cbLayout)
 
         self.mainLayout.addWidget(QtGui.QLabel())
         self.mainLayout.addStretch()
@@ -357,6 +373,7 @@ class animateVariable():
         self.stepValue.valueChanged.connect(      self.onValuesChanged )
         self.Loop.toggled.connect(                self.onLoop )
         self.Pendulum.toggled.connect(            self.onPendulum )
+        self.ForceRender.toggled.connect(self.onForceRender)
         self.CloseButton.clicked.connect(         self.onClose )
         self.StopButton.clicked.connect(self.onStop)
         self.RunButton.clicked.connect(           self.onRun )
