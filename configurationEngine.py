@@ -120,7 +120,7 @@ class saveConfigurationUI():
         FCC.PrintMessage('Saving configuration to "' + confName + '"\n')
         conf = getConfig(confName, 'Configurations')
         if conf:
-            confirm = Asm4.confirmBox('Override cofiguration in "' + confName + '"?')
+            confirm = Asm4.confirmBox('Override configuration in "' + confName + '"?')
             if not confirm:
                 FCC.PrintMessage('Cancel save...\n')
                 return
@@ -320,7 +320,7 @@ class restoreConfigurationUI():
     def accept(self):
         selectedItems = self.configurationList.selectedItems()
         if len(selectedItems) == 0:
-            Asm4.warningBox('Please select a cofiguration in the list')
+            Asm4.warningBox('Please select a configuration in the list')
             return
         config = selectedItems[0]
         RestoreConfiguration(config.name)

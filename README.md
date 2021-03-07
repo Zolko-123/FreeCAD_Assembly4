@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.9.13, 2020-12-01
+Current version 0.9.14, 2021-03-07
 
 
 
@@ -51,6 +51,11 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 
 ## Release notes
+* 2021.03.07 (**0.9.14**) :  
+HoleAxis can now create datums on all selected circles from 1 single part in 1 step   
+Added a selection filter in the main Assembly4 toolbar__
+Made the measurement tool compatible with the selection fiter  
+Changed insertLink and placeLink such that any App::Part can serve as parent assembly but it is inaccessible from the UI for now (might bring more trouble than benefit)__
 
 * 2020.12.01 (**0.9.13**) :  
 improved LCS selection  
@@ -65,7 +70,7 @@ Added Offset translation adjustment in the placeLink dialog
 Added Configuration Engine  
 Measurements obey the preferences settings  
 Some code clean-up (hopefully won't break anything, if it does please report)  
-**Big thanx for the help, this is really apreciated**  
+**Big thanx for the help, this is really appreciated**  
 
 * 2020.11.01 (**0.9.10**) :  
 Bugfixe in placement of Fastener on "Hole Axis"  
@@ -130,7 +135,7 @@ added "release attachments" button
 various small fixes
 
 * 2020.01.06 (**version 0.7.7**) :  
-Moved the turorials to the Resources directory  
+Moved the tutorials to the Resources directory  
 import libAsm4 as Asm4  
 Added a Help command (dummy placeholder)  
 Ported example2 to the latest Asm4 format

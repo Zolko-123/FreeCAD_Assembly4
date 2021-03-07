@@ -202,7 +202,7 @@ def checkModel():
             retval = model
     return retval
 
-
+# checks whether an App::Link is to an App::Part
 def isLinkToPart(obj):
     if obj.TypeId == 'App::Link' and hasattr(obj.LinkedObject,'isDerivedFrom'):
         if  obj.LinkedObject.isDerivedFrom('App::Part') or obj.LinkedObject.isDerivedFrom('PartDesign::Body'):
@@ -702,7 +702,7 @@ def showChildLCSs(obj, show, processedLinks):
                 if subObj != None:
                     if subObj.TypeId in datumTypes:
                         #subObj.Visibility = show
-                        # Aparently obj.Visibility API is very slow
+                        # Apparently obj.Visibility API is very slow
                         # Using the ViewObject.show() and ViewObject.hide() API runs at least twice faster
                         if show:
                             subObj.ViewObject.show()
@@ -726,28 +726,40 @@ def getModelSelected():
     return None
 """
 
-
-def getSelectedContainer():
+# checks whether an App::Part is selected, and that it's at the root of the document
+def getSelectedRootPart():
+    retval = None
     selection = Gui.Selection.getSelection()
     if len(selection)==1:
         selObj = selection[0]
-        # it's an App::Link
+        # only consider App::Parts at the root of the document
+        if selObj.TypeId=='App::Part' and selObj.getParentGeoFeatureGroup() is None:
+            retval = selObj
+    return retval
+
+
+def getSelectedContainer():
+    retval = None
+    selection = Gui.Selection.getSelection()
+    if len(selection)==1:
+        selObj = selection[0]
         if selObj.TypeId in containerTypes:
-            return selObj
-    return None
+            retval = selObj
+    return retval
 
 
 def getSelectedLink():
     # check that there is an App::Part called 'Model'
     #if App.ActiveDocument.getObject('Model') and App.ActiveDocument.Model.TypeId == 'App::Part':
-    if checkModel():
-        selection = Gui.Selection.getSelection()
-        if len(selection)==1:
-            selObj = selection[0]
-            # it's an App::Link
-            if selObj.isDerivedFrom('App::Link') and selObj.LinkedObject.TypeId in containerTypes:
-                return selObj
-    return None
+    #if checkModel():
+    retval = None
+    selection = Gui.Selection.getSelection()
+    if len(selection)==1:
+        selObj = selection[0]
+        # it's an App::Link
+        if selObj.isDerivedFrom('App::Link') and selObj.LinkedObject.TypeId in containerTypes:
+            retval = selObj
+    return retval
 
 
 def getSelectedDatum():    

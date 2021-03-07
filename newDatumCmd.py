@@ -161,65 +161,62 @@ class newHole:
                 }
 
     def IsActive(self):
-        selection = self.getSelectedEdge()
-        if selection == None:
+        selection = self.getSelectedEdges()
+        if selection is None:
             return False
         else:
             return True
 
-    def getSelectedEdge(self):
-        # check that we have selected a circular edge
-        selection = None
-        if App.ActiveDocument:
-            # 1 thing is selected:
-            if len(Gui.Selection.getSelection()) == 1: 
-                # check whether it's a circular edge:
-                edge = Gui.Selection.getSelectionEx()[0]
-                if len(edge.SubObjects) == 1:
-                    # if the edge is circular
-                    if Asm4.isCircle(edge.SubObjects[0]):
-                        # find the feature on which the edge is located
-                        parentObj = Gui.Selection.getSelection()[0]
-                        edgeName = edge.SubElementNames[0]
-                        # selection = ( parentObj, edgeName )
-                        selection = ( parentObj, edge )
-        return selection
 
     """
     +-----------------------------------------------+
     |                 the real stuff                |
     +-----------------------------------------------+
     """
+    def getSelectedEdges(self):
+        # check that we have selected only circular edges
+        selection = None
+        parent = None
+        edges = []
+        # 1 selection means a single parent        
+        if App.ActiveDocument and len(Gui.Selection.getSelection()) == 1:
+            parent = Gui.Selection.getSelection()[0]
+            # parse all sub-elemets of the selection
+            for i in range(len(Gui.Selection.getSelectionEx()[0].SubObjects)):
+                edgeObj  = Gui.Selection.getSelectionEx()[0].SubObjects[i]
+                edgeName = Gui.Selection.getSelectionEx()[0].SubElementNames[i]                    
+                # if the edge is circular
+                if Asm4.isCircle(edgeObj):
+                    edges.append( [edgeObj,edgeName] )
+        # if we found circular edges
+        if len(edges) > 0:
+            selection = ( parent, edges )
+        return selection
+
+
     def Activated(self):
-        ( selectedObj, edge ) = self.getSelectedEdge()
-        edgeName = edge.SubElementNames[0]
-        parentPart = selectedObj.getParentGeoFeatureGroup()
-        # if the solid having the edge is indeed in an App::Part
-        if parentPart and (parentPart.TypeId=='App::Part' or parentPart.TypeId=='PartDesign::Body'):
-            # check whether there is already a similar datum, and increment the instance number 
-            instanceNum = 1
-            while App.ActiveDocument.getObject( 'HoleAxis_'+str(instanceNum) ):
-                instanceNum += 1
-            axis = parentPart.newObject('PartDesign::Line','HoleAxis_'+str(instanceNum))
-            axis.Support = [( selectedObj, (edgeName,) )]
-            axis.MapMode = 'AxisOfCurvature'
-            axis.MapReversed = False
-            axis.ResizeMode = 'Manual'
-            axis.Length = edge.SubObjects[0].BoundBox.DiagonalLength
-            axis.ViewObject.ShapeColor = (0.0,0.0,1.0)
-            axis.ViewObject.Transparency = 50
-            '''
-            pt1    = App.Vector(0,0,diam/2.)
-            pt2    = App.Vector(0,0,-diam/2.)
-            axis   = parentPart.newObject('Part::FeaturePython', 'HoleAxis_'+str(instanceNum))
-            axis.ViewObject.Proxy = Asm4.setCustomIcon(axis,'Asm4_Hole.svg')
-            axis.Shape = Part.Wire(Part.makeLine(pt1,pt2))
-            axis.Placement = circle.Placement
-            axis.ViewObject.DrawStyle = 'Dashdot'
-            axis.ViewObject.LineColor = (0.0,0.0,1.0)
-            '''
-            axis.recompute()
-            parentPart.recompute()
+        ( selectedObj, edges ) = self.getSelectedEdges()
+        for i in range(len(edges)):
+            edgeObj    = edges[i][0]
+            edgeName   = edges[i][1]
+            parentPart = selectedObj.getParentGeoFeatureGroup()
+            parentDoc  = parentPart.Document
+            # if the solid having the edge is indeed in an App::Part
+            if parentPart and (parentPart.TypeId=='App::Part' or parentPart.TypeId=='PartDesign::Body'):
+                # check whether there is already a similar datum, and increment the instance number 
+                instanceNum = 1
+                while parentDoc.getObject( 'HoleAxis_'+str(instanceNum) ):
+                    instanceNum += 1
+                axis             = parentPart.newObject('PartDesign::Line','HoleAxis_'+str(instanceNum))
+                axis.Support     = [( selectedObj, (edgeName,) )]
+                axis.MapMode     = 'AxisOfCurvature'
+                axis.MapReversed = False
+                axis.ResizeMode  = 'Manual'
+                axis.Length      = edgeObj.BoundBox.DiagonalLength
+                axis.ViewObject.ShapeColor = (0.0,0.0,1.0)
+                axis.ViewObject.Transparency = 50
+                axis.recompute()
+                parentPart.recompute()
 
 
 
