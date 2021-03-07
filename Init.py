@@ -23,4 +23,4 @@
 #  
 ###################################################################################
 
-print("Loading Assembly4 WorkBench")
+print("Assembly4 workbench loaded ")

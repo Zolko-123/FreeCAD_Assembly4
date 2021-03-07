@@ -12,6 +12,7 @@ import FreeCAD as App
 from FreeCAD import Console as FCC
 
 import libAsm4 as Asm4
+import selectionFilter
 
 
 
@@ -55,13 +56,28 @@ class placeLinkCmd():
         return False
 
     def Activated(self):
-        # enable the local link selection observer
-        # add the listener, 0 forces to resolve the links
-        #Gui.Selection.addObserver(linkObserver, 0)
-        # launch the UI in the task panel
-        Gui.Control.showDialog(placeLinkUI())
-
-
+        #Handle single selected App::Link
+        selectedLink = None
+        parentAssembly = None
+        selection = Asm4.getSelectedLink()
+        if not selection :
+            # This shouldn't happen
+            FCC.PrintWarning("This is not an error message you are supposed to see, something went wrong\n")
+            return
+        else:
+            parent = selection.getParentGeoFeatureGroup()
+            # only handle if the parent is at the root of the document:
+            if parent and parent.TypeId == 'App::Part' and parent.getParentGeoFeatureGroup() is None:
+                # only accept Asm4 Models as assemblies
+                # this is self-imposed, works also without an Asm4 Model
+                if parent.Name=='Model':
+                    # launch the UI in the task panel
+                    Gui.Control.showDialog(placeLinkUI())
+                else:
+                    Asm4.warningBox('Please select a link in the assembly Model')
+            else:
+                Asm4.warningBox('Please select a link in the assembly Model.')
+        return
 
 
 """
@@ -72,23 +88,32 @@ class placeLinkCmd():
 class placeLinkUI():
 
     def __init__(self):
+        # define the GUI
         self.base = QtGui.QWidget()
         self.form = self.base        
         iconFile = os.path.join( Asm4.iconPath , 'Place_Link.svg')
         self.form.setWindowIcon(QtGui.QIcon( iconFile ))
         self.form.setWindowTitle('Place linked Part')
 
+        # we have checked before that all this is correct 
+        self.selectedLink = Asm4.getSelectedLink()
+        self.parentAssembly = self.selectedLink.getParentGeoFeatureGroup()
+        Asm4.makeAsmProperties(self.selectedLink)
+
+        # remove selectionFilter
+        self.selectionFilterStatus = selectionFilter.observerStatus()
+        selectionFilter.observerDisable()
+
         # get the current active document to avoid errors if user changes tab
         self.activeDoc = App.ActiveDocument
         # the parent (top-level) assembly is the App::Part called Model (hard-coded)
-        self.parentAssembly = self.activeDoc.Model
+        # Was
+        # self.parentAssembly = self.activeDoc.Model
 
         # check that we have selected two LCS or an App::Link object
-        self.selectedLink = []
         self.selectedLCSA = None
         self.selectedLinkB = None
         self.selectedLCSB = None
-        selection = Asm4.getSelectedLink()
         #selectedLCSPair = Asm4.getLinkAndDatum2()
         self.Xtranslation = 0.00
         self.Ytranslation = 0.00
@@ -101,15 +126,6 @@ class placeLinkUI():
         self.drawUI()
         global taskUI
         taskUI = self
-
-        #Handle single selected App::Link
-        if not selection :
-            # This shouldn't happen
-            FCC.PrintWarning("This is not an error message you are supposed to see, something went wrong\n")
-            Gui.Control.closeDialog()
-        else:
-            self.selectedLink = selection
-            Asm4.makeAsmProperties(self.selectedLink)
 
         #save original AttachmentOffset of linked part
         self.old_LinkAttachmentOffset = self.selectedLink.AttachmentOffset
@@ -240,10 +256,12 @@ class placeLinkUI():
     def finish(self):
         # remove the  observer
         Gui.Selection.removeObserver(self)
-
         self.restoreView()
         Gui.Selection.clearSelection()
-        Gui.Selection.addSelection( self.activeDoc.Name, 'Model', self.selectedLink.Name+'.' )
+        Gui.Selection.addSelection( self.activeDoc.Name, self.parentAssembly.Name, self.selectedLink.Name+'.' )
+        # restore previous selection filter (if any)
+        if self.selectionFilterStatus:
+            selectionFilter.observerEnable()
         Gui.Control.closeDialog()
 
 

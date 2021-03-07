@@ -59,8 +59,11 @@ class newModel:
         # check whether there is already Model in the document
         if not self.checkModel():
             # create a group 'Parts' to hold all parts in the assembly document (if any)
-            if not self.activeDoc.getObject('Parts'):
+            # must be done before creating the Asm4 Model
+            partsGroup = self.activeDoc.getObject('Parts')
+            if partsGroup is None:
                 partsGroup = self.activeDoc.addObject( 'App::DocumentObjectGroup', 'Parts' )
+
             # create a new App::Part called 'Model'
             model = self.activeDoc.addObject('App::Part','Model')
             # set the type as a "proof" that it's an Assembly4 Model
@@ -74,22 +77,18 @@ class newModel:
             model.newObject('App::DocumentObjectGroup','Constraints')
             # create an object Variables to hold variables to be used in this document
             model.addObject(Asm4.createVariables())
-            # variables = model.newObject('App::FeaturePython','Variables')
-            #variables.ViewObject.Proxy = Asm4.setCustomIcon(variables,'Asm4_Variables.svg')
-
             # create a Configuration property
             model.addProperty('App::PropertyEnumeration', 'Configuration', 'Parameters')
             model.Configuration = ['Default']
-            # move existing parts at the document root to the Parts group
+            
+            # move existing parts and bodies at the document root to the Parts group
             # not nested inside other parts, to keep hierarchy
-            for obj in self.activeDoc.Objects:
-                if obj.TypeId=='App::Part' and obj.Name!='Model' and obj.getParentGeoFeatureGroup() is None:
-                    partsGroup.addObject(obj)
-            # move existing bodies at the document root to the Parts group
-            # not nested inside other parts, to keep hierarchy
-            for obj in self.activeDoc.Objects:
-                if obj.TypeId=='PartDesign::Body' and obj.getParentGeoFeatureGroup() is None:
-                    partsGroup.addObject(obj)
+            if partsGroup.TypeId=='App::DocumentObjectGroup':
+                for obj in self.activeDoc.Objects:
+                    if obj.TypeId in Asm4.containerTypes and obj.Name!='Model' and obj.getParentGeoFeatureGroup() is None:
+                        partsGroup.addObject(obj)
+            else:
+                Asm4.warningBox(   'There seems to already be a Parts object, you might get unexpected behaviour' )
 
             # recompute to get rid of the small overlays
             model.recompute()

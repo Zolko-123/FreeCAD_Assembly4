@@ -14,8 +14,8 @@ from FreeCAD import Console as FCC
 import libAsm4 as Asm4
 
 
+global Asm4_3DselObserver
 Asm4_3DselObserver = None
-
 
 
 """
@@ -53,7 +53,7 @@ class selectionFilterVertexCmd:
     def GetResources(self):
         return {"MenuText": "Select only Vertices",
                 "ToolTip": "Select only Vertices",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Select_Vertex.svg')
+                "Pixmap" : os.path.join( Asm4.iconPath , 'Snap_Vertex.svg')
                 }
     def IsActive(self):
         return True
@@ -70,7 +70,7 @@ class selectionFilterEdgeCmd:
     def GetResources(self):
         return {"MenuText": "Select only Edges",
                 "ToolTip": "Select only Edges",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Select_Edge.svg')
+                "Pixmap" : os.path.join( Asm4.iconPath , 'Snap_Edge.svg')
                 }
     def IsActive(self):
         return True
@@ -87,7 +87,7 @@ class selectionFilterFaceCmd:
     def GetResources(self):
         return {"MenuText": "Select only Faces",
                 "ToolTip": "Select only Faces",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Select_Face.svg')
+                "Pixmap" : os.path.join( Asm4.iconPath , 'Snap_Face.svg')
                 }
     def IsActive(self):
         return True
@@ -114,6 +114,7 @@ def uncheckAll():
     if tb is not None:
         for button in tb.actions()[0:-1]:
             button.setChecked(False)
+    Gui.Selection.removeSelectionGate()
 
 
 def uncheckOthers(button):
@@ -165,6 +166,8 @@ def applyFilter(button):
 class selObserver3DViewCmd( QtGui.QDialog):
     def __init__(self):
         super(selObserver3DViewCmd,self).__init__()
+        global Asm4_3DselObserver
+        Asm4_3DselObserver = None
 
     def GetResources(self):
         return {"MenuText": "Enable/Disable 3D View selection mode",
@@ -211,7 +214,7 @@ class selObserver3DView:
             # if no App::Link found, let's look for other things:
             if subObjName == '':
                 for subObj in objList:
-                    if subObj.TypeId=='App::Part' or subObj.isDerivedFrom('Part::Feature'):
+                    if subObj.TypeId=='App::Part' or subObj.TypeId=='PartDesign::Body'or subObj.isDerivedFrom('Part::Feature'):
                         # the objList contains also the top-level object, don't count it twice
                         if subObj.Name != obj:
                             subObjName = subObjName + subObj.Name + '.'
@@ -219,6 +222,7 @@ class selObserver3DView:
             if subObjName != '':
                 Gui.Selection.clearSelection()
                 Gui.Selection.addSelection(doc, obj, subObjName)
+                #FCC.PrintMessage("*"+doc+"*"+obj+"*"+subObjName+"*\n")
 
 
 def observerEnable():
@@ -228,16 +232,26 @@ def observerEnable():
     Asm4_3DselObserver = selObserver3DView();
     # add the listener, 0 forces to resolve the links
     Gui.Selection.addObserver(Asm4_3DselObserver, 0)
+    setButton(3,True)
     FCC.PrintMessage("Asm4 3D view selection mode is now ENABLED\n")
 
 
 def observerDisable():
     global Asm4_3DselObserver
     Gui.Selection.removeObserver(Asm4_3DselObserver) 
+    setButton(3,False)
     # only print to Console if the Asm4_3DselObserver was there
     if Asm4_3DselObserver:
         FCC.PrintMessage("Asm4 3D view selection mode is now DISABLED\n")
     Asm4_3DselObserver = None
+
+
+def observerStatus():
+    global Asm4_3DselObserver
+    status = False
+    if Asm4_3DselObserver:
+        status = True
+    return status
 
 
 
