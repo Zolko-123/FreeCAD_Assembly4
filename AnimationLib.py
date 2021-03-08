@@ -250,6 +250,14 @@ class animateVariable():
         if curVal != sliderVal:
             self.setVarValue(varName, sliderVal)
 
+        # Check whether the end of the range can actually be reached with the current stepping.
+        # Flag label if needed.
+        rangeShort = (self.slider.rightValue() < endVal) if (beginVal < endVal) else (self.slider.rightValue() > endVal)
+        if rangeShort:
+            self.sliderRightValue.setStyleSheet("background-color: tomato")
+        else:
+            self.sliderRightValue.setStyleSheet("background-color: none")
+
 
     """
     +-----------------------------------------------+
@@ -336,6 +344,10 @@ class animateVariable():
         self.slider.setTickInterval(0)
         self.sliderLeftValue = QtGui.QLabel('Begin')
         self.sliderRightValue = QtGui.QLabel('End')
+        tt = "The last reachable variable value with the given stepping. "
+        tt += "Flagged red in case this is not equal to the intended value. "
+        tt += "The last step of the animation will be reduced to stay inside the configured limits."
+        self.sliderRightValue.setToolTip(tt)
         self.sliderLayout.addWidget(self.sliderLeftValue)
         self.sliderLayout.addWidget(self.slider)
         self.sliderLayout.addWidget(self.sliderRightValue)
