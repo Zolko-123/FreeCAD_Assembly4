@@ -224,8 +224,6 @@ class animateVariable():
     +-----------------------------------------------+
     """
     def sliderMoved(self):
-        # Stop the animation when the user grabs the slider
-        self.update(self.AnimationRequest.STOP)
         varName = self.varList.currentText()
         varValue = self.slider.value()
         self.setVarValue(varName, varValue)
@@ -233,13 +231,25 @@ class animateVariable():
 
 
     def onValuesChanged(self):
-        minVal = min(self.beginValue.value(), self.endValue.value())
-        maxVal = max(self.beginValue.value(), self.endValue.value())
-        self.sliderLeftValue.setText(str(minVal))
-        self.sliderRightValue.setText(str(maxVal))
-        self.slider.setRange(minVal, maxVal)
-        self.slider.setSingleStep(self.stepValue.value())
-        return
+        # Get range-values from spinboxes
+        beginVal = self.beginValue.value()
+        endVal   = self.endValue.value()
+
+        # Update the slider's ranges
+        # The slider will automatically settle to the nearest value possible based on the new begin/end/stepsize.
+        self.slider.setRange(beginVal, endVal, self.stepValue.value())
+
+        # Update the labels with the actual range of the slider
+        self.sliderLeftValue.setText(str(self.slider.leftValue()))
+        self.sliderRightValue.setText(str(self.slider.rightValue()))
+
+        # Check the current variable state vs. the slider. Update if needed
+        varName = self.varList.currentText()
+        curVal = self.Variables.getPropertyByName(varName)
+        sliderVal = self.slider.value()
+        if curVal != sliderVal:
+            self.setVarValue(varName, sliderVal)
+
 
     """
     +-----------------------------------------------+
@@ -253,7 +263,6 @@ class animateVariable():
 
     def onStop(self):
         self.update(self.AnimationRequest.STOP)
-        return
 
 
     def onClose(self):
@@ -294,7 +303,7 @@ class animateVariable():
         self.formLayout.addRow(QtGui.QLabel('Range End'), self.endValue)
         # Step
         self.stepValue = QtGui.QDoubleSpinBox()
-        self.stepValue.setRange( -10000.0, 10000.0 )
+        self.stepValue.setRange( 0.01, 10000.0 )
         self.stepValue.setValue( 1.0 )
         self.stepValue.setKeyboardTracking(False)
         self.formLayout.addRow(QtGui.QLabel('Step Size'), self.stepValue)
@@ -321,7 +330,7 @@ class animateVariable():
 
         # slider
         self.sliderLayout = QtGui.QHBoxLayout()
-        self.slider = QtGui.QSlider()
+        self.slider = animationSlider()
         self.slider.setOrientation(QtCore.Qt.Orientation.Horizontal)
         self.slider.setRange(0, 10)
         self.slider.setTickInterval(0)
@@ -401,6 +410,65 @@ class animateVariable():
         self.CloseButton.clicked.connect(         self.onClose )
         self.StopButton.clicked.connect(self.onStop)
         self.RunButton.clicked.connect(           self.onRun )
+
+
+
+
+"""
+    +-----------------------------------------------+
+    |     Custom Slider handling inverse ranges     |     
+    |               and steps != 1.                 |
+    +-----------------------------------------------+
+"""
+
+class animationSlider(QtGui.QSlider):
+
+    def __init__(self, parent=None):
+        self.leftVal =  0.0
+        self.rightVal = 1.0
+        self.stepSize = 1.0
+        super().__init__(parent)
+
+
+    # All ranges will be mapped to positive whole numbers.
+    # By definition, the "left hand side value" (begin range) will be reachable.
+    # The last reachable "right hand side value" depends on the step-size
+    # The functions below translate accordingly
+
+    def setRange(self, leftVal, rightVal, stepSize=1.0):
+        val = self.value()
+
+        self.leftVal = leftVal
+        self.rightVal = rightVal
+        self.stepSize = abs(stepSize)
+        if leftVal > rightVal:
+            self.stepSize *= -1.0
+
+        super().setRange(0, (rightVal - leftVal) / self.stepSize)
+
+        # ensure that the exposed slider value stays stable and gets capped if needed
+        sig = self.stepSize/abs(self.stepSize)
+        val = max(val, leftVal * sig)
+        val = min(val, rightVal * sig)
+        self.setValue(val)
+
+
+    def __calculateInternalValue__(self, value):
+        return value * self.stepSize + self.leftVal
+
+    def value(self):
+        return self.__calculateInternalValue__(super().value())
+
+    def leftValue(self):
+        return self.__calculateInternalValue__(super().minimum())
+
+    def rightValue(self):
+        return self.__calculateInternalValue__(super().maximum())
+
+
+    def setValue(self, value):
+        super().setValue((value - self.leftVal) / self.stepSize)
+
 
 
 
