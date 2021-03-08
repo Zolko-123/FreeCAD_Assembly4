@@ -285,21 +285,26 @@ class animateVariable():
         # Range Minimum
         self.beginValue = QtGui.QDoubleSpinBox()
         self.beginValue.setRange(-1000000.0, 1000000.0)
+        self.beginValue.setKeyboardTracking(False)
         self.formLayout.addRow(QtGui.QLabel('Range Begin'), self.beginValue)
         # Maximum
         self.endValue = QtGui.QDoubleSpinBox()
         self.endValue.setRange(-1000000.0, 1000000.0)
+        self.endValue.setKeyboardTracking(False)
         self.formLayout.addRow(QtGui.QLabel('Range End'), self.endValue)
         # Step
         self.stepValue = QtGui.QDoubleSpinBox()
         self.stepValue.setRange( -10000.0, 10000.0 )
         self.stepValue.setValue( 1.0 )
-        self.formLayout.addRow(QtGui.QLabel('Step Size'),self.stepValue)
+        self.stepValue.setKeyboardTracking(False)
+        self.formLayout.addRow(QtGui.QLabel('Step Size'), self.stepValue)
+        
         # Sleep
         self.sleepValue = QtGui.QDoubleSpinBox()
         self.sleepValue.setRange( 0.0, 10.0 )
         self.sleepValue.setValue( 0.0 )
         self.sleepValue.setSingleStep(0.01)
+        self.sleepValue.setKeyboardTracking(False)
         self.formLayout.addRow(QtGui.QLabel('Sleep (s)'),self.sleepValue)
         # apply the layout
         self.mainLayout.addLayout(self.formLayout)
@@ -368,8 +373,15 @@ class animateVariable():
         self.StopButton.setEnabled(False)
         # Run button
         self.RunButton = QtGui.QPushButton('Run')
-        self.RunButton.setDefault(True)
         self.buttonLayout.addWidget(self.RunButton)
+
+        # Add an invisibly dummy button to circumvent QDialogs default-button behavior.
+        # We need the enter key to trigger spinbox-commits only, without also triggering button actions.
+        self.DummyButton = QtGui.QPushButton('Dummy')
+        self.DummyButton.setDefault(True)
+        self.DummyButton.setVisible(False)
+        self.buttonLayout.addWidget(self.DummyButton)
+
         # add buttons to layout
         self.mainLayout.addLayout(self.buttonLayout)
 
@@ -379,6 +391,7 @@ class animateVariable():
         # Actions
         self.varList.currentIndexChanged.connect( self.onSelectVar )
         self.slider.sliderMoved.connect(          self.sliderMoved)
+        self.slider.valueChanged.connect(self.sliderMoved)
         self.beginValue.valueChanged.connect(self.onValuesChanged)
         self.endValue.valueChanged.connect(self.onValuesChanged)
         self.stepValue.valueChanged.connect(      self.onValuesChanged )
