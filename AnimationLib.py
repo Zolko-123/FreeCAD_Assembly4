@@ -194,6 +194,7 @@ class animateVariable():
     def setVarValue(self,name,value):
         setattr( self.Variables, name, value )
         App.ActiveDocument.Model.recompute('True')
+        self.variableValue.setText('{:.2f}'.format(value))
         if self.ForceGUIUpdate:
             Gui.updateGui()
 
@@ -234,8 +235,8 @@ class animateVariable():
     def onValuesChanged(self):
         minVal = min(self.beginValue.value(), self.endValue.value())
         maxVal = max(self.beginValue.value(), self.endValue.value())
-        self.sliderMinValue.setText(str(minVal))
-        self.sliderMaxValue.setText(str(maxVal))
+        self.sliderLeftValue.setText(str(minVal))
+        self.sliderRightValue.setText(str(maxVal))
         self.slider.setRange(minVal, maxVal)
         self.slider.setSingleStep(self.stepValue.value())
         return
@@ -304,17 +305,27 @@ class animateVariable():
         self.mainLayout.addLayout(self.formLayout)
         self.mainLayout.addWidget(QtGui.QLabel())
 
+        # Current Variable Value
+        self.curVarLayout = QtGui.QHBoxLayout()
+        self.variableValue = QtGui.QLabel('Variable')
+        self.curVarLayout.addWidget(QtGui.QLabel('Current Value:'))
+        self.curVarLayout.addStretch()
+        self.curVarLayout.addWidget(self.variableValue)
+
+        self.mainLayout.addLayout(self.curVarLayout)
+
         # slider
         self.sliderLayout = QtGui.QHBoxLayout()
         self.slider = QtGui.QSlider()
         self.slider.setOrientation(QtCore.Qt.Orientation.Horizontal)
         self.slider.setRange(0, 10)
         self.slider.setTickInterval(0)
-        self.sliderMinValue = QtGui.QLabel('Min')
-        self.sliderMaxValue = QtGui.QLabel('Max')
-        self.sliderLayout.addWidget(self.sliderMinValue)
+        self.sliderLeftValue = QtGui.QLabel('Begin')
+        self.sliderRightValue = QtGui.QLabel('End')
+        self.sliderLayout.addWidget(self.sliderLeftValue)
         self.sliderLayout.addWidget(self.slider)
-        self.sliderLayout.addWidget(self.sliderMaxValue)
+        self.sliderLayout.addWidget(self.sliderRightValue)
+
         self.mainLayout.addLayout(self.sliderLayout)
 
 
