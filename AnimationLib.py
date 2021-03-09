@@ -8,7 +8,7 @@
 
 
 
-import os, time
+import os, numpy
 
 from PySide import QtGui, QtCore
 from enum import Enum
@@ -301,17 +301,17 @@ class animateVariable():
         self.formLayout.addRow(QtGui.QLabel('Select Variable'),self.varList)
         # Range Minimum
         self.beginValue = QtGui.QDoubleSpinBox()
-        self.beginValue.setRange(-1000000.0, 1000000.0)
+        self.beginValue.setRange(numpy.finfo(float).min, numpy.finfo(float).max)
         self.beginValue.setKeyboardTracking(False)
         self.formLayout.addRow(QtGui.QLabel('Range Begin'), self.beginValue)
         # Maximum
         self.endValue = QtGui.QDoubleSpinBox()
-        self.endValue.setRange(-1000000.0, 1000000.0)
+        self.endValue.setRange(numpy.finfo(float).min, numpy.finfo(float).max)
         self.endValue.setKeyboardTracking(False)
         self.formLayout.addRow(QtGui.QLabel('Range End'), self.endValue)
         # Step
         self.stepValue = QtGui.QDoubleSpinBox()
-        self.stepValue.setRange( 0.01, 10000.0 )
+        self.stepValue.setRange( 0.01, numpy.finfo(float).max )
         self.stepValue.setValue( 1.0 )
         self.stepValue.setKeyboardTracking(False)
         self.formLayout.addRow(QtGui.QLabel('Step Size'), self.stepValue)
