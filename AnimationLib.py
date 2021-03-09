@@ -11,11 +11,11 @@
 import os, time
 
 from PySide import QtGui, QtCore
+from enum import Enum
 import FreeCADGui as Gui
 import FreeCAD as App
 
 import libAsm4 as Asm4
-
 
 
 """
@@ -25,11 +25,29 @@ import libAsm4 as Asm4
 """
 class animateVariable():
 
+    """
+    +-----------------------------------------------+
+    |           State and Transition Enums          |
+    +-----------------------------------------------+
+    """
+    class AnimationState(Enum):
+        STOPPED = 0
+        RUNNING = 1
+
+    class AnimationRequest(Enum):
+        NONE = 0
+        START = 1
+        STOP = 2
+
+    """
+    +-----------------------------------------------+
+    |         Initialization and Registration       |
+    +-----------------------------------------------+
+    """
     def __init__(self):
         super(animateVariable,self).__init__()
         self.UI = QtGui.QDialog()
         self.drawUI()
-
 
 
     def GetResources(self):
@@ -43,7 +61,7 @@ class animateVariable():
         # is there an active document ?
         if Asm4.checkModel() and App.ActiveDocument.getObject('Variables'):
             return True
-        return False 
+        return False
 
 
 
@@ -57,7 +75,13 @@ class animateVariable():
         # grab the Variables container
         self.Variables = App.ActiveDocument.getObject('Variables')
         self.Model = App.ActiveDocument.getObject('Model')
-        self.Run = True
+
+        # Initialize States and timing logic.
+        self.RunState = self.AnimationState.STOPPED
+        self.reverseAnimation = False  # True flags when the animation is "in reverse" for the pendulum mode.
+        self.ForceGUIUpdate = False # True Forces GUI to update on every step of the animation.
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self.onTimerTick)
 
         # Now we can draw the UI
         self.UI.show()
@@ -68,7 +92,6 @@ class animateVariable():
             if self.Variables.getGroupOfProperty(prop)=='Variables' :
                 if self.Variables.getTypeIdOfProperty(prop)=='App::PropertyFloat' :
                     self.varList.addItem(prop)
-
 
 
     """
@@ -84,103 +107,114 @@ class animateVariable():
             # get its value
             selectedVarValue = self.Variables.getPropertyByName(selectedVar)
             # initialise the Begin and End values with it
-            self.minValue.setValue(selectedVarValue)
-            self.maxValue.setValue(selectedVarValue)
+            self.beginValue.setValue(selectedVarValue)
+            self.endValue.setValue(selectedVarValue)
         return
 
 
 
     """
     +-----------------------------------------------+
-    |                     Run                       |
+    |            Animation Tick Functions           |
     +-----------------------------------------------+
     """
-    def onRun(self):
-        self.Run = True
-        # the selected variable
+    def initAnimation(self):
+        # Set GUI-state, initial value and start the timer
+        self.RunButton.setEnabled(False)
+        self.StopButton.setEnabled(True)
+        self.setVarValue(self.varList.currentText(), self.beginValue.value())
+        sleep = self.sleepValue.value() * 1000.0
+        self.timer.start(sleep)
+        self.reverseAnimation = False
+
+    def nextStep(self, reverse):
+        # Calculate the next variable increment/decrement
+        begin = self.beginValue.value()
+        end   = self.endValue.value()
+        step  = abs(self.stepValue.value())
         varName = self.varList.currentText()
-        begin   = self.minValue.value()
-        end     = self.maxValue.value()
-        step    = self.stepValue.value()
-        sleep   = self.sleepValue.value()
-        # basic checks
-        if varName:
-            # loop indefinitely
-            if self.Loop.isChecked():
-                while self.Run and self.Loop.isChecked():
-                    self.runFwd(varName)
-            # go back-and-forth indefinitely
-            elif self.Pendulum.isChecked():
-                while self.Run and self.Pendulum.isChecked():
-                    self.runFwd(varName)
-                    self.runBwd(varName)
-            else:
-                self.runFwd(varName)
-        return
+        varValue  = self.Variables.getPropertyByName(varName)
+
+        if reverse:
+            begin, end = end, begin
+
+        if begin < end:
+            varValue += step
+        elif begin > end:
+            varValue -= step
+
+        # Assert varValue is in currently set range (range can now update with the animation running)
+        varValue = min(varValue, max(begin, end))
+        varValue = max(varValue, min(begin, end))
+
+        # Update document variable and slider
+        self.setVarValue(varName, varValue)
+        self.slider.setValue(varValue)
+
+        # Flag when the end of one sweep is reached
+        return (varValue == begin) or (varValue == end)
 
 
-    def runFwd( self, varName ):
-        begin   = self.minValue.value()
-        end     = self.maxValue.value()
-        step    = self.stepValue.value()
-        sleep   = self.sleepValue.value()
-        varValue = begin
-        # if we go positive ...
-        if end>begin and step>0:
-            while varValue <= end and self.Run:
-                self.setVarValue(varName,varValue)
-                self.slider.setValue(varValue)
-                varValue += step
-                time.sleep(sleep)
-        # ... or negative
-        elif end<begin and step<0:
-            while varValue >= end and self.Run:
-                self.setVarValue(varName,varValue)
-                self.slider.setValue(varValue)
-                varValue += step
-                time.sleep(sleep)
+    def update(self, req):
 
-    
-    def runBwd( self, varName ):
-        begin   = self.minValue.value()
-        end     = self.maxValue.value()
-        step    = self.stepValue.value()
-        sleep   = self.sleepValue.value()
-        varValue = end
-        # if we went positive ...
-        if end>begin and step>0:
-            while varValue >= begin and self.Run:
-                self.setVarValue(varName,varValue)
-                self.slider.setValue(varValue)
-                varValue -= step
-                time.sleep(sleep)
-        # ... or negative
-        elif end<begin and step<0:
-            while varValue <= begin and self.Run:
-                self.setVarValue(varName,varValue)
-                self.slider.setValue(varValue)
-                varValue -= step
-                time.sleep(sleep)
+        # STOPPED STATE; NO ANIMATION RUNNING
+        if self.RunState == self.AnimationState.STOPPED:
+            if req == self.AnimationRequest.START:
+                self.RunState = self.AnimationState.RUNNING
+                self.initAnimation()
+
+        # RUNNING STATE
+        elif self.RunState == self.AnimationState.RUNNING:
+            endOfCycle = self.nextStep(self.reverseAnimation)
+            stop = (req == self.AnimationRequest.STOP)
+            stop |= endOfCycle and not (self.Pendulum.isChecked() or self.Loop.isChecked())
+            sleep = self.sleepValue.value() * 1000.0
+            self.timer.setInterval(sleep)
+
+            if stop:
+                self.RunButton.setEnabled(True)
+                self.StopButton.setEnabled(False)
+                self.timer.stop()
+                self.RunState = self.AnimationState.STOPPED
+            elif endOfCycle:
+                if self.Loop.isChecked():
+                    self.initAnimation()
+                elif self.Pendulum.isChecked():
+                    self.reverseAnimation = not self.reverseAnimation
+
+        # SANITY CHECK
+        else:
+            print("Unknown State/Transition")
 
 
+    def onTimerTick(self):
+        self.update(self.AnimationRequest.NONE)
+
+
+    def setVarValue(self,name,value):
+        setattr( self.Variables, name, value )
+        App.ActiveDocument.Model.recompute('True')
+        if self.ForceGUIUpdate:
+            Gui.updateGui()
+
+    """
+    +-----------------------------------------------+
+    |            Loop or Pendulum Selector          |
+    +-----------------------------------------------+
+    """
     def onLoop(self):
-        self.Run = False
         if self.Pendulum.isChecked() and self.Loop.isChecked():
             self.Pendulum.setChecked(False)
         return
 
 
     def onPendulum(self):
-        self.Run = False
         if self.Loop.isChecked() and self.Pendulum.isChecked():
             self.Loop.setChecked(False)
         return
 
-
-    def setVarValue(self,name,value):
-        setattr( self.Variables, name, value )
-        App.ActiveDocument.Model.recompute('True')
-        Gui.updateGui()
+    def onForceRender(self):
+        self.ForceGUIUpdate = self.ForceRender.isChecked()
 
 
     """
@@ -189,43 +223,40 @@ class animateVariable():
     +-----------------------------------------------+
     """
     def sliderMoved(self):
-        self.Run = False
+        # Stop the animation when the user grabs the slider
+        self.update(self.AnimationRequest.STOP)
         varName = self.varList.currentText()
         varValue = self.slider.value()
-        self.setVarValue(varName,varValue)
-        #setattr( self.Variables, varName, varValue )
-        #App.ActiveDocument.Model.recompute('True')
-        #Gui.updateGui()
+        self.setVarValue(varName, varValue)
         return
 
 
     def onValuesChanged(self):
-        self.Run = False
-        self.sliderMinValue.setText( str(self.minValue.value()) )
-        self.sliderMaxValue.setText( str(self.maxValue.value()) )
-        self.slider.setRange( self.minValue.value(), self.maxValue.value() )
-        self.slider.setSingleStep( self.stepValue.value() )
+        minVal = min(self.beginValue.value(), self.endValue.value())
+        maxVal = max(self.beginValue.value(), self.endValue.value())
+        self.sliderMinValue.setText(str(minVal))
+        self.sliderMaxValue.setText(str(maxVal))
+        self.slider.setRange(minVal, maxVal)
+        self.slider.setSingleStep(self.stepValue.value())
         return
 
-
-
     """
     +-----------------------------------------------+
-    |                Emergency STOP                 |
+    |                Star/Stop/Close                |
     +-----------------------------------------------+
     """
+
+    def onRun(self):
+        self.update(self.AnimationRequest.START)
+
+
     def onStop(self):
-        self.Run = False
+        self.update(self.AnimationRequest.STOP)
         return
 
 
-    """
-    +-----------------------------------------------+
-    |                     Close                     |
-    +-----------------------------------------------+
-    """
     def onClose(self):
-        self.Run = False
+        self.update(self.AnimationRequest.STOP)
         self.UI.close()
 
 
@@ -251,22 +282,23 @@ class animateVariable():
         self.varList = QtGui.QComboBox()
         self.formLayout.addRow(QtGui.QLabel('Select Variable'),self.varList)
         # Range Minimum
-        self.minValue = QtGui.QDoubleSpinBox()
-        self.minValue.setRange( -1000000.0, 1000000.0 )
-        self.formLayout.addRow(QtGui.QLabel('Range Begin'),self.minValue)
+        self.beginValue = QtGui.QDoubleSpinBox()
+        self.beginValue.setRange(-1000000.0, 1000000.0)
+        self.formLayout.addRow(QtGui.QLabel('Range Begin'), self.beginValue)
         # Maximum
-        self.maxValue = QtGui.QDoubleSpinBox()
-        self.maxValue.setRange( -1000000.0, 1000000.0 )
-        self.formLayout.addRow(QtGui.QLabel('Range End'),self.maxValue)
+        self.endValue = QtGui.QDoubleSpinBox()
+        self.endValue.setRange(-1000000.0, 1000000.0)
+        self.formLayout.addRow(QtGui.QLabel('Range End'), self.endValue)
         # Step
         self.stepValue = QtGui.QDoubleSpinBox()
         self.stepValue.setRange( -10000.0, 10000.0 )
         self.stepValue.setValue( 1.0 )
-        self.formLayout.addRow(QtGui.QLabel('Step'),self.stepValue)
+        self.formLayout.addRow(QtGui.QLabel('Step Size'),self.stepValue)
         # Sleep
         self.sleepValue = QtGui.QDoubleSpinBox()
         self.sleepValue.setRange( 0.0, 10.0 )
         self.sleepValue.setValue( 0.0 )
+        self.sleepValue.setSingleStep(0.01)
         self.formLayout.addRow(QtGui.QLabel('Sleep (s)'),self.sleepValue)
         # apply the layout
         self.mainLayout.addLayout(self.formLayout)
@@ -284,20 +316,31 @@ class animateVariable():
         self.sliderLayout.addWidget(self.slider)
         self.sliderLayout.addWidget(self.sliderMaxValue)
         self.mainLayout.addLayout(self.sliderLayout)
-        
-        # loop and pendumlum tick-boxes
+
+
+        # ForceUpdate, loop and pendulum tick-boxes
+        self.ForceRender = QtGui.QCheckBox()
+        self.ForceRender.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.ForceRender.setToolTip("Force GUI to update on every step.")
+        self.ForceRender.setText("Force-render every step")
+        self.ForceRender.setChecked(False)
+
         self.Loop = QtGui.QCheckBox()
         self.Loop.setLayoutDirection(QtCore.Qt.RightToLeft)
         self.Loop.setToolTip("Infinite Loop")
         self.Loop.setText("Loop")
         self.Loop.setChecked(False)
-        self.mainLayout.addWidget(self.Loop)
+
         self.Pendulum = QtGui.QCheckBox()
         self.Pendulum.setLayoutDirection(QtCore.Qt.RightToLeft)
         self.Pendulum.setToolTip("Back-and-forth pendulum")
         self.Pendulum.setText("Pendulum")
         self.Pendulum.setChecked(False)
-        self.mainLayout.addWidget(self.Pendulum)
+
+        self.mainLayout.addWidget(self.Loop)
+        self.cbLayout = QtGui.QFormLayout()
+        self.cbLayout.addRow(self.ForceRender, self.Pendulum)
+        self.mainLayout.addLayout(self.cbLayout)
 
         self.mainLayout.addWidget(QtGui.QLabel())
         self.mainLayout.addStretch()
@@ -311,6 +354,7 @@ class animateVariable():
         self.StopButton = QtGui.QPushButton('Stop')
         self.buttonLayout.addWidget(self.StopButton)
         self.buttonLayout.addStretch()
+        self.StopButton.setEnabled(False)
         # Run button
         self.RunButton = QtGui.QPushButton('Run')
         self.RunButton.setDefault(True)
@@ -324,13 +368,14 @@ class animateVariable():
         # Actions
         self.varList.currentIndexChanged.connect( self.onSelectVar )
         self.slider.sliderMoved.connect(          self.sliderMoved)
-        self.minValue.valueChanged.connect(       self.onValuesChanged )
-        self.maxValue.valueChanged.connect(       self.onValuesChanged )
+        self.beginValue.valueChanged.connect(self.onValuesChanged)
+        self.endValue.valueChanged.connect(self.onValuesChanged)
         self.stepValue.valueChanged.connect(      self.onValuesChanged )
         self.Loop.toggled.connect(                self.onLoop )
         self.Pendulum.toggled.connect(            self.onPendulum )
+        self.ForceRender.toggled.connect(self.onForceRender)
         self.CloseButton.clicked.connect(         self.onClose )
-        self.StopButton.clicked.connect(          self.onStop )
+        self.StopButton.clicked.connect(self.onStop)
         self.RunButton.clicked.connect(           self.onRun )
 
 
