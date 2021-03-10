@@ -49,6 +49,13 @@ class animateVariable():
         self.UI = QtGui.QDialog()
         self.drawUI()
 
+        # Initialize States and timing logic.
+        self.RunState = self.AnimationState.STOPPED
+        self.reverseAnimation = False  # True flags when the animation is "in reverse" for the pendulum mode.
+        self.ForceGUIUpdate = False  # True Forces GUI to update on every step of the animation.
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self.onTimerTick)
+
 
     def GetResources(self):
         return {"MenuText": "Animate Assembly",
@@ -71,21 +78,22 @@ class animateVariable():
     +-----------------------------------------------+
     """
     def Activated(self):
-
         # grab the Variables container
         self.Variables = App.ActiveDocument.getObject('Variables')
         self.Model = App.ActiveDocument.getObject('Model')
 
-        # Initialize States and timing logic.
-        self.RunState = self.AnimationState.STOPPED
-        self.reverseAnimation = False  # True flags when the animation is "in reverse" for the pendulum mode.
-        self.ForceGUIUpdate = False # True Forces GUI to update on every step of the animation.
-        self.timer = QtCore.QTimer()
-        self.timer.timeout.connect(self.onTimerTick)
-
+        self.updateVarList()
+        
         # Now we can draw the UI
         self.UI.show()
 
+
+    """
+    +------------------------------------------------+
+    |  fill default values when selecting a variable |
+    +------------------------------------------------+
+    """
+    def updateVarList(self):
         # select the Float variables that are in the "Variables" group
         self.varList.clear()
         for prop in self.Variables.PropertiesList:
@@ -94,12 +102,8 @@ class animateVariable():
                     self.varList.addItem(prop)
 
 
-    """
-    +------------------------------------------------+
-    |  fill default values when selecting a variable |
-    +------------------------------------------------+
-    """
     def onSelectVar(self):
+        self.update(self.AnimationRequest.STOP)
         # the currently selected variable
         selectedVar = self.varList.currentText()
         # if it's indeed a property in the Variables object (one never knows)
