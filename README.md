@@ -1,16 +1,16 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.9.14, 2021-03-07
+Current version 0.9.15, 2021-03-10
 
 
 
 ## Overview
 
-This assembly workbench allows to integrate into a single container under a single coordinate system other FreeCAD objects and place them relative to the assembly and to each-other. The principle of Assembly4 is that `App::Part` and `PartDesign::Body` container objects are linked into a host parent assembly called _Model_ and of type `App::Part` using the `App::Link` interface introduced in FreeCAD v0.19. The parts that are linked can invariably be in the same document as the assembly or an external document.
+This assembly workbench allows to assemble into a single Part container under a single coordinate system other FreeCAD objects using Links, and place them relative to the assembly and to each-other. The parts in the assembly can invariably be in the same document as the assembly or in an external document.
 
-As an Assembly4 model is a standard FreeCAD `App::Part` object, it can be used and manipulated with any FreeCAD tool handling `App::Part` objects. In particular, it can be inserted into another Assembly4 _Model_ to create nested assemblies. It can also contain solids and datum objects. An Assembly4 _Model_ can be a stand-alone part, an assembly, a sub-assembly, and any combinations of these.
+As an Assembly4 _Model_ is a standard FreeCAD `App::Part` container, it can be used and manipulated with any FreeCAD tool handling `App::Part` objects. In particular, it can be inserted into another Assembly4 _Model_ to create nested assemblies. It can also contain solids and datum objects. An Assembly4 _Model_ can be a stand-alone part, an assembly, a sub-assembly, and any combinations of these.
 
-Parts and linked parts are placed to each-other in the host parent assembly by matching their Datum Coordinate Systems (`PartDesign::CoordinateSystem` called LCS for Local Coordinate System) using the built-in FreeCAD *ExpressionEngine.* No geometry is used to place and constrain parts relative to each other, thus avoiding a lot of the topological naming problems. 
+Parts and linked parts are placed to each-other in the host parent assembly by matching their Datum Coordinate Systems (called LCS for Local Coordinate System) using the built-in FreeCAD *ExpressionEngine.* No geometry is used to place and constrain parts relative to each other, thus avoiding a lot of the topological naming problems. 
 
 
 ![](Resources/media/Asm4_wb1.png)
@@ -18,7 +18,7 @@ Parts and linked parts are placed to each-other in the host parent assembly by m
 
 **Please Note:** objects in the same document as the linked part but outside the `App::Part` container will **not** be inserted.
 
-**Please Note:** only _Part_ and _Body_ containers at the root of a document can be inserted. Objects inside containers cannot be used directly by Assembly 4. 
+**Please Note:** only _Part_ and _Body_ containers at the root of a document can be inserted. Objects nested inside containers cannot be used directly by Assembly4. 
 
 
 
@@ -30,7 +30,7 @@ Parts and linked parts are placed to each-other in the host parent assembly by m
 
 Assembly 4 is available through the FreeCAD Addon Manager (menu **Tools > Addon Manager**). It is called _Assembly4_ in the Addon Repository.  
 
-**Important Note:** Assembly 4 is **not** compatible with FreeCAD v0.18 and before, needs FreeCAD >= `v0.19.18353` . Pre-built binaries on the v0.19 development branch can be found [here](https://github.com/FreeCAD/FreeCAD/releases/tag/0.19_pre)
+**Important Note:** Assembly 4 needs FreeCAD v0.19 or above. Assembly4 is **not** compatible with FreeCAD v0.18 and before. Pre-built binaries on the v0.19 development branch can be found [here](https://github.com/FreeCAD/FreeCAD/releases/tag/0.19_pre)
 
 
 
@@ -51,6 +51,10 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 
 ## Release notes
+
+* 2021.03.10 (**0.9.15**) :  
+added mirroring of a part__
+
 * 2021.03.07 (**0.9.14**) :  
 HoleAxis can now create datums on all selected circles from 1 single part in 1 step   
 Added a selection filter in the main Assembly4 toolbar__

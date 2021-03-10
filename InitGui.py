@@ -92,6 +92,8 @@ class Assembly4Workbench(Workbench):
         self.dot()
         import newPartCmd          # creates a new App::Part container called 'Model'
         self.dot()
+        import mirrorPartCmd       # creates a new App::Part container with the mirrored part of the selection
+        self.dot()
         import infoPartCmd         # edits part information for BoM
         self.dot()
         import insertLinkCmd       # inserts an App::Link to a 'Model' in another file
@@ -189,6 +191,8 @@ class Assembly4Workbench(Workbench):
                         "Asm4_importDatum", 
                         "Separator",
                         "Asm4_placeLink", 
+                        "Asm4_mirrorPart", 
+                        #"Asm4_newCircularArray", 
                         "Asm4_placeFastener", 
                         "Asm4_cloneFastenersToAxes", 
                         "Asm4_placeDatum", 
@@ -222,6 +226,8 @@ class Assembly4Workbench(Workbench):
                         'Asm4_placeFastener',
                         #'Asm4_cloneFastenersToAxes',
                         "Asm4_placeDatum", 
+                        "Asm4_mirrorPart", 
+                        #"Asm4_newCircularArray", 
                         "Separator",
                         #"Asm4_makeLinkArray",
                         #"Draft_PolarArray",
