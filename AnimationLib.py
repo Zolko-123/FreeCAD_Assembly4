@@ -48,6 +48,7 @@ class animateVariable():
         super(animateVariable,self).__init__()
         self.UI = QtGui.QDialog()
         self.drawUI()
+        self.MDIArea = Gui.getMainWindow().findChild(QtGui.QMdiArea)
 
         # Initialize States and timing logic.
         self.RunState = self.AnimationState.STOPPED
@@ -56,6 +57,7 @@ class animateVariable():
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.onTimerTick)
 
+        self.ActiveDocument = None
         self.knownVariableList = []
 
 
@@ -80,13 +82,17 @@ class animateVariable():
     +-----------------------------------------------+
     """
     def Activated(self):
-        # grab the Variables container
+        # grab the Variables container whenever the selected doc changes
+        if self.ActiveDocument != App.ActiveDocument:
+            self.ActiveDocument = App.ActiveDocument
         self.Variables = App.ActiveDocument.getObject('Variables')
         self.Model = App.ActiveDocument.getObject('Model')
 
         self.updateVarList()
         
-        # Now we can draw the UI
+        # in case the dialog is newly opened, register for changes of the selected document
+        if not self.UI.isVisible():
+            self.MDIArea.subWindowActivated.connect(self.onDocChanged)
         self.UI.show()
 
 
@@ -292,7 +298,13 @@ class animateVariable():
 
     def onClose(self):
         self.update(self.AnimationRequest.STOP)
+        self.MDIArea.subWindowActivated[QtGui.QMdiSubWindow].disconnect(self.onDocChanged)
         self.UI.close()
+
+
+    def onDocChanged(self):
+        self.onStop()
+        self.Activated()
 
 
     """
