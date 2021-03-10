@@ -56,6 +56,8 @@ class animateVariable():
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.onTimerTick)
 
+        self.knownVariableList = []
+
 
     def GetResources(self):
         return {"MenuText": "Animate Assembly",
@@ -94,12 +96,23 @@ class animateVariable():
     +------------------------------------------------+
     """
     def updateVarList(self):
-        # select the Float variables that are in the "Variables" group
-        self.varList.clear()
-        for prop in self.Variables.PropertiesList:
-            if self.Variables.getGroupOfProperty(prop)=='Variables' :
-                if self.Variables.getTypeIdOfProperty(prop)=='App::PropertyFloat' :
-                    self.varList.addItem(prop)
+        docVars = []
+        # Collect all variables currently available in the doc
+        if self.Variables:
+            for prop in self.Variables.PropertiesList:
+                if self.Variables.getGroupOfProperty(prop) == 'Variables':
+                    if self.Variables.getTypeIdOfProperty(prop) == 'App::PropertyFloat':
+                        docVars.append(prop)
+
+        # only update the gui-element if variables actually changed
+        if self.knownVariableList != docVars:
+            self.varList.clear()
+            self.varList.addItems(docVars)
+            self.knownVariableList = docVars
+
+        # prevent active gui controls when no variables are available
+        self.enableDependentGuiElements(len(docVars)!=0)
+
 
 
     def onSelectVar(self):
@@ -301,7 +314,7 @@ class animateVariable():
         # Define the fields for the form ( label + widget )
         self.formLayout = QtGui.QFormLayout()
         # select Variable
-        self.varList = QtGui.QComboBox()
+        self.varList = updatingComboBox()
         self.formLayout.addRow(QtGui.QLabel('Select Variable'),self.varList)
         # Range Minimum
         self.beginValue = QtGui.QDoubleSpinBox()
@@ -415,6 +428,7 @@ class animateVariable():
 
         # Actions
         self.varList.currentIndexChanged.connect( self.onSelectVar )
+        self.varList.popupList.connect(self.updateVarList)
         self.slider.sliderMoved.connect(          self.sliderMoved)
         self.slider.valueChanged.connect(self.sliderMoved)
         self.beginValue.valueChanged.connect(self.onValuesChanged)
@@ -427,6 +441,14 @@ class animateVariable():
         self.StopButton.clicked.connect(self.onStop)
         self.RunButton.clicked.connect(           self.onRun )
 
+
+    def enableDependentGuiElements(self, state):
+        self.beginValue.setEnabled(state)
+        self.endValue.setEnabled(state)
+        self.stepValue.setEnabled(state)
+        self.sleepValue.setEnabled(state)
+        self.slider.setEnabled(state)
+        self.RunButton.setEnabled(state)
 
 
 
@@ -484,6 +506,29 @@ class animationSlider(QtGui.QSlider):
 
     def setValue(self, value):
         super().setValue((value - self.leftVal) / self.stepSize)
+
+
+
+
+"""
+    +-----------------------------------------------+
+    |     Custom Combobox that emits a Signal when  |     
+    |     the user clicks for the popup menu.       |
+    |     Needed to update the list of variables    |
+    |     on the fly.                               |
+    +-----------------------------------------------+
+"""
+
+class updatingComboBox(QtGui.QComboBox):
+
+    popupList = QtCore.Signal()
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+    def showPopup(self):
+        self.popupList.emit()
+        super().showPopup()
 
 
 
