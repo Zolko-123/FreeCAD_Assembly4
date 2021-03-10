@@ -304,6 +304,17 @@ def getPartLCS( part ):
     return partLCS
 
 
+# get the document groupe called Part 
+# (if it exists, else returne None
+def getPartsGroup():
+    retval = None
+    partsGroup = App.ActiveDocument.getObject('Parts')
+    if partsGroup and partsGroup.TypeId=='App::DocumentObjectGroup':
+        retval = partsGroup
+    return retval
+    
+
+
 """
     +-----------------------------------------------+
     |           get the next instance's name         |
