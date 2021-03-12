@@ -58,6 +58,7 @@ class animateVariable():
         self.timer.timeout.connect(self.onTimerTick)
 
         self.ActiveDocument = None
+        self.Variables = None
         self.knownVariableList = []
 
 
@@ -82,14 +83,12 @@ class animateVariable():
     +-----------------------------------------------+
     """
     def Activated(self):
-        # grab the Variables container whenever the selected doc changes
-        if self.ActiveDocument != App.ActiveDocument:
-            self.ActiveDocument = App.ActiveDocument
-        self.Variables = App.ActiveDocument.getObject('Variables')
-        self.Model = App.ActiveDocument.getObject('Model')
+        # grab the Variables container (just do it always, this prevents problems with newly opened docs)
+        self.ActiveDocument = App.ActiveDocument
+        self.Variables = App.ActiveDocument.getObject('Variables') if self.ActiveDocument else None
 
         self.updateVarList()
-        
+
         # in case the dialog is newly opened, register for changes of the selected document
         if not self.UI.isVisible():
             self.MDIArea.subWindowActivated.connect(self.onDocChanged)
@@ -115,6 +114,7 @@ class animateVariable():
             self.varList.clear()
             self.varList.addItems(docVars)
             self.knownVariableList = docVars
+            animationHints.cleanUp(self.Variables)
 
         # prevent active gui controls when no variables are available
         self.enableDependentGuiElements(len(docVars)!=0)
@@ -126,13 +126,15 @@ class animateVariable():
         # the currently selected variable
         selectedVar = self.varList.currentText()
         # if it's indeed a property in the Variables object (one never knows)
-        if selectedVar in self.Variables.PropertiesList:
-            # get its value
-            selectedVarValue = self.Variables.getPropertyByName(selectedVar)
-            # initialise the Begin and End values with it
-            self.beginValue.setValue(selectedVarValue)
-            self.endValue.setValue(selectedVarValue)
-        return
+        if len(selectedVar) > 0 and selectedVar in self.Variables.PropertiesList:
+            # grab animationsHints related to the variable and init accordingly
+            aniHints = animationHints.get(self.Variables, selectedVar)
+            self.beginValue.setValue(aniHints[animationHints.Key.RangeBegin])
+            self.endValue.setValue(aniHints[animationHints.Key.RangeEnd])
+            self.stepValue.setValue(aniHints[animationHints.Key.StepSize])
+            self.sleepValue.setValue(aniHints[animationHints.Key.SleepTime])
+            self.Loop.setChecked(aniHints[animationHints.Key.Loop])
+            self.Pendulum.setChecked(aniHints[animationHints.Key.Pendulum])
 
 
 
@@ -227,12 +229,15 @@ class animateVariable():
     +-----------------------------------------------+
     """
     def onLoop(self):
+        aniHints = animationHints.get(self.Variables, self.varList.currentText())
+        aniHints[animationHints.Key.Loop] = self.Loop.isChecked()
         if self.Pendulum.isChecked() and self.Loop.isChecked():
             self.Pendulum.setChecked(False)
-        return
 
 
     def onPendulum(self):
+        aniHints = animationHints.get(self.Variables, self.varList.currentText())
+        aniHints[animationHints.Key.Pendulum] = self.Pendulum.isChecked()
         if self.Loop.isChecked() and self.Pendulum.isChecked():
             self.Loop.setChecked(False)
         return
@@ -253,7 +258,8 @@ class animateVariable():
         return
 
 
-    def onValuesChanged(self):
+
+    def updateSlider(self):
         # Get range-values from spinboxes
         beginVal = self.beginValue.value()
         endVal   = self.endValue.value()
@@ -282,6 +288,30 @@ class animateVariable():
             self.sliderRightValue.setStyleSheet("background-color: none")
 
 
+    def onBeginValChanged(self):
+        varName = self.varList.currentText()
+        val = self.beginValue.value()
+        animationHints.get(self.Variables, varName)['rangeBegin'] = val
+        self.updateSlider()
+
+    def onEndValChanged(self):
+        varName = self.varList.currentText()
+        val = self.endValue.value()
+        animationHints.get(self.Variables, varName)['rangeEnd'] = val
+        self.updateSlider()
+
+    def onStepValChanged(self):
+        varName = self.varList.currentText()
+        val = self.stepValue.value()
+        animationHints.get(self.Variables, varName)['stepSize'] = val
+        self.updateSlider()
+
+    def onSleepValChanged(self):
+        varName = self.varList.currentText()
+        val = self.sleepValue.value()
+        animationHints.get(self.Variables, varName)['sleepValue'] = val
+
+
     """
     +-----------------------------------------------+
     |                Star/Stop/Close                |
@@ -298,6 +328,7 @@ class animateVariable():
 
     def onClose(self):
         self.update(self.AnimationRequest.STOP)
+        animationHints.cleanUp(self.Variables)
         self.MDIArea.subWindowActivated[QtGui.QMdiSubWindow].disconnect(self.onDocChanged)
         self.UI.close()
 
@@ -443,9 +474,10 @@ class animateVariable():
         self.varList.popupList.connect(self.updateVarList)
         self.slider.sliderMoved.connect(          self.sliderMoved)
         self.slider.valueChanged.connect(self.sliderMoved)
-        self.beginValue.valueChanged.connect(self.onValuesChanged)
-        self.endValue.valueChanged.connect(self.onValuesChanged)
-        self.stepValue.valueChanged.connect(      self.onValuesChanged )
+        self.beginValue.valueChanged.connect(self.onBeginValChanged)
+        self.endValue.valueChanged.connect(self.onEndValChanged)
+        self.stepValue.valueChanged.connect(      self.onStepValChanged)
+        self.sleepValue.valueChanged.connect(       self.onSleepValChanged)
         self.Loop.toggled.connect(                self.onLoop )
         self.Pendulum.toggled.connect(            self.onPendulum )
         self.ForceRender.toggled.connect(self.onForceRender)
@@ -461,6 +493,8 @@ class animateVariable():
         self.sleepValue.setEnabled(state)
         self.slider.setEnabled(state)
         self.RunButton.setEnabled(state)
+        self.Loop.setEnabled(state)
+        self.Pendulum.setEnabled(state)
 
 
 
@@ -541,6 +575,64 @@ class updatingComboBox(QtGui.QComboBox):
     def showPopup(self):
         self.popupList.emit()
         super().showPopup()
+
+
+
+
+"""
+    +-----------------------------------------------+
+    |            Animation Hint Record Helper       |
+    +-----------------------------------------------+
+"""
+
+class animationHints():
+    class Key:
+        RangeBegin = 'rangeBegin'
+        RangeEnd = 'rangeEnd'
+        StepSize = 'stepSize'
+        SleepTime = 'sleepTime'
+        Loop = 'loop'
+        Pendulum = 'pendulum'
+
+    @staticmethod
+    def get(variables, varName):
+        # Get the hints for the given variable.
+        # Ensure that hints with sensible values are created in case there is no entry yet
+        varValue = variables.getPropertyByName(varName)
+
+        defaultHints = {animationHints.Key.RangeBegin: varValue,
+                        animationHints.Key.RangeEnd: varValue,
+                        animationHints.Key.StepSize: 1.0,
+                        animationHints.Key.SleepTime: 0.0,
+                        animationHints.Key.Loop: False,
+                        animationHints.Key.Pendulum: False}
+        hintList = animationHints.__getHintList__(variables)
+        return hintList.setdefault(varName, defaultHints)
+
+
+    @staticmethod
+    def __getHintList__(variables):
+        # Ensure that a hint-dictionary is available and return it
+        if "AnimationHintList" not in variables.PropertiesList:
+            variables.addProperty("App::PropertyPythonObject", "AnimationHintList", "AnimationHints", "The hintfield for the animation dialog").AnimationHintList = {}
+            variables.setPropertyStatus("AnimationHintList", "Hidden")
+        return variables.getPropertyByName("AnimationHintList")
+
+
+    @staticmethod
+    def cleanUp(variables):
+        if not variables:
+            return
+        # Walk through all variable-entries and collect the relevant hints for them
+        newHints = {}
+        hintList = animationHints.__getHintList__(variables)
+        for entry in variables.PropertiesList:
+            if variables.getGroupOfProperty(entry) == 'Variables':
+                hint = hintList.get(entry, None)
+                if hint:
+                    newHints[entry] = hint
+        # Throw old list away and use the new (possibly reduced) one
+        setattr(variables, "AnimationHintList", newHints)
 
 
 
