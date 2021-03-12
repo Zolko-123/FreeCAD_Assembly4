@@ -86,7 +86,8 @@ class newDatum:
         if Gui.Selection.getSelection():
             selectedObj = Gui.Selection.getSelection()[0]
             # ... and it's an App::Part or an datum object
-            if selectedObj.TypeId in self.containers or selectedObj.TypeId in Asm4.datumTypes:
+            selType = selectedObj.TypeId
+            if selType in self.containers or selType in Asm4.datumTypes or selType=='Sketcher::SketchObject':
                 return(selectedObj)
         # or of nothing is selected ...
         elif App.ActiveDocument.getObject('Model'):
@@ -110,7 +111,7 @@ class newDatum:
         if selectedObj.TypeId in self.containers:
             parentContainer = selectedObj
         # if a datum object is selected we try to find the parent container
-        elif selectedObj.TypeId in Asm4.datumTypes:
+        elif selectedObj.TypeId in Asm4.datumTypes or selectedObj.TypeId=='Sketcher::SketchObject':
             parent = selectedObj.getParentGeoFeatureGroup()
             if parent.TypeId in self.containers:
                 parentContainer = parent
