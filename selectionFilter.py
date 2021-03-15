@@ -35,8 +35,8 @@ Asm4_3DselObserver = None
 """
 class selectionFilterClearCmd:
     def GetResources(self):
-        return {"MenuText": "Clear all slection filters",
-                "ToolTip": "Clear all slection filters",
+        return {"MenuText": "Clear all selection filters",
+                "ToolTip": "Clear all selection filters",
                 "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_SelectionAll.svg')
                 }
     def IsActive(self):
