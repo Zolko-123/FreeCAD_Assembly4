@@ -17,8 +17,9 @@
 import os
 #__dir__ = os.path.dirname(__file__)
 wbPath   = os.path.dirname(__file__)
-iconPath = os.path.join( wbPath, 'Resources/icons' )
-libPath  = os.path.join( wbPath, 'Resources/library' )
+resourcePath = os.path.join( wbPath, 'Resources' )
+iconPath = os.path.join( resourcePath, 'icons' )
+libPath  = os.path.join( resourcePath, 'library' )
 
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
