@@ -17,13 +17,15 @@ import FreeCAD as App
 
 import libAsm4 as Asm4
 
+from AnimationProvider import animationProvider
+
 
 """
     +-----------------------------------------------+
     |                  main class                   |
     +-----------------------------------------------+
 """
-class animateVariable():
+class animateVariable(animationProvider):
 
     """
     +-----------------------------------------------+
@@ -61,6 +63,8 @@ class animateVariable():
         self.ActiveDocument = None
         self.Variables = None
         self.knownVariableList = []
+
+        self.exporter = None
 
 
     def GetResources(self):
@@ -318,7 +322,7 @@ class animateVariable():
 
     """
     +-----------------------------------------------+
-    |                Star/Stop/Close                |
+    |                Star/Stop/Close/Export         |
     +-----------------------------------------------+
     """
 
@@ -338,11 +342,36 @@ class animateVariable():
         self.MDIArea.subWindowActivated[QtGui.QMdiSubWindow].disconnect(self.onDocChanged)
         self.UI.close()
 
+    def onExport(self):
+        self.onStop()
+        if not self.exporter:
+            # Only import the export-lib if requested. Helps to keep WB loading times in check.
+            import AnimationExportLib
+            self.exporter = AnimationExportLib.animationExporter(self)
+        self.exporter.openUI()
 
     def onDocChanged(self):
         if App.ActiveDocument != self.ActiveDocument:
             self.onStop()
             self.Activated()
+
+
+    #
+    # animationProvider Interface
+    #
+    def nextFrame(self, resetAnimation) -> bool:
+        req = animateVariable.AnimationRequest.START if resetAnimation else animateVariable.AnimationRequest.NONE
+
+        endOfCycle = self.update(req)
+        if endOfCycle:
+            self.update(animateVariable.AnimationRequest.STOP)
+        animationEnded = self.RunState == animateVariable.AnimationState.STOPPED
+
+        return animationEnded
+
+
+    def pendulumWanted(self) -> bool:
+        return self.Pendulum.isChecked()
 
 
     """
@@ -454,6 +483,10 @@ class animateVariable():
         self.CloseButton = QtGui.QPushButton('Close')
         self.buttonLayout.addWidget(self.CloseButton)
         self.buttonLayout.addStretch()
+        # Export button
+        self.ExportButton = QtGui.QPushButton('Export...')
+        self.buttonLayout.addWidget(self.ExportButton)
+        self.buttonLayout.addStretch()
         # Stop button
         self.StopButton = QtGui.QPushButton('Stop')
         self.buttonLayout.addWidget(self.StopButton)
@@ -489,6 +522,7 @@ class animateVariable():
         self.Pendulum.toggled.connect(            self.onPendulum )
         self.ForceRender.toggled.connect(self.onForceRender)
         self.CloseButton.clicked.connect(         self.onClose )
+        self.ExportButton.clicked.connect(self.onExport)
         self.StopButton.clicked.connect(self.onStop)
         self.RunButton.clicked.connect(           self.onRun )
 
