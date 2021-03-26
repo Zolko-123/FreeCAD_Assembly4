@@ -55,6 +55,7 @@ class animateVariable():
         self.reverseAnimation = False  # True flags when the animation is "in reverse" for the pendulum mode.
         self.ForceGUIUpdate = False  # True Forces GUI to update on every step of the animation.
         self.timer = QtCore.QTimer()
+        self.timer.setInterval(0)
         self.timer.timeout.connect(self.onTimerTick)
 
         self.ActiveDocument = None
@@ -148,8 +149,6 @@ class animateVariable():
         self.RunButton.setEnabled(False)
         self.StopButton.setEnabled(True)
         self.setVarValue(self.varList.currentText(), self.beginValue.value())
-        sleep = self.sleepValue.value() * 1000.0
-        self.timer.start(sleep)
         self.reverseAnimation = False
 
     def nextStep(self, reverse):
@@ -181,7 +180,8 @@ class animateVariable():
 
 
     def update(self, req):
-
+        # Flag out for end of cycle
+        endOfCycle = False
         # STOPPED STATE; NO ANIMATION RUNNING
         if self.RunState == self.AnimationState.STOPPED:
             if req == self.AnimationRequest.START:
@@ -190,16 +190,14 @@ class animateVariable():
 
         # RUNNING STATE
         elif self.RunState == self.AnimationState.RUNNING:
-            endOfCycle = self.nextStep(self.reverseAnimation)
             stop = (req == self.AnimationRequest.STOP)
+            if not stop:
+                endOfCycle = self.nextStep(self.reverseAnimation)
             stop |= endOfCycle and not (self.Pendulum.isChecked() or self.Loop.isChecked())
-            sleep = self.sleepValue.value() * 1000.0
-            self.timer.setInterval(sleep)
 
             if stop:
                 self.RunButton.setEnabled(True)
                 self.StopButton.setEnabled(False)
-                self.timer.stop()
                 self.RunState = self.AnimationState.STOPPED
             elif endOfCycle:
                 if self.Loop.isChecked():
@@ -211,17 +209,22 @@ class animateVariable():
         else:
             print("Unknown State/Transition")
 
+        return endOfCycle
+
 
     def onTimerTick(self):
         self.update(self.AnimationRequest.NONE)
+        if self.ForceGUIUpdate:
+            Gui.updateGui()
+        if self.RunState == self.AnimationState.STOPPED:
+            self.timer.stop()
 
 
     def setVarValue(self,name,value):
         setattr( self.Variables, name, value )
         App.ActiveDocument.Model.recompute('True')
         self.variableValue.setText('{:.2f}'.format(value))
-        if self.ForceGUIUpdate:
-            Gui.updateGui()
+
 
     """
     +-----------------------------------------------+
@@ -310,6 +313,7 @@ class animateVariable():
         varName = self.varList.currentText()
         val = self.sleepValue.value()
         animationHints.get(self.Variables, varName)['sleepValue'] = val
+        self.timer.setInterval(val * 1000)
 
 
     """
@@ -320,14 +324,16 @@ class animateVariable():
 
     def onRun(self):
         self.update(self.AnimationRequest.START)
+        self.timer.start()
 
 
     def onStop(self):
         self.update(self.AnimationRequest.STOP)
+        self.timer.stop()
 
 
     def onClose(self):
-        self.update(self.AnimationRequest.STOP)
+        self.onStop()
         animationHints.cleanUp(self.Variables)
         self.MDIArea.subWindowActivated[QtGui.QMdiSubWindow].disconnect(self.onDocChanged)
         self.UI.close()
