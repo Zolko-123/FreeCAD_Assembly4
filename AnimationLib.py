@@ -340,8 +340,9 @@ class animateVariable():
 
 
     def onDocChanged(self):
-        self.onStop()
-        self.Activated()
+        if App.ActiveDocument != self.ActiveDocument:
+            self.onStop()
+            self.Activated()
 
 
     """
