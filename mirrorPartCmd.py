@@ -69,11 +69,9 @@ class mirrorPartCmd:
             symObjName  = self.selObj.Label+'_mirrored'
             linkObjName = self.selObj.Label+'_link'
             # create Part
-            symPart = App.ActiveDocument.addObject( 'App::Part' )
-            symPart.Label = symPartName
+            symPart = App.ActiveDocument.addObject( 'App::Part', symPartName )
             # add an LCS at the root of the Part, and attach it to the 'Origin'
-            lcs = symPart.newObject('PartDesign::CoordinateSystem')
-            lcs.Label = 'LCS_' + symPart.Name
+            lcs = symPart.newObject('PartDesign::CoordinateSystem','LCS_'+symPart.Name)
             lcs.Support = [(symPart.Origin.OriginFeatures[0],'')]
             lcs.MapMode = 'ObjectXY'
             lcs.MapReversed = False
@@ -82,13 +80,12 @@ class mirrorPartCmd:
             if partsGroup:
                 partsGroup.addObject(symPart)
             # create a link to the original
-            link = symPart.newObject('App::Link')
+            link = symPart.newObject('App::Link',linkObjName)
             link.LinkedObject = self.selObj
             link.Label        = linkObjName
             link.Visibility   = False
             # create the mirrored object
-            symObj = symPart.newObject('Part::Mirroring')
-            symObj.Label = symObjName
+            symObj = symPart.newObject('Part::Mirroring',symObjName)
             symObj.Source = link
             # set the symmetry plane
             if self.symPlane.currentText() == 'X-Y':

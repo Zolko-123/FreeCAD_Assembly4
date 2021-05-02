@@ -131,8 +131,7 @@ class newDatum:
                     'Enter '+self.datumName+' name :'+' '*40, text = proposedName)
             if ok and text:
                 # App.activeDocument().getObject('Model').newObject( 'Sketcher::SketchObject', text )
-                createdDatum = parentContainer.newObject( self.datumType )
-                createdDatum.Label = text
+                createdDatum = parentContainer.newObject( self.datumType, text )
                 # automatic resizing of datum Plane sucks, so we set it to manual
                 if self.datumType=='PartDesign::Plane':
                     createdDatum.ResizeMode = 'Manual'

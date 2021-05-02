@@ -991,8 +991,7 @@ class selectionObserver():
         global taskUI
         if pt1!=pt2:
             line = Part.makeLine( pt1, pt2 )
-            wire = App.ActiveDocument.addObject('Part::FeaturePython')
-            wire.Label = name
+            wire = App.ActiveDocument.addObject('Part::FeaturePython', name)
             wire.ViewObject.Proxy = setCustomIcon(wire, taskUI.lineIcon )
             wire.Shape = Part.Wire(line)
             wire.ViewObject.LineWidth = width
