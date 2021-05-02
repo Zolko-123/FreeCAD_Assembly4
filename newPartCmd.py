@@ -71,7 +71,8 @@ class newPart:
         text,ok = QtGui.QInputDialog.getText(None, self.tooltip, 'Enter new '+self.partName+' name :'+' '*30, text = instanceName)
         if ok and text:
             # create Part
-            part = App.ActiveDocument.addObject(self.partType,text)
+            part = App.ActiveDocument.addObject(self.partType)
+            part.Label = text
             # add an LCS at the root of the Part, and attach it to the 'Origin'
             lcs0 = part.newObject('PartDesign::CoordinateSystem','LCS_0')
             lcs0.Support = [(part.Origin.OriginFeatures[0],'')]
