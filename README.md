@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.9.15, 2021-03-10
+Current version 0.9.16, 2021-05-03
 
 
 
@@ -51,6 +51,10 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 
 ## Release notes
+
+* 2021.05.03 (**0.9.16**) :  
+Various fixes  
+Animation Export  
 
 * 2021.03.10 (**0.9.15**) :  
 added mirroring of a part__
