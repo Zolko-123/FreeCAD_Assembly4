@@ -17,13 +17,15 @@ import FreeCAD as App
 
 import libAsm4 as Asm4
 
+from AnimationProvider import animationProvider
+
 
 """
     +-----------------------------------------------+
     |                  main class                   |
     +-----------------------------------------------+
 """
-class animateVariable():
+class animateVariable(animationProvider):
 
     """
     +-----------------------------------------------+
@@ -55,11 +57,14 @@ class animateVariable():
         self.reverseAnimation = False  # True flags when the animation is "in reverse" for the pendulum mode.
         self.ForceGUIUpdate = False  # True Forces GUI to update on every step of the animation.
         self.timer = QtCore.QTimer()
+        self.timer.setInterval(0)
         self.timer.timeout.connect(self.onTimerTick)
 
         self.ActiveDocument = None
         self.Variables = None
         self.knownVariableList = []
+
+        self.exporter = None
 
 
     def GetResources(self):
@@ -148,8 +153,6 @@ class animateVariable():
         self.RunButton.setEnabled(False)
         self.StopButton.setEnabled(True)
         self.setVarValue(self.varList.currentText(), self.beginValue.value())
-        sleep = self.sleepValue.value() * 1000.0
-        self.timer.start(sleep)
         self.reverseAnimation = False
 
     def nextStep(self, reverse):
@@ -181,7 +184,8 @@ class animateVariable():
 
 
     def update(self, req):
-
+        # Flag out for end of cycle
+        endOfCycle = False
         # STOPPED STATE; NO ANIMATION RUNNING
         if self.RunState == self.AnimationState.STOPPED:
             if req == self.AnimationRequest.START:
@@ -190,16 +194,14 @@ class animateVariable():
 
         # RUNNING STATE
         elif self.RunState == self.AnimationState.RUNNING:
-            endOfCycle = self.nextStep(self.reverseAnimation)
             stop = (req == self.AnimationRequest.STOP)
+            if not stop:
+                endOfCycle = self.nextStep(self.reverseAnimation)
             stop |= endOfCycle and not (self.Pendulum.isChecked() or self.Loop.isChecked())
-            sleep = self.sleepValue.value() * 1000.0
-            self.timer.setInterval(sleep)
 
             if stop:
                 self.RunButton.setEnabled(True)
                 self.StopButton.setEnabled(False)
-                self.timer.stop()
                 self.RunState = self.AnimationState.STOPPED
             elif endOfCycle:
                 if self.Loop.isChecked():
@@ -211,17 +213,22 @@ class animateVariable():
         else:
             print("Unknown State/Transition")
 
+        return endOfCycle
+
 
     def onTimerTick(self):
         self.update(self.AnimationRequest.NONE)
+        if self.ForceGUIUpdate:
+            Gui.updateGui()
+        if self.RunState == self.AnimationState.STOPPED:
+            self.timer.stop()
 
 
     def setVarValue(self,name,value):
         setattr( self.Variables, name, value )
         App.ActiveDocument.Model.recompute('True')
         self.variableValue.setText('{:.2f}'.format(value))
-        if self.ForceGUIUpdate:
-            Gui.updateGui()
+
 
     """
     +-----------------------------------------------+
@@ -310,32 +317,61 @@ class animateVariable():
         varName = self.varList.currentText()
         val = self.sleepValue.value()
         animationHints.get(self.Variables, varName)['sleepValue'] = val
+        self.timer.setInterval(val * 1000)
 
 
     """
     +-----------------------------------------------+
-    |                Star/Stop/Close                |
+    |                Star/Stop/Close/Export         |
     +-----------------------------------------------+
     """
 
     def onRun(self):
         self.update(self.AnimationRequest.START)
+        self.timer.start()
 
 
     def onStop(self):
         self.update(self.AnimationRequest.STOP)
+        self.timer.stop()
 
 
     def onClose(self):
-        self.update(self.AnimationRequest.STOP)
+        self.onStop()
         animationHints.cleanUp(self.Variables)
         self.MDIArea.subWindowActivated[QtGui.QMdiSubWindow].disconnect(self.onDocChanged)
         self.UI.close()
 
+    def onExport(self):
+        self.onStop()
+        if not self.exporter:
+            # Only import the export-lib if requested. Helps to keep WB loading times in check.
+            import AnimationExportLib
+            self.exporter = AnimationExportLib.animationExporter(self)
+        self.exporter.openUI()
 
     def onDocChanged(self):
-        self.onStop()
-        self.Activated()
+        if App.ActiveDocument != self.ActiveDocument:
+            self.onStop()
+            self.Activated()
+
+
+    #
+    # animationProvider Interface
+    #
+    def nextFrame(self, resetAnimation) -> bool:
+        req = animateVariable.AnimationRequest.START if resetAnimation else animateVariable.AnimationRequest.NONE
+
+        endOfCycle = self.update(req)
+        if endOfCycle:
+            self.update(animateVariable.AnimationRequest.STOP)
+        animationEnded = self.RunState == animateVariable.AnimationState.STOPPED
+
+        return animationEnded
+
+
+    def pendulumWanted(self) -> bool:
+        return self.Pendulum.isChecked()
 
 
     """
@@ -447,6 +483,10 @@ class animateVariable():
         self.CloseButton = QtGui.QPushButton('Close')
         self.buttonLayout.addWidget(self.CloseButton)
         self.buttonLayout.addStretch()
+        # Export button
+        self.ExportButton = QtGui.QPushButton('Export...')
+        self.buttonLayout.addWidget(self.ExportButton)
+        self.buttonLayout.addStretch()
         # Stop button
         self.StopButton = QtGui.QPushButton('Stop')
         self.buttonLayout.addWidget(self.StopButton)
@@ -482,6 +522,7 @@ class animateVariable():
         self.Pendulum.toggled.connect(            self.onPendulum )
         self.ForceRender.toggled.connect(self.onForceRender)
         self.CloseButton.clicked.connect(         self.onClose )
+        self.ExportButton.clicked.connect(self.onExport)
         self.StopButton.clicked.connect(self.onStop)
         self.RunButton.clicked.connect(           self.onRun )
 
