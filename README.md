@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.9.15, 2021-03-10
+Current version 0.9.16, 2021-05-03
 
 
 
@@ -52,8 +52,12 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 ## Release notes
 
+* 2021.05.03 (**0.9.16**) :  
+Various fixes  
+Animation Export  
+
 * 2021.03.10 (**0.9.15**) :  
-added mirroring of a part__
+added mirroring of a part  
 
 * 2021.03.07 (**0.9.14**) :  
 HoleAxis can now create datums on all selected circles from 1 single part in 1 step   

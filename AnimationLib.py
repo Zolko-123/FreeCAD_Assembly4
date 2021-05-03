@@ -8,7 +8,7 @@
 
 
 
-import os, time
+import os, numpy
 
 from PySide import QtGui, QtCore
 from enum import Enum
@@ -17,13 +17,40 @@ import FreeCAD as App
 
 import libAsm4 as Asm4
 
+# from AnimationProvider import animationProvider
+
+
+
+"""
+    +-----------------------------------------------+
+    |            animationProvider class            |
+    +-----------------------------------------------+
+"""
+class animationProvider:
+    #
+    # Setup the scene for the next frame of the animation.
+    # Set resetAnimation True for the first frame
+    # Signals that the last frame has been reached by returning True
+    #
+    def nextFrame(self, resetAnimation) -> bool:
+        raise NotImplementedError("animationProvider.nextFrame not implemented.")
+
+    #
+    # Optionally flag that pendulum (forth and back animation) is wanted.
+    # Prevents the need to capture identical frames on the "returning path"
+    # of the animation.
+    #
+    def pendulumWanted(self) -> bool:
+        return False
+
+
 
 """
     +-----------------------------------------------+
     |                  main class                   |
     +-----------------------------------------------+
 """
-class animateVariable():
+class animateVariable(animationProvider):
 
     """
     +-----------------------------------------------+
@@ -48,6 +75,21 @@ class animateVariable():
         super(animateVariable,self).__init__()
         self.UI = QtGui.QDialog()
         self.drawUI()
+        self.MDIArea = Gui.getMainWindow().findChild(QtGui.QMdiArea)
+
+        # Initialize States and timing logic.
+        self.RunState = self.AnimationState.STOPPED
+        self.reverseAnimation = False  # True flags when the animation is "in reverse" for the pendulum mode.
+        self.ForceGUIUpdate = False  # True Forces GUI to update on every step of the animation.
+        self.timer = QtCore.QTimer()
+        self.timer.setInterval(0)
+        self.timer.timeout.connect(self.onTimerTick)
+
+        self.ActiveDocument = None
+        self.Variables = None
+        self.knownVariableList = []
+
+        self.exporter = None
 
 
     def GetResources(self):
@@ -71,27 +113,16 @@ class animateVariable():
     +-----------------------------------------------+
     """
     def Activated(self):
+        # grab the Variables container (just do it always, this prevents problems with newly opened docs)
+        self.ActiveDocument = App.ActiveDocument
+        self.Variables = App.ActiveDocument.getObject('Variables') if self.ActiveDocument else None
 
-        # grab the Variables container
-        self.Variables = App.ActiveDocument.getObject('Variables')
-        self.Model = App.ActiveDocument.getObject('Model')
+        self.updateVarList()
 
-        # Initialize States and timing logic.
-        self.RunState = self.AnimationState.STOPPED
-        self.reverseAnimation = False  # True flags when the animation is "in reverse" for the pendulum mode.
-        self.ForceGUIUpdate = False # True Forces GUI to update on every step of the animation.
-        self.timer = QtCore.QTimer()
-        self.timer.timeout.connect(self.onTimerTick)
-
-        # Now we can draw the UI
+        # in case the dialog is newly opened, register for changes of the selected document
+        if not self.UI.isVisible():
+            self.MDIArea.subWindowActivated.connect(self.onDocChanged)
         self.UI.show()
-
-        # select the Float variables that are in the "Variables" group
-        self.varList.clear()
-        for prop in self.Variables.PropertiesList:
-            if self.Variables.getGroupOfProperty(prop)=='Variables' :
-                if self.Variables.getTypeIdOfProperty(prop)=='App::PropertyFloat' :
-                    self.varList.addItem(prop)
 
 
     """
@@ -99,17 +130,41 @@ class animateVariable():
     |  fill default values when selecting a variable |
     +------------------------------------------------+
     """
+    def updateVarList(self):
+        docVars = ['Select Variable (only float)']
+        # Collect all variables currently available in the doc
+        if self.Variables:
+            for prop in self.Variables.PropertiesList:
+                if self.Variables.getGroupOfProperty(prop) == 'Variables':
+                    if self.Variables.getTypeIdOfProperty(prop) == 'App::PropertyFloat':
+                        docVars.append(prop)
+
+        # only update the gui-element if variables actually changed
+        if self.knownVariableList != docVars:
+            self.varList.clear()
+            self.varList.addItems(docVars)
+            self.knownVariableList = docVars
+            animationHints.cleanUp(self.Variables)
+
+        # prevent active gui controls when no variables are available
+        self.enableDependentGuiElements(len(docVars)!=0)
+
+
+
     def onSelectVar(self):
+        self.update(self.AnimationRequest.STOP)
         # the currently selected variable
         selectedVar = self.varList.currentText()
         # if it's indeed a property in the Variables object (one never knows)
-        if selectedVar in self.Variables.PropertiesList:
-            # get its value
-            selectedVarValue = self.Variables.getPropertyByName(selectedVar)
-            # initialise the Begin and End values with it
-            self.beginValue.setValue(selectedVarValue)
-            self.endValue.setValue(selectedVarValue)
-        return
+        if len(selectedVar) > 0 and selectedVar in self.Variables.PropertiesList:
+            # grab animationsHints related to the variable and init accordingly
+            aniHints = animationHints.get(self.Variables, selectedVar)
+            self.beginValue.setValue(aniHints[animationHints.Key.RangeBegin])
+            self.endValue.setValue(aniHints[animationHints.Key.RangeEnd])
+            self.stepValue.setValue(aniHints[animationHints.Key.StepSize])
+            self.sleepValue.setValue(aniHints[animationHints.Key.SleepTime])
+            self.Loop.setChecked(aniHints[animationHints.Key.Loop])
+            self.Pendulum.setChecked(aniHints[animationHints.Key.Pendulum])
 
 
 
@@ -123,8 +178,6 @@ class animateVariable():
         self.RunButton.setEnabled(False)
         self.StopButton.setEnabled(True)
         self.setVarValue(self.varList.currentText(), self.beginValue.value())
-        sleep = self.sleepValue.value() * 1000.0
-        self.timer.start(sleep)
         self.reverseAnimation = False
 
     def nextStep(self, reverse):
@@ -156,7 +209,8 @@ class animateVariable():
 
 
     def update(self, req):
-
+        # Flag out for end of cycle
+        endOfCycle = False
         # STOPPED STATE; NO ANIMATION RUNNING
         if self.RunState == self.AnimationState.STOPPED:
             if req == self.AnimationRequest.START:
@@ -165,16 +219,14 @@ class animateVariable():
 
         # RUNNING STATE
         elif self.RunState == self.AnimationState.RUNNING:
-            endOfCycle = self.nextStep(self.reverseAnimation)
             stop = (req == self.AnimationRequest.STOP)
+            if not stop:
+                endOfCycle = self.nextStep(self.reverseAnimation)
             stop |= endOfCycle and not (self.Pendulum.isChecked() or self.Loop.isChecked())
-            sleep = self.sleepValue.value() * 1000.0
-            self.timer.setInterval(sleep)
 
             if stop:
                 self.RunButton.setEnabled(True)
                 self.StopButton.setEnabled(False)
-                self.timer.stop()
                 self.RunState = self.AnimationState.STOPPED
             elif endOfCycle:
                 if self.Loop.isChecked():
@@ -186,16 +238,22 @@ class animateVariable():
         else:
             print("Unknown State/Transition")
 
+        return endOfCycle
+
 
     def onTimerTick(self):
         self.update(self.AnimationRequest.NONE)
+        if self.ForceGUIUpdate:
+            Gui.updateGui()
+        if self.RunState == self.AnimationState.STOPPED:
+            self.timer.stop()
 
 
     def setVarValue(self,name,value):
         setattr( self.Variables, name, value )
         App.ActiveDocument.Model.recompute('True')
-        if self.ForceGUIUpdate:
-            Gui.updateGui()
+        self.variableValue.setText('{:.2f}'.format(value))
+
 
     """
     +-----------------------------------------------+
@@ -203,12 +261,15 @@ class animateVariable():
     +-----------------------------------------------+
     """
     def onLoop(self):
+        aniHints = animationHints.get(self.Variables, self.varList.currentText())
+        aniHints[animationHints.Key.Loop] = self.Loop.isChecked()
         if self.Pendulum.isChecked() and self.Loop.isChecked():
             self.Pendulum.setChecked(False)
-        return
 
 
     def onPendulum(self):
+        aniHints = animationHints.get(self.Variables, self.varList.currentText())
+        aniHints[animationHints.Key.Pendulum] = self.Pendulum.isChecked()
         if self.Loop.isChecked() and self.Pendulum.isChecked():
             self.Loop.setChecked(False)
         return
@@ -223,41 +284,119 @@ class animateVariable():
     +-----------------------------------------------+
     """
     def sliderMoved(self):
-        # Stop the animation when the user grabs the slider
-        self.update(self.AnimationRequest.STOP)
         varName = self.varList.currentText()
         varValue = self.slider.value()
         self.setVarValue(varName, varValue)
         return
 
 
-    def onValuesChanged(self):
-        minVal = min(self.beginValue.value(), self.endValue.value())
-        maxVal = max(self.beginValue.value(), self.endValue.value())
-        self.sliderMinValue.setText(str(minVal))
-        self.sliderMaxValue.setText(str(maxVal))
-        self.slider.setRange(minVal, maxVal)
-        self.slider.setSingleStep(self.stepValue.value())
-        return
+
+    def updateSlider(self):
+        # Get range-values from spinboxes
+        beginVal = self.beginValue.value()
+        endVal   = self.endValue.value()
+
+        # Update the slider's ranges
+        # The slider will automatically settle to the nearest value possible based on the new begin/end/stepsize.
+        self.slider.setRange(beginVal, endVal, self.stepValue.value())
+
+        # Update the labels with the actual range of the slider
+        self.sliderLeftValue.setText(str(self.slider.leftValue()))
+        self.sliderRightValue.setText(str(self.slider.rightValue()))
+
+        # Check the current variable state vs. the slider. Update if needed
+        varName = self.varList.currentText()
+        curVal = self.Variables.getPropertyByName(varName)
+        sliderVal = self.slider.value()
+        if curVal != sliderVal:
+            self.setVarValue(varName, sliderVal)
+
+        # Check whether the end of the range can actually be reached with the current stepping.
+        # Flag label if needed.
+        rangeShort = (self.slider.rightValue() < endVal) if (beginVal < endVal) else (self.slider.rightValue() > endVal)
+        if rangeShort:
+            self.sliderRightValue.setStyleSheet("background-color: tomato")
+        else:
+            self.sliderRightValue.setStyleSheet("background-color: none")
+
+
+    def onBeginValChanged(self):
+        varName = self.varList.currentText()
+        val = self.beginValue.value()
+        animationHints.get(self.Variables, varName)['rangeBegin'] = val
+        self.updateSlider()
+
+    def onEndValChanged(self):
+        varName = self.varList.currentText()
+        val = self.endValue.value()
+        animationHints.get(self.Variables, varName)['rangeEnd'] = val
+        self.updateSlider()
+
+    def onStepValChanged(self):
+        varName = self.varList.currentText()
+        val = self.stepValue.value()
+        animationHints.get(self.Variables, varName)['stepSize'] = val
+        self.updateSlider()
+
+    def onSleepValChanged(self):
+        varName = self.varList.currentText()
+        val = self.sleepValue.value()
+        animationHints.get(self.Variables, varName)['sleepValue'] = val
+        self.timer.setInterval(val * 1000)
+
 
     """
     +-----------------------------------------------+
-    |                Star/Stop/Close                |
+    |                Star/Stop/Close/Export         |
     +-----------------------------------------------+
     """
 
     def onRun(self):
         self.update(self.AnimationRequest.START)
+        self.timer.start()
 
 
     def onStop(self):
         self.update(self.AnimationRequest.STOP)
-        return
+        self.timer.stop()
 
 
     def onClose(self):
-        self.update(self.AnimationRequest.STOP)
+        self.onStop()
+        animationHints.cleanUp(self.Variables)
+        self.MDIArea.subWindowActivated[QtGui.QMdiSubWindow].disconnect(self.onDocChanged)
         self.UI.close()
+
+    def onExport(self):
+        self.onStop()
+        if not self.exporter:
+            # Only import the export-lib if requested. Helps to keep WB loading times in check.
+            import AnimationExportLib
+            self.exporter = AnimationExportLib.animationExporter(self)
+        self.exporter.openUI()
+
+    def onDocChanged(self):
+        if App.ActiveDocument != self.ActiveDocument:
+            self.onStop()
+            self.Activated()
+
+
+    #
+    # animationProvider Interface
+    #
+    def nextFrame(self, resetAnimation) -> bool:
+        req = animateVariable.AnimationRequest.START if resetAnimation else animateVariable.AnimationRequest.NONE
+
+        endOfCycle = self.update(req)
+        if endOfCycle:
+            self.update(animateVariable.AnimationRequest.STOP)
+        animationEnded = self.RunState == animateVariable.AnimationState.STOPPED
+
+        return animationEnded
+
+
+    def pendulumWanted(self) -> bool:
+        return self.Pendulum.isChecked()
 
 
     """
@@ -279,42 +418,61 @@ class animateVariable():
         # Define the fields for the form ( label + widget )
         self.formLayout = QtGui.QFormLayout()
         # select Variable
-        self.varList = QtGui.QComboBox()
-        self.formLayout.addRow(QtGui.QLabel('Select Variable'),self.varList)
+        self.varList = updatingComboBox()
+        self.formLayout.addRow(QtGui.QLabel('Variable'),self.varList)
         # Range Minimum
         self.beginValue = QtGui.QDoubleSpinBox()
-        self.beginValue.setRange(-1000000.0, 1000000.0)
+        self.beginValue.setRange(numpy.finfo(float).min, numpy.finfo(float).max)
+        self.beginValue.setKeyboardTracking(False)
         self.formLayout.addRow(QtGui.QLabel('Range Begin'), self.beginValue)
         # Maximum
         self.endValue = QtGui.QDoubleSpinBox()
-        self.endValue.setRange(-1000000.0, 1000000.0)
+        self.endValue.setRange(numpy.finfo(float).min, numpy.finfo(float).max)
+        self.endValue.setKeyboardTracking(False)
         self.formLayout.addRow(QtGui.QLabel('Range End'), self.endValue)
         # Step
         self.stepValue = QtGui.QDoubleSpinBox()
-        self.stepValue.setRange( -10000.0, 10000.0 )
+        self.stepValue.setRange( 0.01, numpy.finfo(float).max )
         self.stepValue.setValue( 1.0 )
-        self.formLayout.addRow(QtGui.QLabel('Step Size'),self.stepValue)
+        self.stepValue.setKeyboardTracking(False)
+        self.formLayout.addRow(QtGui.QLabel('Step Size'), self.stepValue)
+        
         # Sleep
         self.sleepValue = QtGui.QDoubleSpinBox()
         self.sleepValue.setRange( 0.0, 10.0 )
         self.sleepValue.setValue( 0.0 )
         self.sleepValue.setSingleStep(0.01)
+        self.sleepValue.setKeyboardTracking(False)
         self.formLayout.addRow(QtGui.QLabel('Sleep (s)'),self.sleepValue)
         # apply the layout
         self.mainLayout.addLayout(self.formLayout)
         self.mainLayout.addWidget(QtGui.QLabel())
 
+        # Current Variable Value
+        self.curVarLayout = QtGui.QHBoxLayout()
+        self.variableValue = QtGui.QLabel('Variable')
+        self.curVarLayout.addWidget(QtGui.QLabel('Current Value:'))
+        self.curVarLayout.addStretch()
+        self.curVarLayout.addWidget(self.variableValue)
+
+        self.mainLayout.addLayout(self.curVarLayout)
+
         # slider
         self.sliderLayout = QtGui.QHBoxLayout()
-        self.slider = QtGui.QSlider()
+        self.slider = animationSlider()
         self.slider.setOrientation(QtCore.Qt.Orientation.Horizontal)
         self.slider.setRange(0, 10)
         self.slider.setTickInterval(0)
-        self.sliderMinValue = QtGui.QLabel('Min')
-        self.sliderMaxValue = QtGui.QLabel('Max')
-        self.sliderLayout.addWidget(self.sliderMinValue)
+        self.sliderLeftValue = QtGui.QLabel('Begin')
+        self.sliderRightValue = QtGui.QLabel('End')
+        tt = "The last reachable variable value with the given stepping. "
+        tt += "Flagged red in case this is not equal to the intended value. "
+        tt += "The last step of the animation will be reduced to stay inside the configured limits."
+        self.sliderRightValue.setToolTip(tt)
+        self.sliderLayout.addWidget(self.sliderLeftValue)
         self.sliderLayout.addWidget(self.slider)
-        self.sliderLayout.addWidget(self.sliderMaxValue)
+        self.sliderLayout.addWidget(self.sliderRightValue)
+
         self.mainLayout.addLayout(self.sliderLayout)
 
 
@@ -350,6 +508,10 @@ class animateVariable():
         self.CloseButton = QtGui.QPushButton('Close')
         self.buttonLayout.addWidget(self.CloseButton)
         self.buttonLayout.addStretch()
+        # Export button
+        self.ExportButton = QtGui.QPushButton('Export')
+        self.buttonLayout.addWidget(self.ExportButton)
+        self.buttonLayout.addStretch()
         # Stop button
         self.StopButton = QtGui.QPushButton('Stop')
         self.buttonLayout.addWidget(self.StopButton)
@@ -357,8 +519,15 @@ class animateVariable():
         self.StopButton.setEnabled(False)
         # Run button
         self.RunButton = QtGui.QPushButton('Run')
-        self.RunButton.setDefault(True)
         self.buttonLayout.addWidget(self.RunButton)
+
+        # Add an invisibly dummy button to circumvent QDialogs default-button behavior.
+        # We need the enter key to trigger spinbox-commits only, without also triggering button actions.
+        self.DummyButton = QtGui.QPushButton('Dummy')
+        self.DummyButton.setDefault(True)
+        self.DummyButton.setVisible(False)
+        self.buttonLayout.addWidget(self.DummyButton)
+
         # add buttons to layout
         self.mainLayout.addLayout(self.buttonLayout)
 
@@ -367,16 +536,170 @@ class animateVariable():
 
         # Actions
         self.varList.currentIndexChanged.connect( self.onSelectVar )
+        self.varList.popupList.connect(self.updateVarList)
         self.slider.sliderMoved.connect(          self.sliderMoved)
-        self.beginValue.valueChanged.connect(self.onValuesChanged)
-        self.endValue.valueChanged.connect(self.onValuesChanged)
-        self.stepValue.valueChanged.connect(      self.onValuesChanged )
+        self.slider.valueChanged.connect(self.sliderMoved)
+        self.beginValue.valueChanged.connect(self.onBeginValChanged)
+        self.endValue.valueChanged.connect(self.onEndValChanged)
+        self.stepValue.valueChanged.connect(      self.onStepValChanged)
+        self.sleepValue.valueChanged.connect(       self.onSleepValChanged)
         self.Loop.toggled.connect(                self.onLoop )
         self.Pendulum.toggled.connect(            self.onPendulum )
         self.ForceRender.toggled.connect(self.onForceRender)
         self.CloseButton.clicked.connect(         self.onClose )
+        self.ExportButton.clicked.connect(self.onExport)
         self.StopButton.clicked.connect(self.onStop)
         self.RunButton.clicked.connect(           self.onRun )
+
+
+    def enableDependentGuiElements(self, state):
+        self.beginValue.setEnabled(state)
+        self.endValue.setEnabled(state)
+        self.stepValue.setEnabled(state)
+        self.sleepValue.setEnabled(state)
+        self.slider.setEnabled(state)
+        self.RunButton.setEnabled(state)
+        self.Loop.setEnabled(state)
+        self.Pendulum.setEnabled(state)
+
+
+
+"""
+    +-----------------------------------------------+
+    |     Custom Slider handling inverse ranges     |     
+    |               and steps != 1.                 |
+    +-----------------------------------------------+
+"""
+
+class animationSlider(QtGui.QSlider):
+
+    def __init__(self, parent=None):
+        self.leftVal =  0.0
+        self.rightVal = 1.0
+        self.stepSize = 1.0
+        super().__init__(parent)
+
+
+    # All ranges will be mapped to positive whole numbers.
+    # By definition, the "left hand side value" (begin range) will be reachable.
+    # The last reachable "right hand side value" depends on the step-size
+    # The functions below translate accordingly
+
+    def setRange(self, leftVal, rightVal, stepSize=1.0):
+        val = self.value()
+
+        self.leftVal = leftVal
+        self.rightVal = rightVal
+        self.stepSize = abs(stepSize)
+        if leftVal > rightVal:
+            self.stepSize *= -1.0
+
+        super().setRange(0, (rightVal - leftVal) / self.stepSize)
+
+        # ensure that the exposed slider value stays stable and gets capped if needed
+        sig = self.stepSize/abs(self.stepSize)
+        val = max(val, leftVal * sig)
+        val = min(val, rightVal * sig)
+        self.setValue(val)
+
+
+    def __calculateInternalValue__(self, value):
+        return value * self.stepSize + self.leftVal
+
+    def value(self):
+        return self.__calculateInternalValue__(super().value())
+
+    def leftValue(self):
+        return self.__calculateInternalValue__(super().minimum())
+
+    def rightValue(self):
+        return self.__calculateInternalValue__(super().maximum())
+
+
+    def setValue(self, value):
+        super().setValue((value - self.leftVal) / self.stepSize)
+
+
+
+
+"""
+    +-----------------------------------------------+
+    |     Custom Combobox that emits a Signal when  |     
+    |     the user clicks for the popup menu.       |
+    |     Needed to update the list of variables    |
+    |     on the fly.                               |
+    +-----------------------------------------------+
+"""
+
+class updatingComboBox(QtGui.QComboBox):
+
+    popupList = QtCore.Signal()
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+    def showPopup(self):
+        self.popupList.emit()
+        super().showPopup()
+
+
+
+
+"""
+    +-----------------------------------------------+
+    |            Animation Hint Record Helper       |
+    +-----------------------------------------------+
+"""
+
+class animationHints():
+    class Key:
+        RangeBegin = 'rangeBegin'
+        RangeEnd = 'rangeEnd'
+        StepSize = 'stepSize'
+        SleepTime = 'sleepTime'
+        Loop = 'loop'
+        Pendulum = 'pendulum'
+
+    @staticmethod
+    def get(variables, varName):
+        # Get the hints for the given variable.
+        # Ensure that hints with sensible values are created in case there is no entry yet
+        varValue = variables.getPropertyByName(varName)
+
+        defaultHints = {animationHints.Key.RangeBegin: varValue,
+                        animationHints.Key.RangeEnd: varValue,
+                        animationHints.Key.StepSize: 1.0,
+                        animationHints.Key.SleepTime: 0.0,
+                        animationHints.Key.Loop: False,
+                        animationHints.Key.Pendulum: False}
+        hintList = animationHints.__getHintList__(variables)
+        return hintList.setdefault(varName, defaultHints)
+
+
+    @staticmethod
+    def __getHintList__(variables):
+        # Ensure that a hint-dictionary is available and return it
+        if "AnimationHintList" not in variables.PropertiesList:
+            variables.addProperty("App::PropertyPythonObject", "AnimationHintList", "AnimationHints", "The hintfield for the animation dialog").AnimationHintList = {}
+            variables.setPropertyStatus("AnimationHintList", "Hidden")
+        return variables.getPropertyByName("AnimationHintList")
+
+
+    @staticmethod
+    def cleanUp(variables):
+        if not variables:
+            return
+        # Walk through all variable-entries and collect the relevant hints for them
+        newHints = {}
+        hintList = animationHints.__getHintList__(variables)
+        for entry in variables.PropertiesList:
+            if variables.getGroupOfProperty(entry) == 'Variables':
+                hint = hintList.get(entry, None)
+                if hint:
+                    newHints[entry] = hint
+        # Throw old list away and use the new (possibly reduced) one
+        setattr(variables, "AnimationHintList", newHints)
+
 
 
 
