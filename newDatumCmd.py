@@ -106,12 +106,21 @@ class newDatum:
     def Activated(self):
         # check that we have somewhere to put our stuff
         selectedObj = self.checkSelection()
-        
+        # default name increments the datum type's end numeral
+        proposedName = Asm4.nextInstance( self.datumName, startAtOne=True )
+
         # check whether we have selected a container
         if selectedObj.TypeId in self.containers:
             parentContainer = selectedObj
-        # if a datum object is selected we try to find the parent container
+            # we add the container name to the datum's name
+            proposedName = Asm4.nextInstance( self.datumName + '_' + selectedObj.Label, startAtOne=True )
+        # if a datum object is selected
         elif selectedObj.TypeId in Asm4.datumTypes or selectedObj.TypeId=='Sketcher::SketchObject':
+            # try to figure out a good new name
+            (a,b,c) = selectedObj.Label.rpartition('_')
+            if c.isdigit():
+                proposedName = Asm4.nextInstance(a, startAtOne=True)
+            # see whether it's in a container
             parent = selectedObj.getParentGeoFeatureGroup()
             if parent.TypeId in self.containers:
                 parentContainer = parent
@@ -126,17 +135,21 @@ class newDatum:
         #datumName = self.datumName+'_'+str(instanceNum)
         if parentContainer:
             # input dialog to ask the user the name of the Sketch:
-            proposedName = Asm4.nextInstance( self.datumName + '_' + selectedObj.Label, startAtOne=True )
+            #proposedName = Asm4.nextInstance( self.datumName + '_' + selectedObj.Label, startAtOne=True )
             text,ok = QtGui.QInputDialog.getText(None,'Create new '+self.datumName,
                     'Enter '+self.datumName+' name :'+' '*40, text = proposedName)
             if ok and text:
                 # App.activeDocument().getObject('Model').newObject( 'Sketcher::SketchObject', text )
                 createdDatum = parentContainer.newObject( self.datumType, text )
+                createdDatum.Label = text
                 # automatic resizing of datum Plane sucks, so we set it to manual
                 if self.datumType=='PartDesign::Plane':
                     createdDatum.ResizeMode = 'Manual'
                     createdDatum.Length = 100
                     createdDatum.Width = 100
+                elif self.datumType=='PartDesign::Line':
+                    createdDatum.ResizeMode = 'Manual'
+                    createdDatum.Length = 200
                 # if color or transparency is specified for this datum type
                 if self.datumColor:
                     Gui.ActiveDocument.getObject(createdDatum.Name).ShapeColor = self.datumColor
