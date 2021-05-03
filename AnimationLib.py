@@ -17,7 +17,32 @@ import FreeCAD as App
 
 import libAsm4 as Asm4
 
-from AnimationProvider import animationProvider
+# from AnimationProvider import animationProvider
+
+
+
+"""
+    +-----------------------------------------------+
+    |            animationProvider class            |
+    +-----------------------------------------------+
+"""
+class animationProvider:
+    #
+    # Setup the scene for the next frame of the animation.
+    # Set resetAnimation True for the first frame
+    # Signals that the last frame has been reached by returning True
+    #
+    def nextFrame(self, resetAnimation) -> bool:
+        raise NotImplementedError("animationProvider.nextFrame not implemented.")
+
+    #
+    # Optionally flag that pendulum (forth and back animation) is wanted.
+    # Prevents the need to capture identical frames on the "returning path"
+    # of the animation.
+    #
+    def pendulumWanted(self) -> bool:
+        return False
+
 
 
 """
@@ -106,7 +131,7 @@ class animateVariable(animationProvider):
     +------------------------------------------------+
     """
     def updateVarList(self):
-        docVars = []
+        docVars = ['Select Variable (only float)']
         # Collect all variables currently available in the doc
         if self.Variables:
             for prop in self.Variables.PropertiesList:
@@ -394,7 +419,7 @@ class animateVariable(animationProvider):
         self.formLayout = QtGui.QFormLayout()
         # select Variable
         self.varList = updatingComboBox()
-        self.formLayout.addRow(QtGui.QLabel('Select Variable'),self.varList)
+        self.formLayout.addRow(QtGui.QLabel('Variable'),self.varList)
         # Range Minimum
         self.beginValue = QtGui.QDoubleSpinBox()
         self.beginValue.setRange(numpy.finfo(float).min, numpy.finfo(float).max)
@@ -484,7 +509,7 @@ class animateVariable(animationProvider):
         self.buttonLayout.addWidget(self.CloseButton)
         self.buttonLayout.addStretch()
         # Export button
-        self.ExportButton = QtGui.QPushButton('Export...')
+        self.ExportButton = QtGui.QPushButton('Export')
         self.buttonLayout.addWidget(self.ExportButton)
         self.buttonLayout.addStretch()
         # Stop button

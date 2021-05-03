@@ -18,7 +18,7 @@ import cv2
 import FreeCADGui as Gui
 import libAsm4 as Asm4
 
-from AnimationProvider import animationProvider
+from AnimationLib import animationProvider
 
 
 """
@@ -303,20 +303,21 @@ class animationExporter():
             if needNewGrab:
                 self.updatePreview()
 
-        self.expDiag.gpbShadow.setChecked(useBg and self.expDiag.gpbShadow.isChecked())
-        self.expDiag.gpbShadow.setEnabled(useBg)
+        #self.expDiag.gpbShadow.setChecked(useBg and self.expDiag.gpbShadow.isChecked())
+        #self.expDiag.gpbShadow.setEnabled(useBg)
 
 
     # calculate a new shadow layer
     def shadowFromInputFields(self, img):
-        useShadow = self.expDiag.gpbShadow.isChecked()
-
-        color = self.expDiag.shadowColSel.color()
-        scale = (self.expDiag.sbShadowWidth.value() / 100.0, self.expDiag.sbShadowHeight.value() / 100.0)
-        offset = (self.expDiag.sbShadowX.value() / 100.0, self.expDiag.sbShadowY.value() / 100.0)
-        blur = self.expDiag.sbShadowBlur.value()
-
-        return self.createShadow(img, color, blur, scale, offset) if useShadow else None
+        useShadow = False # self.expDiag.gpbShadow.isChecked()
+        if useShadow:
+            color = self.expDiag.shadowColSel.color()
+            scale = (self.expDiag.sbShadowWidth.value() / 100.0, self.expDiag.sbShadowHeight.value() / 100.0)
+            offset = (self.expDiag.sbShadowX.value() / 100.0, self.expDiag.sbShadowY.value() / 100.0)
+            blur = self.expDiag.sbShadowBlur.value()
+            return self.createShadow(img, color, blur, scale, offset)
+        else:
+            return None
 
 
     # calculate a new logo overlay layer
@@ -398,13 +399,13 @@ class animationExporter():
         self.expDiag.bgImgFileSel.fileChanged.connect(self.onUpdateBackground)
         self.expDiag.bgColorSel.colorChanged.connect(self.onUpdateBackground)
 
-        self.expDiag.gpbShadow.toggled.connect(self.onUpdateShadow)
-        self.expDiag.shadowColSel.colorChanged.connect(self.onUpdateShadow)
-        self.expDiag.sbShadowX.valueChanged.connect(self.onUpdateShadow)
-        self.expDiag.sbShadowY.valueChanged.connect(self.onUpdateShadow)
-        self.expDiag.sbShadowWidth.valueChanged.connect(self.onUpdateShadow)
-        self.expDiag.sbShadowHeight.valueChanged.connect(self.onUpdateShadow)
-        self.expDiag.sbShadowBlur.valueChanged.connect(self.onUpdateShadow)
+        #self.expDiag.gpbShadow.toggled.connect(self.onUpdateShadow)
+        #self.expDiag.shadowColSel.colorChanged.connect(self.onUpdateShadow)
+        #self.expDiag.sbShadowX.valueChanged.connect(self.onUpdateShadow)
+        #self.expDiag.sbShadowY.valueChanged.connect(self.onUpdateShadow)
+        #self.expDiag.sbShadowWidth.valueChanged.connect(self.onUpdateShadow)
+        #self.expDiag.sbShadowHeight.valueChanged.connect(self.onUpdateShadow)
+        #self.expDiag.sbShadowBlur.valueChanged.connect(self.onUpdateShadow)
 
         self.expDiag.gpbLogo.toggled.connect(self.onUpdateLogo)
         self.expDiag.logoFileSel.fileChanged.connect(self.onUpdateLogo)
@@ -463,31 +464,31 @@ class exportDialog(QtGui.QDialog):
         self.gpbPreview.setLayout(self.prevVL)
 
         # # # Output Group Box # # #
+        self.outputVLayout = QtGui.QVBoxLayout()
         self.gpbOutput = QtGui.QGroupBox("Output", self)
         self.outputFileSel = fileSelectorWidget("save", self.gpbOutput)
 
         self.sbOutWidth = QtGui.QSpinBox()
-        self.sbOutWidth.setRange(1, 99999)
+        self.sbOutWidth.setRange(1, 9999)
         self.sbOutWidth.setValue(1280)
         self.sbOutWidth.setKeyboardTracking(False)
         self.sbOutHeight = QtGui.QSpinBox()
-        self.sbOutHeight.setRange(1, 99999)
+        self.sbOutHeight.setRange(1, 9999)
         self.sbOutHeight.setValue(720)
         self.sbOutHeight.setKeyboardTracking(False)
 
         self.sbOutFPS = QtGui.QSpinBox()
-        self.sbOutFPS.setRange(1, 99999)
+        self.sbOutFPS.setRange(1, 999)
         self.sbOutFPS.setValue(10)
         self.sbOutLoops = QtGui.QSpinBox()
-        self.sbOutLoops.setRange(1, 99999)
-        self.sbOutLoops.setValue(3)
+        self.sbOutLoops.setRange(1, 999)
+        self.sbOutLoops.setValue(1)
 
         self.sbSmoothFactor = QtGui.QSpinBox()
         self.sbSmoothFactor.setRange(0, 3)
-        self.sbSmoothFactor.setValue(1)
+        self.sbSmoothFactor.setValue(0)
         self.sbSmoothFactor.setKeyboardTracking(False)
 
-        self.outputVLayout = QtGui.QVBoxLayout()
         self.outputVLayout.addWidget(self.outputFileSel)
 
         self.outputHL2 = QtGui.QHBoxLayout()
@@ -525,6 +526,7 @@ class exportDialog(QtGui.QDialog):
         self.gpbBG.setLayout(self.bgVLayout)
 
         # # # Shadow Group Box # # #
+        '''
         self.gpbShadow = QtGui.QGroupBox("shadow", self)
         self.gpbShadow.setCheckable(True)
         self.gpbShadow.setChecked(False)
@@ -581,6 +583,7 @@ class exportDialog(QtGui.QDialog):
         self.shadowVLayout.addLayout(self.shadowHL4)
 
         self.gpbShadow.setLayout(self.shadowVLayout)
+        '''
 
          # # # Logo Group Box # # #
         self.gpbLogo = QtGui.QGroupBox("Logo", self)
@@ -633,7 +636,7 @@ class exportDialog(QtGui.QDialog):
         self.upperRHVLayout = QtGui.QVBoxLayout()
         self.upperRHVLayout.addWidget(self.gpbOutput)
         self.upperRHVLayout.addWidget(self.gpbBG)
-        self.upperRHVLayout.addWidget(self.gpbShadow)
+        #self.upperRHVLayout.addWidget(self.gpbShadow)
         self.upperRHVLayout.addWidget(self.gpbLogo)
         self.upperRHVLayout.addStretch()
 
