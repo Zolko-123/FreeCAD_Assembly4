@@ -463,7 +463,7 @@ def RestoreObject(doc, obj):
         return
 
     vis   = doc.get( OBJECT_VISIBLE_COL   + row )
-    obj.ViewObject.Visibility = vis
+    obj.ViewObject.Visibility = (vis=='True')
     asm   = str(doc.get( OBJECT_ASM_TYPE_COL  + row ))
     if asm == 'Asm4EE':
         x     = doc.get( OFFSET_POS_X_COL     + row )
