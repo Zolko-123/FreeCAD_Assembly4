@@ -57,7 +57,7 @@ Various fixes
 Animation Export  
 
 * 2021.03.10 (**0.9.15**) :  
-added mirroring of a part__
+added mirroring of a part  
 
 * 2021.03.07 (**0.9.14**) :  
 HoleAxis can now create datums on all selected circles from 1 single part in 1 step   
