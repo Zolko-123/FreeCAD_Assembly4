@@ -34,7 +34,7 @@ class mirrorPartCmd:
         self.drawUI()
 
     def GetResources(self):
-        return {"MenuText"   : 'Create symetric of part',
+        return {"MenuText"   : 'Create symmetric of part',
                 "ToolTip"    : 'Create a mirrored part of a part\n\nYou must re-create the attachment\ndatums in the resulting part',
                 "Pixmap"     : os.path.join( Asm4.iconPath , 'Asm4_Mirror.svg') 
                 }

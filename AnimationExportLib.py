@@ -97,7 +97,7 @@ class animationExporter():
 
         return shadow
 
-    # renders a logo-image to composit at the given position
+    # renders a logo-image to composite at the given position
     @staticmethod
     def createLogo(imgFilename, frameSize, scale=(1, 1), position=(0, 0), mode=Image.BICUBIC) -> Image.Image:
         cmpImg = Image.new("RGBA", frameSize, (0, 0, 0, 0))
@@ -192,9 +192,9 @@ class animationExporter():
             img.save(fname)
 
 
-    # alpha composit all precalculated images
+    # alpha composite all precalculated images
     def compositStack(self, outputSize, frameImg=None, shadowImg=None):
-        # composit the final image from full-size bg-colored image, shadow, original (alpha-cleaned) image, etc
+        # composite the final image from full-size bg-colored image, shadow, original (alpha-cleaned) image, etc
         frame = frameImg if frameImg else self.grabbedView
 
         cmpImg = self.bgImage if self.bgImage else Image.new("RGBA", frame.size, (0, 0, 0, 0))
@@ -225,7 +225,7 @@ class animationExporter():
         return pDlg
 
 
-    # the main working funtion
+    # the main working function
     # grabs all the frames as per the current animation configuration
     def exportAnimation(self):
         # get selected filename, pop up dialog if none selected yet
