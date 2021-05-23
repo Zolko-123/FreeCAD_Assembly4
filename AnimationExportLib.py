@@ -25,7 +25,7 @@ from AnimationLib import animationProvider
     +-----------------------------------------------+
     |               Animation Export                |
     | Provides ability to export the animation as   |
-    | single frames, mp4 or animated gif.           |
+    | single frames, mp4, avi or animated gif.      |
     +-----------------------------------------------+
 """
 
@@ -183,6 +183,29 @@ class animationExporter():
         # write file
         video.release()
 
+    # export an x264 avi from the rendered framed
+    def writeAVI(self, filename):
+        # append reversed list if pendulum is wanted
+        if self.animProvider.pendulumWanted():
+            self.imageList.extend(list(reversed(self.imageList)))
+
+        # Grab the stats from image1 to use for the resultant video
+        height, width, layers = numpy.array(self.imageList[0]).shape
+
+        # create video
+        codec = cv2.VideoWriter_fourcc(*'X264')
+        fps = self.expDiag.sbOutFPS.value()
+        video = cv2.VideoWriter(filename, codec, fps, (width, height))
+
+        loops = self.expDiag.sbOutLoops.value()
+        for i in range(0, loops):
+            for img in self.imageList:
+                img = img.convert('RGB')
+                video.write(cv2.cvtColor(numpy.array(img), cv2.COLOR_RGB2BGR))
+
+        # write file
+        video.release()
+
     # export each grabbed frame to a separate image
     def writeFrames(self, filename):
         # export frame by frame
@@ -257,6 +280,8 @@ class animationExporter():
         # export to the chosen filename, deduce format based in name
         if fname.lower().endswith(".mp4"):
             self.writeMP4(fname)
+        elif fname.lower().endswith(".avi"):
+            self.writeAVI(fname)
         elif fname.lower().endswith(".gif"):
             self.writeGif(fname)
         elif fname.lower().endswith(".png"):
@@ -722,7 +747,7 @@ class fileSelectorWidget(QtGui.QWidget):
 
         self.type = type
         self.title = "Select File"
-        self.filter = "Image Files (*.png *.jpg *.jpeg *.gif)" if self.type=="read" else "Supported Files (*.mp4 *.gif *.png)"
+        self.filter = "Image Files (*.png *.jpg *.jpeg *.gif)" if self.type=="read" else "Supported Files (*.mp4 *.avi *.gif *.png)"
 
         self.pbSelectFile.clicked.connect(self.selectFile)
 
