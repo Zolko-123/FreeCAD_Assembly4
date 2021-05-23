@@ -146,8 +146,8 @@ class animateVariable(animationProvider):
             self.knownVariableList = docVars
             animationHints.cleanUp(self.Variables)
 
-        # prevent active gui controls when no variables are available
-        self.enableDependentGuiElements(len(docVars)!=0)
+        # prevent active gui controls when no valid variable is selected
+        self.onSelectVar()
 
 
 
@@ -156,7 +156,7 @@ class animateVariable(animationProvider):
         # the currently selected variable
         selectedVar = self.varList.currentText()
         # if it's indeed a property in the Variables object (one never knows)
-        if len(selectedVar) > 0 and selectedVar in self.Variables.PropertiesList:
+        if self.isKnownVariable(selectedVar):
             # grab animationsHints related to the variable and init accordingly
             aniHints = animationHints.get(self.Variables, selectedVar)
             self.beginValue.setValue(aniHints[animationHints.Key.RangeBegin])
@@ -165,7 +165,15 @@ class animateVariable(animationProvider):
             self.sleepValue.setValue(aniHints[animationHints.Key.SleepTime])
             self.Loop.setChecked(aniHints[animationHints.Key.Loop])
             self.Pendulum.setChecked(aniHints[animationHints.Key.Pendulum])
+            self.enableDependentGuiElements(True)
+        else:
+            self.enableDependentGuiElements(False)
 
+    def isKnownVariable(self, varName):
+        """
+        Returns True if a variable with name varName exists
+        """
+        return len(varName) > 0 and self.Variables and varName in self.Variables.PropertiesList
 
 
     """
@@ -561,6 +569,7 @@ class animateVariable(animationProvider):
         self.RunButton.setEnabled(state)
         self.Loop.setEnabled(state)
         self.Pendulum.setEnabled(state)
+        self.ExportButton.setEnabled(state)
 
 
 
