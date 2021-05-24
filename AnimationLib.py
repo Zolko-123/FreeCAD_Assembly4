@@ -43,6 +43,14 @@ class animationProvider:
     def pendulumWanted(self) -> bool:
         return False
 
+    class Error(Exception):
+        """
+        Base class for exceptions thrown when issues with
+        animating the scene from an animationProvider occur.
+        """
+        def __init__(self, shortMsg: str, detailMsg: str):
+            self.shortMsg = shortMsg
+            self.detailMsg = detailMsg
 
 
 """
@@ -65,6 +73,23 @@ class animateVariable(animationProvider):
         NONE = 0
         START = 1
         STOP = 2
+
+    """
+    +-----------------------------------------------+
+    |           Exception Definitions               |
+    +-----------------------------------------------+
+    """
+    class variableInvalidError(animationProvider.Error):
+        """
+        Exception to be raised when animation fails because
+        the selected variable is not valid/does not exist.
+        """
+        def __init__(self, varName):
+            shortMsg = 'Variable name invalid'
+            detailMsg = 'The selected variable name "' + varName + '" is not valid. ' + \
+                    'Please select an existing variable.'
+            super().__init__(shortMsg, detailMsg)
+            self.varName = varName
 
     """
     +-----------------------------------------------+
@@ -146,8 +171,8 @@ class animateVariable(animationProvider):
             self.knownVariableList = docVars
             animationHints.cleanUp(self.Variables)
 
-        # prevent active gui controls when no variables are available
-        self.enableDependentGuiElements(len(docVars)!=0)
+        # prevent active gui controls when no valid variable is selected
+        self.onSelectVar()
 
 
 
@@ -156,7 +181,7 @@ class animateVariable(animationProvider):
         # the currently selected variable
         selectedVar = self.varList.currentText()
         # if it's indeed a property in the Variables object (one never knows)
-        if len(selectedVar) > 0 and selectedVar in self.Variables.PropertiesList:
+        if self.isKnownVariable(selectedVar):
             # grab animationsHints related to the variable and init accordingly
             aniHints = animationHints.get(self.Variables, selectedVar)
             self.beginValue.setValue(aniHints[animationHints.Key.RangeBegin])
@@ -165,7 +190,15 @@ class animateVariable(animationProvider):
             self.sleepValue.setValue(aniHints[animationHints.Key.SleepTime])
             self.Loop.setChecked(aniHints[animationHints.Key.Loop])
             self.Pendulum.setChecked(aniHints[animationHints.Key.Pendulum])
+            self.enableDependentGuiElements(True)
+        else:
+            self.enableDependentGuiElements(False)
 
+    def isKnownVariable(self, varName):
+        """
+        Returns True if a variable with name varName exists
+        """
+        return len(varName) > 0 and self.Variables and varName in self.Variables.PropertiesList
 
 
     """
@@ -175,6 +208,11 @@ class animateVariable(animationProvider):
     """
     def initAnimation(self):
         # Set GUI-state, initial value and start the timer
+        varName = self.varList.currentText()
+        if not self.isKnownVariable(varName):
+            self.updateVarList()
+            raise animateVariable.variableInvalidError(varName)
+
         self.RunButton.setEnabled(False)
         self.StopButton.setEnabled(True)
         self.setVarValue(self.varList.currentText(), self.beginValue.value())
@@ -186,6 +224,8 @@ class animateVariable(animationProvider):
         end   = self.endValue.value()
         step  = abs(self.stepValue.value())
         varName = self.varList.currentText()
+        if not self.isKnownVariable(varName):
+            raise animateVariable.variableInvalidError(varName)
         varValue  = self.Variables.getPropertyByName(varName)
 
         if reverse:
@@ -214,8 +254,8 @@ class animateVariable(animationProvider):
         # STOPPED STATE; NO ANIMATION RUNNING
         if self.RunState == self.AnimationState.STOPPED:
             if req == self.AnimationRequest.START:
-                self.RunState = self.AnimationState.RUNNING
                 self.initAnimation()
+                self.RunState = self.AnimationState.RUNNING
 
         # RUNNING STATE
         elif self.RunState == self.AnimationState.RUNNING:
@@ -242,11 +282,17 @@ class animateVariable(animationProvider):
 
 
     def onTimerTick(self):
-        self.update(self.AnimationRequest.NONE)
-        if self.ForceGUIUpdate:
-            Gui.updateGui()
-        if self.RunState == self.AnimationState.STOPPED:
+        try:
+            self.update(self.AnimationRequest.NONE)
+        except animationProvider.Error as e:
             self.timer.stop()
+            self.RunState == self.AnimationState.STOPPED
+            QtGui.QMessageBox.warning(self.UI, e.shortMsg, e.detailMsg)
+        else:
+            if self.ForceGUIUpdate:
+                Gui.updateGui()
+            if self.RunState == self.AnimationState.STOPPED:
+                self.timer.stop()
 
 
     def setVarValue(self,name,value):
@@ -352,8 +398,12 @@ class animateVariable(animationProvider):
     """
 
     def onRun(self):
-        self.update(self.AnimationRequest.START)
-        self.timer.start()
+        try:
+            self.update(self.AnimationRequest.START)
+        except animationProvider.Error as e:
+            QtGui.QMessageBox.warning(self.UI, e.shortMsg, e.detailMsg)
+        else:
+            self.timer.start()
 
 
     def onStop(self):
@@ -561,6 +611,7 @@ class animateVariable(animationProvider):
         self.RunButton.setEnabled(state)
         self.Loop.setEnabled(state)
         self.Pendulum.setEnabled(state)
+        self.ExportButton.setEnabled(state)
 
 
 
