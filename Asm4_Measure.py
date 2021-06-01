@@ -78,7 +78,7 @@ class setCustomIcon():
     def __init__( self, obj, iconFile ):
         icon = os.path.join( iconDir , iconFile )
         self.customIcon = icon
-        
+
     def getIcon(self):
         return self.customIcon
 
@@ -177,7 +177,7 @@ class MeasureUI():
     def Finish(self):
         FCC.PrintMessage("closing ... ")
         try:
-            Gui.Selection.removeObserver(self.so)   # desinstalle la fonction residente SelObserver
+            Gui.Selection.removeObserver(self.so)   # uninstall the resident SelObserver function
             FCC.PrintMessage("done\n")
         except:
             FCC.PrintWarning("was not able to remove observer\n")
@@ -200,7 +200,7 @@ class MeasureUI():
             except:
                 pass
         addedDims=[]
-        # remove also the "Measures" group if any
+        # also remove the "Measures" group if any
         if App.ActiveDocument.getObject('Measures') and \
                     App.ActiveDocument.getObject('Measures').TypeId=='App::DocumentObjectGroup':
             App.ActiveDocument.removeObject('Measures')
@@ -271,7 +271,7 @@ class MeasureUI():
         chkb_sizeX=20;chkb_sizeY=20;
         btn_sm_sizeX=20;btn_sm_sizeY=20;
         btn_md_sizeX=26;btn_md_sizeY=26;
-        
+
         # icons of UI
         pm = QtGui.QPixmap()
         self.noneIcon      = None
@@ -467,7 +467,7 @@ class MeasureUI():
         self.selectGrid.addWidget(self.sel2Icon,   1,2)
 
         self.mainLayout.addLayout(self.selectGrid)
-        
+
         # Results
         self.Results_Group = QtGui.QGroupBox(self.form)
         self.Results_Group.setToolTip("Results")
@@ -497,10 +497,10 @@ class MeasureUI():
         self.resultText.setMinimumSize(200, 200)
         self.resultText.setReadOnly(True)
         self.resultLayout.addWidget(self.resultText)
-        
+
         # apply the layout to the main window
         self.mainLayout.addLayout(self.resultLayout)
-        
+
         self.form.setLayout(self.mainLayout)
 
         # Actions
@@ -563,14 +563,14 @@ class selectionObserver():
         ticksize='0.1mm'
 
         # Select a subObject w/ the full hierarchy information
-        # empty string means current document, '*' means all document. 
+        # empty string means current document, '*' means all document.
         # The second argument 1 means resolve sub-object, which is the default value. 0 means full hierarchy.
         # sel = Gui.Selection.getSelectionEx('', 0)[0].SubObjects[0]
-        selEx = Gui.Selection.getSelectionEx('', 0) 
+        selEx = Gui.Selection.getSelectionEx('', 0)
         if len(Gui.Selection.getSelection()) == 1 or len(selEx) == 1:# or (len(selobject) == 1 and len(sel) == 1):
             selObj = Gui.Selection.getSelection()[0]
             #Faces or Edges
-            if len(selEx[0].SubObjects)>0: 
+            if len(selEx[0].SubObjects)>0:
                 subShape = selEx[0].SubObjects[0]
                 # we have selected an LCS
                 if selObj.TypeId == 'PartDesign::CoordinateSystem':
@@ -857,7 +857,7 @@ class selectionObserver():
             vect = (pt2.sub(pt1))
             if vect.Length != 0:
                 direction = vect / vect.Length
-        # for another line (like Datum::Line) it's the Z vector 
+        # for another line (like Datum::Line) it's the Z vector
         # multiplied by the Line's Placement
         elif self.isLine(shape):
             direction = shape.Placement.Rotation.multVec(App.Vector(0,0,1))
@@ -1034,7 +1034,7 @@ class selectionObserver():
         approxval = int(val/annoPrecision + annoPrecision*0.1)*annoPrecision
         string = '{0:.3f}'.format(approxval)
         return string
-    
+
     def midPoint(self, pt1, pt2):
         if self.isVector(pt1) and self.isVector(pt2):
             return App.Vector.add(pt1,(pt2.sub(pt1)).multiply(.5))
@@ -1059,7 +1059,7 @@ class selectionObserver():
                             and hasattr(shape,'Placement'):
             return True
         return False
-    
+
     def isSegment(self, shape):
         if shape.isValid()  and hasattr(shape,'Curve') \
                             and shape.Curve.TypeId=='Part::GeomLine' \
