@@ -111,7 +111,9 @@ class animateVariable(animationProvider):
         self.timer.timeout.connect(self.onTimerTick)
 
         self.ActiveDocument = None
+        self.AnimatedDocument = None
         self.Variables = None
+        self.knownDocumentList = []
         self.knownVariableList = []
 
         self.exporter = None
@@ -140,8 +142,9 @@ class animateVariable(animationProvider):
     def Activated(self):
         # grab the Variables container (just do it always, this prevents problems with newly opened docs)
         self.ActiveDocument = App.ActiveDocument
-        self.Variables = App.ActiveDocument.getObject('Variables') if self.ActiveDocument else None
+        self.Variables = self.AnimatedDocument.getObject('Variables') if self.AnimatedDocument else None
 
+        self.updateDocList()
         self.updateVarList()
 
         # in case the dialog is newly opened, register for changes of the selected document
@@ -149,6 +152,23 @@ class animateVariable(animationProvider):
             self.MDIArea.subWindowActivated.connect(self.onDocChanged)
         self.UI.show()
 
+    """
+    +------------------------------------------------+
+    |  fill default values when selecting a document |
+    +------------------------------------------------+
+    """
+
+    def updateDocList(self):
+        docDocs = ['Select Document']
+        # Collect all documents currently available
+        for doc in App.listDocuments():
+            docDocs.append(doc)
+
+        # only update the gui-element if documents actually changed
+        if self.knownDocumentList != docDocs:
+            self.docList.clear()
+            self.docList.addItems(docDocs)
+            self.knownDocumentList = docDocs
 
     """
     +------------------------------------------------+
@@ -174,6 +194,21 @@ class animateVariable(animationProvider):
         # prevent active gui controls when no valid variable is selected
         self.onSelectVar()
 
+    def onSelectDoc(self):
+        self.update(self.AnimationRequest.STOP)
+        # the currently selected document
+        selectedDoc = self.docList.currentText()
+        # if it's indeed a document (one never knows)
+        documents = App.listDocuments()
+        if len(selectedDoc) > 0 and selectedDoc in documents:
+            # update vars
+            self.AnimatedDocument = documents[selectedDoc]
+            self.Variables = self.AnimatedDocument.getObject('Variables')
+            self.updateVarList()
+        else:
+            self.AnimatedDocument = None
+            self.Variables = None
+            self.updateVarList()
 
 
     def onSelectVar(self):
@@ -297,7 +332,10 @@ class animateVariable(animationProvider):
 
     def setVarValue(self,name,value):
         setattr( self.Variables, name, value )
-        App.ActiveDocument.Model.recompute('True')
+        if App.ActiveDocument == self.AnimatedDocument:
+            App.ActiveDocument.Model.recompute('True')
+        else:
+            App.ActiveDocument.recompute(None, True, True)
         self.variableValue.setText('{:.2f}'.format(value))
 
 
@@ -467,6 +505,9 @@ class animateVariable(animationProvider):
 
         # Define the fields for the form ( label + widget )
         self.formLayout = QtGui.QFormLayout()
+        # select Document
+        self.docList = updatingComboBox()
+        self.formLayout.addRow(QtGui.QLabel('Document'), self.docList)
         # select Variable
         self.varList = updatingComboBox()
         self.formLayout.addRow(QtGui.QLabel('Variable'),self.varList)
@@ -585,6 +626,8 @@ class animateVariable(animationProvider):
         self.UI.setLayout(self.mainLayout)
 
         # Actions
+        self.docList.currentIndexChanged.connect(self.onSelectDoc)
+        self.docList.popupList.connect(self.updateDocList)
         self.varList.currentIndexChanged.connect( self.onSelectVar )
         self.varList.popupList.connect(self.updateVarList)
         self.slider.sliderMoved.connect(          self.sliderMoved)
