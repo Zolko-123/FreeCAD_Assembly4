@@ -465,6 +465,9 @@ class animateVariable(animationProvider):
 
     def onDocChanged(self):
         if App.ActiveDocument != self.ActiveDocument:
+            # Check if AnimatedDocument still exists
+            if not self.AnimatedDocument in App.listDocuments().values():
+                self.AnimatedDocument = None
             self.onStop()
             self.Activated()
 
