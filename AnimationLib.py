@@ -159,7 +159,7 @@ class animateVariable(animationProvider):
     """
 
     def updateDocList(self):
-        docDocs = ['Select Document']
+        docDocs = ['- Select Document -']
         # Collect all documents currently available
         for doc in App.listDocuments():
             docDocs.append(doc)
@@ -169,6 +169,14 @@ class animateVariable(animationProvider):
             self.docList.clear()
             self.docList.addItems(docDocs)
             self.knownDocumentList = docDocs
+            
+        # set current active documents per default
+        if self.AnimatedDocument is None:
+            activeDoc = App.ActiveDocument
+            if activeDoc in App.listDocuments().values():
+                docIndex = list(App.listDocuments().values()).index(activeDoc)
+                self.docList.setCurrentIndex(docIndex + 1)
+
 
     """
     +------------------------------------------------+
@@ -176,7 +184,7 @@ class animateVariable(animationProvider):
     +------------------------------------------------+
     """
     def updateVarList(self):
-        docVars = ['Select Variable (only float)']
+        docVars = ['- Select Variable (only float) -']
         # Collect all variables currently available in the doc
         if self.Variables:
             for prop in self.Variables.PropertiesList:
