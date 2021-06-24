@@ -71,8 +71,17 @@ class placeLinkCmd():
                 # only accept Asm4 Models as assemblies
                 # this is self-imposed, works also without an Asm4 Model
                 if parent.Name=='Model':
-                    # launch the UI in the task panel
-                    Gui.Control.showDialog(placeLinkUI())
+                    # check that the selected Part is from this workbench
+                    if Asm4.isAsm4EE(selection):
+                        # launch the UI in the task panel
+                        Gui.Control.showDialog(placeLinkUI())
+                    else:
+                        # Asm4.warningBox("This Part wasn't assembled with this Assembly4 WorkBench")
+                        convert = Asm4.confirmBox("This Part wasn't assembled with this Assembly4 WorkBench. Continuing will convert it and remove all previous assembly properties.")
+                        if convert:
+                            Asm4.makeAsmProperties( selection, reset=True )
+                            # launch the UI in the task panel
+                            Gui.Control.showDialog(placeLinkUI())
                 else:
                     Asm4.warningBox('Please select a link in the assembly Model')
             else:
@@ -88,44 +97,39 @@ class placeLinkCmd():
 class placeLinkUI():
 
     def __init__(self):
-        # define the GUI
-        self.base = QtGui.QWidget()
-        self.form = self.base        
-        iconFile = os.path.join( Asm4.iconPath , 'Place_Link.svg')
-        self.form.setWindowIcon(QtGui.QIcon( iconFile ))
-        self.form.setWindowTitle('Place linked Part')
-
-        # we have checked before that all this is correct 
-        self.selectedLink = Asm4.getSelectedLink()
-        self.parentAssembly = self.selectedLink.getParentGeoFeatureGroup()
-        Asm4.makeAsmProperties(self.selectedLink)
-
         # remove selectionFilter
         self.selectionFilterStatus = selectionFilter.observerStatus()
         selectionFilter.observerDisable()
 
         # get the current active document to avoid errors if user changes tab
         self.activeDoc = App.ActiveDocument
-        # the parent (top-level) assembly is the App::Part called Model (hard-coded)
-        # Was
-        # self.parentAssembly = self.activeDoc.Model
 
-        # check that we have selected two LCS or an App::Link object
-        self.selectedLCSA = None
-        self.selectedLinkB = None
-        self.selectedLCSB = None
-        #selectedLCSPair = Asm4.getLinkAndDatum2()
-        self.Xtranslation = 0.00
-        self.Ytranslation = 0.00
-        self.Ztranslation = 0.00
-        self.XrotationAngle = 0.00
-        self.YrotationAngle = 0.00
-        self.ZrotationAngle = 0.00
+        # we have checked before that all this is correct 
+        self.selectedLink = Asm4.getSelectedLink()
+        self.parentAssembly = self.selectedLink.getParentGeoFeatureGroup()
 
-        # draw the GUI, objects are defined later down
-        self.drawUI()
+        # has been checked before, this is for security only
+        if Asm4.isAsm4EE(self.selectedLink):
+            # get the old values
+            self.old_AO = self.selectedLink.AttachmentOffset
+            self.old_linkLCS = self.selectedLink.AttachedBy[1:]
+        else:
+            # this shouldn't happen
+            FCC.PrintWarning("WARNING : unsupported Assembly/Solver/Part combination, you shouldn't be seeing this\n")
+            Asm4.makeAsmProperties(self.selectedLink)
+            self.old_AO = []
+            self.old_linkLCS = ''
+
+        # define the GUI
         global taskUI
         taskUI = self
+        # draw the GUI, objects are defined later down
+        self.base = QtGui.QWidget()
+        self.form = self.base        
+        iconFile = os.path.join( Asm4.iconPath , 'Place_Link.svg')
+        self.form.setWindowIcon(QtGui.QIcon( iconFile ))
+        self.form.setWindowTitle('Place linked Part')
+        self.drawUI()
 
         #save original AttachmentOffset of linked part
         self.old_LinkAttachmentOffset = self.selectedLink.AttachmentOffset
@@ -138,6 +142,10 @@ class placeLinkUI():
         self.XrotationAngle = self.old_LinkRotation.toEuler()[0]
         self.YrotationAngle = self.old_LinkRotation.toEuler()[1]
         self.ZrotationAngle = self.old_LinkRotation.toEuler()[2]
+        # check that we have selected two LCS or an App::Link object
+        self.selectedLCSA = None
+        self.selectedLinkB = None
+        self.selectedLCSB = None
         
         # save previous view properties
         self.old_OverrideMaterial = self.selectedLink.ViewObject.OverrideMaterial
@@ -152,14 +160,35 @@ class placeLinkUI():
         self.selectedLink.ViewObject.ShapeMaterial.DiffuseColor = DiffuseColor
         self.selectedLink.ViewObject.ShapeMaterial.Transparency = Transparency
 
-        # check that the link is an Asm4 link:
-        self.isAsm4EE = False
+        '''
+        self.isAsm4EE =         
         if hasattr(self.selectedLink,'AssemblyType'):
             if self.selectedLink.AssemblyType == 'Asm4EE' or self.selectedLink.AssemblyType == '' :
                 self.isAsm4EE = True
-            else:
-                Asm4.warningBox("This Link's assembly type doesn't correspond to this WorkBench")
-                return
+        # this is going to be the new property going forward:
+        elif hasattr(self.selectedLink,'SolverId'):
+            if self.selectedLink.SolverId == 'Asm4::ExpressionEngine' or self.selectedLink.SolverId == '' :
+                self.isAsm4EE = True
+        '''
+        # check that the link is an Asm4 link:
+        # we only deal with Asm4 ExpressionEngines here
+        
+
+        # get the old values
+        self.old_EE     = ''
+        old_Parent      = ''
+        old_ParentPart  = ''
+        old_attLCS      = ''
+        constrName      = ''
+        linkedDoc       = ''
+        old_linkLCS     = ''
+        # get and store the current expression engine:
+        self.old_EE = Asm4.placementEE(self.selectedLink.ExpressionEngine)
+
+        # decode the old ExpressionEngine
+        # if the decode is unsuccessful, old_Expression is set to False and the other things are set to 'None'
+        (self.old_Parent, separator, self.old_parentLCS) = self.selectedLink.AttachedTo.partition('#')
+        ( old_Parent, old_attLCS, old_linkLCS ) = Asm4.splitExpressionLink( self.old_EE, self.old_Parent )
 
         # initialize the UI with the current data
         self.attLCStable = []
@@ -190,29 +219,6 @@ class placeLinkUI():
             newItem.setIcon( lcs.ViewObject.Icon )
             self.partLCSlist.addItem(newItem)
 
-        # get the old values
-        if self.isAsm4EE:
-            self.old_AO = self.selectedLink.AttachmentOffset
-            self.old_linkLCS = self.selectedLink.AttachedBy[1:]
-            (self.old_Parent, separator, self.old_parentLCS) = self.selectedLink.AttachedTo.partition('#')
-        else:
-            self.old_AO = []
-            self.old_Parent = ''
-
-        self.old_EE = ''
-        # get and store the current expression engine:
-        self.old_EE = Asm4.placementEE(self.selectedLink.ExpressionEngine)
-
-        # decode the old ExpressionEngine
-        old_Parent = ''
-        old_ParentPart = ''
-        old_attLCS = ''
-        constrName = ''
-        linkedDoc = ''
-        old_linkLCS = ''
-        # if the decode is unsuccessful, old_Expression is set to False and the other things are set to 'None'
-        ( old_Parent, old_attLCS, old_linkLCS ) = Asm4.splitExpressionLink( self.old_EE, self.old_Parent )
-
         # find the old LCS in the list of LCS of the linked part...
         # MatchExactly, MatchContains, MatchEndsWith ...
         lcs_found = self.partLCSlist.findItems( old_linkLCS, QtCore.Qt.MatchExactly )
@@ -221,7 +227,6 @@ class placeLinkUI():
         if lcs_found:
             # ... and select it
             self.partLCSlist.setCurrentItem( lcs_found[0] )
-
 
         # find the oldPart in the part list...
         if old_Parent == 'Parent Assembly':

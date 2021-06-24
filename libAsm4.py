@@ -423,6 +423,20 @@ def isAppLink(obj):
         if obj.TypeId == 'App::Link':
             return True
     return False
+
+
+def isAsm4EE(obj):
+    if not obj:
+        return False
+    # old pre-v0.9 property
+    if hasattr(obj,'AssemblyType'):
+        if obj.AssemblyType == 'Asm4EE' or obj.AssemblyType == '' :
+            return True
+    # this is going to be the new property going forward from v0.10:
+    elif hasattr(obj,'SolverId'):
+        if obj.SolverId == 'Asm4::ExpressionEngine' or obj.SolverId == '' :
+            return True
+
     
 
 """
