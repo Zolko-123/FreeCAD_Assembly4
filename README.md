@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.9.16, 2021-05-03
+Current version 0.9.17, 2021-06-21
 
 
 
@@ -51,6 +51,11 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 
 ## Release notes
+
+* 2021.06.24 (**0.9.17**) :  
+Minor bugfixes in _AnimationLib_ and _placeLink_  
+Introduced the next assembly property _SolverId_ (which will replace _AssemblyType_) with value _Asm4::ExpressionEngine_. _placeLink_ checks the new and old properties for forward compatibility  
+__This should be the final version of the 0.9 series__
 
 * 2021.05.03 (**0.9.16**) :  
 Various fixes  
