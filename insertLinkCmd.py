@@ -73,7 +73,7 @@ class insertLink( QtGui.QDialog ):
         elif Asm4.getSelectedLink():
             selObj = Asm4.getSelectedLink()
             parent = selObj.getParentGeoFeatureGroup()
-            # if the selectd link is in a root App::Part
+            # if the selected link is in a root App::Part
             if parent.TypeId == 'App::Part' and parent.getParentGeoFeatureGroup() is None:
                 self.asmPart = parent
                 self.origLink = selObj

@@ -43,6 +43,14 @@ class animationProvider:
     def pendulumWanted(self) -> bool:
         return False
 
+    class Error(Exception):
+        """
+        Base class for exceptions thrown when issues with
+        animating the scene from an animationProvider occur.
+        """
+        def __init__(self, shortMsg: str, detailMsg: str):
+            self.shortMsg = shortMsg
+            self.detailMsg = detailMsg
 
 
 """
@@ -68,6 +76,23 @@ class animateVariable(animationProvider):
 
     """
     +-----------------------------------------------+
+    |           Exception Definitions               |
+    +-----------------------------------------------+
+    """
+    class variableInvalidError(animationProvider.Error):
+        """
+        Exception to be raised when animation fails because
+        the selected variable is not valid/does not exist.
+        """
+        def __init__(self, varName):
+            shortMsg = 'Variable name invalid'
+            detailMsg = 'The selected variable name "' + varName + '" is not valid. ' + \
+                    'Please select an existing variable.'
+            super().__init__(shortMsg, detailMsg)
+            self.varName = varName
+
+    """
+    +-----------------------------------------------+
     |         Initialization and Registration       |
     +-----------------------------------------------+
     """
@@ -86,7 +111,9 @@ class animateVariable(animationProvider):
         self.timer.timeout.connect(self.onTimerTick)
 
         self.ActiveDocument = None
+        self.AnimatedDocument = None
         self.Variables = None
+        self.knownDocumentList = []
         self.knownVariableList = []
 
         self.exporter = None
@@ -115,14 +142,40 @@ class animateVariable(animationProvider):
     def Activated(self):
         # grab the Variables container (just do it always, this prevents problems with newly opened docs)
         self.ActiveDocument = App.ActiveDocument
-        self.Variables = App.ActiveDocument.getObject('Variables') if self.ActiveDocument else None
+        self.Variables = self.AnimatedDocument.getObject('Variables') if self.AnimatedDocument else None
 
+        self.updateDocList()
         self.updateVarList()
 
         # in case the dialog is newly opened, register for changes of the selected document
         if not self.UI.isVisible():
             self.MDIArea.subWindowActivated.connect(self.onDocChanged)
         self.UI.show()
+
+    """
+    +------------------------------------------------+
+    |  fill default values when selecting a document |
+    +------------------------------------------------+
+    """
+
+    def updateDocList(self):
+        docDocs = ['- Select Document -']
+        # Collect all documents currently available
+        for doc in App.listDocuments():
+            docDocs.append(doc)
+
+        # only update the gui-element if documents actually changed
+        if self.knownDocumentList != docDocs:
+            self.docList.clear()
+            self.docList.addItems(docDocs)
+            self.knownDocumentList = docDocs
+            
+        # set current active documents per default
+        if self.AnimatedDocument is None:
+            activeDoc = App.ActiveDocument
+            if activeDoc in App.listDocuments().values():
+                docIndex = list(App.listDocuments().values()).index(activeDoc)
+                self.docList.setCurrentIndex(docIndex + 1)
 
 
     """
@@ -131,7 +184,7 @@ class animateVariable(animationProvider):
     +------------------------------------------------+
     """
     def updateVarList(self):
-        docVars = ['Select Variable (only float)']
+        docVars = ['- Select Variable (only float) -']
         # Collect all variables currently available in the doc
         if self.Variables:
             for prop in self.Variables.PropertiesList:
@@ -146,9 +199,24 @@ class animateVariable(animationProvider):
             self.knownVariableList = docVars
             animationHints.cleanUp(self.Variables)
 
-        # prevent active gui controls when no variables are available
-        self.enableDependentGuiElements(len(docVars)!=0)
+        # prevent active gui controls when no valid variable is selected
+        self.onSelectVar()
 
+    def onSelectDoc(self):
+        self.update(self.AnimationRequest.STOP)
+        # the currently selected document
+        selectedDoc = self.docList.currentText()
+        # if it's indeed a document (one never knows)
+        documents = App.listDocuments()
+        if len(selectedDoc) > 0 and selectedDoc in documents:
+            # update vars
+            self.AnimatedDocument = documents[selectedDoc]
+            self.Variables = self.AnimatedDocument.getObject('Variables')
+            self.updateVarList()
+        else:
+            self.AnimatedDocument = None
+            self.Variables = None
+            self.updateVarList()
 
 
     def onSelectVar(self):
@@ -156,7 +224,7 @@ class animateVariable(animationProvider):
         # the currently selected variable
         selectedVar = self.varList.currentText()
         # if it's indeed a property in the Variables object (one never knows)
-        if len(selectedVar) > 0 and selectedVar in self.Variables.PropertiesList:
+        if self.isKnownVariable(selectedVar):
             # grab animationsHints related to the variable and init accordingly
             aniHints = animationHints.get(self.Variables, selectedVar)
             self.beginValue.setValue(aniHints[animationHints.Key.RangeBegin])
@@ -165,7 +233,15 @@ class animateVariable(animationProvider):
             self.sleepValue.setValue(aniHints[animationHints.Key.SleepTime])
             self.Loop.setChecked(aniHints[animationHints.Key.Loop])
             self.Pendulum.setChecked(aniHints[animationHints.Key.Pendulum])
+            self.enableDependentGuiElements(True)
+        else:
+            self.enableDependentGuiElements(False)
 
+    def isKnownVariable(self, varName):
+        """
+        Returns True if a variable with name varName exists
+        """
+        return len(varName) > 0 and self.Variables and varName in self.Variables.PropertiesList
 
 
     """
@@ -175,6 +251,11 @@ class animateVariable(animationProvider):
     """
     def initAnimation(self):
         # Set GUI-state, initial value and start the timer
+        varName = self.varList.currentText()
+        if not self.isKnownVariable(varName):
+            self.updateVarList()
+            raise animateVariable.variableInvalidError(varName)
+
         self.RunButton.setEnabled(False)
         self.StopButton.setEnabled(True)
         self.setVarValue(self.varList.currentText(), self.beginValue.value())
@@ -186,6 +267,8 @@ class animateVariable(animationProvider):
         end   = self.endValue.value()
         step  = abs(self.stepValue.value())
         varName = self.varList.currentText()
+        if not self.isKnownVariable(varName):
+            raise animateVariable.variableInvalidError(varName)
         varValue  = self.Variables.getPropertyByName(varName)
 
         if reverse:
@@ -214,8 +297,8 @@ class animateVariable(animationProvider):
         # STOPPED STATE; NO ANIMATION RUNNING
         if self.RunState == self.AnimationState.STOPPED:
             if req == self.AnimationRequest.START:
-                self.RunState = self.AnimationState.RUNNING
                 self.initAnimation()
+                self.RunState = self.AnimationState.RUNNING
 
         # RUNNING STATE
         elif self.RunState == self.AnimationState.RUNNING:
@@ -242,16 +325,25 @@ class animateVariable(animationProvider):
 
 
     def onTimerTick(self):
-        self.update(self.AnimationRequest.NONE)
-        if self.ForceGUIUpdate:
-            Gui.updateGui()
-        if self.RunState == self.AnimationState.STOPPED:
+        try:
+            self.update(self.AnimationRequest.NONE)
+        except animationProvider.Error as e:
             self.timer.stop()
+            self.RunState == self.AnimationState.STOPPED
+            QtGui.QMessageBox.warning(self.UI, e.shortMsg, e.detailMsg)
+        else:
+            if self.ForceGUIUpdate:
+                Gui.updateGui()
+            if self.RunState == self.AnimationState.STOPPED:
+                self.timer.stop()
 
 
     def setVarValue(self,name,value):
         setattr( self.Variables, name, value )
-        App.ActiveDocument.Model.recompute('True')
+        if App.ActiveDocument == self.AnimatedDocument:
+            App.ActiveDocument.Model.recompute('True')
+        else:
+            App.ActiveDocument.recompute(None, True, True)
         self.variableValue.setText('{:.2f}'.format(value))
 
 
@@ -352,8 +444,12 @@ class animateVariable(animationProvider):
     """
 
     def onRun(self):
-        self.update(self.AnimationRequest.START)
-        self.timer.start()
+        try:
+            self.update(self.AnimationRequest.START)
+        except animationProvider.Error as e:
+            QtGui.QMessageBox.warning(self.UI, e.shortMsg, e.detailMsg)
+        else:
+            self.timer.start()
 
 
     def onStop(self):
@@ -377,6 +473,9 @@ class animateVariable(animationProvider):
 
     def onDocChanged(self):
         if App.ActiveDocument != self.ActiveDocument:
+            # Check if AnimatedDocument still exists
+            if not self.AnimatedDocument in App.listDocuments().values():
+                self.AnimatedDocument = None
             self.onStop()
             self.Activated()
 
@@ -417,6 +516,9 @@ class animateVariable(animationProvider):
 
         # Define the fields for the form ( label + widget )
         self.formLayout = QtGui.QFormLayout()
+        # select Document
+        self.docList = updatingComboBox()
+        self.formLayout.addRow(QtGui.QLabel('Document'), self.docList)
         # select Variable
         self.varList = updatingComboBox()
         self.formLayout.addRow(QtGui.QLabel('Variable'),self.varList)
@@ -535,6 +637,8 @@ class animateVariable(animationProvider):
         self.UI.setLayout(self.mainLayout)
 
         # Actions
+        self.docList.currentIndexChanged.connect(self.onSelectDoc)
+        self.docList.popupList.connect(self.updateDocList)
         self.varList.currentIndexChanged.connect( self.onSelectVar )
         self.varList.popupList.connect(self.updateVarList)
         self.slider.sliderMoved.connect(          self.sliderMoved)
@@ -561,6 +665,7 @@ class animateVariable(animationProvider):
         self.RunButton.setEnabled(state)
         self.Loop.setEnabled(state)
         self.Pendulum.setEnabled(state)
+        self.ExportButton.setEnabled(state)
 
 
 

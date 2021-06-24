@@ -16,6 +16,7 @@ import pathlib
 import cv2
 
 import FreeCADGui as Gui
+import FreeCAD as App
 import libAsm4 as Asm4
 
 from AnimationLib import animationProvider
@@ -97,7 +98,7 @@ class animationExporter():
 
         return shadow
 
-    # renders a logo-image to composit at the given position
+    # renders a logo-image to composite at the given position
     @staticmethod
     def createLogo(imgFilename, frameSize, scale=(1, 1), position=(0, 0), mode=Image.BICUBIC) -> Image.Image:
         cmpImg = Image.new("RGBA", frameSize, (0, 0, 0, 0))
@@ -161,7 +162,7 @@ class animationExporter():
 
 
     # export an mp4 from the rendered framed
-    def writeMP4(self, filename):
+    def writeVideo(self, filename):
         # append reversed list if pendulum is wanted
         if self.animProvider.pendulumWanted():
             self.imageList.extend(list(reversed(self.imageList)))
@@ -170,18 +171,27 @@ class animationExporter():
         height, width, layers = numpy.array(self.imageList[0]).shape
 
         # create video
-        codec = -1  # auto/select
         fps = self.expDiag.sbOutFPS.value()
-        video = cv2.VideoWriter(filename, codec, fps, (width, height))
-
         loops = self.expDiag.sbOutLoops.value()
-        for i in range(0, loops):
-            for img in self.imageList:
-                img = img.convert('RGB')
-                video.write(cv2.cvtColor(numpy.array(img), cv2.COLOR_RGB2BGR))
+        fourccs = ['mp4v', 'avc1', 'X264', 'XVID']
+        # codec = -1  # auto/select
+        exported = False
+        for fcc in fourccs:
+            codec = cv2.VideoWriter_fourcc(*fcc)
+            video = cv2.VideoWriter(filename, codec, fps, (width, height))
 
-        # write file
-        video.release()
+            for i in range(0, loops):
+                for img in self.imageList:
+                    img = img.convert('RGB')
+                    video.write(cv2.cvtColor(numpy.array(img), cv2.COLOR_RGB2BGR))
+
+            # write file
+            video.release()
+            if os.path.getsize(filename) > 0:
+                exported = True
+                break
+        if not exported:
+            App.Console.PrintError("Export failed for \"" + filename + "\". Using another container type can help.\n")
 
     # export each grabbed frame to a separate image
     def writeFrames(self, filename):
@@ -192,9 +202,9 @@ class animationExporter():
             img.save(fname)
 
 
-    # alpha composit all precalculated images
+    # alpha composite all precalculated images
     def compositStack(self, outputSize, frameImg=None, shadowImg=None):
-        # composit the final image from full-size bg-colored image, shadow, original (alpha-cleaned) image, etc
+        # composite the final image from full-size bg-colored image, shadow, original (alpha-cleaned) image, etc
         frame = frameImg if frameImg else self.grabbedView
 
         cmpImg = self.bgImage if self.bgImage else Image.new("RGBA", frame.size, (0, 0, 0, 0))
@@ -225,7 +235,7 @@ class animationExporter():
         return pDlg
 
 
-    # the main working funtion
+    # the main working function
     # grabs all the frames as per the current animation configuration
     def exportAnimation(self):
         # get selected filename, pop up dialog if none selected yet
@@ -255,8 +265,8 @@ class animationExporter():
                 return
 
         # export to the chosen filename, deduce format based in name
-        if fname.lower().endswith(".mp4"):
-            self.writeMP4(fname)
+        if fname.lower().endswith((".mp4", ".avi", ".mov", ".mkv")):
+            self.writeVideo(fname)
         elif fname.lower().endswith(".gif"):
             self.writeGif(fname)
         elif fname.lower().endswith(".png"):
@@ -722,7 +732,7 @@ class fileSelectorWidget(QtGui.QWidget):
 
         self.type = type
         self.title = "Select File"
-        self.filter = "Image Files (*.png *.jpg *.jpeg *.gif)" if self.type=="read" else "Supported Files (*.mp4 *.gif *.png)"
+        self.filter = "Image Files (*.png *.jpg *.jpeg *.gif)" if self.type=="read" else "Supported Files (*.mp4 *.avi *.mov *.mkv *.gif *.png)"
 
         self.pbSelectFile.clicked.connect(self.selectFile)
 

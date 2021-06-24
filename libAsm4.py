@@ -423,6 +423,20 @@ def isAppLink(obj):
         if obj.TypeId == 'App::Link':
             return True
     return False
+
+
+def isAsm4EE(obj):
+    if not obj:
+        return False
+    # old pre-v0.9 property
+    if hasattr(obj,'AssemblyType'):
+        if obj.AssemblyType == 'Asm4EE' or obj.AssemblyType == '' :
+            return True
+    # this is going to be the new property going forward from v0.10:
+    elif hasattr(obj,'SolverId'):
+        if obj.SolverId == 'Asm4::ExpressionEngine' or obj.SolverId == '' :
+            return True
+
     
 
 """
@@ -573,8 +587,8 @@ def splitExpressionLink( expr, parent ):
         if parent == 'Parent Assembly':
             # we're attached to an LCS in the parent assembly
             # expr = LCS_in_the_assembly.Placement * AttachmentOffset * LCS_linkedPart.Placement ^ -1
-            ( attLCS, separator, rest1 ) = expr.partition('.Placement * AttachmentOffset * ')
-            ( linkLCS, separator, rest2 ) = rest1.partition('.Placement ^ ')
+            ( attLCS,     separator, rest1 ) = expr.partition('.Placement * AttachmentOffset * ')
+            ( linkLCS,    separator, rest2 ) = rest1.partition('.Placement ^ ')
             restFinal = rest2[0:2]
             attLink = parent
             attPart = 'None'
@@ -590,19 +604,28 @@ def splitExpressionLink( expr, parent ):
         if parent == 'Parent Assembly':
             # we're attached to an LCS in the parent assembly
             # expr = LCS_assembly.Placement * AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
-            ( attLCS, separator, rest1 ) = expr.partition('.Placement * AttachmentOffset * ')
-            ( linkedDoc, separator, rest2 ) = rest1.partition('#')
-            ( linkLCS, separator, rest3 ) = rest2.partition('.Placement ^ ')
+            ( attLCS,     separator, rest1 ) = expr.partition('.Placement * AttachmentOffset * ')
+            ( linkedDoc,  separator, rest2 ) = rest1.partition('#')
+            ( linkLCS,    separator, rest3 ) = rest2.partition('.Placement ^ ')
             restFinal = rest3[0:2]
             attLink = parent
             attPart = 'None'
+        # a part from the document is attached to an external part
+        else:
+            # expr = Rail_40x40_Y.Placement * Rails_V_Slot#LCS_AR.Placement * AttachmentOffset * LCS_Plaque_Laterale_sym.Placement ^ -1
+            # expr = parentLink.Placement * externalDoc#LCS_parentPart * AttachmentOffset * LCS_linkedPart.Placement ^ -1
+            ( attLink,    separator, rest1 ) = expr.partition('.Placement * ')
+            ( linkedDoc,  separator, rest2 ) = rest1.partition('#')
+            ( attLCS,     separator, rest3 ) = rest2.partition('.Placement * AttachmentOffset * ')
+            ( linkLCS,    separator, rest4 ) = rest3.partition('.Placement ^ ')
+            restFinal = rest4[0:2]
     elif nbHash==2:
         # linked part and sister part in external documents to the parent assembly:
         # expr = ParentLink.Placement * ParentPart#LCS.Placement * AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
         ( attLink,    separator, rest1 ) = expr.partition('.Placement * ')
         ( attPart,    separator, rest2 ) = rest1.partition('#')
         ( attLCS,     separator, rest3 ) = rest2.partition('.Placement * AttachmentOffset * ')
-        ( linkedDoc, separator, rest4 ) = rest3.partition('#')
+        ( linkedDoc,  separator, rest4 ) = rest3.partition('#')
         ( linkLCS,    separator, rest5 ) = rest4.partition('.Placement ^ ')
         restFinal = rest5[0:2]
     else:
