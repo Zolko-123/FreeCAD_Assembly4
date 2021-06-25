@@ -167,6 +167,8 @@ class insertLink( QtGui.QDialog ):
             if createdLink.Name != linkName:
                 # we try to set the label to the chosen name
                 createdLink.Label = linkName
+            # add the Asm4 properties
+            Asm4.makeAsmProperties(createdLink)
             # update the link
             createdLink.recompute()
             
