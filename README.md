@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.9.17, 2021-06-21
+Current version 0.10.00, 2021-07-04
 
 
 
@@ -51,6 +51,11 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 
 ## Release notes
+
+* 2021.07.04 (**0.10.00**) :  
+Translation i18  
+Circular array  
+Changed _AssemblyType_ to _SolverId_  
 
 * 2021.06.24 (**0.9.17**) :  
 Minor bugfixes in _AnimationLib_ and _placeLink_  
