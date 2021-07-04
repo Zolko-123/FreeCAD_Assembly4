@@ -55,7 +55,8 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 * 2021.07.04 (**0.10.00**) :  
 Translation i18  
 Circular array  
-Changed _AssemblyType_ to _SolverId_  
+Changed libAsm4 as to Asm4_libs (the Variables objects will lose their tree-view icon)  
+Added Asm4_objects  
 
 * 2021.06.24 (**0.9.17**) :  
 Minor bugfixes in _AnimationLib_ and _placeLink_  

@@ -17,7 +17,7 @@ import cv2
 
 import FreeCADGui as Gui
 import FreeCAD as App
-import libAsm4 as Asm4
+import Asm4_libs as Asm4
 
 from AnimationLib import animationProvider
 

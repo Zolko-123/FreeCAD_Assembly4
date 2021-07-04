@@ -15,7 +15,7 @@ from FreeCAD import Console as FCC
 from FastenerBase import FSBaseObject
 import FastenersCmd as FS
 
-import libAsm4 as Asm4
+import Asm4_libs as Asm4
 
 
 

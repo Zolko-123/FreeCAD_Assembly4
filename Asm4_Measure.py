@@ -40,7 +40,7 @@ from FreeCAD import Console as FCC
 import Part
 
 # only needed for icons
-import libAsm4 as Asm4
+import Asm4_libs as Asm4
 import selectionFilter
 
 

@@ -23,12 +23,12 @@
 
 
 import os
-from Asm4_translate import _atr, QT_TRANSLATE_NOOP
+from Asm4_Translate import _atr, QT_TRANSLATE_NOOP
 
-import Asm4wb_locator
-global Asm4wb_icon
-Asm4wb_path = os.path.dirname( Asm4wb_locator.__file__ )
-Asm4wb_icon = os.path.join( Asm4wb_path , 'Resources/icons/Assembly4.svg' )
+import Asm4_locator
+global Asm4_icon
+Asm4_path = os.path.dirname( Asm4_locator.__file__ )
+Asm4_icon = os.path.join( Asm4_path , 'Resources/icons/Assembly4.svg' )
 
 # I don't like this being here
 import selectionFilter
@@ -41,12 +41,12 @@ import selectionFilter
 """
 class Assembly4Workbench(Workbench):
 
-    global Asm4wb_icon
+    global Asm4_icon
     global selectionFilter
     global _atr, QT_TRANSLATE_NOOP
     MenuText = "Assembly 4"
     ToolTip = "Assembly 4 workbench"
-    Icon = Asm4wb_icon
+    Icon = Asm4_icon
 
     def __init__(self):
         "This function is executed when FreeCAD starts"
@@ -113,8 +113,8 @@ class Assembly4Workbench(Workbench):
         self.dot()
         import updateAssemblyCmd   # updates all parts and constraints in the assembly
         self.dot()
-        #import newLinkArray       # creates a new array of App::Link
-        #import makeLinkArray      # creates a new array of App::Link
+        import makeArrayCmd        # creates a new array of App::Link
+        self.dot()
         import gotoDocumentCmd     # opens the documentof the selected App::Link
         self.dot()
         import Asm4_Measure        # Measure tool in the Task panel
@@ -193,12 +193,11 @@ class Assembly4Workbench(Workbench):
                         "Separator",
                         "Asm4_placeLink", 
                         "Asm4_mirrorPart", 
-                        #"Asm4_newCircularArray", 
+                        "Asm4_circularArray", 
                         "Asm4_placeFastener", 
                         "Asm4_cloneFastenersToAxes", 
                         "Asm4_placeDatum", 
                         "Asm4_releaseAttachment", 
-                        #"Asm4_makeLinkArray",
                         "Separator",
                         "Asm4_infoPart", 
                         "Asm4_makeBOM", 
@@ -228,10 +227,8 @@ class Assembly4Workbench(Workbench):
                         #'Asm4_cloneFastenersToAxes',
                         "Asm4_placeDatum", 
                         "Asm4_mirrorPart", 
-                        #"Asm4_newCircularArray", 
+                        "Asm4_circularArray", 
                         "Separator",
-                        #"Asm4_makeLinkArray",
-                        #"Draft_PolarArray",
                         "Asm4_makeBOM", 
                         "Asm4_Measure", 
                         "Asm4_variablesCmd",

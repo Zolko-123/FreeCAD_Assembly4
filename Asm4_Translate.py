@@ -3,13 +3,13 @@
 #
 # LGPL
 #
-# Asm4_translate.py
+# Asm4_Translate.py
 
 import os
 import FreeCADGui as Gui
 import FreeCAD as App
 
-Gui.addLanguagePath(os.path.join(os.path.dirname(__file__), "translations"))
+Gui.addLanguagePath(os.path.join(os.path.dirname(__file__), "Resources/translations"))
 
 
 def _atr(context: str, text: str) -> str:

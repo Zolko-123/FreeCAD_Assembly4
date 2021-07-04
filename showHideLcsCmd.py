@@ -8,11 +8,10 @@ import math, re, os
 import FreeCADGui as Gui
 import FreeCAD as App
 
-import libAsm4 as Asm4
-from Asm4_translate import QT_TRANSLATE_NOOP
+import Asm4_libs as Asm4
+from Asm4_Translate import QT_TRANSLATE_NOOP as Qtranslate
 
-# Already processed links cache, no need to process the same part if its linked multiple times
-#processedLinks = []
+
 
 
 """
@@ -26,8 +25,8 @@ class showLcsCmd:
         super(showLcsCmd,self).__init__()
 
     def GetResources(self):
-        return {"MenuText": QT_TRANSLATE_NOOP("Asm4_showLcs", "Show LCS"),
-                "ToolTip": QT_TRANSLATE_NOOP("Asm4_showLcs", "Show LCS and Datums of selected part and its children"),
+        return {"MenuText": Qtranslate("Asm4_showLcs", "Show LCS"),
+                "ToolTip": Qtranslate("Asm4_showLcs", "Show LCS and Datums of selected part and its children"),
                 "Pixmap": os.path.join(Asm4.iconPath, 'Asm4_showLCS.svg')
                 }
 
@@ -64,8 +63,8 @@ class hideLcsCmd:
         super(hideLcsCmd,self).__init__()
 
     def GetResources(self):
-        return {"MenuText": QT_TRANSLATE_NOOP("Asm4_hideLcs", "Hide LCS"),
-                "ToolTip": QT_TRANSLATE_NOOP("Asm4_hideLcs", "Hide LCS and Datums of selected part and its children"),
+        return {"MenuText": Qtranslate("Asm4_hideLcs", "Hide LCS"),
+                "ToolTip": Qtranslate("Asm4_hideLcs", "Hide LCS and Datums of selected part and its children"),
                 "Pixmap": os.path.join(Asm4.iconPath, 'Asm4_hideLCS.svg')
                 }
 
