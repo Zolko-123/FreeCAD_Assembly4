@@ -23,7 +23,7 @@
 
 
 import os
-
+from Asm4_translate import _atr, QT_TRANSLATE_NOOP
 
 import Asm4wb_locator
 global Asm4wb_icon
@@ -43,6 +43,7 @@ class Assembly4Workbench(Workbench):
 
     global Asm4wb_icon
     global selectionFilter
+    global _atr, QT_TRANSLATE_NOOP
     MenuText = "Assembly 4"
     ToolTip = "Assembly 4 workbench"
     Icon = Asm4wb_icon
@@ -53,8 +54,8 @@ class Assembly4Workbench(Workbench):
 
     def Activated(self):
         "This function is executed when the workbench is activated"
-        FreeCAD.Console.PrintMessage("Activating Assembly4 WorkBench\n")
-        
+        FreeCAD.Console.PrintMessage(_atr("Asm4", "Activating Assembly4 WorkBench") + "\n")
+
         # make buttons of the selection toolbar checkable
         from PySide import QtGui
         mainwin = Gui.getMainWindow()
@@ -64,17 +65,17 @@ class Assembly4Workbench(Workbench):
                 sf_tb = tb
         # make all buttons except last one (clear selection filter) checkable
         if sf_tb is not None:
-            for button in sf_tb.actions()[0:-1]:      
+            for button in sf_tb.actions()[0:-1]:
                 button.setCheckable(True)
         return
 
     def Deactivated(self):
         "This function is executed when the workbench is deactivated"
         selectionFilter.observerDisable()
-        FreeCAD.Console.PrintMessage("Leaving Assembly4 WorkBench\n")
-        return 
+        FreeCAD.Console.PrintMessage(_atr("Asm4", "Leaving Assembly4 WorkBench") + "\n")
+        return
 
-    def GetClassName(self): 
+    def GetClassName(self):
         # this function is mandatory if this is a full python workbench
         return "Gui::PythonWorkbench"
 
@@ -84,7 +85,7 @@ class Assembly4Workbench(Workbench):
     +-----------------------------------------------+
         """
     def Initialize(self):
-        FreeCAD.Console.PrintMessage("Assembly4 WorkBench initializing .")
+        FreeCAD.Console.PrintMessage(_atr("Asm4", "Assembly4 WorkBench initializing ."))
         FreeCADGui.updateGui()
         import newModelCmd         # creates a new App::Part container called 'Model'
         self.dot()
@@ -141,27 +142,27 @@ class Assembly4Workbench(Workbench):
 
         # Define Menus
         # commands to appear in the Assembly4 menu 'Assembly'
-        self.appendMenu( "&Assembly", self.assemblyMenuItems() )
+        self.appendMenu(QT_TRANSLATE_NOOP("Workbench", "&Assembly"), self.assemblyMenuItems())
         self.dot()
 
         # self.appendMenu("&Geometry",["Asm4_newPart"])
 
         # additional entry in the Help menu
-        self.appendMenu("&Help", ["Asm4_Help"])
+        self.appendMenu(QT_TRANSLATE_NOOP("Workbench", "&Help"), ["Asm4_Help"])
         self.dot()
 
         # Define Toolbars
         # commands to appear in the Assembly4 toolbar
-        self.appendToolbar( "Assembly", self.assemblyToolbarItems() )
+        self.appendToolbar(_atr("Asm4", "Assembly"), self.assemblyToolbarItems())
         self.dot()
 
         # build the selection toolbar
-        self.appendToolbar( "Selection Filter", self.selectionToolbarItems() )
+        self.appendToolbar(_atr("Asm4", "Selection Filter"), self.selectionToolbarItems())
         self.dot()
 
         # self.appendToolbar("Geometry",["Asm4_newPart"])
 
-        FreeCAD.Console.PrintMessage(" done.\n")
+        FreeCAD.Console.PrintMessage(" " + _atr("Asm4", "done") + ".\n")
         """
     +-----------------------------------------------+
     |           Initialisation finished             |
@@ -288,11 +289,11 @@ class Assembly4Workbench(Workbench):
                         "Asm4_insertNut", 
                         "Asm4_insertWasher"]
 
-        self.appendContextMenu( "", "Separator")
-        self.appendContextMenu( "", contextMenu ) # add commands to the context menu
-        self.appendContextMenu( "Assembly", assemblySubMenu ) # add commands to the context menu
-        self.appendContextMenu( "Create", createSubMenu ) # add commands to the context menu
-        self.appendContextMenu( "", "Separator")
+        self.appendContextMenu("", "Separator")
+        self.appendContextMenu("", contextMenu)  # add commands to the context menu
+        self.appendContextMenu(_atr("Asm4", "Assembly"), assemblySubMenu)  # add commands to the context menu
+        self.appendContextMenu(_atr("Asm4", "Create"), createSubMenu)  # add commands to the context menu
+        self.appendContextMenu("", "Separator")
 
 
 

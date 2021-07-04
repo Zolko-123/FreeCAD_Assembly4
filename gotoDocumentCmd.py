@@ -10,6 +10,8 @@ import FreeCADGui as Gui
 import FreeCAD as App
 import Part
 
+from Asm4_translate import QT_TRANSLATE_NOOP
+
 import libAsm4 as Asm4
 
 
@@ -27,9 +29,9 @@ class gotoDocumentCmd:
 
 
     def GetResources(self):
-        return {"MenuText": "Open Document",
-                "ToolTip": "Activates the document of the selected linked part",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_openDocument.svg')
+        return {"MenuText": QT_TRANSLATE_NOOP("Asm4_gotoDocument", "Open Document"),
+                "ToolTip": QT_TRANSLATE_NOOP("Asm4_gotoDocument", "Activates the document of the selected linked part"),
+                "Pixmap": os.path.join(Asm4.iconPath, 'Asm4_openDocument.svg')
                 }
 
 
