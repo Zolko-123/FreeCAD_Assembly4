@@ -171,11 +171,11 @@ class animateVariable(animationProvider):
             self.knownDocumentList = docDocs
             
         # set current active documents per default
-        if self.AnimatedDocument is None:
-            activeDoc = App.ActiveDocument
-            if activeDoc in App.listDocuments().values():
-                docIndex = list(App.listDocuments().values()).index(activeDoc)
-                self.docList.setCurrentIndex(docIndex + 1)
+        #if self.AnimatedDocument is None:
+        activeDoc = App.ActiveDocument
+        if activeDoc in App.listDocuments().values():
+            docIndex = list(App.listDocuments().values()).index(activeDoc)
+            self.docList.setCurrentIndex(docIndex + 1)
 
 
     """
@@ -477,7 +477,7 @@ class animateVariable(animationProvider):
             if not self.AnimatedDocument in App.listDocuments().values():
                 self.AnimatedDocument = None
             self.onStop()
-            self.Activated()
+            #self.Activated()
 
 
     #
