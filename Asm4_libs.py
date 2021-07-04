@@ -132,11 +132,15 @@ def makeAsmProperties( obj, reset=False ):
     # property AttachmentOffset
     if not hasattr(obj,'AttachmentOffset'):
         obj.addProperty( 'App::PropertyPlacement', 'AttachmentOffset', 'Assembly' )
+    # property SolverId
+    if not hasattr(obj,'SolverId'):
+        obj.addProperty( 'App::PropertyString', 'SolverId', 'Assembly' )
     if reset:
         obj.AssemblyType = ''
         obj.AttachedBy = ''
         obj.AttachedTo = ''
         obj.AttachmentOffset = App.Placement()
+        obj.SolverId = ''
     return
 
 

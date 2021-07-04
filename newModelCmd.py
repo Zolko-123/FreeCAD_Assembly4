@@ -77,9 +77,8 @@ class newModel:
             model.newObject('App::DocumentObjectGroup','Constraints')
             # create an object Variables to hold variables to be used in this document
             model.addObject(Asm4.createVariables())
-            # create a Configuration property
-            model.addProperty('App::PropertyEnumeration', 'Configuration', 'Parameters')
-            model.Configuration = ['Default']
+            # create a group Configurations to store future solver constraints there
+            model.newObject('App::DocumentObjectGroup','Configurations')
             
             # move existing parts and bodies at the document root to the Parts group
             # not nested inside other parts, to keep hierarchy

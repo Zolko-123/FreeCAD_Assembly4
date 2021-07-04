@@ -40,6 +40,11 @@ class newPart:
             self.menutext    = "New Body"
             self.tooltip     = "Create a new Body"
             self.icon        = os.path.join( Asm4.iconPath , 'Asm4_Body.svg')
+        elif self.partName  == 'Group':
+            self.partType    = 'App::DocumentObjectGroup'
+            self.menutext    = "New Group"
+            self.tooltip     = "Create a new Group"
+            self.icon        = os.path.join( Asm4.iconPath , 'Asm4_Group.svg')
 
 
     def GetResources(self):
@@ -72,18 +77,20 @@ class newPart:
         if ok and text:
             # create Part
             part = App.ActiveDocument.addObject(self.partType,text)
-            # add an LCS at the root of the Part, and attach it to the 'Origin'
-            lcs0 = part.newObject('PartDesign::CoordinateSystem','LCS_0')
-            lcs0.Support = [(part.Origin.OriginFeatures[0],'')]
-            lcs0.MapMode = 'ObjectXY'
-            lcs0.MapReversed = False
-            # If an App::Part container is selected, move the created part/body there
+            # add LCS if appropriate
+            if self.partType in Asm4.containerTypes:
+                # add an LCS at the root of the Part, and attach it to the 'Origin'
+                lcs0 = part.newObject('PartDesign::CoordinateSystem','LCS_0')
+                lcs0.Support = [(part.Origin.OriginFeatures[0],'')]
+                lcs0.MapMode = 'ObjectXY'
+                lcs0.MapReversed = False
+            # If an App::Part container is selected, move the created part/body/group there
             container = self.checkPart()
             partsGroup = App.ActiveDocument.getObject('Parts')
             if container and part.Name!='Model':
                 container.addObject(part)
             # If the 'Part' group exists, move it there:
-            elif partsGroup and partsGroup.TypeId=='App::DocumentObjectGroup' :
+            elif partsGroup and partsGroup.TypeId=='App::DocumentObjectGroup' and part.TypeId in Asm4.containerTypes:
                 partsGroup.addObject(part)
             # recompute
             part.recompute()
@@ -92,5 +99,6 @@ class newPart:
 
 
 # add the command to the workbench
-Gui.addCommand( 'Asm4_newPart', newPart('Part') )
-Gui.addCommand( 'Asm4_newBody', newPart('Body') )
+Gui.addCommand( 'Asm4_newPart',  newPart('Part') )
+Gui.addCommand( 'Asm4_newBody',  newPart('Body') )
+Gui.addCommand( 'Asm4_newGroup', newPart('Group'))
