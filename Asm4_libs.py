@@ -229,14 +229,17 @@ def getLinkAndDatum():
             if isLinkToPart(obj):
                 # add it to our tree table if it's a link to an App::Part ...
                 childrenTable.append( obj )
-
+        # the selected datum
         selObj = Gui.Selection.getSelection()[0]
-        # a datum is selected
+        # if indeed a datum is selected
         if selObj.TypeId in datumTypes:
+            # return at least the selected datum object
+            retval = (None,selObj)
             # this returns the selection hierarchy in the form 'linkName.datumName.'
             selTree = Gui.Selection.getSelectionEx("", 0)[0].SubElementNames[0]
             (parents, toto, dot) = selTree.partition('.'+selObj.Name)
             link = App.ActiveDocument.getObject( parents )
+            # if indeed the datum is the child of a link
             if dot =='.' and link in childrenTable:
                 retval = (link,selObj)
             else:
@@ -248,48 +251,6 @@ def getLinkAndDatum():
                     retval = (link2,selObj)
     return retval
 
-
-# get from two selected datums the corresponding links
-def getLinkAndDatum2():
-    retval = (None, None, None, None)
-    # only for Asm4 
-    if checkModel() and len(Gui.Selection.getSelection()) == 2:
-        parentAssembly = App.ActiveDocument.Model
-        # find all the links to Part or Body objects
-        childrenTable = []
-        for objStr in parentAssembly.getSubObjects():
-            # the string ends with a . that must be removed
-            obj = App.ActiveDocument.getObject( objStr[0:-1] )
-            if isLinkToPart(obj):
-                # add it to our tree table if it's a link to an App::Part ...
-                childrenTable.append( obj )
-
-        selObjA = Gui.Selection.getSelection()[0]
-        selObjB = Gui.Selection.getSelection()[1]
-        # two datum objects are selected
-        if ((selObjA.TypeId in datumTypes) and (selObjB.TypeId in datumTypes)):
-            # this returns the selection hierarchy in the form 'linkName.datumName.'
-            selTreeA = Gui.Selection.getSelectionEx("", 0)[0].SubElementNames[0]
-            selTreeB = Gui.Selection.getSelectionEx("", 0)[0].SubElementNames[1]
-            (parentsA, totoA, dotA) = selTreeA.partition('.'+selObjA.Name)
-            (parentsB, totoB, dotB) = selTreeB.partition('.'+selObjB.Name)
-            linkA = App.ActiveDocument.getObject( parentsA )
-            linkB = App.ActiveDocument.getObject( parentsB )
-            if (dotA =='.' and linkA in childrenTable) and (dotB =='.' and linkB in childrenTable):
-                retval = (linkA, selObjA, linkB, selObjB)
-
-            else:
-                # see whether the datum objects are in a group, some people like to do that
-                (parentsA2, dotA, groupNameA) = parentsA.partition('.')
-                (parentsB2, dotB, groupNameB) = parentsB.partition('.')
-                linkA2 = App.ActiveDocument.getObject( parentsA2 )
-                linkB2 = App.ActiveDocument.getObject( parentsB2 )
-                groupA = App.ActiveDocument.getObject( groupNameA )
-                groupB = App.ActiveDocument.getObject( groupNameB )
-                if ((linkA2 in childrenTable and groupA.TypeId=='App::DocumentObjectGroup') and (linkB2 in childrenTable and groupB.TypeId=='App::DocumentObjectGroup')):
-                    retval = (linkA2,selObjA,linkB2,selObjB)
-
-    return retval
 
 # get all datums in a part
 def getPartLCS( part ):

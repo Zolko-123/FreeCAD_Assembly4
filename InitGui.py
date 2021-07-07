@@ -181,24 +181,24 @@ class Assembly4Workbench(Workbench):
                         "Asm4_newPart", 
                         "Asm4_newBody", 
                         "Asm4_newGroup", 
-                        "Asm4_insertLink", 
-                        self.FastenersCmd, 
-                        "Separator",
                         "Asm4_newSketch", 
-                        "Asm4_newLCS", 
-                        "Asm4_newPlane", 
-                        "Asm4_newAxis", 
-                        "Asm4_newPoint", 
-                        "Asm4_newHole", 
-                        "Asm4_importDatum", 
+                        'Asm4_createDatum',
+                        self.FastenersCmd, 
+                        #"Asm4_newLCS", 
+                        #"Asm4_newPlane", 
+                        #"Asm4_newAxis", 
+                        #"Asm4_newPoint", 
+                        #"Asm4_newHole", 
                         "Separator",
+                        "Asm4_insertLink", 
                         "Asm4_placeLink", 
+                        "Asm4_releaseAttachment", 
                         "Asm4_mirrorPart", 
                         "Asm4_circularArray", 
                         "Asm4_placeFastener", 
                         "Asm4_cloneFastenersToAxes", 
+                        "Asm4_importDatum", 
                         "Asm4_placeDatum", 
-                        "Asm4_releaseAttachment", 
                         "Separator",
                         "Asm4_infoPart", 
                         "Asm4_makeBOM", 
@@ -207,6 +207,10 @@ class Assembly4Workbench(Workbench):
                         'Asm4_hideLcs',
                         "Asm4_addVariable", 
                         "Asm4_delVariable", 
+                        #"Asm4_applyConfiguration", 
+                        "Asm4_openConfigurations", 
+                        #'Asm4_saveConfiguration',
+                        #'Asm4_newConfiguration',
                         "Asm4_Animate", 
                         "Asm4_updateAssembly"]
         return commandList
@@ -234,6 +238,7 @@ class Assembly4Workbench(Workbench):
                         "Asm4_makeBOM", 
                         "Asm4_Measure", 
                         "Asm4_variablesCmd",
+                        "Asm4_openConfigurations", 
                         "Asm4_Animate",
                         "Asm4_updateAssembly"]
         return commandList
@@ -274,8 +279,7 @@ class Assembly4Workbench(Workbench):
                         'Asm4_placeFastener' ,
                         'Asm4_cloneFastenersToAxes' ,
                         'Separator'          ,
-                        'Asm4_saveConfiguration',
-                        'Asm4_restoreConfiguration']
+                        'Asm4_applyConfiguration']
         # commands to appear in the 'Create' sub-menu in the contextual menu (right-click)
         createSubMenu =["Asm4_newSketch",  
                         "Asm4_newBody", 
@@ -286,7 +290,9 @@ class Assembly4Workbench(Workbench):
                         "Asm4_newHole", 
                         "Asm4_insertScrew", 
                         "Asm4_insertNut", 
-                        "Asm4_insertWasher"]
+                        "Asm4_insertWasher",
+                        'Separator',
+                        'Asm4_newConfiguration']
 
         self.appendContextMenu("", "Separator")
         self.appendContextMenu("", contextMenu)  # add commands to the context menu
