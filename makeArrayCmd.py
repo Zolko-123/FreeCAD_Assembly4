@@ -128,7 +128,7 @@ array = makeArrayCmd.makeCircularArray(obj,20)
 """
 
 def makeMyLink(obj):
-    # addObject() API is extended to accpet extra parameters in order to 
+    # addObject() API is extended to accept extra parameters in order to 
     # let the python object override the type of C++ view provider
     link = obj.Document.addObject("App::FeaturePython",'LinkArray',LinkArray(),None,True)
     #ViewProviderLink(link.ViewObject)

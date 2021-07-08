@@ -14,7 +14,7 @@
 #*                                                                          *
 #* Measure tool                                                             *
 #*                                                                          *
-#*    This is a stand-alone tool that doesn't need anything outside Part    *                                                                     *
+#*    This is a stand-alone tool that doesn't need anything outside Part    *
 #*                                                                          *
 #*    This program is free software; you can redistribute it and/or modify  *
 #*    it under the terms of the GNU Library General Public License (LGPL)   *
@@ -536,7 +536,7 @@ class selectionObserver():
         )[0]
 
     # add the dim to the global addedDims table to be able to remove it
-    # add it also the the "Measures" group
+    # add it also the "Measures" group
     def addToDims( self, dim ):
         global addedDims
         # check whether there is a "Measures" group
@@ -616,7 +616,7 @@ class selectionObserver():
                             # if we have snapped a point before, we show its coordinates
                             if self.Sel1 == 'point':
                                 self.measureCoords(self.Pt1)
-                            # if we have selected a shape before, we show its charcteristics
+                            # if we have selected a shape before, we show its characteristics
                             elif self.Sel1 == 'shape':
                                 # a surface
                                 if 'Face' in str(self.Shp1):
