@@ -63,7 +63,7 @@ def getSelectionPath(docName, objName, subObjName):
                 for son in subObjName.split('.'):
                     if son and (son != ''):
                         val.append(son)
-        
+
         return val
 
 
@@ -159,7 +159,7 @@ def createVariables():
     return retval
 
 
-# custum icon
+# custom icon
 # views/view_custom.py
 # https://wiki.freecadweb.org/Viewprovider
 # https://wiki.freecadweb.org/Custom_icon_in_tree_view
@@ -251,7 +251,7 @@ def getSelectionTree():
 # get from the selected object the corresponding parent instance (link)
 def getLinkAndObj():
     retval = (None,None)
-    # only for Asm4 
+    # only for Asm4
     if checkModel() and len(Gui.Selection.getSelection())==1:
         parentAssembly = App.ActiveDocument.Model
         # find all the links to Part or Body objects
@@ -303,20 +303,20 @@ def getPartLCS( part ):
     return partLCS
 
 
-# get the document groupe called Part 
-# (if it exists, else returne None
+# get the document group called Part 
+# (if it exists, else return None
 def getPartsGroup():
     retval = None
     partsGroup = App.ActiveDocument.getObject('Parts')
     if partsGroup and partsGroup.TypeId=='App::DocumentObjectGroup':
         retval = partsGroup
     return retval
-    
+
 
 
 """
     +-----------------------------------------------+
-    |           get the next instance's name         |
+    |           get the next instance's name        |
     +-----------------------------------------------+
 """
 def nextInstance( name, startAtOne=False ):
@@ -436,7 +436,7 @@ def isAsm4EE(obj):
         if obj.SolverId == 'Asm4::ExpressionEngine' or obj.SolverId == '' :
             return True
 
-    
+
 
 """
     +-----------------------------------------------+
@@ -497,8 +497,8 @@ class dropDownCmd:
 
     def GetResources(self):
         return { 'MenuText': self.menu, 'ToolTip': self.tooltip }
-    
-    
+
+
 
 """
     +-----------------------------------------------+
@@ -639,7 +639,7 @@ def splitExpressionLink( expr, parent ):
         restFinal = rest5[0:2]
     else:
         # complicated stuff, we'll do it later
-        pass        
+        pass
     # final check, all options should give the correct data
     if restFinal=='-1' and attLink==parent :
         # wow, everything went according to plan
