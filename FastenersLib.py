@@ -52,40 +52,17 @@ def isFastener(obj):
 iconFile = os.path.join( Asm4.iconPath , 'Asm4_mvFastener.svg')
 
 
-def getSelectedAxes():
-    holeAxes = []
-    fstnr = None
-    selection = Gui.Selection.getSelectionEx('', 0)
+
+
+
+"""
+    +-----------------------------------------------+
+    |         clone per App::Link fasteners         |
+    +-----------------------------------------------+
     
-    if selection:
-        for s in selection:
-            for seNames in s.SubElementNames:
-                seObj = s.Object
-                for se in seNames.split('.'):
-                    if se and (len(se) > 0):
-                        seObj = seObj.getObject(se)
-                        if Asm4.isAppLink(seObj):
-                            seObj = seObj.getLinkedObject()
-                        if Asm4.isHoleAxis(seObj):
-                            holeAxes.append(Asm4.getSelectionPath(s.Document.Name, s.ObjectName, seNames))
-                            break
-                        elif isFastener(seObj):
-                            if fstnr is None:
-                                fstnr = seObj
-                                break
-                            else:
-                                return(None)
-                            
-                    else:
-                        break
-
-    if fstnr and (len(holeAxes) > 0):
-        return (fstnr, holeAxes)
-    else:
-        return(None)
-
-
-
+    Select a fastener and several datum axes and the fastener will
+    be cloned (as App::Link) and attached to those axes
+"""
 class cloneFastenersToAxesCmd():
     
     def __init__(self):
@@ -98,7 +75,7 @@ class cloneFastenersToAxesCmd():
                 }
     
     def IsActive(self):
-        self.selection = getSelectedAxes()
+        self.selection = self.getSelectedAxes()
         if Asm4.checkModel() and self.selection:
             return True
         return False
@@ -123,6 +100,40 @@ class cloneFastenersToAxesCmd():
                                     
             Gui.Selection.clearSelection()
             Gui.Selection.addSelection( fstnr.Document.Name, 'Model', fstnr.Name +'.')
+
+
+    def getSelectedAxes(self):
+        holeAxes = []
+        fstnr = None
+        selection = Gui.Selection.getSelectionEx('', 0)
+        
+        if selection:
+            for s in selection:
+                for seNames in s.SubElementNames:
+                    seObj = s.Object
+                    for se in seNames.split('.'):
+                        if se and (len(se) > 0):
+                            seObj = seObj.getObject(se)
+                            if Asm4.isAppLink(seObj):
+                                seObj = seObj.getLinkedObject()
+                            if Asm4.isHoleAxis(seObj):
+                                holeAxes.append(Asm4.getSelectionPath(s.Document.Name, s.ObjectName, seNames))
+                                break
+                            elif isFastener(seObj):
+                                if fstnr is None:
+                                    fstnr = seObj
+                                    break
+                                else:
+                                    # only 1 fastener can be selected
+                                    return(None)
+                        else:
+                            break
+        # if a fastener and at least 1 HoleAxis have been selected
+        if fstnr and (len(holeAxes) > 0):
+            return (fstnr, holeAxes)
+        else:
+            return(None)
+
 
 """
     +-----------------------------------------------+
@@ -784,9 +795,8 @@ class changeFSparametersCmd():
             Gui.activateWorkbench('Assembly4Workbench')
         # check that we have selected a Fastener from the Fastener WB
         selection = getSelectionFS()
-        if selection is None:
-            return
-        Gui.runCommand('FSChangeParams')
+        if selection:
+            Gui.runCommand('FSChangeParams')
 
 
 

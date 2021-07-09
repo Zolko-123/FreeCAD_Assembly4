@@ -214,9 +214,42 @@ def isLinkToPart(obj):
     else:
         return False
 
+# returns the selected object and its selection hierarchy
+def getSelectionTree():
+    retval = (None,None)
+    # we obviously need something selected
+    if len(Gui.Selection.getSelection())>0:
+        selObj = Gui.Selection.getSelection()[0]
+        retval = ( selObj, None )
+        # objects at the document root dont have a selection tree
+        if len(Gui.Selection.getSelectionEx("", 0)[0].SubElementNames)>0:
+            # we only treat thefirst selected object 
+            # this is a dot-separated list of the selection hierarchy
+            selList = Gui.Selection.getSelectionEx("", 0)[0].SubElementNames[0]
+            # this is the final tree table
+            selTree = ['root part']
+            # parse the list to find all objects
+            rest = selList
+            while rest:
+                (parent, dot, rest) = rest.partition('.')
+                # FCC.PrintMessage('found '+parent+'\n')
+                selTree.append(parent)
+            # if we did find things
+            if len(selTree)>1:
+                # if the last one is not the selected object, it might be a sub-element of it
+                if selTree[-1]!=selObj.Name:
+                    selTree = selTree[0:-1]
+                # the last one should the selected object
+                if selTree[-1]==selObj.Name:
+                    topObj = App.ActiveDocument.getObject(selTree[1])
+                    rootObj = topObj.getParentGeoFeatureGroup()
+                    selTree[0] = rootObj.Name
+                    # all went well, we return the selected object and it's tree
+                    retval = ( selObj, selTree )
+    return retval
 
-# get from the selected datum the corresponding link
-def getLinkAndDatum():
+# get from the selected object the corresponding parent instance (link)
+def getLinkAndObj():
     retval = (None,None)
     # only for Asm4 
     if checkModel() and len(Gui.Selection.getSelection())==1:
@@ -232,8 +265,9 @@ def getLinkAndDatum():
         # the selected datum
         selObj = Gui.Selection.getSelection()[0]
         # if indeed a datum is selected
-        if selObj.TypeId in datumTypes:
-            # return at least the selected datum object
+        # if selObj.TypeId in datumTypes:
+        if selObj.isDerivedFrom('Part::Feature'):
+            # return at least the selected object
             retval = (None,selObj)
             # this returns the selection hierarchy in the form 'linkName.datumName.'
             selTree = Gui.Selection.getSelectionEx("", 0)[0].SubElementNames[0]
@@ -492,6 +526,16 @@ def nameLabel( obj ):
     else:
         return None
 
+# Label (Name)
+def labelName( obj ):
+    if obj:
+        if obj.Name == obj.Label:
+            txt = obj.Label
+        else:
+            txt = obj.Label +' ('+obj.Name+')'
+        return txt
+    else:
+        return None
 
 
 
