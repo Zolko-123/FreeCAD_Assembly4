@@ -166,14 +166,14 @@ class placeFastenerCmd():
             Asm4.makeAsmProperties(selection)
         # we only deal with Asm4 or empty types
         asmType = selection.AssemblyType
-        if asmType=='Asm4EE' or asmType=='':
+        if asmType=='Part::Link' or asmType=='':
             # now we should be safe, call the UI
             Gui.Control.showDialog( placeFastenerUI() )
         else:
-            convert = Asm4.confirmBox("This doesn't seem to be an Assembly4 Fastener")
+            convert = Asm4.confirmBox("This doesn't seem to be an Assembly4 Fastener, but I can convert it.")
             if convert:
                 Asm4.makeAsmProperties( selection, reset=True )
-                selection.AssemblyType = 'Asm4EE'
+                selection.AssemblyType = 'Part::Link'
                 Gui.Control.showDialog( placeFastenerUI() )
             return
 
@@ -215,7 +215,7 @@ class placeFastenerUI():
                     self.parentTable.append( obj )
                     # ... and add to the drop-down combo box with the assembly tree's parts
                     objIcon = obj.LinkedObject.ViewObject.Icon
-                    objText = Asm4.nameLabel(obj)
+                    objText = Asm4.labelName(obj)
                     self.parentList.addItem( objIcon, objText, obj)
 
         # check where the fastener was attached to
@@ -249,20 +249,15 @@ class placeFastenerUI():
         self.parentList.setCurrentIndex( parent_index )
         # this should have triggered self.getPartLCS() to fill the LCS list
 
-
         # find the oldLCS in the list of LCS of the linked part...
         lcs_found = []
         lcs_found = self.attLCSlist.findItems( old_parentLCS, QtCore.Qt.MatchExactly )
+        # may-be it was renamed, see if we can find it as (name)
         if not lcs_found:
-            lcs_found = self.attLCSlist.findItems( old_parentLCS+' (', QtCore.Qt.MatchStartsWith )
+            lcs_found = self.attLCSlist.findItems( '('+old_parentLCS+')', QtCore.Qt.MatchContains )
         if lcs_found:
             # ... and select it
             self.attLCSlist.setCurrentItem( lcs_found[0] )
-        else:
-            # may-be it was renamed, see if we can find it as (name)
-            lcs_found = self.attLCSlist.findItems( '('+old_parentLCS+')', QtCore.Qt.MatchContains )
-            if lcs_found:
-                self.attLCSlist.setCurrentItem( lcs_found[0] )
 
         Gui.Selection.addObserver(self, 0)
 
@@ -286,7 +281,7 @@ class placeFastenerUI():
     def clicked(self, bt):
         if bt == QtGui.QDialogButtonBox.Ignore:
             # ask for confirmation before resetting everything
-            msgName = Asm4.nameLabel(self.selectedFastener)
+            msgName = Asm4.labelName(self.selectedFastener)
             # see whether the ExpressionEngine field is filled
             if self.old_EE :
                 # if yes, then ask for confirmation
@@ -435,7 +430,7 @@ class placeFastenerUI():
             parentPart = self.activeDoc.getObject( 'Model' )
             # we get the LCS directly in the root App::Part 'Model'
             self.attLCStable = Asm4.getPartLCS( parentPart )
-            self.parentDoc.setText( parentPart.Document.Name+'#'+Asm4.nameLabel(parentPart) )
+            self.parentDoc.setText( parentPart.Document.Name+'#'+Asm4.labelName(parentPart) )
         # if something is selected
         elif self.parentList.currentIndex() > 1:
             parentName = self.parentTable[ self.parentList.currentIndex() ].Name
@@ -446,7 +441,7 @@ class placeFastenerUI():
                 # linked part & doc
                 dText = parentPart.LinkedObject.Document.Name +'#'
                 # if the linked part has been renamed by the user
-                pText = Asm4.nameLabel( parentPart.LinkedObject )
+                pText = Asm4.labelName( parentPart.LinkedObject )
                 self.parentDoc.setText( dText + pText )
                 # highlight the selected part:
                 Gui.Selection.addSelection( \
@@ -462,7 +457,7 @@ class placeFastenerUI():
         self.attLCSlist.clear()
         for lcs in self.attLCStable:
             newItem = QtGui.QListWidgetItem()
-            newItem.setText(Asm4.nameLabel(lcs))
+            newItem.setText(Asm4.labelName(lcs))
             newItem.setIcon( lcs.ViewObject.Icon )
             self.attLCSlist.addItem( newItem )
             #self.attLCStable.append(lcs)
@@ -504,7 +499,7 @@ class placeFastenerUI():
                 self.parentList.setCurrentIndex(idx)
                 #selObj = Gui.Selection.getSelection()[0]
                 #if selObj:
-                found = self.attLCSlist.findItems(Asm4.nameLabel(selObj), QtCore.Qt.MatchExactly)
+                found = self.attLCSlist.findItems(Asm4.labelName(selObj), QtCore.Qt.MatchExactly)
                 if len(found) > 0:
                     self.attLCSlist.clearSelection()
                     found[0].setSelected(True)

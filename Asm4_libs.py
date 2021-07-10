@@ -69,7 +69,7 @@ def getSelectionPath(docName, objName, subObjName):
 
 """
     +-----------------------------------------------+
-    |           Object helper functions           |
+    |           Object helper functions             |
     +-----------------------------------------------+
 """
 
@@ -83,11 +83,11 @@ def cloneObject(obj):
         result.Label = obj.Label
         container.addObject(result)
         result.recompute()
-        container = result.getParentGeoFeatureGroup()
-        if container:
-            container.recompute()
-        if result.Document:
-            result.Document.recompute()
+        #container = result.getParentGeoFeatureGroup()
+        #if container:
+        container.recompute()
+        #if result.Document:
+        result.Document.recompute()
     return result
  
  
@@ -96,13 +96,15 @@ def placeObjectToLCS( attObj, attLink, attDoc, attLCS ):
     # indicate the this fastener has been placed with the Assembly4 workbench
     if not hasattr(attObj,'AssemblyType'):
         Asm4.makeAsmProperties(attObj)
-    attObj.AssemblyType = 'Asm4EE'
+    attObj.AssemblyType = 'Part::Link'
     # the fastener is attached by its Origin, no extra LCS
     attObj.AttachedBy = 'Origin'
     # store the part where we're attached to in the constraints object
     attObj.AttachedTo = attLink+'#'+attLCS
     # load the built expression into the Expression field of the constraint
     attObj.setExpression( 'Placement', expr )
+    # Which solver is used
+    attObj.SolverId = 'Placement::ExpressionEngine'
     # recompute the object to apply the placement:
     attObj.recompute()
     container = attObj.getParentGeoFeatureGroup()
@@ -137,9 +139,9 @@ def makeAsmProperties( obj, reset=False ):
         obj.addProperty( 'App::PropertyString', 'SolverId', 'Assembly' )
     if reset:
         obj.AssemblyType = ''
-        obj.AttachedBy = ''
-        obj.AttachedTo = ''
-        obj.AttachmentOffset = App.Placement()
+        #obj.AttachedBy = ''
+        #obj.AttachedTo = ''
+        #obj.AttachmentOffset = App.Placement()
         obj.SolverId = ''
     return
 
@@ -197,22 +199,22 @@ def checkWorkbench( workbench ):
             hasWB = True
     return hasWB
 
-# checks whether there is an Asm4 Model in the active document
+# checks whether there is an Asm4 Model at the root of the active document
 def checkModel():
-    retval = None
-    if App.ActiveDocument and App.ActiveDocument.getObject('Model'):
+    if App.ActiveDocument:
         model = App.ActiveDocument.getObject('Model')
-        if model.TypeId=='App::Part':
-            retval = model
-    return retval
+        if model and model.TypeId=='App::Part' and model.getParentGeoFeatureGroup is None:
+            return model
+    return None
 
 # checks whether an App::Link is to an App::Part
 def isLinkToPart(obj):
+    if not obj:
+        return False
     if obj.TypeId == 'App::Link' and hasattr(obj.LinkedObject,'isDerivedFrom'):
         if  obj.LinkedObject.isDerivedFrom('App::Part') or obj.LinkedObject.isDerivedFrom('PartDesign::Body'):
             return True
-    else:
-        return False
+    return False
 
 # returns the selected object and its selection hierarchy
 def getSelectionTree():
@@ -248,7 +250,9 @@ def getSelectionTree():
                     retval = ( selObj, selTree )
     return retval
 
+'''
 # get from the selected object the corresponding parent instance (link)
+# deprecated for getSelectionTree()
 def getLinkAndObj():
     retval = (None,None)
     # only for Asm4
@@ -284,7 +288,7 @@ def getLinkAndObj():
                 if link2 and group and link2 in childrenTable and group.TypeId=='App::DocumentObjectGroup':
                     retval = (link2,selObj)
     return retval
-
+'''
 
 # get all datums in a part
 def getPartLCS( part ):
@@ -424,18 +428,23 @@ def isAppLink(obj):
     return False
 
 
-def isAsm4EE(obj):
+def isPartLinkAssembly(obj):
     if not obj:
         return False
-    # old pre-v0.9 property
-    if hasattr(obj,'AssemblyType'):
-        if obj.AssemblyType == 'Asm4EE' or obj.AssemblyType == '' :
+    if hasattr(obj,'AssemblyType') and hasattr(obj,'SolverId'):
+        if obj.AssemblyType == 'Part::Link' or obj.AssemblyType == '' :
             return True
-    # this is going to be the new property going forward from v0.10:
-    elif hasattr(obj,'SolverId'):
-        if obj.SolverId == 'Asm4::ExpressionEngine' or obj.SolverId == '' :
-            return True
+    return False
 
+
+def isAsm4EE(obj):
+    # we check that it's a Part::Link type of assembly:
+    if not isPartLinkAssembly(obj):
+        return False
+    # we only need to check for the SolverId
+    if obj.SolverId == 'Placement::ExpressionEngine' or obj.SolverId == '' :
+        return True
+    return False
 
 
 """
@@ -526,6 +535,8 @@ def nameLabel( obj ):
         return None
 """
 
+
+# Label (Name)
 def labelName( obj ):
     if obj:
         if obj.Name == obj.Label:
