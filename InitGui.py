@@ -101,8 +101,8 @@ class Assembly4Workbench(Workbench):
         self.dot()
         import placeLinkCmd        # places a linked part by snapping LCS (in the Part and in the Assembly)
         self.dot()
-        import placeDatumCmd       # places an LCS relative to an external file (creates a local attached copy)
-        self.dot()
+        #import placeDatumCmd       # places an LCS relative to an external file (creates a local attached copy)
+        #self.dot()
         import importDatumCmd      # creates an LCS in assembly and attaches it to an LCS relative to an external file
         self.dot()
         import releaseAttachmentCmd# creates an LCS in assembly and attaches it to an LCS relative to an external file
@@ -198,7 +198,7 @@ class Assembly4Workbench(Workbench):
                         "Asm4_placeFastener", 
                         "Asm4_cloneFastenersToAxes", 
                         "Asm4_importDatum", 
-                        "Asm4_placeDatum", 
+                        #"Asm4_placeDatum", 
                         "Separator",
                         "Asm4_infoPart", 
                         "Asm4_makeBOM", 
@@ -231,7 +231,7 @@ class Assembly4Workbench(Workbench):
                         "Asm4_placeLink", 
                         'Asm4_placeFastener',
                         #'Asm4_cloneFastenersToAxes',
-                        "Asm4_placeDatum", 
+                        #"Asm4_placeDatum", 
                         "Asm4_mirrorPart", 
                         "Asm4_circularArray", 
                         "Separator",
@@ -274,7 +274,6 @@ class Assembly4Workbench(Workbench):
         assemblySubMenu =[ "Asm4_insertLink"    , 
                         "Asm4_placeLink"     , 
                         "Asm4_importDatum"   ,
-                        "Asm4_placeDatum"    ,
                         'Asm4_FSparameters'  ,
                         'Asm4_placeFastener' ,
                         'Asm4_cloneFastenersToAxes' ,

@@ -514,9 +514,8 @@ rotZ = App.Placement( App.Vector(0,0,0), App.Rotation( App.Vector(0,0,1), 90. ) 
 
 """
     +-----------------------------------------------+
-    |         returns the object Name (Label)       |
+    |         returns the object Label (Name)       |
     +-----------------------------------------------+
-"""
 def nameLabel( obj ):
     if obj:
         txt = obj.Name
@@ -525,8 +524,8 @@ def nameLabel( obj ):
         return txt
     else:
         return None
+"""
 
-# Label (Name)
 def labelName( obj ):
     if obj:
         if obj.Name == obj.Label:

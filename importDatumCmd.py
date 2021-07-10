@@ -31,7 +31,8 @@ class importDatumCmd():
     def GetResources(self):
         tooltip  = "Imports the selected Datum object from a sub-part into the root assembly.\n"
         tooltip += "This creates a new datum of the same type, and with the same global placement\n\n"
-        tooltip += "This command can also be used to override the placement of an existing datum"
+        tooltip += "This command can also be used to override the placement of an existing datum :\n"
+        tooltip += "select a second datum in the same root container as the first selected datum"
         iconFile = os.path.join( Asm4.iconPath , 'Import_Datum.svg')
         return {"MenuText": "Import Datum object",
                 "ToolTip" : tooltip,
