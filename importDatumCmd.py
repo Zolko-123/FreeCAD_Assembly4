@@ -73,8 +73,8 @@ class importDatumCmd():
         rootContainer = App.ActiveDocument.getObject(selTree[0])
         
         # build the Placement expression
-        # the first object gets a special treatment
-        # it is always in the current document
+        # the first [0] object is at the document root and its Placement is ignored
+        # the second [1] object gets a special treatment, it is always in the current document
         expression = selTree[1]+'.Placement'
         obj1 = App.ActiveDocument.getObject(selTree[1])
         # the document where an object is
@@ -84,9 +84,9 @@ class importDatumCmd():
             doc = App.ActiveDocument
         # parse the tree
         for objName in selTree[2:]:
-            FCC.PrintMessage('treating '+objName+'\n')
+            #FCC.PrintMessage('treating '+objName+'\n')
             obj = doc.getObject(objName)
-            # the *previous* object was a link to 
+            # the *previous* object was a link to doc
             if doc == App.ActiveDocument:
                 expression += ' * '+objName+'.Placement'
             else:
@@ -100,7 +100,7 @@ class importDatumCmd():
         #FCC.PrintMessage('expression = '+expression+'\n')
         
         confirm = False
-        selection = Gui.Selection.getSelection()
+        selection = self.getSelectedDatums()
         # if a single datum object is selected
         if len(selection)==1:
             # create a new datum object
@@ -112,11 +112,22 @@ class importDatumCmd():
             text,ok = QtGui.QInputDialog.getText(None,'Import Datum',
                     message, text = proposedName)
             if ok and text:
-                createdDatum = rootContainer.newObject( selDatum.TypeId, text )
-                createdDatum.Label = text
-                targetDatum = createdDatum
+                targetDatum = rootContainer.newObject( selDatum.TypeId, text )
+                targetDatum.Label = text
+                # apply existing view properties if applicable
+                if hasattr(selDatum,'ResizeMode') and selDatum.ResizeMode == 'Manual':
+                    targetDatum.ResizeMode = 'Manual'
+                    if hasattr(selDatum,'Length'):
+                        targetDatum.Length = selDatum.Length
+                    if hasattr(selDatum,'Width'):
+                        targetDatum.Width = selDatum.Width
+                targetDatum.ViewObject.ShapeColor   = selDatum.ViewObject.ShapeColor
+                targetDatum.ViewObject.Transparency = selDatum.ViewObject.Transparency
+                # signal for later down that everything went fine
                 confirm = True
         # two datum objects are selected
+        # the second is superimposed on the first
+        # Can be of different types, doesn't matter
         elif len(selection)==2:
             targetDatum = selection[1]
             # we can only import a datum to another datum at the root of the same container
@@ -130,7 +141,7 @@ class importDatumCmd():
                 for objName in selTree[1:-1]:
                     message += '> '+objName+'\n'
                 message += '> '+Asm4.labelName(selDatum)
-                Asm4.warningBox(message)
+                Asm4.messageBox(message)
                 confirm = True
             # target datum is attached
             else:
@@ -140,15 +151,16 @@ class importDatumCmd():
                     message += '> '+objName+'\n'
                 message += '> '+Asm4.labelName(selDatum)
                 confirm = Asm4.confirmBox(message)
-
+        # if everything went according to plan
         if confirm:
             # unset Attachment
-            targetDatum.Support = None
             targetDatum.MapMode = 'Deactivated'
+            targetDatum.Support = None
             # set the Placement's ExpressionEngine
             targetDatum.setExpression( 'Placement', expression )
             # hide initial datum
-            selDatum.Visibility=False
+            selDatum.Visibility    = False
+            targetDatum.Visibility = True
             # select the newly created datum
             Gui.Selection.clearSelection()
             Gui.Selection.addSelection( App.ActiveDocument.Name, rootContainer.Name, targetDatum.Name+'.' )
@@ -158,138 +170,6 @@ class importDatumCmd():
             rootContainer.recompute(True)
 
        
-
-
-"""
-    +-----------------------------------------------+
-    |    The UI and functions in the Task panel     |
-    +-----------------------------------------------+
-
-class importDatumUI():
-    def __init__(self):
-        ( link, datum ) = Asm4.getLinkAndDatum()
-        if link :
-            self.targetDatum = datum
-            self.targetLink  = link
-            
-            self.base = QtGui.QWidget()
-            self.form = self.base        
-            self.form.setWindowIcon(QtGui.QIcon( iconFile ))
-            self.form.setWindowTitle('Import a Datum object into the Assembly')
-
-            # get the current active document to avoid errors if user changes tab
-            self.activeDoc = App.ActiveDocument
-            self.parentAssembly = self.activeDoc.Model
-
-            # make and initialize UI
-            self.drawUI()
-            self.initUI()
-        else:
-            Asm4.warningBox( 'The selected datum object cannot be imported into this assembly' )
-
-
-    # this is the end ...
-    def finish(self):
-        Gui.Control.closeDialog()
-
-    # standard FreeCAD Task panel buttons
-    def getStandardButtons(self):
-        return int(QtGui.QDialogButtonBox.Cancel
-                   | QtGui.QDialogButtonBox.Ok)
-
-    # OK
-    def accept(self):
-        self.onApply()
-        self.finish()
-
-    # Cancel
-    def reject(self):
-        self.finish()
-
-
-    def onApply(self):
-        # get the name of the part where the datum to be copied is:
-        #linkedPartName = self.childrenList.currentText()
-
-        linkName   = self.targetLink.Name
-        linkedPart = self.targetLink.LinkedObject.Name
-        linkedDoc  = self.targetLink.LinkedObject.Document.Name
-        datum = self.targetDatum
-
-        # the name of the datum in the assembly, as per the dialog box
-        setDatumName = self.datumName.text()
-        
-        # check that all of them have something in
-        if not (linkName and linkedPart and datum and setDatumName):
-            self.datumName.setText( 'Problem in selections' )
-        else:
-            # create the Datum
-            createdDatum = App.activeDocument().getObject('Model').newObject( datum.TypeId, setDatumName )
-            self.datumName.setText( '=> ' +createdDatum.Name )
-            # build the expression for the ExpressionEngine
-            # if the linked part is in the same docmument as the assembly
-            if self.activeDoc == self.targetLink.LinkedObject.Document:
-                expr = linkName +'.Placement * '+ datum.Name +'.Placement * AttachmentOffset'
-            # if the linked part is in another document
-            else:
-                # it's the App.Document, not the App::Part that must be set before the #
-                # expr = linkName +'.Placement * '+ linkedPart +'#'+ datum.Name +'.Placement'
-                expr = linkName +'.Placement * '+ linkedDoc +'#'+ datum.Name +'.Placement * AttachmentOffset'
-            # load the built expression into the Expression field of the datum created in the assembly
-            self.activeDoc.getObject( createdDatum.Name ).setExpression( 'Placement', expr )
-            # recompute the object to apply the placement:
-            createdDatum.recompute()
-        # recompute assembly
-        self.parentAssembly.recompute(True)
-        return
-
-
-    def initUI(self):
-        docName = self.targetLink.LinkedObject.Document.Name+'#'
-        self.datumOrig.setText( Asm4.nameLabel(self.targetDatum) )
-        self.datumType.setText( self.targetDatum.TypeId )
-        self.linkName.setText(  Asm4.nameLabel(self.targetLink) )
-        self.partName.setText(  docName + Asm4.nameLabel(self.targetLink.LinkedObject))
-        self.datumName.setText( self.targetDatum.Label )
-
-
-    
-    # defines the UI, only static elements
-    def drawUI(self):
-        # Our main layoyt will be vertical
-        self.mainLayout = QtGui.QVBoxLayout(self.form)
-
-        # Define the fields for the form ( label + widget )
-        self.formLayout = QtGui.QFormLayout()
-        # Datum Type
-        self.datumType = QtGui.QLineEdit()
-        self.datumType.setReadOnly(True)
-        self.formLayout.addRow(QtGui.QLabel('Datum Type'),self.datumType)
-        # Datum Object
-        self.datumOrig = QtGui.QLineEdit()
-        self.datumOrig.setReadOnly(True)
-        self.formLayout.addRow(QtGui.QLabel('Orig. Datum'),self.datumOrig)
-        # Link instance
-        self.linkName = QtGui.QLineEdit()
-        self.linkName.setReadOnly(True)
-        self.formLayout.addRow(QtGui.QLabel('Orig. Instance'),self.linkName)
-        # Orig Part
-        self.partName = QtGui.QLineEdit()
-        self.partName.setReadOnly(True)
-        self.formLayout.addRow(QtGui.QLabel('Orig. Doc#Part'),self.partName)
-        # apply the layout
-        self.mainLayout.addLayout(self.formLayout)
-        
-        # empty line
-        self.mainLayout.addWidget(QtGui.QLabel())
-        # the name as seen in the tree of the selected link
-        self.datumName = QtGui.QLineEdit()
-        self.mainLayout.addWidget(QtGui.QLabel("Enter the imported Datum's name :"))
-        self.mainLayout.addWidget(self.datumName)
-
-        # set main window widgets
-        self.form.setLayout(self.mainLayout)
-"""
 
 
 
