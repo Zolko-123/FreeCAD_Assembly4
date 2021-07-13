@@ -27,11 +27,12 @@ class makeCircularArray():
         pass
 
     def GetResources(self):
-        return {"MenuText": "Create a circular Array",
-                "ToolTip":  "Create a circular (polar) array of the selected object\n"+
-                            "Select an object and a datum axis",
-                "Pixmap": os.path.join( Asm4.iconPath, 'Asm4_PolarArray.svg' )
-                }
+        tooltip  = "Create a circular (polar) array of the selected object\n"
+        tooltip += "Select first an object and then the axis\n"
+        tooltip += "The axis can be either a datum Axis or the axis of an LCS\n"
+        tooltip += "but it must be in the same container as the selected object"
+        iconFile = os.path.join( Asm4.iconPath, 'Asm4_PolarArray.svg' )
+        return {"MenuText": "Create a circular Array", "ToolTip":  tooltip, "Pixmap": iconFile }
 
     def IsActive(self):
         if App.ActiveDocument:
@@ -48,8 +49,7 @@ class makeCircularArray():
         #FCC.PrintMessage('Selected '+selObj.Name+' of '+selObj.TypeId+' TypeId' )
         # check that object and axis belong to the same parent
         objParent  =  selObj.getParentGeoFeatureGroup()
-        axisParent = selAxis.getParentGeoFeatureGroup()
-        if not objParent==axisParent:
+        if not objParent and not objParent.getObject(selAxis):
             msg = 'Please select an object and an axis belonging to the same assembly'
             Asm4.warningBox( msg)
         # if something valid has been returned:
@@ -89,21 +89,23 @@ class makeCircularArray():
         if len(Gui.Selection.getSelection())==2:
             obj1 = Gui.Selection.getSelection()[0]
             obj2 = Gui.Selection.getSelection()[1]
-            # Only create arrays with a datum axis
-            # TODO : extend it to cylinders and circles
-            if obj2.TypeId == 'PartDesign::Line':
-                selObj  = obj1
-                selAxis = obj2
-            # if it's a circle
-            '''
-            else:
-                selEx = Gui.Selection.getSelectionEx('', 0)
-                if len(selEx[0].SubObjects)==2:
-                    obj2 = selEx[0].SubObjects[1]
-                    if Asm4.isCircle(obj2):
-                        selObj  = obj1
-                        selAxis = obj2
-            '''
+            # both objects need to be in the same container or 
+            # the Placements will get screwed
+            if obj1.getParentGeoFeatureGroup() == obj2.getParentGeoFeatureGroup():
+                # Only create arrays with a datum axis ...
+                if obj2.TypeId == 'PartDesign::Line':
+                    selObj  = obj1
+                    selAxis = obj2.Name
+                # ... or LCS axis
+                elif obj2.TypeId == 'PartDesign::CoordinateSystem':
+                    # this should give 'LCS.Z' or similar
+                    selEx = Gui.Selection.getSelectionEx('', 0)[0].SubElementNames[1]
+                    (tree,lcs,axis) = selEx.partition(obj2.Name)
+                    # if indeed obj2.Name is in the selection tree
+                    if lcs and axis[1] in ('X','Y','Z'):
+                        if obj1.getParentGeoFeatureGroup().getObject(lcs) == obj2:
+                            selObj  = obj1
+                            selAxis = lcs+'.'+axis[1]
         # return what we have found
         return selObj,selAxis
 

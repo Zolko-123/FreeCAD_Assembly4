@@ -234,6 +234,8 @@ def isLinkToPart(obj):
     return False
 
 # returns the selected object and its selection hierarchy
+# the first element in the tree is the uppermost container name
+# the last is the object name
 def getSelectionTree():
     retval = (None,None)
     # we obviously need something selected

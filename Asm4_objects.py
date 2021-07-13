@@ -133,7 +133,7 @@ class CircularArray(LinkArray):
         obj.addProperty("App::PropertyString",      "ArrayType",    "Array", '')
         obj.ArrayType = 'Circular Array'
         obj.setPropertyStatus('ArrayType', 'ReadOnly')
-        obj.addProperty("App::PropertyLink" ,       "Axis",         "Array", '')
+        obj.addProperty("App::PropertyString" ,     "Axis",         "Array", '')
         obj.addProperty("App::PropertyAngle",       "FullAngle",    "Array", '')
         obj.addProperty("App::PropertyAngle",       "IntervalAngle","Array", '')
         # do the attach of the LinkArray class
@@ -144,19 +144,42 @@ class CircularArray(LinkArray):
         #FCC.PrintMessage('Triggered execute() ...')
         if not obj.SourceObject or not obj.Axis:
             return
+        # Source Object
+        sObj = obj.SourceObject
+        parent = sObj.getParentGeoFeatureGroup()
+        if not parent:
+            return
+        # get the datum axis 
+        axisObj = parent.getObject(obj.Axis)
+        if axisObj:
+            axisPlacement = axisObj.Placement
+        # if it's not, it might be the axis of an LCS, like 'LCS.Z'
+        else:
+            (lcs,dot,axis) = obj.Axis.partition('.')
+            lcsObj = parent.getObject(lcs)
+            # if lcs and axis are not empty
+            if lcs and lcsObj and axis :
+                if axis =='X':
+                    axisPlacement = Asm4.rotY * lcsObj.Placement
+                elif axis == 'Y':
+                    axisPlacement = Asm4.rotX * lcsObj.Placement
+                else:
+                    axisPlacement = lcsObj.Placement
+            else:
+                FCC.PrintMessage('Axis not found\n')
+                return    
+        # calculate the number of instances
         if obj.ArraySteps=='Interval':
             obj.FullAngle = (obj.ElementCount-1) * obj.IntervalAngle
         elif  obj.ArraySteps=='Full Circle':
             obj.FullAngle = 360
             obj.IntervalAngle = obj.FullAngle/obj.ElementCount
-        # Source Object
-        sobj = obj.SourceObject
         plaList = []
         for i in range(obj.ElementCount):
             # calculate placement of element i
             rot_i = App.Rotation( App.Vector(0,0,1), i*obj.IntervalAngle)
             pla_i = App.Placement(App.Vector(0,0,0), rot_i)
-            plaElmt = obj.Axis.Placement * pla_i * obj.Axis.Placement.inverse() * sobj.Placement
+            plaElmt = axisPlacement * pla_i * axisPlacement.inverse() * sObj.Placement
             plaList.append(plaElmt)
         if not getattr(obj, 'ShowElement', True) or obj.ElementCount != len(plaList):
             obj.setPropertyStatus('PlacementList', '-Immutable')

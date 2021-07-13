@@ -36,27 +36,24 @@ class gotoDocumentCmd:
 
     def IsActive(self):
         # is there an active document ?
-        if App.ActiveDocument:
-            # is something selected ?
-            selObj = self.checkSelection()
-            if selObj != None:
-                return True
-        return False 
+        if App.ActiveDocument and self.checkSelection() is not None:
+            return True
+        else:
+            return False 
 
 
     def checkSelection(self):
         selectedLink = None
-        # check that there is an App::Part called 'Model'
-        # a standard App::Part would also do, but then more error checks are necessary
-        if App.ActiveDocument.getObject('Model') and App.ActiveDocument.getObject('Model').TypeId=='App::Part' :
-        # check that something is selected
-            if Gui.Selection.getSelection():
-            # set the (first) selected object as global variable
-                selection = Gui.Selection.getSelection()[0]
-                selectedType = selection.TypeId
-                # check that the selected object is a Datum CS or Point type
-                if  selectedType=='App::Link':
-                    selectedLink = selection
+        # check that 1 object is selected
+        if len(Gui.Selection.getSelection())==1:
+            selObj = Gui.Selection.getSelection()[0]
+            # check that the selected object is a link ...
+            if  selObj.TypeId=='App::Link':
+                # ... to something in a Document ...
+                if hasattr(selObj.LinkedObject,'Document'):
+                    # ... that is not the current Document
+                    if selObj.LinkedObject.Document != App.ActiveDocument:
+                        selectedLink = selObj
         # now we should be safe
         return selectedLink
     
@@ -67,12 +64,9 @@ class gotoDocumentCmd:
     +-----------------------------------------------+
     """
     def Activated(self):
-
         # check what we have selected
         selectedLink = self.checkSelection()
         if not selectedLink:
-            return
-        elif not selectedLink.TypeId=='App::Link':
             return
         linkedObj = selectedLink.LinkedObject
 
