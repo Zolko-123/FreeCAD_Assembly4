@@ -76,24 +76,31 @@ class newPart:
         text,ok = QtGui.QInputDialog.getText(None, self.tooltip, 'Enter new '+self.partName+' name :'+' '*30, text = instanceName)
         if ok and text:
             # create Part
-            part = App.ActiveDocument.addObject(self.partType,text)
-            # add LCS if appropriate
+            newPart = App.ActiveDocument.addObject(self.partType,text)
+            # add LCS if appropriate (not for groups)
             if self.partType in Asm4.containerTypes:
                 # add an LCS at the root of the Part, and attach it to the 'Origin'
-                lcs0 = part.newObject('PartDesign::CoordinateSystem','LCS_0')
-                lcs0.Support = [(part.Origin.OriginFeatures[0],'')]
+                lcs0 = newPart.newObject('PartDesign::CoordinateSystem','LCS_0')
+                lcs0.Support = [(newPart.Origin.OriginFeatures[0],'')]
                 lcs0.MapMode = 'ObjectXY'
                 lcs0.MapReversed = False
             # If an App::Part container is selected, move the created part/body/group there
-            container = self.checkPart()
-            partsGroup = App.ActiveDocument.getObject('Parts')
-            if container and part.Name!='Model':
-                container.addObject(part)
+            container = None
+            if len(Gui.Selection.getSelection())==1:
+                obj = Gui.Selection.getSelection()[0]
+                if obj.TypeId == 'App::Part':
+                    container = obj
+            if container :
+                if newPart.Name != 'Assembly':
+                    container.addObject(newPart)
             # If the 'Part' group exists, move it there:
-            elif partsGroup and partsGroup.TypeId=='App::DocumentObjectGroup' and part.TypeId in Asm4.containerTypes:
-                partsGroup.addObject(part)
+            else:
+                partsGroup = App.ActiveDocument.getObject('Parts')
+                if partsGroup and partsGroup.TypeId=='App::DocumentObjectGroup' and newPart.TypeId in Asm4.containerTypes:
+                    if newPart.Name != 'Assembly':
+                        partsGroup.addObject(newPart)
             # recompute
-            part.recompute()
+            newPart.recompute()
             App.ActiveDocument.recompute()
 
 

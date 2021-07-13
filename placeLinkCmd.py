@@ -72,7 +72,7 @@ class placeLinkCmd():
             return
         else:
             parent = selection.getParentGeoFeatureGroup()
-            if parent and parent == Asm4.checkAssembly():
+            if parent and parent == Asm4.getAssembly():
                 # if it's a valid assembly and part
                 if Asm4.isAsm4EE(selection):
                     # launch the UI in the task panel
@@ -135,7 +135,7 @@ class placeLinkUI():
         # we have checked before that all this is correct 
         self.selectedLink = Asm4.getSelectedLink()
         #self.rootAssembly = self.selectedLink.getParentGeoFeatureGroup()
-        self.rootAssembly = Asm4.checkAssembly()
+        self.rootAssembly = Asm4.getAssembly()
 
         # has been checked before, this is for security only
         if Asm4.isAsm4EE(self.selectedLink):

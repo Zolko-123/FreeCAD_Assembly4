@@ -54,7 +54,7 @@ class insertLink( QtGui.QDialog ):
 
         # initialise stuff
         # this is the App::Part where we'll put our App::Link
-        self.asmPart  = None
+        self.rootAssembly  = None
         self.origLink = None
         self.allParts = []
         self.partsDoc = []
@@ -67,22 +67,22 @@ class insertLink( QtGui.QDialog ):
 
         # an App::Part at the root of the document is selected, we insert the link there
         if Asm4.getSelectedRootPart():
-            self.asmPart = Asm4.getSelectedRootPart()
+            self.rootAssembly = Asm4.getSelectedRootPart()
         # a link is selected, let's see if we can duplicate it
         elif Asm4.getSelectedLink():
             selObj = Asm4.getSelectedLink()
             parent = selObj.getParentGeoFeatureGroup()
             # if the selected link is in a root App::Part
             if parent.TypeId == 'App::Part' and parent.getParentGeoFeatureGroup() is None:
-                self.asmPart = parent
+                self.rootAssembly = parent
                 self.origLink = selObj
-        elif Asm4.checkModel():
-            self.asmPart = self.activeDoc.getObject('Model')
-        
-        if self.asmPart is None:
+        elif Asm4.getAssembly():
+            self.rootAssembly = Asm4.getAssembly
+
+        if self.rootAssembly is None:
             Asm4.warningBox( 'Please create an Assembly Model' )
             return
-        
+
         # Search for all App::Parts and PartDesign::Body in all open documents
         # Also store the document of the part
         for doc in App.listDocuments().values():
@@ -90,7 +90,7 @@ class insertLink( QtGui.QDialog ):
                 # we don't want to link to itself to the 'Model' object
                 # other App::Part in the same document are OK 
                 # but only those at top level (not nested inside other containers)
-                if obj != self.asmPart and obj.getParentGeoFeatureGroup() is None:
+                if obj != self.rootAssembly and obj.getParentGeoFeatureGroup() is None:
                     self.allParts.append( obj )
                     self.partsDoc.append( doc )
             for obj in doc.findObjects("PartDesign::Body"):
@@ -156,10 +156,10 @@ class insertLink( QtGui.QDialog ):
         # get the name of the link (as it should appear in the tree)
         linkName = self.linkNameInput.text()
         # only create link if there is a Part object and a name
-        if self.asmPart and selectedPart and linkName:
+        if self.rootAssembly and selectedPart and linkName:
             # create the App::Link with the user-provided name
             #createdLink = self.activeDoc.getObject('Model').newObject( 'App::Link', linkName )
-            createdLink = self.asmPart.newObject( 'App::Link', linkName )
+            createdLink = self.rootAssembly.newObject( 'App::Link', linkName )
             # assign the user-selected selectedPart to it
             createdLink.LinkedObject = selectedPart
             # If the name was already chosen, and a UID was generated:
@@ -176,9 +176,9 @@ class insertLink( QtGui.QDialog ):
 
             # ... and launch the placement of the inserted part
             Gui.Selection.clearSelection()
-            Gui.Selection.addSelection( self.activeDoc.Name, self.asmPart.Name, createdLink.Name+'.' )
+            Gui.Selection.addSelection( self.activeDoc.Name, self.rootAssembly.Name, createdLink.Name+'.' )
             # ... but only if we're in an Asm4 Model
-            if self.asmPart.Name=='Model':
+            if self.rootAssembly.Name=='Model':
                 Gui.runCommand( 'Asm4_placeLink' )
 
         # if still open, close the dialog UI

@@ -40,7 +40,12 @@ def createConfig(name, description):
     group = getConfGroup()
     if not group:
         # create a group Configurations to store various config tables
-        group = App.ActiveDocument.getObject('Model').newObject('App::DocumentObjectGroup','Configurations')
+        assy = Asm4.getAssembly()
+        if assy:
+            group = assy.newObject('App::DocumentObjectGroup','Configurations')
+        else:
+            FCC.PrintWarnin('No assembly container here, quitting\n')
+            return
     # Create the document
     conf = group.newObject('Spreadsheet::Sheet', name)
     headerRow = str(int(OBJECTS_START_ROW)-1)
@@ -76,7 +81,7 @@ class applyConfigurationCmd:
 
     def IsActive(self):
         # if a spreadsheet in a Group called "Configuration" is selected
-        if Asm4.checkModel() and len(Gui.Selection.getSelection()) == 1:
+        if Asm4.getAssembly() and len(Gui.Selection.getSelection()) == 1:
             config = Gui.Selection.getSelection()[0]
             if getConfGroup() and isAsm4Config(config):
                 return True
@@ -86,7 +91,7 @@ class applyConfigurationCmd:
         config = Gui.Selection.getSelection()[0]        
         restoreConfiguration(config.Name)
         Gui.Selection.clearSelection()
-        Gui.Selection.addSelection( Asm4.checkModel() )
+        Gui.Selection.addSelection( Asm4.getAssembly() )
         
         
         
@@ -108,7 +113,7 @@ class openConfigurationsCmd:
     def IsActive(self):
         # Will handle LCSs only for the Assembly4 model
         #if Asm4.getSelectedLink() or Asm4.getModelSelected():
-        if Asm4.getSelectedLink() or Asm4.checkModel():
+        if Asm4.getSelectedLink() or Asm4.getAssembly():
             return True
         return False
 
@@ -281,7 +286,7 @@ class newConfigurationCmd:
 
     def IsActive(self):
         # is there an active document ?
-        if Asm4.checkModel():
+        if Asm4.getAssembly():
             return True
         return False 
 
@@ -404,12 +409,12 @@ def SaveConfiguration(confName, description):
     else:
         conf = createConfig(confName, description)
 
-    model = App.ActiveDocument.getObject('Model')
+    assy = Asm4.getAssembly()
     link  = Asm4.getSelectedLink()
     if link:
         SaveObject(conf, link)
     else:
-        SaveSubObjects(conf, model)            
+        SaveSubObjects(conf, assy)            
     conf.recompute(True)
 
 
@@ -466,12 +471,12 @@ def restoreConfiguration(confName):
     FCC.PrintMessage('Restoring configuration "' + confName + '"\n')
     #doc = getConfig(confName, 'Configurations')
     conf = getConfig(confName)
-    model = Asm4.checkModel()
+    assy = Asm4.getAssembly()
     link = Asm4.getSelectedLink()
     if link:
         restoreObject(conf, link)
     else:
-        restoreSubObjects(conf, model)
+        restoreSubObjects(conf, assy)
     App.ActiveDocument.recompute()
 
 # parse container

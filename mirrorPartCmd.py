@@ -34,10 +34,10 @@ class mirrorPartCmd:
         self.drawUI()
 
     def GetResources(self):
-        return {"MenuText"   : 'Create symmetric of part',
-                "ToolTip"    : 'Create a mirrored part of a part\n\nYou must re-create the attachment\ndatums in the resulting part',
-                "Pixmap"     : os.path.join( Asm4.iconPath , 'Asm4_Mirror.svg') 
-                }
+        tooltip  = 'Create a mirrored part of a part. Use only on individual parts, not assemblies\n'
+        tooltip += 'You must re-create the attachment datums in the resulting part'
+        iconFile = os.path.join( Asm4.iconPath , 'Asm4_Mirror.svg') 
+        return {"MenuText" : 'Create symmetric of part', "ToolTip" : tooltip, "Pixmap" : iconFile }
 
     def IsActive(self):
         # this works on Parts and Bodies, and links to such

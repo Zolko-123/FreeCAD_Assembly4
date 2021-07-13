@@ -195,7 +195,7 @@ class placeFastenerUI():
         # get the current active document to avoid errors if user changes tab
         self.activeDoc = App.activeDocument()
         # the parent (top-level) assembly is the App::Part called Model (hard-coded)
-        self.parentAssembly = self.activeDoc.Model
+        self.rootAssembly = Asm4.getAssembly()
         # has been checked before calling
         self.selectedFastener = getSelectionFS()
 
@@ -205,7 +205,7 @@ class placeFastenerUI():
         # now self.parentList and self.parentTable are available
 
         # find all the linked parts in the assembly
-        for objName in self.parentAssembly.getSubObjects():
+        for objName in self.rootAssembly.getSubObjects():
             # remove the trailing .
             obj = self.activeDoc.getObject(objName[0:-1])
             if obj.TypeId=='App::Link' and hasattr(obj.LinkedObject,'isDerivedFrom'):
@@ -382,7 +382,7 @@ class placeFastenerUI():
             #self.expression.setText( 'parentAsm ***'+restFinal+'***'+attLink+'***'+attLCS+'***' )
             #return ( restFinal, 'None', 'None', 'None', 'None', 'None')
         else:
-            parentObj = self.parentAssembly.getObject(parent)
+            parentObj = self.rootAssembly.getObject(parent)
             if parentObj and parentObj.TypeId == 'App::Link':
                 parentDoc = parentObj.LinkedObject.Document
                 # if the link points to a Part in the same document
@@ -546,9 +546,9 @@ class placeFastenerUI():
         self.parentList.clear()
         self.parentTable.append( [] )
         self.parentList.addItem('Please select')
-        self.parentTable.append( self.parentAssembly )
-        parentIcon = self.parentAssembly.ViewObject.Icon
-        self.parentList.addItem( parentIcon, 'Parent Assembly', self.parentAssembly )
+        self.parentTable.append( self.rootAssembly )
+        parentIcon = self.rootAssembly.ViewObject.Icon
+        self.parentList.addItem( parentIcon, 'Parent Assembly', self.rootAssembly )
         # set the old position values
         self.XtranslSpinBox.setValue( self.selectedFastener.AttachmentOffset.Base.x )
         self.YtranslSpinBox.setValue( self.selectedFastener.AttachmentOffset.Base.y )
@@ -716,7 +716,7 @@ class insertFastener:
                     return( parent )
         # or of nothing is selected but there is a Part called Model:
         else:
-            return Asm4.checkModel()
+            return Asm4.getAssembly()
 
     def Activated(self):
         # check that the Fasteners WB has been loaded before:

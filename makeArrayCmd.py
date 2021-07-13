@@ -50,7 +50,7 @@ class makeCircularArray():
         objParent  =  selObj.getParentGeoFeatureGroup()
         axisParent = selAxis.getParentGeoFeatureGroup()
         if not objParent==axisParent:
-            msg = 'Please select an object and an axis belonging to the same part'
+            msg = 'Please select an object and an axis belonging to the same assembly'
             Asm4.warningBox( msg)
         # if something valid has been returned:
         else:
@@ -94,6 +94,16 @@ class makeCircularArray():
             if obj2.TypeId == 'PartDesign::Line':
                 selObj  = obj1
                 selAxis = obj2
+            # if it's a circle
+            '''
+            else:
+                selEx = Gui.Selection.getSelectionEx('', 0)
+                if len(selEx[0].SubObjects)==2:
+                    obj2 = selEx[0].SubObjects[1]
+                    if Asm4.isCircle(obj2):
+                        selObj  = obj1
+                        selAxis = obj2
+            '''
         # return what we have found
         return selObj,selAxis
 

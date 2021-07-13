@@ -93,8 +93,8 @@ class addVariable():
             if checkPart():
                 part = checkPart()
             # if an Asm4 Model is present:
-            elif Asm4.checkModel():
-                part = Asm4.checkModel()
+            elif Asm4.getAssembly():
+                part = Asm4.getAssembly()
             if part:
                 part.addObject(self.Variables)
                 #self.Variables =  part.newObject('App::FeaturePython','Variables')
@@ -249,8 +249,8 @@ class delVariable():
         self.Variables = App.ActiveDocument.getObject('Variables')
         # if it doesn't exist then create it (for older Asm4 documents)
         if not self.Variables:
-            self.Variables =  App.ActiveDocument.getObject('Model').newObject('App::FeaturePython','Variables')
-
+            Asm4.messageBox('There are no variables here')
+            return
         # (re-)initialise the UI
         self.UI.show()
         self.initUI()

@@ -200,20 +200,19 @@ def checkWorkbench( workbench ):
     return hasWB
 
 # checks whether there is a FreeCAD Assembly at the root of the active document
-def checkAssembly():
+def getAssembly():
     if App.ActiveDocument:
         # should we check for AssemblyType=='Part::Link' ?
         assy = App.ActiveDocument.getObject('Assembly')
         if assy and assy.TypeId=='App::Part'                        \
                 and assy.Type == 'Assembly'                         \
-                and hasattr(assy,'AssemblyType')                    \
                 and assy.getParentGeoFeatureGroup() is None:
             return assy
         else:
             # legacy check for compatibility
             model = checkModel()
             if model:
-                FCC.PrintWarning('This is a legacy Asm4 Model.')
+                #FCC.PrintWarning('This is a legacy Asm4 Model\n')
                 return model
     return None
 
