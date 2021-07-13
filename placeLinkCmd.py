@@ -22,7 +22,7 @@ import selectionFilter
     |                Global variables               |
     +-----------------------------------------------+
 """
-global taskUI
+#global taskUI
 
 # link being placed view properties overrides
 DrawStyle = 'Solid'
@@ -64,7 +64,7 @@ class placeLinkCmd():
     def Activated(self):
         #Handle single selected App::Link
         selectedLink = None
-        parentAssembly = None
+        #parentAssembly = None
         selection = Asm4.getSelectedLink()
         if not selection :
             # This shouldn't happen
@@ -72,6 +72,24 @@ class placeLinkCmd():
             return
         else:
             parent = selection.getParentGeoFeatureGroup()
+            if parent and parent == Asm4.checkAssembly():
+                # if it's a valid assembly and part
+                if Asm4.isAsm4EE(selection):
+                    # launch the UI in the task panel
+                    ui = placeLinkUI()
+                    Gui.Control.showDialog(ui)
+                # else try to convert it
+                else:
+                    convert = Asm4.confirmBox("This Part wasn't assembled with this Assembly4 WorkBench, but I can convert it.")
+                    if convert:
+                        Asm4.makeAsmProperties( selection, reset=True )
+                        # launch the UI in the task panel
+                        ui = placeLinkUI()
+                        Gui.Control.showDialog(ui)
+            else:
+                Asm4.warningBox('Please select a link in the assembly Model.')
+        return
+        '''
             # only handle if the parent is at the root of the document:
             if parent and parent.TypeId == 'App::Part' and parent.getParentGeoFeatureGroup() is None:
                 # only accept Asm4 Models as assemblies
@@ -81,19 +99,22 @@ class placeLinkCmd():
                     # check that the selected Part is from this workbench
                     if Asm4.isAsm4EE(selection):
                         # launch the UI in the task panel
-                        Gui.Control.showDialog(placeLinkUI())
+                        ui = placeLinkUI()
+                        Gui.Control.showDialog(ui)
                     else:
                         # Asm4.warningBox("This Part wasn't assembled with this Assembly4 WorkBench")
                         convert = Asm4.confirmBox("This Part wasn't assembled with this Assembly4 WorkBench, but I can convert it.")
                         if convert:
                             Asm4.makeAsmProperties( selection, reset=True )
                             # launch the UI in the task panel
-                            Gui.Control.showDialog(placeLinkUI())
+                            ui = placeLinkUI()
+                            Gui.Control.showDialog(ui)
                 else:
                     Asm4.warningBox('Please select a link in the assembly Model')
             else:
                 Asm4.warningBox('Please select a link in the assembly Model.')
         return
+        '''
 
 
 """
@@ -113,7 +134,8 @@ class placeLinkUI():
 
         # we have checked before that all this is correct 
         self.selectedLink = Asm4.getSelectedLink()
-        self.parentAssembly = self.selectedLink.getParentGeoFeatureGroup()
+        #self.rootAssembly = self.selectedLink.getParentGeoFeatureGroup()
+        self.rootAssembly = Asm4.checkAssembly()
 
         # has been checked before, this is for security only
         if Asm4.isAsm4EE(self.selectedLink):
@@ -128,8 +150,8 @@ class placeLinkUI():
             self.old_linkLCS = ''
 
         # define the GUI
-        global taskUI
-        taskUI = self
+        #global taskUI
+        #taskUI = self
         # draw the GUI, objects are defined later down
         self.base = QtGui.QWidget()
         self.form = self.base        
@@ -186,7 +208,7 @@ class placeLinkUI():
         # now self.parentList and self.parentTable are available
 
         # find all the linked parts in the assembly
-        for objName in self.parentAssembly.getSubObjects():
+        for objName in self.rootAssembly.getSubObjects():
             # remove the trailing .
             obj = self.activeDoc.getObject(objName[0:-1])
             if obj.TypeId=='App::Link' and hasattr(obj.LinkedObject,'isDerivedFrom'):
@@ -255,7 +277,7 @@ class placeLinkUI():
         Gui.Selection.removeObserver(self)
         self.restoreView()
         Gui.Selection.clearSelection()
-        Gui.Selection.addSelection( self.activeDoc.Name, self.parentAssembly.Name, self.selectedLink.Name+'.' )
+        Gui.Selection.addSelection( self.activeDoc.Name, self.rootAssembly.Name, self.selectedLink.Name+'.' )
         # restore previous selection filter (if any)
         if self.selectionFilterStatus:
             selectionFilter.observerEnable()
@@ -275,7 +297,7 @@ class placeLinkUI():
     def getStandardButtons(self):
         return int(QtGui.QDialogButtonBox.Cancel
                    | QtGui.QDialogButtonBox.Ok
-                   | QtGui.QDialogButtonBox.Ignore)
+                   | QtGui.QDialogButtonBox.Apply)
 
 
     # OK
@@ -301,7 +323,9 @@ class placeLinkUI():
 
     # Free insert
     def clicked(self, button):
-        if button == QtGui.QDialogButtonBox.Ignore:
+        if button == QtGui.QDialogButtonBox.Apply:
+            self.Apply()
+        elif button == QtGui.QDialogButtonBox.Ignore:
             # ask for confirmation before resetting everything
             msgName = Asm4.labelName(self.selectedLink)
             # see whether the ExpressionEngine field is filled
@@ -317,10 +341,10 @@ class placeLinkUI():
                 # reset the assembly properties
                 Asm4.makeAsmProperties( self.selectedLink, reset=True )
                 # finish
-                FCC.PrintWarning("Part is now manually placed\n")
+                FCC.PrintMessage("Part is now manually placed\n")
                 self.finish()
             else:
-                FCC.PrintWarning("Part untouched\n")
+                FCC.PrintMessage("Part untouched\n")
                 self.finish()
 
 
@@ -367,6 +391,13 @@ class placeLinkUI():
         # check that all of them have something in
         # constrName has been checked at the beginning
         if a_Link and a_LCS and l_Part and l_LCS :
+            # add the Asm4 properties if it's a pure App::Link
+            Asm4.makeAsmProperties(self.selectedLink)
+            # DEPRECATED: self.selectedLink.AssemblyType = 'Part::Link'
+            self.selectedLink.AttachedBy = '#'+l_LCS
+            self.selectedLink.AttachedTo = a_Link+'#'+a_LCS
+            self.selectedLink.SolverId = 'Placement::ExpressionEngine'
+            # build the expression for the ExpressionEngine
             # this is where all the magic is, see:
             # 
             # https://forum.freecadweb.org/viewtopic.php?p=278124#p278124
@@ -377,18 +408,11 @@ class placeLinkUI():
             # expr = ParentLink.Placement * ParentPart#LCS.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
             # expr = LCS_in_the_assembly.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
             expr = Asm4.makeExpressionPart( a_Link, a_Part, a_LCS, l_Part, l_LCS )
-            # add the Asm4 properties if it's a pure App::Link
-            Asm4.makeAsmProperties(self.selectedLink)
-            # store the part where we're attached to in the constraints object
-            self.selectedLink.AssemblyType = 'Part::Link'
-            self.selectedLink.AttachedBy = '#'+l_LCS
-            self.selectedLink.AttachedTo = a_Link+'#'+a_LCS
             # load the expression into the link's Expression Engine
             self.selectedLink.setExpression('Placement', expr )
-            self.selectedLink.SolverId = 'Placement::ExpressionEngine'
             # recompute the object to apply the placement:
             self.selectedLink.recompute()
-            self.parentAssembly.recompute(True)
+            self.rootAssembly.recompute(True)
             return True
         else:
             #FCC.PrintWarning("Problem in selections\n")
@@ -405,7 +429,7 @@ class placeLinkUI():
         # ... or it's 'Parent Assembly' then the parent is the 'Model' root App::Part
         if self.parentList.currentText() == 'Parent Assembly':
             parentName = 'Parent Assembly'
-            parentPart = self.parentAssembly
+            parentPart = self.rootAssembly
             # we get the LCS directly in the root App::Part 'Model'
             self.attLCStable = Asm4.getPartLCS( parentPart )
             self.parentDoc.setText( Asm4.labelName(parentPart) )
@@ -430,9 +454,9 @@ class placeLinkUI():
                         lcs.ViewObject.show()
                 # highlight the selected part:
                 Gui.Selection.addSelection( \
-                        parentPart.Document.Name, 'Model', parentPart.Name+'.' )
+                        parentPart.Document.Name, self.rootAssembly.Name, parentPart.Name+'.' )
                 QtCore.QTimer.singleShot(1500, lambda:Gui.Selection.removeSelection( \
-                        parentPart.Document.Name, 'Model', parentPart.Name+'.' ) )
+                        parentPart.Document.Name, self.rootAssembly.Name, parentPart.Name+'.' ) )
         # something wrong
         else:
             return
@@ -446,7 +470,6 @@ class placeLinkUI():
             self.attLCSlist.addItem( newItem )
             #self.attLCStable.append(lcs)
         return
-
 
     # selection observer
     def addSelection(self, doc, obj, sub, pnt):
@@ -466,7 +489,10 @@ class placeLinkUI():
                     found[0].setSelected(True)
                     self.partLCSlist.scrollToItem(found[0])
                     self.partLCSlist.setCurrentRow(self.partLCSlist.row(found[0]))
-                    self.Apply()
+                    #self.Apply()
+                    # show and highlight LCS
+                    selObj.Visibility=True
+                    Gui.Selection.addSelection(doc,obj,selObj.Name+'.')
             # is the selected datum belongs to another part
             else:
                 # idx = self.parentList.findText(selLinkName)
@@ -478,18 +504,21 @@ class placeLinkUI():
                 # may-be the selected LCS is in the Parent Assembly
                 else:
                     self.parentList.setCurrentIndex(1)
-                #selObj = Gui.Selection.getSelection()[0]
-                #if selObj:
+                # this has triggered to fill in the attachment LCS list
+                # now lets try to find the selected LCS in this list
                 found = self.attLCSlist.findItems(Asm4.labelName(selObj), QtCore.Qt.MatchExactly)
                 if len(found) > 0:
                     self.attLCSlist.clearSelection()
                     found[0].setSelected(True)
                     self.attLCSlist.scrollToItem(found[0])
                     self.attLCSlist.setCurrentRow(self.attLCSlist.row(found[0]))
-                    self.Apply()
+                    #self.Apply()
+                    # show and highlight LCS
+                    selObj.Visibility=True
+                    Gui.Selection.addSelection(doc,obj,selObj.Name+'.')
         else:
             self.parentList.setCurrentIndex( 1 )
-    
+
 
     # Reorientation
     def reorientLink( self ):
@@ -537,6 +566,29 @@ class placeLinkUI():
             self.ZrotationAngle = self.ZrotationAngle + 90.0
         self.reorientLink()
 
+    # highlight selected LCSs
+    def onLCSclicked( self ):
+        # clear the selection in the GUI window
+        Gui.Selection.clearSelection()
+        # LCS of the linked part
+        if self.partLCSlist.selectedItems():
+            p_LCS = self.partLCStable[ self.partLCSlist.currentRow() ]
+            p_LCS.Visibility = True
+            Gui.Selection.addSelection( self.activeDoc.Name, self.rootAssembly.Name, self.selectedLink.Name+'.'+p_LCS.Name+'.')
+        # LCS in the parent
+        if self.attLCSlist.selectedItems():
+            a_LCS = self.attLCStable[ self.attLCSlist.currentRow() ]
+            # get the part where the selected LCS is
+            a_Part = self.parentList.currentText()
+            # parent assembly and sister part need a different treatment
+            if a_Part == 'Parent Assembly':
+                linkDot = ''
+            else:
+                linkDot = a_Part+'.'
+            a_LCS.Visibility = True
+            Gui.Selection.addSelection( self.activeDoc.Name, self.rootAssembly.Name, linkDot+a_LCS.Name+'.')
+        return
+
     # initialize the UI for the selected link
     def initUI(self):
         # clear the parent name (if any)
@@ -558,9 +610,9 @@ class placeLinkUI():
         self.parentList.clear()
         self.parentTable.append( [] )
         self.parentList.addItem('Please select')
-        self.parentTable.append( self.parentAssembly )
-        parentIcon = self.parentAssembly.ViewObject.Icon
-        self.parentList.addItem( parentIcon, 'Parent Assembly', self.parentAssembly )
+        self.parentTable.append( self.rootAssembly )
+        parentIcon = self.rootAssembly.ViewObject.Icon
+        self.parentList.addItem( parentIcon, 'Parent Assembly', self.rootAssembly )
         # set the old position values
         self.XtranslSpinBox.setValue(self.old_LinkPosition[0])
         self.YtranslSpinBox.setValue(self.old_LinkPosition[1])
@@ -678,8 +730,10 @@ class placeLinkUI():
         # Actions
         self.parentList.currentIndexChanged.connect( self.onParentSelected )
         self.parentList.activated.connect( self.onParentSelected )
-        self.attLCSlist.itemClicked.connect( self.Apply )
-        self.partLCSlist.itemClicked.connect( self.Apply )
+        #self.attLCSlist.itemClicked.connect( self.Apply )
+        #self.partLCSlist.itemClicked.connect( self.Apply )
+        self.attLCSlist.itemActivated.connect( self.onLCSclicked )
+        self.partLCSlist.itemActivated.connect( self.onLCSclicked )
         self.RotXButton.clicked.connect( self.onRotX )
         self.RotYButton.clicked.connect( self.onRotY )
         self.RotZButton.clicked.connect( self.onRotZ )

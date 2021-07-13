@@ -87,7 +87,7 @@ class Assembly4Workbench(Workbench):
     def Initialize(self):
         FreeCAD.Console.PrintMessage(_atr("Asm4", "Assembly4 WorkBench initializing ."))
         FreeCADGui.updateGui()
-        import newModelCmd         # creates a new App::Part container called 'Model'
+        import newAssemblyCmd      # creates a new App::Part container called 'Model'
         self.dot()
         import newDatumCmd         # creates a new LCS in 'Model'
         self.dot()
@@ -177,7 +177,7 @@ class Assembly4Workbench(Workbench):
     +-----------------------------------------------+
     """
     def assemblyMenuItems(self):
-        commandList = [ "Asm4_newModel",
+        commandList = [ "Asm4_makeAssembly",
                         "Asm4_newPart", 
                         "Asm4_newBody", 
                         "Asm4_newGroup", 
@@ -216,7 +216,7 @@ class Assembly4Workbench(Workbench):
         return commandList
         
     def assemblyToolbarItems(self):
-        commandList = [ "Asm4_newModel",
+        commandList = [ "Asm4_makeAssembly",
                         "Asm4_newPart", 
                         "Asm4_newBody", 
                         "Asm4_newGroup", 
@@ -229,6 +229,7 @@ class Assembly4Workbench(Workbench):
                         "Asm4_importDatum", 
                         "Separator",
                         "Asm4_placeLink", 
+                        "Asm4_releaseAttachment", 
                         'Asm4_placeFastener',
                         #'Asm4_cloneFastenersToAxes',
                         #"Asm4_placeDatum", 

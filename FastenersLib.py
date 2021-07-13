@@ -715,11 +715,8 @@ class insertFastener:
                 if parent and parent.TypeId == 'App::Part':
                     return( parent )
         # or of nothing is selected but there is a Part called Model:
-        elif App.ActiveDocument.getObject('Model') and App.ActiveDocument.Model.TypeId=='App::Part':
-            return App.ActiveDocument.getObject('Model')
-        # if there is no reason to be active:
-        return(None)
-
+        else:
+            return Asm4.checkModel()
 
     def Activated(self):
         # check that the Fasteners WB has been loaded before:

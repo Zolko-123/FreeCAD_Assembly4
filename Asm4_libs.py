@@ -123,8 +123,8 @@ def placeObjectToLCS( attObj, attLink, attDoc, attLCS ):
 """
 def makeAsmProperties( obj, reset=False ):
     # property AssemblyType
-    if not hasattr(obj,'AssemblyType'):
-        obj.addProperty( 'App::PropertyString', 'AssemblyType', 'Assembly' )
+    #if not hasattr(obj,'AssemblyType'):
+    #    obj.addProperty( 'App::PropertyString', 'AssemblyType', 'Assembly' )
     # property AttachedBy
     if not hasattr(obj,'AttachedBy'):
         obj.addProperty( 'App::PropertyString', 'AttachedBy', 'Assembly' )
@@ -138,7 +138,7 @@ def makeAsmProperties( obj, reset=False ):
     if not hasattr(obj,'SolverId'):
         obj.addProperty( 'App::PropertyString', 'SolverId', 'Assembly' )
     if reset:
-        obj.AssemblyType = ''
+        #obj.AssemblyType = ''
         #obj.AttachedBy = ''
         #obj.AttachedTo = ''
         #obj.AttachmentOffset = App.Placement()
@@ -199,11 +199,29 @@ def checkWorkbench( workbench ):
             hasWB = True
     return hasWB
 
-# checks whether there is an Asm4 Model at the root of the active document
+# checks whether there is a FreeCAD Assembly at the root of the active document
+def checkAssembly():
+    if App.ActiveDocument:
+        # should we check for AssemblyType=='Part::Link' ?
+        assy = App.ActiveDocument.getObject('Assembly')
+        if assy and assy.TypeId=='App::Part'                        \
+                and assy.Type == 'Assembly'                         \
+                and hasattr(assy,'AssemblyType')                    \
+                and assy.getParentGeoFeatureGroup() is None:
+            return assy
+        else:
+            # legacy check for compatibility
+            model = checkModel()
+            if model:
+                FCC.PrintWarning('This is a legacy Asm4 Model.')
+                return model
+    return None
+
+# DEPRECATED checks whether there is an Asm4 Model at the root of the active document
 def checkModel():
     if App.ActiveDocument:
         model = App.ActiveDocument.getObject('Model')
-        if model and model.TypeId=='App::Part' and model.getParentGeoFeatureGroup is None:
+        if model and model.TypeId=='App::Part' and model.getParentGeoFeatureGroup() is None:
             return model
     return None
 
@@ -438,12 +456,19 @@ def isPartLinkAssembly(obj):
 
 
 def isAsm4EE(obj):
-    # we check that it's a Part::Link type of assembly:
-    if not isPartLinkAssembly(obj):
+    if not obj:
         return False
     # we only need to check for the SolverId
-    if obj.SolverId == 'Placement::ExpressionEngine' or obj.SolverId == '' :
-        return True
+    if hasattr(obj,'SolverId') :
+        if obj.SolverId == 'Placement::ExpressionEngine' or obj.SolverId == '' :
+            return True
+    # legacy check
+    elif hasattr(obj,'AssemblyType') :
+        if obj.AssemblyType == 'Asm4EE' or obj.AssemblyType == '' :
+            FCC.PrintMessage('Found legacy AssemblyType property, adding new empty SolverId property\n')
+            # add the new property to convert legacy object
+            obj.addProperty( 'App::PropertyString', 'SolverId', 'Assembly' )
+            return True
     return False
 
 
@@ -483,13 +508,7 @@ def confirmBox( text ):
 """
     +-----------------------------------------------+
     |        Drop-down menu to group buttons        |
-    +----def findObjectLink(obj, doc = App.ActiveDocument):
-    for o in doc.Objects:
-        if hasattr(o, 'LinkedObject'):
-            if o.LinkedObject == obj:
-                return o
-    return(None)
--------------------------------------------+
+    +-----------------------------------------------+
 """
 # from https://github.com/HakanSeven12/FreeCAD-Geomatics-Workbench/commit/d82d27b47fcf794bf6f9825405eacc284de18996
 class dropDownCmd:

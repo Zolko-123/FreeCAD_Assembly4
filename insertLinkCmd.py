@@ -31,11 +31,10 @@ class insertLink( QtGui.QDialog ):
 
 
     def GetResources(self):
-        return {"MenuText": "Link a Part",
-                "Accel": "Ctrl+L",
-                "ToolTip": "Insert a link to a Part",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Link_Part.svg')
-                }
+        tooltip  = "Insert a link to a Part. This will create a dynamic link to the part\n"
+        tooltip += "The part to be linked must be open in the current session"
+        iconFile = os.path.join( Asm4.iconPath , 'Link_Part.svg')
+        return {"MenuText": "Insert Link to a Part", "ToolTip": tooltip, "Pixmap" : iconFile }
 
 
     def IsActive(self):
