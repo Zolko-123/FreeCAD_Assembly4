@@ -830,7 +830,7 @@ def getSelectedLink():
     if len(selection)==1:
         selObj = selection[0]
         # it's an App::Link
-        if selObj.isDerivedFrom('App::Link') and selObj.LinkedObject.TypeId in containerTypes:
+        if selObj.isDerivedFrom('App::Link') and selObj.LinkedObject is not None and selObj.LinkedObject.TypeId in containerTypes:
             retval = selObj
     return retval
 
