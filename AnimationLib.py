@@ -128,7 +128,7 @@ class animateVariable(animationProvider):
 
     def IsActive(self):
         # is there an active document ?
-        if Asm4.checkModel() and App.ActiveDocument.getObject('Variables'):
+        if Asm4.getAssembly() and App.ActiveDocument.getObject('Variables'):
             return True
         return False
 
@@ -143,6 +143,8 @@ class animateVariable(animationProvider):
         # grab the Variables container (just do it always, this prevents problems with newly opened docs)
         self.ActiveDocument = App.ActiveDocument
         self.Variables = self.AnimatedDocument.getObject('Variables') if self.AnimatedDocument else None
+        # the root assembly in the current document
+        self.rootAssembly = Asm4.getAssembly()
 
         self.updateDocList()
         self.updateVarList()
@@ -341,7 +343,7 @@ class animateVariable(animationProvider):
     def setVarValue(self,name,value):
         setattr( self.Variables, name, value )
         if App.ActiveDocument == self.AnimatedDocument:
-            App.ActiveDocument.Model.recompute('True')
+            self.rootAssembly.recompute('True')
         else:
             App.ActiveDocument.recompute(None, True, True)
         self.variableValue.setText('{:.2f}'.format(value))

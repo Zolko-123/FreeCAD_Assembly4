@@ -90,9 +90,9 @@ class newDatum:
             if selType in self.containers or selType in Asm4.datumTypes or selType=='Sketcher::SketchObject':
                 return(selectedObj)
         # or of nothing is selected ...
-        elif App.ActiveDocument.getObject('Model'):
-            # ... but there is a Model:
-            return App.ActiveDocument.getObject('Model')
+        elif Asm4.getAssembly():
+            # ... but there is as assembly:
+            return Asm4.getAssembly()
         # if we're here it's because we didn't find a good reason to not be here
         return None
 
@@ -112,18 +112,15 @@ class newDatum:
         # check whether we have selected a container
         if selectedObj.TypeId in self.containers:
             parentContainer = selectedObj
-            # we add the container name to the datum's name
-            proposedName = Asm4.nextInstance( self.datumName + '_' + selectedObj.Label, startAtOne=True )
         # if a datum object is selected
         elif selectedObj.TypeId in Asm4.datumTypes or selectedObj.TypeId=='Sketcher::SketchObject':
-            # try to figure out a good new name
-            (a,b,c) = selectedObj.Label.rpartition('_')
-            if c.isdigit():
-                proposedName = Asm4.nextInstance(a, startAtOne=True)
             # see whether it's in a container
             parent = selectedObj.getParentGeoFeatureGroup()
             if parent.TypeId in self.containers:
                 parentContainer = parent
+        # if there is an assembly
+        elif Asm4.getAssembly():
+            parentContainer = Asm4.getAssembly()
         # something went wrong
         else:
             Asm4.warningBox("I can't create a "+self.datumType+" with the current selections")
