@@ -16,7 +16,7 @@ import FreeCADGui as Gui
 import FreeCAD as App
 import Part
 
-import libAsm4 as Asm4
+import Asm4_libs as Asm4
 
 
 
@@ -40,6 +40,11 @@ class newPart:
             self.menutext    = "New Body"
             self.tooltip     = "Create a new Body"
             self.icon        = os.path.join( Asm4.iconPath , 'Asm4_Body.svg')
+        elif self.partName  == 'Group':
+            self.partType    = 'App::DocumentObjectGroup'
+            self.menutext    = "New Group"
+            self.tooltip     = "Create a new Group"
+            self.icon        = os.path.join( Asm4.iconPath , 'Asm4_Group.svg')
 
 
     def GetResources(self):
@@ -71,26 +76,36 @@ class newPart:
         text,ok = QtGui.QInputDialog.getText(None, self.tooltip, 'Enter new '+self.partName+' name :'+' '*30, text = instanceName)
         if ok and text:
             # create Part
-            part = App.ActiveDocument.addObject(self.partType,text)
-            # add an LCS at the root of the Part, and attach it to the 'Origin'
-            lcs0 = part.newObject('PartDesign::CoordinateSystem','LCS_0')
-            lcs0.Support = [(part.Origin.OriginFeatures[0],'')]
-            lcs0.MapMode = 'ObjectXY'
-            lcs0.MapReversed = False
-            # If an App::Part container is selected, move the created part/body there
-            container = self.checkPart()
-            partsGroup = App.ActiveDocument.getObject('Parts')
-            if container and part.Name!='Model':
-                container.addObject(part)
+            newPart = App.ActiveDocument.addObject(self.partType,text)
+            # add LCS if appropriate (not for groups)
+            if self.partType in Asm4.containerTypes:
+                # add an LCS at the root of the Part, and attach it to the 'Origin'
+                lcs0 = newPart.newObject('PartDesign::CoordinateSystem','LCS_0')
+                lcs0.Support = [(newPart.Origin.OriginFeatures[0],'')]
+                lcs0.MapMode = 'ObjectXY'
+                lcs0.MapReversed = False
+            # If an App::Part container is selected, move the created part/body/group there
+            container = None
+            if len(Gui.Selection.getSelection())==1:
+                obj = Gui.Selection.getSelection()[0]
+                if obj.TypeId == 'App::Part':
+                    container = obj
+            if container :
+                if newPart.Name != 'Assembly':
+                    container.addObject(newPart)
             # If the 'Part' group exists, move it there:
-            elif partsGroup and partsGroup.TypeId=='App::DocumentObjectGroup' :
-                partsGroup.addObject(part)
+            else:
+                partsGroup = App.ActiveDocument.getObject('Parts')
+                if partsGroup and partsGroup.TypeId=='App::DocumentObjectGroup' and newPart.TypeId in Asm4.containerTypes:
+                    if newPart.Name != 'Assembly':
+                        partsGroup.addObject(newPart)
             # recompute
-            part.recompute()
+            newPart.recompute()
             App.ActiveDocument.recompute()
 
 
 
 # add the command to the workbench
-Gui.addCommand( 'Asm4_newPart', newPart('Part') )
-Gui.addCommand( 'Asm4_newBody', newPart('Body') )
+Gui.addCommand( 'Asm4_newPart',  newPart('Part') )
+Gui.addCommand( 'Asm4_newBody',  newPart('Body') )
+Gui.addCommand( 'Asm4_newGroup', newPart('Group'))

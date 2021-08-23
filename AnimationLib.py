@@ -15,7 +15,7 @@ from enum import Enum
 import FreeCADGui as Gui
 import FreeCAD as App
 
-import libAsm4 as Asm4
+import Asm4_libs as Asm4
 
 # from AnimationProvider import animationProvider
 
@@ -128,7 +128,7 @@ class animateVariable(animationProvider):
 
     def IsActive(self):
         # is there an active document ?
-        if Asm4.checkModel() and App.ActiveDocument.getObject('Variables'):
+        if Asm4.getAssembly() and App.ActiveDocument.getObject('Variables'):
             return True
         return False
 
@@ -143,6 +143,8 @@ class animateVariable(animationProvider):
         # grab the Variables container (just do it always, this prevents problems with newly opened docs)
         self.ActiveDocument = App.ActiveDocument
         self.Variables = self.AnimatedDocument.getObject('Variables') if self.AnimatedDocument else None
+        # the root assembly in the current document
+        self.rootAssembly = Asm4.getAssembly()
 
         self.updateDocList()
         self.updateVarList()
@@ -171,11 +173,11 @@ class animateVariable(animationProvider):
             self.knownDocumentList = docDocs
             
         # set current active documents per default
-        if self.AnimatedDocument is None:
-            activeDoc = App.ActiveDocument
-            if activeDoc in App.listDocuments().values():
-                docIndex = list(App.listDocuments().values()).index(activeDoc)
-                self.docList.setCurrentIndex(docIndex + 1)
+        #if self.AnimatedDocument is None:
+        activeDoc = App.ActiveDocument
+        if activeDoc in App.listDocuments().values():
+            docIndex = list(App.listDocuments().values()).index(activeDoc)
+            self.docList.setCurrentIndex(docIndex + 1)
 
 
     """
@@ -341,7 +343,7 @@ class animateVariable(animationProvider):
     def setVarValue(self,name,value):
         setattr( self.Variables, name, value )
         if App.ActiveDocument == self.AnimatedDocument:
-            App.ActiveDocument.Model.recompute('True')
+            self.rootAssembly.recompute('True')
         else:
             App.ActiveDocument.recompute(None, True, True)
         self.variableValue.setText('{:.2f}'.format(value))
@@ -477,7 +479,7 @@ class animateVariable(animationProvider):
             if not self.AnimatedDocument in App.listDocuments().values():
                 self.AnimatedDocument = None
             self.onStop()
-            self.Activated()
+            #self.Activated()
 
 
     #

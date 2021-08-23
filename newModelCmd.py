@@ -12,7 +12,7 @@ import FreeCADGui as Gui
 import FreeCAD as App
 import Part
 
-import libAsm4 as Asm4
+import Asm4_libs as Asm4
 
 
 
@@ -24,13 +24,20 @@ class newModel:
     |             which is an App::Part             |
     |    with some extra features and properties    |
     +-----------------------------------------------+
+    
+def makeAssembly():
+    assembly = App.ActiveDocument.addObject('App::Part','Assembly')
+    assembly.Type='Assembly'
+    assembly.addProperty( 'App::PropertyString', 'AssemblyType', 'Assembly' )
+    assembly.AssemblyType = 'Part::Link'
+    assembly.newObject('App::DocumentObjectGroup','Constraints')
+    return assembly
+
     """
     def GetResources(self):
-        return {"MenuText": "New Model",
-                "Accel": "Ctrl+M",
-                "ToolTip": "Create a new Assembly4 Model",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_Model.svg')
-                }
+        tooltip = "Create a new Assembly4 Model"
+        iconFile = os.path.join( Asm4.iconPath , 'Asm4_Model.svg')
+        return {"MenuText": "New Assembly", "ToolTip": tooltip, "Pixmap" : iconFile }
 
 
     def IsActive(self):
@@ -65,21 +72,22 @@ class newModel:
                 partsGroup = self.activeDoc.addObject( 'App::DocumentObjectGroup', 'Parts' )
 
             # create a new App::Part called 'Model'
-            model = self.activeDoc.addObject('App::Part','Model')
+            assembly = self.activeDoc.addObject('App::Part','Model')
             # set the type as a "proof" that it's an Assembly4 Model
-            model.Type='Assembly4 Model'
+            assembly.Type='Assembly'
+            assembly.addProperty( 'App::PropertyString', 'AssemblyType', 'Assembly' )
+            assembly.AssemblyType = 'Part::Link'
             # add an LCS at the root of the Model, and attach it to the 'Origin'
-            lcs0 = model.newObject('PartDesign::CoordinateSystem','LCS_Origin')
-            lcs0.Support = [(model.Origin.OriginFeatures[0],'')]
+            lcs0 = assembly.newObject('PartDesign::CoordinateSystem','LCS_Origin')
+            lcs0.Support = [(assembly.Origin.OriginFeatures[0],'')]
             lcs0.MapMode = 'ObjectXY'
             lcs0.MapReversed = False
             # create a group Constraints to store future solver constraints there
-            model.newObject('App::DocumentObjectGroup','Constraints')
+            assembly.newObject('App::DocumentObjectGroup','Constraints')
             # create an object Variables to hold variables to be used in this document
-            model.addObject(Asm4.createVariables())
-            # create a Configuration property
-            model.addProperty('App::PropertyEnumeration', 'Configuration', 'Parameters')
-            model.Configuration = ['Default']
+            assembly.addObject(Asm4.createVariables())
+            # create a group Configurations to store future solver constraints there
+            assembly.newObject('App::DocumentObjectGroup','Configurations')
             
             # move existing parts and bodies at the document root to the Parts group
             # not nested inside other parts, to keep hierarchy
@@ -91,10 +99,13 @@ class newModel:
                 Asm4.warningBox(   'There seems to already be a Parts object, you might get unexpected behaviour' )
 
             # recompute to get rid of the small overlays
-            model.recompute()
+            assembly.recompute()
             self.activeDoc.recompute()
 
 
 
 # add the command to the workbench
 Gui.addCommand( 'Asm4_newModel', newModel() )
+
+
+

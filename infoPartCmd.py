@@ -15,7 +15,7 @@ import FreeCADGui as Gui
 import FreeCAD as App
 from FreeCAD import Console as FCC
 
-import libAsm4 as Asm4
+import Asm4_libs as Asm4
 
 
 

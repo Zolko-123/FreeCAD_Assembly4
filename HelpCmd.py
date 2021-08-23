@@ -13,7 +13,8 @@ from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
 
-import libAsm4 as Asm4
+import Asm4_libs as Asm4
+from Asm4_Translate import QT_TRANSLATE_NOOP as Qtranslate
 
 
 
@@ -26,15 +27,15 @@ import libAsm4 as Asm4
 class Asm4Help():
 
     def __init__(self):
-        super(Asm4Help,self).__init__()
+        super(Asm4Help, self).__init__()
         self.UI = QtGui.QDialog()
         self.drawUI()
 
 
     def GetResources(self):
-        return {"MenuText": "Help for Assembly4",
-                "ToolTip": "Show basic usage for FreeCAD and Assembly4",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_Help.svg')
+        return {"MenuText": Qtranslate("Asm4_Help", "Help for Assembly4"),
+                "ToolTip": Qtranslate("Asm4_Help", "Show basic usage for FreeCAD and Assembly4"),
+                "Pixmap": os.path.join(Asm4.iconPath, 'Asm4_Help.svg')
                 }
 
 

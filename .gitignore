@@ -1,1 +1,4 @@
 __pycache__/*
+*.directory
+AnimationLib_translated.py
+.gitignore

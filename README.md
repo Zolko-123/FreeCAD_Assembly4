@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.9.17, 2021-06-21
+Current version 0.10.00, 2021-08-23
 
 
 
@@ -52,6 +52,12 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 ## Release notes
 
+* 2021.08.23 (**0.10.00**) :  
+Translation i18  
+Circular array  
+Changed libAsm4 as to Asm4_libs (the Variables objects will lose their tree-view icon)  
+Added Asm4_objects  
+
 * 2021.06.24 (**0.9.17**) :  
 Minor bugfixes in _AnimationLib_ and _placeLink_  
 Introduced the next assembly property _SolverId_ (which will replace _AssemblyType_) with value _Asm4::ExpressionEngine_. _placeLink_ checks the new and old properties for forward compatibility  
@@ -66,9 +72,9 @@ added mirroring of a part
 
 * 2021.03.07 (**0.9.14**) :  
 HoleAxis can now create datums on all selected circles from 1 single part in 1 step   
-Added a selection filter in the main Assembly4 toolbar__
+Added a selection filter in the main Assembly4 toolbar  
 Made the measurement tool compatible with the selection filter  
-Changed insertLink and placeLink such that any App::Part can serve as parent assembly but it is inaccessible from the UI for now (might bring more trouble than benefit)__
+Changed insertLink and placeLink such that any App::Part can serve as parent assembly but it is inaccessible from the UI for now (might bring more trouble than benefit)  
 
 * 2020.12.01 (**0.9.13**) :  
 improved LCS selection  

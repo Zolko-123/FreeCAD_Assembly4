@@ -15,7 +15,7 @@ from FreeCAD import Console as FCC
 from FastenerBase import FSBaseObject
 import FastenersCmd as FS
 
-import libAsm4 as Asm4
+import Asm4_libs as Asm4
 
 
 
@@ -52,40 +52,17 @@ def isFastener(obj):
 iconFile = os.path.join( Asm4.iconPath , 'Asm4_mvFastener.svg')
 
 
-def getSelectedAxes():
-    holeAxes = []
-    fstnr = None
-    selection = Gui.Selection.getSelectionEx('', 0)
+
+
+
+"""
+    +-----------------------------------------------+
+    |         clone per App::Link fasteners         |
+    +-----------------------------------------------+
     
-    if selection:
-        for s in selection:
-            for seNames in s.SubElementNames:
-                seObj = s.Object
-                for se in seNames.split('.'):
-                    if se and (len(se) > 0):
-                        seObj = seObj.getObject(se)
-                        if Asm4.isAppLink(seObj):
-                            seObj = seObj.getLinkedObject()
-                        if Asm4.isHoleAxis(seObj):
-                            holeAxes.append(Asm4.getSelectionPath(s.Document.Name, s.ObjectName, seNames))
-                            break
-                        elif isFastener(seObj):
-                            if fstnr is None:
-                                fstnr = seObj
-                                break
-                            else:
-                                return(None)
-                            
-                    else:
-                        break
-
-    if fstnr and (len(holeAxes) > 0):
-        return (fstnr, holeAxes)
-    else:
-        return(None)
-
-
-
+    Select a fastener and several datum axes and the fastener will
+    be cloned (as App::Link) and attached to those axes
+"""
 class cloneFastenersToAxesCmd():
     
     def __init__(self):
@@ -98,7 +75,7 @@ class cloneFastenersToAxesCmd():
                 }
     
     def IsActive(self):
-        self.selection = getSelectedAxes()
+        self.selection = self.getSelectedAxes()
         if Asm4.checkModel() and self.selection:
             return True
         return False
@@ -123,6 +100,40 @@ class cloneFastenersToAxesCmd():
                                     
             Gui.Selection.clearSelection()
             Gui.Selection.addSelection( fstnr.Document.Name, 'Model', fstnr.Name +'.')
+
+
+    def getSelectedAxes(self):
+        holeAxes = []
+        fstnr = None
+        selection = Gui.Selection.getSelectionEx('', 0)
+        
+        if selection:
+            for s in selection:
+                for seNames in s.SubElementNames:
+                    seObj = s.Object
+                    for se in seNames.split('.'):
+                        if se and (len(se) > 0):
+                            seObj = seObj.getObject(se)
+                            if Asm4.isAppLink(seObj):
+                                seObj = seObj.getLinkedObject()
+                            if Asm4.isHoleAxis(seObj):
+                                holeAxes.append(Asm4.getSelectionPath(s.Document.Name, s.ObjectName, seNames))
+                                break
+                            elif isFastener(seObj):
+                                if fstnr is None:
+                                    fstnr = seObj
+                                    break
+                                else:
+                                    # only 1 fastener can be selected
+                                    return(None)
+                        else:
+                            break
+        # if a fastener and at least 1 HoleAxis have been selected
+        if fstnr and (len(holeAxes) > 0):
+            return (fstnr, holeAxes)
+        else:
+            return(None)
+
 
 """
     +-----------------------------------------------+
@@ -155,14 +166,14 @@ class placeFastenerCmd():
             Asm4.makeAsmProperties(selection)
         # we only deal with Asm4 or empty types
         asmType = selection.AssemblyType
-        if asmType=='Asm4EE' or asmType=='':
+        if asmType=='Part::Link' or asmType=='':
             # now we should be safe, call the UI
             Gui.Control.showDialog( placeFastenerUI() )
         else:
-            convert = Asm4.confirmBox("This doesn't seem to be an Assembly4 Fastener")
+            convert = Asm4.confirmBox("This doesn't seem to be an Assembly4 Fastener, but I can convert it.")
             if convert:
                 Asm4.makeAsmProperties( selection, reset=True )
-                selection.AssemblyType = 'Asm4EE'
+                selection.AssemblyType = 'Part::Link'
                 Gui.Control.showDialog( placeFastenerUI() )
             return
 
@@ -184,7 +195,7 @@ class placeFastenerUI():
         # get the current active document to avoid errors if user changes tab
         self.activeDoc = App.activeDocument()
         # the parent (top-level) assembly is the App::Part called Model (hard-coded)
-        self.parentAssembly = self.activeDoc.Model
+        self.rootAssembly = Asm4.getAssembly()
         # has been checked before calling
         self.selectedFastener = getSelectionFS()
 
@@ -194,7 +205,7 @@ class placeFastenerUI():
         # now self.parentList and self.parentTable are available
 
         # find all the linked parts in the assembly
-        for objName in self.parentAssembly.getSubObjects():
+        for objName in self.rootAssembly.getSubObjects():
             # remove the trailing .
             obj = self.activeDoc.getObject(objName[0:-1])
             if obj.TypeId=='App::Link' and hasattr(obj.LinkedObject,'isDerivedFrom'):
@@ -204,7 +215,7 @@ class placeFastenerUI():
                     self.parentTable.append( obj )
                     # ... and add to the drop-down combo box with the assembly tree's parts
                     objIcon = obj.LinkedObject.ViewObject.Icon
-                    objText = Asm4.nameLabel(obj)
+                    objText = Asm4.labelName(obj)
                     self.parentList.addItem( objIcon, objText, obj)
 
         # check where the fastener was attached to
@@ -238,20 +249,15 @@ class placeFastenerUI():
         self.parentList.setCurrentIndex( parent_index )
         # this should have triggered self.getPartLCS() to fill the LCS list
 
-
         # find the oldLCS in the list of LCS of the linked part...
         lcs_found = []
         lcs_found = self.attLCSlist.findItems( old_parentLCS, QtCore.Qt.MatchExactly )
+        # may-be it was renamed, see if we can find it as (name)
         if not lcs_found:
-            lcs_found = self.attLCSlist.findItems( old_parentLCS+' (', QtCore.Qt.MatchStartsWith )
+            lcs_found = self.attLCSlist.findItems( '('+old_parentLCS+')', QtCore.Qt.MatchContains )
         if lcs_found:
             # ... and select it
             self.attLCSlist.setCurrentItem( lcs_found[0] )
-        else:
-            # may-be it was renamed, see if we can find it as (name)
-            lcs_found = self.attLCSlist.findItems( '('+old_parentLCS+')', QtCore.Qt.MatchContains )
-            if lcs_found:
-                self.attLCSlist.setCurrentItem( lcs_found[0] )
 
         Gui.Selection.addObserver(self, 0)
 
@@ -275,7 +281,7 @@ class placeFastenerUI():
     def clicked(self, bt):
         if bt == QtGui.QDialogButtonBox.Ignore:
             # ask for confirmation before resetting everything
-            msgName = Asm4.nameLabel(self.selectedFastener)
+            msgName = Asm4.labelName(self.selectedFastener)
             # see whether the ExpressionEngine field is filled
             if self.old_EE :
                 # if yes, then ask for confirmation
@@ -376,7 +382,7 @@ class placeFastenerUI():
             #self.expression.setText( 'parentAsm ***'+restFinal+'***'+attLink+'***'+attLCS+'***' )
             #return ( restFinal, 'None', 'None', 'None', 'None', 'None')
         else:
-            parentObj = self.parentAssembly.getObject(parent)
+            parentObj = self.rootAssembly.getObject(parent)
             if parentObj and parentObj.TypeId == 'App::Link':
                 parentDoc = parentObj.LinkedObject.Document
                 # if the link points to a Part in the same document
@@ -424,7 +430,7 @@ class placeFastenerUI():
             parentPart = self.activeDoc.getObject( 'Model' )
             # we get the LCS directly in the root App::Part 'Model'
             self.attLCStable = Asm4.getPartLCS( parentPart )
-            self.parentDoc.setText( parentPart.Document.Name+'#'+Asm4.nameLabel(parentPart) )
+            self.parentDoc.setText( parentPart.Document.Name+'#'+Asm4.labelName(parentPart) )
         # if something is selected
         elif self.parentList.currentIndex() > 1:
             parentName = self.parentTable[ self.parentList.currentIndex() ].Name
@@ -435,7 +441,7 @@ class placeFastenerUI():
                 # linked part & doc
                 dText = parentPart.LinkedObject.Document.Name +'#'
                 # if the linked part has been renamed by the user
-                pText = Asm4.nameLabel( parentPart.LinkedObject )
+                pText = Asm4.labelName( parentPart.LinkedObject )
                 self.parentDoc.setText( dText + pText )
                 # highlight the selected part:
                 Gui.Selection.addSelection( \
@@ -451,7 +457,7 @@ class placeFastenerUI():
         self.attLCSlist.clear()
         for lcs in self.attLCStable:
             newItem = QtGui.QListWidgetItem()
-            newItem.setText(Asm4.nameLabel(lcs))
+            newItem.setText(Asm4.labelName(lcs))
             newItem.setIcon( lcs.ViewObject.Icon )
             self.attLCSlist.addItem( newItem )
             #self.attLCStable.append(lcs)
@@ -493,7 +499,7 @@ class placeFastenerUI():
                 self.parentList.setCurrentIndex(idx)
                 #selObj = Gui.Selection.getSelection()[0]
                 #if selObj:
-                found = self.attLCSlist.findItems(Asm4.nameLabel(selObj), QtCore.Qt.MatchExactly)
+                found = self.attLCSlist.findItems(Asm4.labelName(selObj), QtCore.Qt.MatchExactly)
                 if len(found) > 0:
                     self.attLCSlist.clearSelection()
                     found[0].setSelected(True)
@@ -540,9 +546,9 @@ class placeFastenerUI():
         self.parentList.clear()
         self.parentTable.append( [] )
         self.parentList.addItem('Please select')
-        self.parentTable.append( self.parentAssembly )
-        parentIcon = self.parentAssembly.ViewObject.Icon
-        self.parentList.addItem( parentIcon, 'Parent Assembly', self.parentAssembly )
+        self.parentTable.append( self.rootAssembly )
+        parentIcon = self.rootAssembly.ViewObject.Icon
+        self.parentList.addItem( parentIcon, 'Parent Assembly', self.rootAssembly )
         # set the old position values
         self.XtranslSpinBox.setValue( self.selectedFastener.AttachmentOffset.Base.x )
         self.YtranslSpinBox.setValue( self.selectedFastener.AttachmentOffset.Base.y )
@@ -709,11 +715,8 @@ class insertFastener:
                 if parent and parent.TypeId == 'App::Part':
                     return( parent )
         # or of nothing is selected but there is a Part called Model:
-        elif App.ActiveDocument.getObject('Model') and App.ActiveDocument.Model.TypeId=='App::Part':
-            return App.ActiveDocument.getObject('Model')
-        # if there is no reason to be active:
-        return(None)
-
+        else:
+            return Asm4.getAssembly()
 
     def Activated(self):
         # check that the Fasteners WB has been loaded before:
@@ -784,9 +787,8 @@ class changeFSparametersCmd():
             Gui.activateWorkbench('Assembly4Workbench')
         # check that we have selected a Fastener from the Fastener WB
         selection = getSelectionFS()
-        if selection is None:
-            return
-        Gui.runCommand('FSChangeParams')
+        if selection:
+            Gui.runCommand('FSChangeParams')
 
 
 

@@ -23,12 +23,12 @@
 
 
 import os
+from Asm4_Translate import _atr, QT_TRANSLATE_NOOP
 
-
-import Asm4wb_locator
-global Asm4wb_icon
-Asm4wb_path = os.path.dirname( Asm4wb_locator.__file__ )
-Asm4wb_icon = os.path.join( Asm4wb_path , 'Resources/icons/Assembly4.svg' )
+import Asm4_locator
+global Asm4_icon
+Asm4_path = os.path.dirname( Asm4_locator.__file__ )
+Asm4_icon = os.path.join( Asm4_path , 'Resources/icons/Assembly4.svg' )
 
 # I don't like this being here
 import selectionFilter
@@ -41,11 +41,12 @@ import selectionFilter
 """
 class Assembly4Workbench(Workbench):
 
-    global Asm4wb_icon
+    global Asm4_icon
     global selectionFilter
+    global _atr, QT_TRANSLATE_NOOP
     MenuText = "Assembly 4"
     ToolTip = "Assembly 4 workbench"
-    Icon = Asm4wb_icon
+    Icon = Asm4_icon
 
     def __init__(self):
         "This function is executed when FreeCAD starts"
@@ -53,8 +54,8 @@ class Assembly4Workbench(Workbench):
 
     def Activated(self):
         "This function is executed when the workbench is activated"
-        FreeCAD.Console.PrintMessage("Activating Assembly4 WorkBench\n")
-        
+        FreeCAD.Console.PrintMessage(_atr("Asm4", "Activating Assembly4 WorkBench") + "\n")
+
         # make buttons of the selection toolbar checkable
         from PySide import QtGui
         mainwin = Gui.getMainWindow()
@@ -64,17 +65,17 @@ class Assembly4Workbench(Workbench):
                 sf_tb = tb
         # make all buttons except last one (clear selection filter) checkable
         if sf_tb is not None:
-            for button in sf_tb.actions()[0:-1]:      
+            for button in sf_tb.actions()[0:-1]:
                 button.setCheckable(True)
         return
 
     def Deactivated(self):
         "This function is executed when the workbench is deactivated"
         selectionFilter.observerDisable()
-        FreeCAD.Console.PrintMessage("Leaving Assembly4 WorkBench\n")
-        return 
+        FreeCAD.Console.PrintMessage(_atr("Asm4", "Leaving Assembly4 WorkBench") + "\n")
+        return
 
-    def GetClassName(self): 
+    def GetClassName(self):
         # this function is mandatory if this is a full python workbench
         return "Gui::PythonWorkbench"
 
@@ -84,9 +85,9 @@ class Assembly4Workbench(Workbench):
     +-----------------------------------------------+
         """
     def Initialize(self):
-        FreeCAD.Console.PrintMessage("Assembly4 WorkBench initializing .")
+        FreeCAD.Console.PrintMessage(_atr("Asm4", "Assembly4 WorkBench initializing ."))
         FreeCADGui.updateGui()
-        import newModelCmd         # creates a new App::Part container called 'Model'
+        import newAssemblyCmd      # creates a new App::Part container called 'Model'
         self.dot()
         import newDatumCmd         # creates a new LCS in 'Model'
         self.dot()
@@ -100,8 +101,8 @@ class Assembly4Workbench(Workbench):
         self.dot()
         import placeLinkCmd        # places a linked part by snapping LCS (in the Part and in the Assembly)
         self.dot()
-        import placeDatumCmd       # places an LCS relative to an external file (creates a local attached copy)
-        self.dot()
+        #import placeDatumCmd       # places an LCS relative to an external file (creates a local attached copy)
+        #self.dot()
         import importDatumCmd      # creates an LCS in assembly and attaches it to an LCS relative to an external file
         self.dot()
         import releaseAttachmentCmd# creates an LCS in assembly and attaches it to an LCS relative to an external file
@@ -112,8 +113,8 @@ class Assembly4Workbench(Workbench):
         self.dot()
         import updateAssemblyCmd   # updates all parts and constraints in the assembly
         self.dot()
-        #import newLinkArray       # creates a new array of App::Link
-        #import makeLinkArray      # creates a new array of App::Link
+        import makeArrayCmd        # creates a new array of App::Link
+        self.dot()
         import gotoDocumentCmd     # opens the documentof the selected App::Link
         self.dot()
         import Asm4_Measure        # Measure tool in the Task panel
@@ -141,27 +142,27 @@ class Assembly4Workbench(Workbench):
 
         # Define Menus
         # commands to appear in the Assembly4 menu 'Assembly'
-        self.appendMenu( "&Assembly", self.assemblyMenuItems() )
+        self.appendMenu(QT_TRANSLATE_NOOP("Workbench", "&Assembly"), self.assemblyMenuItems())
         self.dot()
 
         # self.appendMenu("&Geometry",["Asm4_newPart"])
 
         # additional entry in the Help menu
-        self.appendMenu("&Help", ["Asm4_Help"])
+        self.appendMenu(QT_TRANSLATE_NOOP("Workbench", "&Help"), ["Asm4_Help"])
         self.dot()
 
         # Define Toolbars
         # commands to appear in the Assembly4 toolbar
-        self.appendToolbar( "Assembly", self.assemblyToolbarItems() )
+        self.appendToolbar(_atr("Asm4", "Assembly"), self.assemblyToolbarItems())
         self.dot()
 
         # build the selection toolbar
-        self.appendToolbar( "Selection Filter", self.selectionToolbarItems() )
+        self.appendToolbar(_atr("Asm4", "Selection Filter"), self.selectionToolbarItems())
         self.dot()
 
         # self.appendToolbar("Geometry",["Asm4_newPart"])
 
-        FreeCAD.Console.PrintMessage(" done.\n")
+        FreeCAD.Console.PrintMessage(" " + _atr("Asm4", "done") + ".\n")
         """
     +-----------------------------------------------+
     |           Initialisation finished             |
@@ -176,28 +177,28 @@ class Assembly4Workbench(Workbench):
     +-----------------------------------------------+
     """
     def assemblyMenuItems(self):
-        commandList = [ "Asm4_newModel",
+        commandList = [ "Asm4_makeAssembly",
                         "Asm4_newPart", 
                         "Asm4_newBody", 
-                        "Asm4_insertLink", 
-                        self.FastenersCmd, 
-                        "Separator",
+                        "Asm4_newGroup", 
                         "Asm4_newSketch", 
-                        "Asm4_newLCS", 
-                        "Asm4_newPlane", 
-                        "Asm4_newAxis", 
-                        "Asm4_newPoint", 
-                        "Asm4_newHole", 
-                        "Asm4_importDatum", 
+                        'Asm4_createDatum',
+                        self.FastenersCmd, 
+                        #"Asm4_newLCS", 
+                        #"Asm4_newPlane", 
+                        #"Asm4_newAxis", 
+                        #"Asm4_newPoint", 
+                        #"Asm4_newHole", 
                         "Separator",
+                        "Asm4_insertLink", 
                         "Asm4_placeLink", 
+                        "Asm4_releaseAttachment", 
                         "Asm4_mirrorPart", 
-                        #"Asm4_newCircularArray", 
+                        "Asm4_circularArray", 
                         "Asm4_placeFastener", 
                         "Asm4_cloneFastenersToAxes", 
-                        "Asm4_placeDatum", 
-                        "Asm4_releaseAttachment", 
-                        #"Asm4_makeLinkArray",
+                        "Asm4_importDatum", 
+                        #"Asm4_placeDatum", 
                         "Separator",
                         "Asm4_infoPart", 
                         "Asm4_makeBOM", 
@@ -206,14 +207,19 @@ class Assembly4Workbench(Workbench):
                         'Asm4_hideLcs',
                         "Asm4_addVariable", 
                         "Asm4_delVariable", 
+                        #"Asm4_applyConfiguration", 
+                        "Asm4_openConfigurations", 
+                        #'Asm4_saveConfiguration',
+                        #'Asm4_newConfiguration',
                         "Asm4_Animate", 
                         "Asm4_updateAssembly"]
         return commandList
         
     def assemblyToolbarItems(self):
-        commandList = [ "Asm4_newModel",
+        commandList = [ "Asm4_makeAssembly",
                         "Asm4_newPart", 
                         "Asm4_newBody", 
+                        "Asm4_newGroup", 
                         "Asm4_infoPart", 
                         "Asm4_insertLink", 
                         self.FastenersCmd, 
@@ -223,17 +229,17 @@ class Assembly4Workbench(Workbench):
                         "Asm4_importDatum", 
                         "Separator",
                         "Asm4_placeLink", 
+                        "Asm4_releaseAttachment", 
                         'Asm4_placeFastener',
                         #'Asm4_cloneFastenersToAxes',
-                        "Asm4_placeDatum", 
+                        #"Asm4_placeDatum", 
                         "Asm4_mirrorPart", 
-                        #"Asm4_newCircularArray", 
+                        "Asm4_circularArray", 
                         "Separator",
-                        #"Asm4_makeLinkArray",
-                        #"Draft_PolarArray",
                         "Asm4_makeBOM", 
                         "Asm4_Measure", 
                         "Asm4_variablesCmd",
+                        "Asm4_openConfigurations", 
                         "Asm4_Animate",
                         "Asm4_updateAssembly"]
         return commandList
@@ -269,13 +275,11 @@ class Assembly4Workbench(Workbench):
         assemblySubMenu =[ "Asm4_insertLink"    , 
                         "Asm4_placeLink"     , 
                         "Asm4_importDatum"   ,
-                        "Asm4_placeDatum"    ,
                         'Asm4_FSparameters'  ,
                         'Asm4_placeFastener' ,
                         'Asm4_cloneFastenersToAxes' ,
                         'Separator'          ,
-                        'Asm4_saveConfiguration',
-                        'Asm4_restoreConfiguration']
+                        'Asm4_applyConfiguration']
         # commands to appear in the 'Create' sub-menu in the contextual menu (right-click)
         createSubMenu =["Asm4_newSketch",  
                         "Asm4_newBody", 
@@ -286,13 +290,15 @@ class Assembly4Workbench(Workbench):
                         "Asm4_newHole", 
                         "Asm4_insertScrew", 
                         "Asm4_insertNut", 
-                        "Asm4_insertWasher"]
+                        "Asm4_insertWasher",
+                        'Separator',
+                        'Asm4_newConfiguration']
 
-        self.appendContextMenu( "", "Separator")
-        self.appendContextMenu( "", contextMenu ) # add commands to the context menu
-        self.appendContextMenu( "Assembly", assemblySubMenu ) # add commands to the context menu
-        self.appendContextMenu( "Create", createSubMenu ) # add commands to the context menu
-        self.appendContextMenu( "", "Separator")
+        self.appendContextMenu("", "Separator")
+        self.appendContextMenu("", contextMenu)  # add commands to the context menu
+        self.appendContextMenu(_atr("Asm4", "Assembly"), assemblySubMenu)  # add commands to the context menu
+        self.appendContextMenu(_atr("Asm4", "Create"), createSubMenu)  # add commands to the context menu
+        self.appendContextMenu("", "Separator")
 
 
 
