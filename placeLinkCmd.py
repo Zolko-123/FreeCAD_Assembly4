@@ -153,12 +153,12 @@ class placeLinkUI():
         #global taskUI
         #taskUI = self
         # draw the GUI, objects are defined later down
-        self.base = QtGui.QWidget()
-        self.form = self.base        
+        self.UI = QtGui.QWidget()
+        self.form = self.UI        
         iconFile = os.path.join( Asm4.iconPath , 'Place_Link.svg')
         self.form.setWindowIcon(QtGui.QIcon( iconFile ))
         self.form.setWindowTitle('Place linked Part')
-        self.drawUI()
+        self.drawUI(self.form)
 
         #save original AttachmentOffset of linked part
         self.old_LinkAttachmentOffset = self.selectedLink.AttachmentOffset
@@ -237,7 +237,7 @@ class placeLinkUI():
         lcs_found = self.partLCSlist.findItems( old_linkLCS, QtCore.Qt.MatchExactly )
         # ... or with (Name)
         if not lcs_found:
-            lcs_found = self.partLCSlist.findItems( '('+old_linkLCS+')', QtCore.Qt.MatchStartsWith )
+            lcs_found = self.partLCSlist.findItems( '('+old_linkLCS+')', QtCore.Qt.MatchEndsWith )
         if lcs_found:
             # ... and select it
             self.partLCSlist.setCurrentItem( lcs_found[0] )
@@ -263,7 +263,7 @@ class placeLinkUI():
         # find the old attachment Datum in the list of the Datums in the linked part...
         lcs_found = self.attLCSlist.findItems( old_attLCS, QtCore.Qt.MatchExactly )
         if not lcs_found:
-            lcs_found = self.attLCSlist.findItems( '('+old_attLCS+')', QtCore.Qt.MatchStartsWith )
+            lcs_found = self.attLCSlist.findItems( '('+old_attLCS+')', QtCore.Qt.MatchEndsWith )
         if lcs_found:
             # ... and select it
             self.attLCSlist.setCurrentItem( lcs_found[0] )
@@ -393,7 +393,7 @@ class placeLinkUI():
         if a_Link and a_LCS and l_Part and l_LCS :
             # add the Asm4 properties if it's a pure App::Link
             Asm4.makeAsmProperties(self.selectedLink)
-            # DEPRECATED: self.selectedLink.AssemblyType = 'Part::Link'
+            # self.selectedLink.AssemblyType = 'Part::Link'
             self.selectedLink.AttachedBy = '#'+l_LCS
             self.selectedLink.AttachedTo = a_Link+'#'+a_LCS
             self.selectedLink.SolverId = 'Placement::ExpressionEngine'
@@ -447,12 +447,14 @@ class placeLinkUI():
                 # if the linked part has been renamed by the user
                 pText = Asm4.labelName( parentPart.LinkedObject )
                 self.parentDoc.setText( dText + pText )
+                '''
                 # show all LCS in selected parent
                 for lcsName in parentPart.LinkedObject.getSubObjects(1):
                     lcs = parentPart.LinkedObject.Document.getObject(lcsName[0:-1])
                     if lcs.TypeId in [ 'PartDesign::CoordinateSystem', 'PartDesign::Line' ]:
                         lcs.ViewObject.show()
-                # highlight the selected part:
+                '''
+                # highlight the selected part for a short time:
                 Gui.Selection.addSelection( \
                         parentPart.Document.Name, self.rootAssembly.Name, parentPart.Name+'.' )
                 QtCore.QTimer.singleShot(1500, lambda:Gui.Selection.removeSelection( \
@@ -471,31 +473,88 @@ class placeLinkUI():
             #self.attLCStable.append(lcs)
         return
 
+
+    # highlight selected LCSs
+    def onLCSclicked( self ):
+        p_LCS_selected = False
+        a_LCS_selected = False
+        # LCS of the linked part
+        if len(self.partLCSlist.selectedItems())>0:
+            p_LCS = self.partLCStable[ self.partLCSlist.currentRow() ]
+            p_LCS.Visibility = True
+            p_LCStext = self.selectedLink.Name+'.'+p_LCS.Name+'.'
+            p_LCS_selected = True
+        # LCS in the parent
+        if len(self.attLCSlist.selectedItems())>0:
+            a_LCS = self.attLCStable[ self.attLCSlist.currentRow() ]
+            # get the part where the selected LCS is
+            # parent assembly and sister part need a different treatment
+            if self.parentList.currentText() == 'Parent Assembly':
+                a_LCStext = a_LCS.Name+'.'
+            else:
+                a_Part = self.parentTable[ self.parentList.currentIndex() ].Name
+                a_LCStext = a_Part+'.'+a_LCS.Name+'.'
+            a_LCS.Visibility = True
+            a_LCS_selected = True
+        # clear the selection in the GUI window
+        Gui.Selection.clearSelection()
+        # apply selections
+        if p_LCS_selected:
+            Gui.Selection.addSelection( self.activeDoc.Name, self.rootAssembly.Name, p_LCStext)
+        if a_LCS_selected:
+            Gui.Selection.addSelection( self.activeDoc.Name, self.rootAssembly.Name, a_LCStext)
+        return
+
+
     # selection observer
     def addSelection(self, doc, obj, sub, pnt):
-        selPath = Asm4.getSelectionPath(doc, obj, sub)
-        selObj = Gui.Selection.getSelection()[0]
-        if selObj and len(selPath) > 2:
-            selLinkName = selPath[2]
-            selLink = self.activeDoc.getObject(selLinkName)
+        selLinkOK = False
+        # Since both 3D view clicks and manual tree selection gets into the same callback
+        # we will determine by clicked coordinates
+        # for manual tree selections the coordinates are (0,0,0)
+        # 3D view click
+        if pnt != (0,0,0):
+            selObj = Gui.Selection.getSelection()[0]
+            selPath = Asm4.getSelectionPath(doc, obj, sub)
+            if selObj and len(selPath) > 2:
+                selLinkName = selPath[2]
+                selLink = self.activeDoc.getObject(selLinkName)
+                if selLink:
+                    selLinkOK = True
+            else:
+                self.parentList.setCurrentIndex( 1 )
+        # tree selection
+        elif len(Gui.Selection.getSelection())==1:
+            selObj = Gui.Selection.getSelection()[0]
+            ( obj, tree ) = Asm4.getSelectionTree()
+            if selObj == obj:
+                # obj is selected in a root part
+                if len(tree)==2:
+                    root = App.ActiveDocument.getObject(tree[0])
+                    if root==self.rootAssembly:
+                        selLinkOK = True
+                # obj is in a child part
+                elif len(tree)==3:
+                    selLinkName = tree[1]
+                    selLink = self.activeDoc.getObject(selLinkName)
+                    if selLink:
+                        selLinkOK = True
+        # if selection has been found
+        if selLinkOK:
             # if the selected datum belongs to the part to be placed
-            #if self.linkName.text() == selLinkName:
-            if self.selectedLink.Name == selLinkName:
-                #selObj = Gui.Selection.getSelection()[0]
-                #if selObj:
+            if self.selectedLink.Name == selLink.Name:
                 found = self.partLCSlist.findItems(Asm4.labelName(selObj), QtCore.Qt.MatchExactly)
                 if len(found) > 0:
                     self.partLCSlist.clearSelection()
                     found[0].setSelected(True)
                     self.partLCSlist.scrollToItem(found[0])
-                    self.partLCSlist.setCurrentRow(self.partLCSlist.row(found[0]))
-                    #self.Apply()
+                    self.partLCSlist.setCurrentItem(found[0])
                     # show and highlight LCS
                     selObj.Visibility=True
-                    Gui.Selection.addSelection(doc,obj,selObj.Name+'.')
-            # is the selected datum belongs to another part
+                    self.onLCSclicked()
+                    #self.Apply()
+            # if the selected datum belongs to another part
             else:
-                # idx = self.parentList.findText(selLinkName)
                 idx = self.parentList.findText(Asm4.labelName(selLink), QtCore.Qt.MatchExactly)
                 # the selected LCS is in a child part
                 if idx >= 0:
@@ -511,13 +570,11 @@ class placeLinkUI():
                     self.attLCSlist.clearSelection()
                     found[0].setSelected(True)
                     self.attLCSlist.scrollToItem(found[0])
-                    self.attLCSlist.setCurrentRow(self.attLCSlist.row(found[0]))
-                    #self.Apply()
+                    self.attLCSlist.setCurrentItem(found[0])
                     # show and highlight LCS
                     selObj.Visibility=True
-                    Gui.Selection.addSelection(doc,obj,selObj.Name+'.')
-        else:
-            self.parentList.setCurrentIndex( 1 )
+                    self.onLCSclicked()
+                    #self.Apply()
 
 
     # Reorientation
@@ -566,28 +623,6 @@ class placeLinkUI():
             self.ZrotationAngle = self.ZrotationAngle + 90.0
         self.reorientLink()
 
-    # highlight selected LCSs
-    def onLCSclicked( self ):
-        # clear the selection in the GUI window
-        Gui.Selection.clearSelection()
-        # LCS of the linked part
-        if self.partLCSlist.selectedItems():
-            p_LCS = self.partLCStable[ self.partLCSlist.currentRow() ]
-            p_LCS.Visibility = True
-            Gui.Selection.addSelection( self.activeDoc.Name, self.rootAssembly.Name, self.selectedLink.Name+'.'+p_LCS.Name+'.')
-        # LCS in the parent
-        if self.attLCSlist.selectedItems():
-            a_LCS = self.attLCStable[ self.attLCSlist.currentRow() ]
-            # get the part where the selected LCS is
-            a_Part = self.parentList.currentText()
-            # parent assembly and sister part need a different treatment
-            if a_Part == 'Parent Assembly':
-                linkDot = ''
-            else:
-                linkDot = a_Part+'.'
-            a_LCS.Visibility = True
-            Gui.Selection.addSelection( self.activeDoc.Name, self.rootAssembly.Name, linkDot+a_LCS.Name+'.')
-        return
 
     # initialize the UI for the selected link
     def initUI(self):
@@ -621,19 +656,19 @@ class placeLinkUI():
 
 
     # defines the UI, only static elements
-    def drawUI(self):
+    def drawUI(self,Form):
         # the layout for the main window is vertical (top to down)
-        self.mainLayout = QtGui.QVBoxLayout(self.form)
+        self.mainLayout = QtGui.QVBoxLayout(Form)
         
         # Define the fields for the form ( label + widget )
-        self.formLayout = QtGui.QFormLayout()
+        self.formLayout = QtGui.QFormLayout(Form)
         # Selected Link (the name as seen in the tree of the selected link)
-        self.linkName = QtGui.QLineEdit()
+        self.linkName = QtGui.QLineEdit(Form)
         self.linkName.setReadOnly(True)
         self.formLayout.addRow(QtGui.QLabel('Selected Link :'),self.linkName)
 
         # combobox showing all available App::Link
-        self.parentList = QtGui.QComboBox()
+        self.parentList = QtGui.QComboBox(Form)
         self.parentList.setMaximumWidth(300)
         self.parentList.setToolTip('Choose the part in which the attachment\ncoordinate system is to be found')
         # the parent assembly is hardcoded, and made the first real element
@@ -641,20 +676,20 @@ class placeLinkUI():
         self.mainLayout.addLayout(self.formLayout)
 
         # with 2 columns
-        self.columnsLayout = QtGui.QHBoxLayout()
-        self.leftLayout = QtGui.QVBoxLayout()
-        self.rightLayout = QtGui.QVBoxLayout()
+        self.columnsLayout = QtGui.QHBoxLayout(Form)
+        self.leftLayout = QtGui.QVBoxLayout(Form)
+        self.rightLayout = QtGui.QVBoxLayout(Form)
         # Part, left side
         #
         # the document containing the linked part
         self.leftLayout.addWidget(QtGui.QLabel("Linked Part :"))
-        self.linkedDoc = QtGui.QLineEdit()
+        self.linkedDoc = QtGui.QLineEdit(Form)
         self.linkedDoc.setReadOnly(True)
         self.leftLayout.addWidget(self.linkedDoc)
 
         # The list of all LCS in the part is a QListWidget
         self.leftLayout.addWidget(QtGui.QLabel("Select LCS in Part :"))
-        self.partLCSlist = QtGui.QListWidget()
+        self.partLCSlist = QtGui.QListWidget(self.form)
         self.partLCSlist.setMinimumHeight(200)
         self.partLCSlist.setToolTip('Select a coordinate system from the list')
         self.leftLayout.addWidget(self.partLCSlist)
@@ -663,13 +698,13 @@ class placeLinkUI():
         #
         # the document containing the linked object
         self.rightLayout.addWidget(QtGui.QLabel("Parent Part :"))
-        self.parentDoc = QtGui.QLineEdit()
+        self.parentDoc = QtGui.QLineEdit(Form)
         self.parentDoc.setReadOnly(True)
         self.rightLayout.addWidget(self.parentDoc)
         # The list of all attachment LCS in the assembly is a QListWidget
         # it is populated only when the parent combo-box is activated
         self.rightLayout.addWidget(QtGui.QLabel("Select LCS in Parent :"))
-        self.attLCSlist = QtGui.QListWidget()
+        self.attLCSlist = QtGui.QListWidget(self.form)
         self.attLCSlist.setMinimumHeight(200)
         self.attLCSlist.setToolTip('Select a coordinate system from the list')
         self.rightLayout.addWidget(self.attLCSlist)
@@ -680,9 +715,9 @@ class placeLinkUI():
         self.mainLayout.addLayout(self.columnsLayout)
 
         # X Translation Value
-        self.XoffsetLayout = QtGui.QHBoxLayout()
+        self.XoffsetLayout = QtGui.QHBoxLayout(Form)
         self.XtranslSpinBoxLabel = self.XoffsetLayout.addWidget(QtGui.QLabel("X Translation :"))
-        self.XtranslSpinBox = QtGui.QDoubleSpinBox()
+        self.XtranslSpinBox = QtGui.QDoubleSpinBox(Form)
         self.XtranslSpinBox.setRange(-999999.00, 999999.00)
         #self.XtranslSpinBox.setValue(self.Xtranslation)
         self.XtranslSpinBox.setToolTip("Translation along X axis")
@@ -695,9 +730,9 @@ class placeLinkUI():
         self.mainLayout.addLayout(self.XoffsetLayout)
 
         # Y Translation Value
-        self.YoffsetLayout = QtGui.QHBoxLayout()
+        self.YoffsetLayout = QtGui.QHBoxLayout(Form)
         self.YtranslSpinBoxLabel = self.YoffsetLayout.addWidget(QtGui.QLabel("Y Translation :"))
-        self.YtranslSpinBox = QtGui.QDoubleSpinBox()
+        self.YtranslSpinBox = QtGui.QDoubleSpinBox(Form)
         self.YtranslSpinBox.setRange(-999999.00, 999999.00)
         #self.YtranslSpinBox.setValue(self.Ytranslation)
         self.YtranslSpinBox.setToolTip("Translation along Y")
@@ -710,9 +745,9 @@ class placeLinkUI():
         self.mainLayout.addLayout(self.YoffsetLayout)
 
         # Z Translation Value
-        self.ZoffsetLayout = QtGui.QHBoxLayout()
+        self.ZoffsetLayout = QtGui.QHBoxLayout(Form)
         self.ZtranslSpinBoxLabel = self.ZoffsetLayout.addWidget(QtGui.QLabel("Z Translation :"))
-        self.ZtranslSpinBox = QtGui.QDoubleSpinBox()
+        self.ZtranslSpinBox = QtGui.QDoubleSpinBox(Form)
         self.ZtranslSpinBox.setRange(-999999.00, 999999.00)
         #self.ZtranslSpinBox.setValue(self.Ztranslation)
         self.ZtranslSpinBox.setToolTip("Translation along Z:")
@@ -730,10 +765,8 @@ class placeLinkUI():
         # Actions
         self.parentList.currentIndexChanged.connect( self.onParentSelected )
         self.parentList.activated.connect( self.onParentSelected )
-        #self.attLCSlist.itemClicked.connect( self.Apply )
-        #self.partLCSlist.itemClicked.connect( self.Apply )
-        self.attLCSlist.itemActivated.connect( self.onLCSclicked )
-        self.partLCSlist.itemActivated.connect( self.onLCSclicked )
+        self.partLCSlist.itemClicked.connect( self.onLCSclicked )
+        self.attLCSlist.itemClicked.connect(  self.onLCSclicked )
         self.RotXButton.clicked.connect( self.onRotX )
         self.RotYButton.clicked.connect( self.onRotY )
         self.RotZButton.clicked.connect( self.onRotZ )

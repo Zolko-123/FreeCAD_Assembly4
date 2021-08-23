@@ -236,6 +236,9 @@ def isLinkToPart(obj):
 # returns the selected object and its selection hierarchy
 # the first element in the tree is the uppermost container name
 # the last is the object name
+# elements are separated by '.' (dot)
+# usage:
+# ( obj, tree ) = Asm4.getSelectionTree()
 def getSelectionTree():
     retval = (None,None)
     # we obviously need something selected
@@ -749,55 +752,6 @@ def splitExpressionDatum( expr ):
 # is in the FastenersLib.py file
 
 
-
-"""
-    +-----------------------------------------------+
-    |              Show/Hide the LCSs in            |
-    |   the provided object and all its children    |
-    +-----------------------------------------------+
-
-def showChildLCSs(obj, show, processedLinks):
-    #global processedLinks
-    # if its a datum apply the visibility
-    if obj.TypeId in datumTypes:
-        obj.Visibility = show
-    # if it's a link, look for subObjects
-    elif obj.TypeId == 'App::Link' and obj.Name not in processedLinks:
-        processedLinks.append(obj.Name)
-        for objName in obj.LinkedObject.getSubObjects(1):
-            linkedObj = obj.LinkedObject.Document.getObject(objName[0:-1])
-            showChildLCSs(linkedObj, show, processedLinks)
-    # if it's a container
-    else:
-        if obj.TypeId in containerTypes:
-            for subObjName in obj.getSubObjects(1):
-                subObj = obj.getSubObject(subObjName, 1)    # 1 for returning the real object
-                if subObj != None:
-                    if subObj.TypeId in datumTypes:
-                        #subObj.Visibility = show
-                        # Apparently obj.Visibility API is very slow
-                        # Using the ViewObject.show() and ViewObject.hide() API runs at least twice faster
-                        if show:
-                            subObj.ViewObject.show()
-                        else:
-                            subObj.ViewObject.hide()
-"""
-
-
-"""
-    +-----------------------------------------------+
-    |        Selection Helper functions             |
-    +-----------------------------------------------+
-
-def getModelSelected():
-    if App.ActiveDocument.getObject('Model') and App.ActiveDocument.Model.TypeId == 'App::Part':
-        selection = Gui.Selection.getSelection()
-        if len(selection)==1:
-            selObj = selection[0]
-            if selObj.Name == 'Model' and selObj.TypeId == 'App::Part':
-                return selObj
-    return None
-"""
 
 # checks whether an App::Part is selected, and that it's at the root of the document
 def getSelectedRootPart():
