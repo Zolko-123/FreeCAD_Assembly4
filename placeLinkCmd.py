@@ -200,7 +200,13 @@ class placeLinkUI():
         # decode the old ExpressionEngine
         # if the decode is unsuccessful, old_Expression is set to False and the other things are set to 'None'
         (self.old_Parent, separator, self.old_parentLCS) = self.selectedLink.AttachedTo.partition('#')
-        ( old_Parent, old_attLCS, old_linkLCS ) = Asm4.splitExpressionLink( self.old_EE, self.old_Parent )
+        ( old_Parent, old_attLCS, old_linkLCS ) = self.splitExpressionLink( self.old_EE, self.old_Parent )
+        # sometimes, the object is in << >> which is an error by FreeCAD,
+        # because that's reserved for labels, but we still look for it
+        if len(old_attLCS)>4 and old_attLCS[:2]=='<<' and old_attLCS[-2:]=='>>':
+            old_attLCS = old_attLCS[2:-2]
+        if len(old_linkLCS)>4 and old_linkLCS[:2]=='<<' and old_linkLCS[-2:]=='>>':
+            old_linkLCS = old_linkLCS[2:-2]
 
         # initialize the UI with the current data
         self.attLCStable = []
@@ -624,6 +630,89 @@ class placeLinkUI():
         self.reorientLink()
 
 
+    """
+        +-----------------------------------------------+
+        |  split the ExpressionEngine of a linked part  |
+        |          to find the old attachments          |
+        |   (in the parent assembly or a sister part)   |
+        |   and the old target LCS in the linked Part   |
+        +-----------------------------------------------+
+    """
+    def splitExpressionLink( self, expr, parent ):
+        # same document:
+        # expr = LCS_target.Placement * AttachmentOffset * LCS_attachment.Placement ^ -1
+        # external document:
+        # expr = LCS_target.Placement * AttachmentOffset * linkedPart#LCS_attachment.Placement ^ -1
+        # expr = sisterLink.Placement * sisterPart#LCS_target.Placement * AttachmentOffset * linkedPart#LCS_attachment.Placement ^ -1
+        retval = ( expr, 'None', 'None' )
+        restFinal = ''
+        attLink = ''
+        # expr is empty
+        if not expr:
+            return retval
+        nbHash = expr.count('#')
+        if nbHash==0:
+            # linked part, sister part and assembly in the same document
+            if parent == 'Parent Assembly':
+                # we're attached to an LCS in the parent assembly
+                # expr = LCS_in_the_assembly.Placement * AttachmentOffset * LCS_linkedPart.Placement ^ -1
+                ( attLCS,     separator, rest1 ) = expr.partition('.Placement * AttachmentOffset * ')
+                ( linkLCS,    separator, rest2 ) = rest1.partition('.Placement ^ ')
+                restFinal = rest2[0:2]
+                attLink = parent
+                attPart = 'None'
+            else:
+                # we're attached to an LCS in a sister part
+                # expr = ParentLink.Placement * LCS_parent.Placement * AttachmentOffset * LCS_linkedPart.Placement ^ -1
+                ( attLink,    separator, rest1 ) = expr.partition('.Placement * ')
+                ( attLCS,     separator, rest2 ) = rest1.partition('.Placement * AttachmentOffset * ')
+                ( linkLCS,    separator, rest3 ) = rest2.partition('.Placement ^ ')
+                restFinal = rest3[0:2]
+        elif nbHash==1:
+            # an external part is linked to the assembly or a part in the same document as the assembly
+            if parent == 'Parent Assembly':
+                # we're attached to an LCS in the parent assembly
+                # expr = LCS_assembly.Placement * AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
+                ( attLCS,     separator, rest1 ) = expr.partition('.Placement * AttachmentOffset * ')
+                ( linkedDoc,  separator, rest2 ) = rest1.partition('#')
+                ( linkLCS,    separator, rest3 ) = rest2.partition('.Placement ^ ')
+                restFinal = rest3[0:2]
+                attLink = parent
+                attPart = 'None'
+            # a part from the document is attached to an external part
+            else:
+                # expr = Rail_40x40_Y.Placement * Rails_V_Slot#LCS_AR.Placement * AttachmentOffset * LCS_Plaque_Laterale_sym.Placement ^ -1
+                # expr = parentLink.Placement * externalDoc#LCS_parentPart * AttachmentOffset * LCS_linkedPart.Placement ^ -1
+                ( attLink,    separator, rest1 ) = expr.partition('.Placement * ')
+                ( linkedDoc,  separator, rest2 ) = rest1.partition('#')
+                ( attLCS,     separator, rest3 ) = rest2.partition('.Placement * AttachmentOffset * ')
+                ( linkLCS,    separator, rest4 ) = rest3.partition('.Placement ^ ')
+                restFinal = rest4[0:2]
+        elif nbHash==2:
+            # linked part and sister part in external documents to the parent assembly:
+            # expr = ParentLink.Placement * ParentPart#LCS.Placement * AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
+            ( attLink,    separator, rest1 ) = expr.partition('.Placement * ')
+            ( attPart,    separator, rest2 ) = rest1.partition('#')
+            ( attLCS,     separator, rest3 ) = rest2.partition('.Placement * AttachmentOffset * ')
+            ( linkedDoc,  separator, rest4 ) = rest3.partition('#')
+            ( linkLCS,    separator, rest5 ) = rest4.partition('.Placement ^ ')
+            restFinal = rest5[0:2]
+        else:
+            # complicated stuff, we'll do it later
+            pass
+        # final check, all options should give the correct data
+        if restFinal=='-1' and attLink==parent :
+            # wow, everything went according to plan
+            # retval = ( expr, attPart, attLCS, constrLink, partLCS )
+            retval = ( attLink, attLCS, linkLCS )
+        return retval
+
+
+    """
+        +-----------------------------------------------+
+        |                    the UI                     |
+        +-----------------------------------------------+
+    """
     # initialize the UI for the selected link
     def initUI(self):
         # clear the parent name (if any)
