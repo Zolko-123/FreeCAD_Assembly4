@@ -122,7 +122,7 @@ class placeDatumUI():
         old_Parent = ''
         old_ParentPart = ''
         old_attLCS = ''
-        ( old_Parent, old_ParentPart, old_attLCS ) = Asm4.splitExpressionDatum( self.old_EE )
+        ( old_Parent, old_ParentPart, old_attLCS ) = self.splitExpressionDatum( self.old_EE )
 
         # find the oldPart in the current part list...
         oldPart = self.parentList.findText( old_Parent )
@@ -327,7 +327,54 @@ class placeDatumUI():
     def onRotZ(self):
         self.rotAxis(Asm4.rotZ)
 
+    """
+        +-----------------------------------------------+
+        |           split the ExpressionEngine          |
+        |        of a linked Datum object to find       |
+        |         the old attachment Part and LCS       |
+        +-----------------------------------------------+
+    """
+    def splitExpressionDatum( self, expr ):
+        retval = ( expr, 'None', 'None' )
+        # expr is empty
+        if not expr:
+            return retval
+        restFinal = ''
+        attLink = ''
+        if expr:
+            # Look for a # to see whether the linked part is in the same document
+            # expr = Link.Placement * LinkedPart#LCS.Placement * AttachmentOffset
+            # expr = Link.Placement * LCS.Placement * AttachmentOffset
+            if '#' in expr:
+                # the linked part is in another document
+                # expr = Link.Placement * LinkedPart#LCS.Placement * AttachmentOffset
+                ( attLink, separator, rest1 ) = expr.partition('.Placement * ')
+                ( attPart, separator, rest2 ) = rest1.partition('#')
+                ( attLCS,  separator, rest3 ) = rest2.partition('.Placement * ')
+                restFinal = rest3[0:16]
+            else:
+                # the linked part is in the same document
+                # expr = Link.Placement * LCS.Placement * AttachmentOffset
+                ( attLink, separator, rest1 ) =  expr.partition('.Placement * ')
+                ( attLCS,  separator, rest2 ) = rest1.partition('.Placement * ')
+                restFinal = rest2[0:16]
+                attPart = 'unimportant'
+            if restFinal=='AttachmentOffset':
+                # wow, everything went according to plan
+                retval = ( attLink, attPart, attLCS )
+                #self.expression.setText( attPart +'***'+ attLCS )
+            else:
+                # rats ! But still, if the decode is unsuccessful, put some text
+                retval = ( restFinal, 'None', 'None' )
+        return retval
 
+
+
+    """
+        +-----------------------------------------------+
+        |                    the UI                     |
+        +-----------------------------------------------+
+    """
     # Initialises the UI once the widget has started
     def initUI(self):
         self.lscName.setText( Asm4.nameLabel(self.selectedDatum) )
