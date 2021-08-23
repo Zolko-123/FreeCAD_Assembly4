@@ -26,7 +26,7 @@ import os
 from Asm4_Translate import _atr, QT_TRANSLATE_NOOP
 
 import Asm4_locator
-global Asm4_icon
+global Asm4_icon, Asm4_path
 Asm4_path = os.path.dirname( Asm4_locator.__file__ )
 Asm4_icon = os.path.join( Asm4_path , 'Resources/icons/Assembly4.svg' )
 
@@ -54,7 +54,8 @@ class Assembly4Workbench(Workbench):
 
     def Activated(self):
         "This function is executed when the workbench is activated"
-        FreeCAD.Console.PrintMessage(_atr("Asm4", "Activating Assembly4 WorkBench") + "\n")
+
+        FreeCAD.Console.PrintMessage(_atr("Asm4", "Activating Assembly4 WorkBench") + '\n')
 
         # make buttons of the selection toolbar checkable
         from PySide import QtGui
@@ -85,8 +86,15 @@ class Assembly4Workbench(Workbench):
     +-----------------------------------------------+
         """
     def Initialize(self):
-        FreeCAD.Console.PrintMessage(_atr("Asm4", "Assembly4 WorkBench initializing ."))
+        # Assembly4 version info
+        versionPath = os.path.join( Asm4_path, 'VERSION' )
+        versionFile = open(versionPath,"r")
+        version = versionFile.readlines()[1]
+        Asm4_version = version[:-1]
+        versionFile.close()
+        FreeCAD.Console.PrintMessage(_atr("Asm4", "Initializing Assembly4 workbench")+ ' ('+Asm4_version+') .')
         FreeCADGui.updateGui()
+        # import all stuff
         import newAssemblyCmd      # creates a new App::Part container called 'Model'
         self.dot()
         import newDatumCmd         # creates a new LCS in 'Model'

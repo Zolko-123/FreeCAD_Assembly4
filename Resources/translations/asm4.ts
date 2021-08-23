@@ -21,8 +21,8 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../InitGui.py" line="88"/>
-        <source>Assembly4 WorkBench initializing .</source>
+        <location filename="../InitGui.py" line="95"/>
+        <source>Initializing Assembly4 workbench</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
