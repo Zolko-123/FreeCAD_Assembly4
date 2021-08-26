@@ -135,7 +135,10 @@ class CircularArray(LinkArray):
         obj.setPropertyStatus('ArrayType', 'ReadOnly')
         obj.addProperty("App::PropertyString" ,     "Axis",         "Array", '')
         obj.addProperty("App::PropertyAngle",       "FullAngle",    "Array", '')
+        # obj.FullAngle.setRange(-3600, 3600)
         obj.addProperty("App::PropertyAngle",       "IntervalAngle","Array", '')
+        tooltip = 'Steps perpandicular to the array plane to form a spiral'
+        obj.addProperty("App::PropertyFloat",       "LinearSteps",  "Array", tooltip)
         # do the attach of the LinkArray class
         super().attach(obj)
 
@@ -170,15 +173,18 @@ class CircularArray(LinkArray):
                 return    
         # calculate the number of instances
         if obj.ArraySteps=='Interval':
-            obj.FullAngle = (obj.ElementCount-1) * obj.IntervalAngle
+            fullAngle = (obj.ElementCount-1) * obj.IntervalAngle
+            obj.setExpression("FullAngle","ElementCount * IntervalAngle")
         elif  obj.ArraySteps=='Full Circle':
+            obj.setExpression("FullAngle",None)
             obj.FullAngle = 360
             obj.IntervalAngle = obj.FullAngle/obj.ElementCount
         plaList = []
         for i in range(obj.ElementCount):
             # calculate placement of element i
             rot_i = App.Rotation( App.Vector(0,0,1), i*obj.IntervalAngle)
-            pla_i = App.Placement(App.Vector(0,0,0), rot_i)
+            lin_i = App.Vector(0,0,i*obj.LinearSteps)
+            pla_i = App.Placement( lin_i, rot_i )
             plaElmt = axisPlacement * pla_i * axisPlacement.inverse() * sObj.Placement
             plaList.append(plaElmt)
         if not getattr(obj, 'ShowElement', True) or obj.ElementCount != len(plaList):
