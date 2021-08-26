@@ -66,7 +66,6 @@ class makeCircularArray():
             array.Label = 'Array_'+selObj.Label
             array.Axis = selAxis
             array.ArraySteps = "Full Circle"
-            array.ElementCount = 5
             # hide original object
             #array.SourceObject.ViewObject.hide()
             selObj.Visibility = False

@@ -529,6 +529,7 @@ class placeLinkUI():
                     selLinkOK = True
             else:
                 self.parentList.setCurrentIndex( 1 )
+        '''
         # tree selection
         elif len(Gui.Selection.getSelection())==1:
             selObj = Gui.Selection.getSelection()[0]
@@ -545,6 +546,7 @@ class placeLinkUI():
                     selLink = self.activeDoc.getObject(selLinkName)
                     if selLink:
                         selLinkOK = True
+        '''
         # if selection has been found
         if selLinkOK:
             # if the selected datum belongs to the part to be placed
