@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.10.00, 2021-08-23
+Current 0.10.1, 2021-08-26
 
 
 
@@ -51,6 +51,10 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 
 ## Release notes
+
+* 2021.08.26 (**0.10.1**) :  
+Fix in selection in placeLink: this fixes a freeze in the UI, but direct selection in the tree is not possible anymore  
+Added spiral offset for circular array  
 
 * 2021.08.23 (**0.10.00**) :  
 Translation i18  

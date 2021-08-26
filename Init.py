@@ -23,7 +23,6 @@
 #  
 ###################################################################################
 
-'''
 import Asm4_locator
 Asm4_path = os.path.dirname( Asm4_locator.__file__ )
 # Assembly4 version info
@@ -34,6 +33,5 @@ version = versionFile.readlines()[1]
 versionFile.close()
 # remove trailing newline
 Asm4_version = version[:-1]
-'''
 
 print("Assembly4 workbench ("+Asm4_version+") loaded")
