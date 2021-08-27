@@ -601,8 +601,18 @@ def makeExpressionPart( attLink, attDoc, attLCS, linkedDoc, linkLCS ):
     else:
         expr = False
     return expr
-
-
+    
+    
+def makeExpressionDatum( attLink, attPart, attLCS ):
+    # check that everything is defined
+    if attLink and attLCS:
+        # expr = Link.Placement * LinkedPart#LCS.Placement
+        expr = attLCS +'.Placement * AttachmentOffset'
+        if attPart:
+            expr = attLink+'.Placement * '+attPart+'#'+expr
+    else:
+        expr = False
+    return expr
 
 
 """
