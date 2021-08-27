@@ -34,10 +34,12 @@ datumTypes = [  'PartDesign::CoordinateSystem', \
                 'PartDesign::Point']
 
 
-partInfo =[     'PartID',                       \
-                'PartName',                     \
-                'PartDescription',              \
-                'PartSupplier']
+partInfo =[     'Nom_de_la_piece',              \
+                'Reference_AP',                 \
+                'Angle1',                       \
+                'Angle2',                       \
+                'percage',                      \
+                'longueur' ]
 
 containerTypes = [  'App::Part', 'PartDesign::Body' ]
 
@@ -575,6 +577,7 @@ def labelName( obj ):
 """
     +-----------------------------------------------+
     |         populate the ExpressionEngine         |
+    |             for a linked App::Part            |
     +-----------------------------------------------+
 """
 def makeExpressionPart( attLink, attDoc, attLCS, linkedDoc, linkLCS ):
@@ -600,16 +603,6 @@ def makeExpressionPart( attLink, attDoc, attLCS, linkedDoc, linkLCS ):
     return expr
 
 
-def makeExpressionDatum( attLink, attPart, attLCS ):
-    # check that everything is defined
-    if attLink and attLCS:
-        # expr = Link.Placement * LinkedPart#LCS.Placement
-        expr = attLCS +'.Placement * AttachmentOffset'
-        if attPart:
-            expr = attLink+'.Placement * '+attPart+'#'+expr
-    else:
-        expr = False
-    return expr
 
 
 """
@@ -619,7 +612,7 @@ def makeExpressionDatum( attLink, attPart, attLCS ):
     |   (in the parent assembly or a sister part)   |
     |   and the old target LCS in the linked Part   |
     +-----------------------------------------------+
-
+"""
 def splitExpressionLink( expr, parent ):
     # same document:
     # expr = LCS_target.Placement * AttachmentOffset * LCS_attachment.Placement ^ -1
@@ -688,11 +681,26 @@ def splitExpressionLink( expr, parent ):
         # retval = ( expr, attPart, attLCS, constrLink, partLCS )
         retval = ( attLink, attLCS, linkLCS )
     return retval
+
+
+
 """
-
-
-
-
+    +-----------------------------------------------+
+    |         populate the ExpressionEngine         |
+    |               for a Datum object              |
+    |       linked to an LCS in a sister part       |
+    +-----------------------------------------------+
+"""
+def makeExpressionDatum( attLink, attPart, attLCS ):
+    # check that everything is defined
+    if attLink and attLCS:
+        # expr = Link.Placement * LinkedPart#LCS.Placement
+        expr = attLCS +'.Placement * AttachmentOffset'
+        if attPart:
+            expr = attLink+'.Placement * '+attPart+'#'+expr
+    else:
+        expr = False
+    return expr
 
 
 """
@@ -701,6 +709,7 @@ def splitExpressionLink( expr, parent ):
     |        of a linked Datum object to find       |
     |         the old attachment Part and LCS       |
     +-----------------------------------------------+
+"""
 def splitExpressionDatum( expr ):
     retval = ( expr, 'None', 'None' )
     # expr is empty
@@ -734,7 +743,6 @@ def splitExpressionDatum( expr ):
             # rats ! But still, if the decode is unsuccessful, put some text
             retval = ( restFinal, 'None', 'None' )
     return retval
-"""
 
 
 
