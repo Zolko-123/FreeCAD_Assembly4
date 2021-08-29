@@ -76,7 +76,7 @@ class cloneFastenersToAxesCmd():
     
     def IsActive(self):
         self.selection = self.getSelectedAxes()
-        if Asm4.checkModel() and self.selection:
+        if Asm4.getAssembly() and self.selection:
             return True
         return False
 
@@ -99,7 +99,7 @@ class cloneFastenersToAxesCmd():
                                     Asm4.placeObjectToLCS(newFstnr, axisData[2], axis.Document.Name, axisData[3])
                                     
             Gui.Selection.clearSelection()
-            Gui.Selection.addSelection( fstnr.Document.Name, 'Model', fstnr.Name +'.')
+            Gui.Selection.addSelection( fstnr.Document.Name, self.rootAssembly.Name, fstnr.Name +'.')
 
 
     def getSelectedAxes(self):
@@ -152,7 +152,7 @@ class placeFastenerCmd():
                 }
 
     def IsActive(self):
-        if Asm4.checkModel() and getSelectionFS():
+        if Asm4.getAssembly() and getSelectionFS():
             return True
         return False
 
@@ -311,7 +311,7 @@ class placeFastenerUI():
         self.selectedFastener.recompute()
         # highlight the selected LCS in its new position
         Gui.Selection.clearSelection()
-        Gui.Selection.addSelection( self.activeDoc.Name, 'Model', self.selectedFastener.Name +'.')
+        Gui.Selection.addSelection( self.activeDoc.Name, self.rootAssembly.Name, self.selectedFastener.Name +'.')
         self.finish()
 
 
@@ -355,7 +355,7 @@ class placeFastenerUI():
             
             # highlight the selected fastener in its new position
             Gui.Selection.clearSelection()
-            Gui.Selection.addSelection( self.activeDoc.Name, 'Model', self.selectedFastener.Name +'.')
+            Gui.Selection.addSelection( self.activeDoc.Name, self.rootAssembly.Name, self.selectedFastener.Name +'.')
         else:
             FCC.PrintWarning("Problem in selections\n")
         return
@@ -422,13 +422,14 @@ class placeFastenerUI():
         # clear the selection in the GUI window
         Gui.Selection.clearSelection()
         # keep the fastener selected
-        Gui.Selection.addSelection( self.activeDoc.Name, 'Model', self.selectedFastener.Name+'.')
+        Gui.Selection.addSelection( self.activeDoc.Name, self.rootAssembly.Name, self.selectedFastener.Name+'.')
         # the current text in the combo-box is the link's name...
         # ... or it's 'Parent Assembly' then the parent is the 'Model' root App::Part		
         if self.parentList.currentText() == 'Parent Assembly':
             parentName = 'Parent Assembly'
-            parentPart = self.activeDoc.getObject( 'Model' )
-            # we get the LCS directly in the root App::Part 'Model'
+            # parentPart = self.activeDoc.getObject( 'Model' )
+            parentPart = self.rootAssembly
+            # we get the LCS directly in the root App::Part 
             self.attLCStable = Asm4.getPartLCS( parentPart )
             self.parentDoc.setText( parentPart.Document.Name+'#'+Asm4.labelName(parentPart) )
         # if something is selected
@@ -445,9 +446,9 @@ class placeFastenerUI():
                 self.parentDoc.setText( dText + pText )
                 # highlight the selected part:
                 Gui.Selection.addSelection( \
-                        parentPart.Document.Name, 'Model', parentPart.Name+'.' )
+                        parentPart.Document.Name, self.rootAssembly.Name, parentPart.Name+'.' )
                 QtCore.QTimer.singleShot(1500, lambda:Gui.Selection.removeSelection( \
-                        parentPart.Document.Name, 'Model', parentPart.Name+'.' ) )
+                        parentPart.Document.Name, self.rootAssembly.Name, parentPart.Name+'.' ) )
 
         # something wrong
         else:
@@ -469,7 +470,7 @@ class placeFastenerUI():
         # clear the selection in the GUI window
         Gui.Selection.clearSelection()
         # keep the fastener selected
-        Gui.Selection.addSelection( self.activeDoc.Name, 'Model', self.selectedFastener.Name+'.')
+        Gui.Selection.addSelection( self.activeDoc.Name, self.rootAssembly.Name, self.selectedFastener.Name+'.')
         # LCS in the parent
         if self.attLCSlist.selectedItems():
             #a_LCS = self.attLCSlist.selectedItems()[0].text()
@@ -482,7 +483,7 @@ class placeFastenerUI():
                 linkDot = ''
             else:
                 linkDot = a_Part+'.'
-            Gui.Selection.addSelection( self.activeDoc.Name, 'Model', linkDot+a_LCS+'.')
+            Gui.Selection.addSelection( self.activeDoc.Name, self.rootAssembly.Name, linkDot+a_LCS+'.')
             FCC.PrintMessage("selection: "+ linkDot+a_LCS+'.' +"\n")
         # show the resulting placement
         self.onApply()
@@ -698,10 +699,11 @@ class insertFastener:
                 "Pixmap" : self.icon }
 
     def IsActive(self):
-        if App.ActiveDocument and  self.getPart():
-                return True
-        return(None)
+        if Asm4.getAssembly():
+            return True
+        return None
 
+    '''
     def getPart(self):
         # check where to put our fastener
         if Gui.Selection.getSelection():
@@ -717,6 +719,7 @@ class insertFastener:
         # or of nothing is selected but there is a Part called Model:
         else:
             return Asm4.getAssembly()
+    '''
 
     def Activated(self):
         # check that the Fasteners WB has been loaded before:
@@ -725,8 +728,8 @@ class insertFastener:
             Gui.activateWorkbench('Assembly4Workbench')
         # check that we have somewhere to put our stuff
         self.asmDoc = App.ActiveDocument
-        part = self.getPart()
-        if part :
+        rootAssembly = Asm4.getAssembly()
+        if rootAssembly :
             newFastener = App.ActiveDocument.addObject("Part::FeaturePython",self.FStype)
             newFastener.ViewObject.ShapeColor = self.FScolor
             if self.FStype == 'Screw':
@@ -743,7 +746,7 @@ class insertFastener:
             # add Asm4 properties if necessary
             Asm4.makeAsmProperties( newFastener, reset=True )
             # add it to the Part 
-            part.addObject( newFastener )
+            rootAssembly.addObject( newFastener )
             # hide "offset" and "invert" properties to avoid confusion as they are not used in Asm4
             if hasattr( newFastener, 'offset' ):
                 newFastener.setPropertyStatus('offset', 'Hidden')

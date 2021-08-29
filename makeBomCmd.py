@@ -170,14 +170,19 @@ class makeBOM:
 
 
     def IsActive(self):
-        return self.checkModel()
-
+        # return self.checkModel()
+        if Asm4.getAssembly() is None:
+            return False
+        else: 
+            return True
+        
 
     def Activated(self):
         self.UI = QtGui.QDialog()
         # get the current active document to avoid errors if user changes tab
         self.modelDoc = App.ActiveDocument
-        self.model = self.modelDoc.Model
+        # self.model = self.modelDoc.Model
+        self.model = Asm4.getAssembly()
         self.drawUI()
         self.UI.show()
         self.BOM.clear()
@@ -268,7 +273,7 @@ class makeBOM:
         else:
             return False
 
-
+    '''
     def checkModel(self):
         # check whether there is already a Model in the document
         # Returns True if there is an object called 'Model'
@@ -276,6 +281,7 @@ class makeBOM:
             return(True)
         else:
             return(False)
+    '''
 
 
     def onCopy(self):
