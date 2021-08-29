@@ -32,7 +32,7 @@ class showLcsCmd:
 
     def IsActive(self):
         # treats all container types : Body and Part
-        if Asm4.getSelectedContainer() or Asm4.checkModel() or Asm4.getSelectedLink():
+        if Asm4.getSelectedContainer() or Asm4.getAssembly() or Asm4.getSelectedLink():
             return True
         return False
 
@@ -44,7 +44,7 @@ class showLcsCmd:
         #model = Asm4.getModelSelected()
         container = Asm4.getSelectedContainer()
         if not container:
-            container = Asm4.checkModel()
+            container = Asm4.getAssembly()
         link = Asm4.getSelectedLink()
         if link:
             showChildLCSs(link, True, processedLinks)
@@ -70,7 +70,7 @@ class hideLcsCmd:
 
     def IsActive(self):
         # Will handle LCSs only for the Assembly4 model
-        if Asm4.getSelectedContainer() or Asm4.checkModel() or Asm4.getSelectedLink():
+        if Asm4.getSelectedContainer() or Asm4.getAssembly() or Asm4.getSelectedLink():
             return True
         return False
 
@@ -81,7 +81,7 @@ class hideLcsCmd:
 
         container = Asm4.getSelectedContainer()
         if not container:
-            container = Asm4.checkModel()
+            container = Asm4.getAssembly()
         link = Asm4.getSelectedLink()
         if link:
             showChildLCSs(link, False, processedLinks)
