@@ -123,8 +123,8 @@ def placeObjectToLCS( attObj, attLink, attDoc, attLCS ):
 """
 def makeAsmProperties( obj, reset=False ):
     # property AssemblyType
-    #if not hasattr(obj,'AssemblyType'):
-    #    obj.addProperty( 'App::PropertyString', 'AssemblyType', 'Assembly' )
+    if not hasattr(obj,'AssemblyType'):
+        obj.addProperty( 'App::PropertyString', 'AssemblyType', 'Assembly' )
     # property AttachedBy
     if not hasattr(obj,'AttachedBy'):
         obj.addProperty( 'App::PropertyString', 'AttachedBy', 'Assembly' )
@@ -138,7 +138,7 @@ def makeAsmProperties( obj, reset=False ):
     if not hasattr(obj,'SolverId'):
         obj.addProperty( 'App::PropertyString', 'SolverId', 'Assembly' )
     if reset:
-        #obj.AssemblyType = ''
+        obj.AssemblyType = ''
         #obj.AttachedBy = ''
         #obj.AttachedTo = ''
         #obj.AttachmentOffset = App.Placement()
@@ -251,6 +251,7 @@ def getSelectionTree():
             # this is a dot-separated list of the selection hierarchy
             selList = Gui.Selection.getSelectionEx("", 0)[0].SubElementNames[0]
             # this is the final tree table
+            # this first element will be overwritten later
             selTree = ['root part']
             # parse the list to find all objects
             rest = selList

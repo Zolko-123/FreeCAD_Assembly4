@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current 0.10.1, 2021-08-26
+Current 0.10.2, 2021-08-29
 
 
 
@@ -51,6 +51,9 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 
 ## Release notes
+
+* 2021.08.29 (**0.10.2**) :  
+Fix placeFasteners__
 
 * 2021.08.26 (**0.10.1**) :  
 Fix in selection in placeLink: this fixes a freeze in the UI, but direct selection in the tree is not possible anymore  
