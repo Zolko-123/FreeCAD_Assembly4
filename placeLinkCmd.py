@@ -68,7 +68,7 @@ class placeLinkCmd():
         selection = Asm4.getSelectedLink()
         if not selection :
             # This shouldn't happen
-            FCC.PrintWarning("This is not an error message you are supposed to see, something went wrong\n")
+            FCC.PrintWarning("Please select a linked part\n")
             return
         else:
             parent = selection.getParentGeoFeatureGroup()
@@ -539,6 +539,7 @@ class placeLinkUI():
                 if len(tree)==2:
                     root = App.ActiveDocument.getObject(tree[0])
                     if root==self.rootAssembly:
+                        selLink = self.rootAssembly
                         selLinkOK = True
                 # obj is in a child part
                 elif len(tree)==3:
