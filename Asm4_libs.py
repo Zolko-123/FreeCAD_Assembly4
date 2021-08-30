@@ -34,10 +34,12 @@ datumTypes = [  'PartDesign::CoordinateSystem', \
                 'PartDesign::Point']
 
 
-partInfo =[     'PartID',                       \
-                'PartName',                     \
-                'PartDescription',              \
-                'PartSupplier']
+partInfo =[     'Nom_de_la_piece',              \
+                'Reference_AP',                 \
+                'Angle1',                       \
+                'Angle2',                       \
+                'percage',                      \
+                'longueur' ]
 
 containerTypes = [  'App::Part', 'PartDesign::Body' ]
 
@@ -693,7 +695,23 @@ def splitExpressionLink( expr, parent ):
 
 
 
-
+"""
+    +-----------------------------------------------+
+    |         populate the ExpressionEngine         |
+    |               for a Datum object              |
+    |       linked to an LCS in a sister part       |
+    +-----------------------------------------------+
+"""
+def makeExpressionDatum( attLink, attPart, attLCS ):
+    # check that everything is defined
+    if attLink and attLCS:
+        # expr = Link.Placement * LinkedPart#LCS.Placement
+        expr = attLCS +'.Placement * AttachmentOffset'
+        if attPart:
+            expr = attLink+'.Placement * '+attPart+'#'+expr
+    else:
+        expr = False
+    return expr
 
 
 """
