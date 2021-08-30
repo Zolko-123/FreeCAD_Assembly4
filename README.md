@@ -1,24 +1,25 @@
 # FreeCAD Assembly 4 workbench
 
-Current 0.10.2, 2021-08-29
+Current 0.10.3, 2021-08-30
 
 
 
 ## Overview
 
-This assembly workbench allows to assemble into a single Part container under a single coordinate system other FreeCAD objects using Links, and place them relative to the assembly and to each-other. The parts in the assembly can invariably be in the same document as the assembly or in an external document.
+This assembly workbench allows to assemble into a single Part container under a single coordinate system other FreeCAD objects using Links, and place them relative to the assembly and to each-other. The parts in the assembly can invariably be in the same document as the assembly or in an external document. When parts are modified in their original document, they are instantly updated in the assembly.
 
-As an Assembly4 _Model_ is a standard FreeCAD `App::Part` container, it can be used and manipulated with any FreeCAD tool handling `App::Part` objects. In particular, it can be inserted into another Assembly4 _Model_ to create nested assemblies. It can also contain solids and datum objects. An Assembly4 _Model_ can be a stand-alone part, an assembly, a sub-assembly, and any combinations of these.
+As an Assembly4 _Assembly_ is a standard FreeCAD `App::Part` container, it can be used and manipulated with any FreeCAD tool handling `App::Part` objects. In particular, it can be inserted into another _Assembly_ to create nested assemblies. It can also contain solids and datum objects. An _Assembly_ can be an assembly, a sub-assembly or a stand-alone part, and any combinations of these; a document can contain only 1 _Assembly_.
 
 Parts and linked parts are placed to each-other in the host parent assembly by matching their Datum Coordinate Systems (called LCS for Local Coordinate System) using the built-in FreeCAD *ExpressionEngine.* No geometry is used to place and constrain parts relative to each other, thus avoiding a lot of the topological naming problems. 
 
 
 ![](Resources/media/Asm4_wb1.png)
 
+**Please Note:** only _Part_ and _Body_ containers at the root of a document can be inserted. Objects nested inside containers cannot be used directly by Assembly4. 
 
 **Please Note:** objects in the same document as the linked part but outside the `App::Part` container will **not** be inserted.
 
-**Please Note:** only _Part_ and _Body_ containers at the root of a document can be inserted. Objects nested inside containers cannot be used directly by Assembly4. 
+**Please Note:** objects need to be opened in the current session in order to be inserted into an assembly.
 
 
 
@@ -30,8 +31,7 @@ Parts and linked parts are placed to each-other in the host parent assembly by m
 
 Assembly 4 is available through the FreeCAD Addon Manager (menu **Tools > Addon Manager**). It is called _Assembly4_ in the Addon Repository.  
 
-**Important Note:** Assembly 4 needs FreeCAD v0.19 or above. Assembly4 is **not** compatible with FreeCAD v0.18 and before. Pre-built binaries on the v0.19 development branch can be found [here](https://github.com/FreeCAD/FreeCAD/releases/tag/0.19_pre)
-
+**Important Note:** Assembly 4 needs FreeCAD v0.19 or above. Assembly4 is **not** compatible with FreeCAD v0.18 and before. 
 
 
 
@@ -52,8 +52,12 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 ## Release notes
 
+* 2021.08.30 (**0.10.3**) :  
+Returned to the part placement preview in *placeLink*  
+Some small fixes  
+
 * 2021.08.29 (**0.10.2**) :  
-Fix placeFasteners__
+Fix placeFasteners  
 
 * 2021.08.26 (**0.10.1**) :  
 Fix in selection in placeLink: this fixes a freeze in the UI, but direct selection in the tree is not possible anymore  

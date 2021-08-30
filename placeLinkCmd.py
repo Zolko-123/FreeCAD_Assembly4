@@ -509,6 +509,8 @@ class placeLinkUI():
             Gui.Selection.addSelection( self.activeDoc.Name, self.rootAssembly.Name, p_LCStext)
         if a_LCS_selected:
             Gui.Selection.addSelection( self.activeDoc.Name, self.rootAssembly.Name, a_LCStext)
+        if p_LCS_selected and a_LCS_selected:
+            self.Apply()
         return
 
 
