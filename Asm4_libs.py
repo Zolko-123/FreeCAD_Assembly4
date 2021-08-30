@@ -34,10 +34,12 @@ datumTypes = [  'PartDesign::CoordinateSystem', \
                 'PartDesign::Point']
 
 
-partInfo =[     'PartID',                       \
-                'PartName',                     \
-                'PartDescription',              \
-                'PartSupplier']
+partInfo =[     'Nom_de_la_piece',              \
+                'Reference_AP',                 \
+                'Angle1',                       \
+                'Angle2',                       \
+                'percage',                      \
+                'longueur' ]
 
 containerTypes = [  'App::Part', 'PartDesign::Body' ]
 
