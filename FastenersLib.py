@@ -162,18 +162,19 @@ class placeFastenerCmd():
         if selection is None:
             return
         # check that the fastener is an Asm4 fastener
-        if not hasattr(selection,'AssemblyType'):
+        if not hasattr(selection,'SolverId'):
             Asm4.makeAsmProperties(selection)
         # we only deal with Asm4 or empty types
-        asmType = selection.AssemblyType
-        if asmType=='Part::Link' or asmType=='':
+        asmType = selection.SolverId
+        if asmType=='Placement::ExpressionEngine' or asmType=='':
             # now we should be safe, call the UI
             Gui.Control.showDialog( placeFastenerUI() )
         else:
             convert = Asm4.confirmBox("This doesn't seem to be an Assembly4 Fastener, but I can convert it.")
             if convert:
                 Asm4.makeAsmProperties( selection, reset=True )
-                selection.AssemblyType = 'Part::Link'
+                # selection.AssemblyType = 'Part::Link'
+                selection.SolverId = 'Placement::ExpressionEngine'
                 Gui.Control.showDialog( placeFastenerUI() )
             return
 
@@ -199,6 +200,15 @@ class placeFastenerUI():
         # has been checked before calling
         self.selectedFastener = getSelectionFS()
 
+        # check where the fastener was attached to
+        (self.old_Parent, separator, self.old_parentLCS) = self.selectedFastener.AttachedTo.partition('#')
+        # get and store the Placement's current ExpressionEngine:
+        self.old_EE = Asm4.placementEE( self.selectedFastener.ExpressionEngine )
+        if hasattr(self.selectedFastener,'AttachmentOffset'):
+            self.old_AO = self.selectedFastener.AttachmentOffset
+        else:
+            self.old_AO = None
+
         # Now we can draw the UI
         self.drawUI()
         self.initUI()
@@ -217,11 +227,6 @@ class placeFastenerUI():
                     objIcon = obj.LinkedObject.ViewObject.Icon
                     objText = Asm4.labelName(obj)
                     self.parentList.addItem( objIcon, objText, obj)
-
-        # check where the fastener was attached to
-        (self.old_Parent, separator, self.old_parentLCS) = self.selectedFastener.AttachedTo.partition('#')
-        # get and store the Placement's current ExpressionEngine:
-        self.old_EE = Asm4.placementEE( self.selectedFastener.ExpressionEngine )
 
         # decode the old ExpressionEngine
         # if the decode is unsuccessful, old_Expression is set to False
@@ -305,8 +310,10 @@ class placeFastenerUI():
 
     # Cancel
     def reject(self):
-        # restore previous expression if it existed
-        if self.old_EE != None:
+        # restore previous values if they existed
+        if self.old_AO is not None:
+            self.selectedFastener.AttachmentOffset = self.old_AO
+        if self.old_EE is not None:
             self.selectedFastener.setExpression('Placement', self.old_EE )
         self.selectedFastener.recompute()
         # highlight the selected LCS in its new position
@@ -702,24 +709,6 @@ class insertFastener:
         if Asm4.getAssembly():
             return True
         return None
-
-    '''
-    def getPart(self):
-        # check where to put our fastener
-        if Gui.Selection.getSelection():
-            selectedObj = Gui.Selection.getSelection()[0]
-            # first-choice: it's an App::Part
-            if selectedObj.TypeId=='App::Part':
-                return( selectedObj )
-            # if a previous fastener is selected, we return its parent container
-            if isFastener(selectedObj):
-                parent = selectedObj.getParentGeoFeatureGroup()
-                if parent and parent.TypeId == 'App::Part':
-                    return( parent )
-        # or of nothing is selected but there is a Part called Model:
-        else:
-            return Asm4.getAssembly()
-    '''
 
     def Activated(self):
         # check that the Fasteners WB has been loaded before:
