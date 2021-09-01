@@ -303,7 +303,7 @@ class placeLinkUI():
     def getStandardButtons(self):
         return int(QtGui.QDialogButtonBox.Cancel
                    | QtGui.QDialogButtonBox.Ok
-                   | QtGui.QDialogButtonBox.Apply)
+                   | QtGui.QDialogButtonBox.Ignore)
 
 
     # OK
@@ -521,39 +521,14 @@ class placeLinkUI():
         # we will determine by clicked coordinates
         # for manual tree selections the coordinates are (0,0,0)
         # 3D view click
-        if pnt != (0,0,0):
-            selObj = Gui.Selection.getSelection()[0]
-            selPath = Asm4.getSelectionPath(doc, obj, sub)
-            if selObj and len(selPath) > 2:
-                selLinkName = selPath[2]
-                selLink = self.activeDoc.getObject(selLinkName)
-                if selLink:
-                    selLinkOK = True
-            else:
-                self.parentList.setCurrentIndex( 1 )
-        '''
-        # tree selection
-        elif len(Gui.Selection.getSelection())==1:
-            selObj = Gui.Selection.getSelection()[0]
-            ( obj, tree ) = Asm4.getSelectionTree()
-            if selObj == obj:
-                # obj is selected in a root part
-                if len(tree)==2:
-                    root = App.ActiveDocument.getObject(tree[0])
-                    if root==self.rootAssembly:
-                        selLink = self.rootAssembly
-                        selLinkOK = True
-                # obj is in a child part
-                elif len(tree)==3:
-                    selLinkName = tree[1]
-                    selLink = self.activeDoc.getObject(selLinkName)
-                    if selLink:
-                        selLinkOK = True
-        '''
-        # if selection has been found
-        if selLinkOK:
+        #if pnt != (0,0,0):
+        selPath = Asm4.getSelectionPath(doc, obj, sub)
+        selObj = Gui.Selection.getSelection()[0]
+        if selObj and len(selPath) > 2:
+            selLinkName = selPath[2]
+            selLink = self.activeDoc.getObject(selLinkName)
             # if the selected datum belongs to the part to be placed
-            if self.selectedLink.Name == selLink.Name:
+            if selLink and selLink==self.selectedLink:
                 found = self.partLCSlist.findItems(Asm4.labelName(selObj), QtCore.Qt.MatchExactly)
                 if len(found) > 0:
                     self.partLCSlist.clearSelection()
@@ -562,8 +537,8 @@ class placeLinkUI():
                     self.partLCSlist.setCurrentItem(found[0])
                     # show and highlight LCS
                     selObj.Visibility=True
-                    self.onLCSclicked()
-                    #self.Apply()
+                    #self.onLCSclicked()
+                    self.Apply()
             # if the selected datum belongs to another part
             else:
                 idx = self.parentList.findText(Asm4.labelName(selLink), QtCore.Qt.MatchExactly)
@@ -572,7 +547,7 @@ class placeLinkUI():
                     self.parentList.setCurrentIndex(idx)
                 # the parent was not found in the child part list
                 # may-be the selected LCS is in the Parent Assembly
-                else:
+                elif selLink.TypeId in Asm4.datumTypes:
                     self.parentList.setCurrentIndex(1)
                 # this has triggered to fill in the attachment LCS list
                 # now lets try to find the selected LCS in this list
@@ -584,8 +559,8 @@ class placeLinkUI():
                     self.attLCSlist.setCurrentItem(found[0])
                     # show and highlight LCS
                     selObj.Visibility=True
-                    self.onLCSclicked()
-                    #self.Apply()
+                    #self.onLCSclicked()
+                    self.Apply()
 
 
     # Reorientation
