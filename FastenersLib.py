@@ -355,6 +355,14 @@ class placeFastenerUI():
 
         # check that all of them have something in
         if a_Link and a_LCS :
+            # add Asm4 properties if necessary
+            Asm4.makeAsmProperties( self.selectedFastener, reset=True )
+            # hide "offset" and "invert" properties to avoid confusion as they are not used in Asm4
+            if hasattr( self.selectedFastener, 'offset' ):
+                self.selectedFastener.setPropertyStatus('offset', 'Hidden')
+            if hasattr( self.selectedFastener, 'invert' ):
+                self.selectedFastener.setPropertyStatus('invert', 'Hidden')
+
             # <<LinkName>>.Placement.multiply( <<LinkName>>.<<LCS.>>.Placement )
             # expr = '<<'+ a_Part +'>>.Placement.multiply( <<'+ a_Part +'>>.<<'+ a_LCS +'.>>.Placement )'
             
@@ -502,18 +510,22 @@ class placeFastenerUI():
         selObj = Gui.Selection.getSelection()[0]
         if selObj and len(selPath) > 2:
             selLinkName = selPath[2]
-            idx = self.parentList.findText(selLinkName)
+            selLink = App.ActiveDocument.getObject(selLinkName)
+            idx = self.parentList.findText(Asm4.labelName(selLink), QtCore.Qt.MatchExactly)
+            # if selLink is in the child list
             if idx >= 0:
                 self.parentList.setCurrentIndex(idx)
-                #selObj = Gui.Selection.getSelection()[0]
-                #if selObj:
-                found = self.attLCSlist.findItems(Asm4.labelName(selObj), QtCore.Qt.MatchExactly)
-                if len(found) > 0:
-                    self.attLCSlist.clearSelection()
-                    found[0].setSelected(True)
-                    self.attLCSlist.scrollToItem(found[0])
-                    self.attLCSlist.setCurrentRow(self.attLCSlist.row(found[0]))
-                    self.onApply()
+            # else it might be an LCS in the root assembly
+            elif selLink.TypeId in Asm4.datumTypes:
+                self.parentList.setCurrentIndex(1)
+            # this has triggered to fill the LCS list
+            found = self.attLCSlist.findItems(Asm4.labelName(selObj), QtCore.Qt.MatchExactly)
+            if len(found) > 0:
+                self.attLCSlist.clearSelection()
+                found[0].setSelected(True)
+                self.attLCSlist.scrollToItem(found[0])
+                self.attLCSlist.setCurrentRow(self.attLCSlist.row(found[0]))
+                self.onApply()
 
 
     # Rotations
@@ -719,7 +731,7 @@ class insertFastener:
         self.asmDoc = App.ActiveDocument
         rootAssembly = Asm4.getAssembly()
         if rootAssembly :
-            newFastener = App.ActiveDocument.addObject("Part::FeaturePython",self.FStype)
+            newFastener = rootAssembly.newObject("Part::FeaturePython",self.FStype)
             newFastener.ViewObject.ShapeColor = self.FScolor
             if self.FStype == 'Screw':
                 FS.FSScrewObject( newFastener, 'ISO4762', None )
@@ -732,15 +744,15 @@ class insertFastener:
             # make the Proxy and stuff
             newFastener.Label = newFastener.Proxy.itemText
             FS.FSViewProviderTree(newFastener.ViewObject)
+            '''
             # add Asm4 properties if necessary
             Asm4.makeAsmProperties( newFastener, reset=True )
-            # add it to the Part 
-            rootAssembly.addObject( newFastener )
             # hide "offset" and "invert" properties to avoid confusion as they are not used in Asm4
             if hasattr( newFastener, 'offset' ):
                 newFastener.setPropertyStatus('offset', 'Hidden')
             if hasattr( newFastener, 'invert' ):
                 newFastener.setPropertyStatus('invert', 'Hidden')
+            '''
             newFastener.recompute()
             # ... and select it
             Gui.Selection.clearSelection()

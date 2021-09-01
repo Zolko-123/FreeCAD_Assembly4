@@ -157,6 +157,10 @@ class importDatumCmd():
             # unset Attachment
             targetDatum.MapMode = 'Deactivated'
             targetDatum.Support = None
+            # Set Asm4 properties
+            Asm4.makeAsmProperties( targetDatum, reset=True )
+            targetDatum.AttachedBy = 'Origin'
+            targetDatum.SolverId   = 'Placement::ExpressionEngine'
             # set the Placement's ExpressionEngine
             targetDatum.setExpression( 'Placement', expression )
             # hide initial datum
