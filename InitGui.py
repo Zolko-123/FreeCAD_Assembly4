@@ -115,8 +115,8 @@ class Assembly4Workbench(Workbench):
         self.dot()
         import releaseAttachmentCmd# creates an LCS in assembly and attaches it to an LCS relative to an external file
         self.dot()
-        #import makeBinderCmd       # creates an LCS in assembly and attaches it to an LCS relative to an external file
-        #self.dot()
+        import makeBinderCmd       # creates an LCS in assembly and attaches it to an LCS relative to an external file
+        self.dot()
         import VariablesLib        # creates an LCS in assembly and attaches it to an LCS relative to an external file
         self.dot()
         import AnimationLib        # creates an LCS in assembly and attaches it to an LCS relative to an external file
@@ -208,7 +208,7 @@ class Assembly4Workbench(Workbench):
                         "Asm4_placeFastener", 
                         "Asm4_cloneFastenersToAxes", 
                         "Asm4_importDatum", 
-                        #"Asm4_shapeBinder", 
+                        "Asm4_shapeBinder", 
                         #"Asm4_placeDatum", 
                         "Separator",
                         "Asm4_infoPart", 
@@ -238,7 +238,7 @@ class Assembly4Workbench(Workbench):
                         "Asm4_newSketch", 
                         'Asm4_createDatum',
                         "Asm4_importDatum", 
-                        #"Asm4_shapeBinder", 
+                        "Asm4_shapeBinder", 
                         "Separator",
                         "Asm4_placeLink", 
                         "Asm4_releaseAttachment", 
