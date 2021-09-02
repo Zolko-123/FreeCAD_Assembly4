@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current 0.10.3, 2021-08-30
+Current 0.10.4, 2021-09-01
 
 
 
@@ -51,6 +51,9 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 
 ## Release notes
+
+* 2021.09.01 (**0.10.4**) :  
+added wrapper for SubShapeBinder  
 
 * 2021.08.30 (**0.10.3**) :  
 Returned to the part placement preview in *placeLink*  
