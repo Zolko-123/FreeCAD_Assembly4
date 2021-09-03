@@ -12,8 +12,10 @@ import os
 import shutil
 ### to have the dir of external configuration file
 wbPath = os.path.dirname(__file__)
-InfoKeysFile = wbPath + '\\InfoKeys.py'
-AutoInfofile = wbPath + '\\InfoScript.py'
+InfoKeysFile = os.path.join( wbPath , 'InfoKeys.py' )
+InfoScript = os.path.join( wbPath , 'InfoScript.py' )
+InfoKeysFileInit = os.path.join( wbPath , 'InfoKeys.py' )
+InfoScriptInit = os.path.join( wbPath , 'InfoScript.py' )
 
 
 from PySide import QtGui, QtCore
@@ -29,16 +31,16 @@ try :
     import InfoKeys as InfoKeys
 ### else make the default external configuration file
 except :
-    shutil.copyfile(wbPath + '\\InfoKeysInit.py',InfoKeysFile)
+    shutil.copyfile( InfoKeysFileInit , InfoKeysFile )
     import InfoKeys as InfoKeys
 ### try to open existing external configuration file of user
 try :
-    fichier = open(AutoInfofile, 'r')
+    fichier = open(InfoScript, 'r')
     fichier.close()
     import InfoScript as autoInfo
 ### else make the default external configuration file
 except :
-    shutil.copyfile(wbPath + '\\InfoScriptInit.py',AutoInfofile)
+    shutil.copyfile( InfoScriptInit ,InfoScript)
     import InfoScript as autoInfo
 
 
