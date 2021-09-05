@@ -521,12 +521,18 @@ class placeLinkUI():
         # we will determine by clicked coordinates
         # for manual tree selections the coordinates are (0,0,0)
         # 3D view click
-        #if pnt != (0,0,0):
-        selPath = Asm4.getSelectionPath(doc, obj, sub)
-        selObj = Gui.Selection.getSelection()[0]
-        if selObj and len(selPath) > 2:
-            selLinkName = selPath[2]
-            selLink = self.activeDoc.getObject(selLinkName)
+        if pnt != (0,0,0):
+            selObj = Gui.Selection.getSelection()[0]
+            selPath = Asm4.getSelectionPath(doc, obj, sub)
+            if selObj and len(selPath) > 2:
+                selLinkName = selPath[2]
+                selLink = self.activeDoc.getObject(selLinkName)
+                if selLink:
+                    selLinkOK = True
+            else:
+                self.parentList.setCurrentIndex( 1 )
+        # if selection has been found
+        if selLinkOK:
             # if the selected datum belongs to the part to be placed
             if selLink and selLink==self.selectedLink:
                 found = self.partLCSlist.findItems(Asm4.labelName(selObj), QtCore.Qt.MatchExactly)
