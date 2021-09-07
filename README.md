@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current 0.10.5, 2021-09-05
+Current 0.10.6, 2021-09-07
 
 
 
@@ -51,6 +51,9 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 
 ## Release notes
+
+* 2021.09.07 (**0.10.6**) :  
+corrected placeLink selection mechanism: now, the user can select LCS in either the model tree, the 3D window or the task panel lists  
 
 * 2021.09.05 (**0.10.5**) :  
 reverted placeLink to 0.10.3 version (bug in the selections)  
