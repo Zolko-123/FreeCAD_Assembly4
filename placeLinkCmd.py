@@ -421,7 +421,7 @@ class placeLinkUI():
             self.rootAssembly.recompute(True)
             return True
         else:
-            #FCC.PrintWarning("Problem in selections\n")
+            FCC.PrintWarning("Problem in selections\n")
             return False
 
 
@@ -505,10 +505,16 @@ class placeLinkUI():
         # clear the selection in the GUI window
         Gui.Selection.clearSelection()
         # apply selections
+        sel = ''
         if p_LCS_selected:
-            Gui.Selection.addSelection( self.activeDoc.Name, self.rootAssembly.Name, p_LCStext)
-        if a_LCS_selected:
-            Gui.Selection.addSelection( self.activeDoc.Name, self.rootAssembly.Name, a_LCStext)
+            if a_LCS_selected:
+                selText = p_LCStext+','+a_LCStext
+            else:
+                selText = p_LCStext
+        elif a_LCS_selected:
+                selText = a_LCStext
+        if sel:
+            Gui.Selection.addSelection( self.activeDoc.Name, self.rootAssembly.Name, sel)
         if p_LCS_selected and a_LCS_selected:
             self.Apply()
         return
@@ -516,57 +522,57 @@ class placeLinkUI():
 
     # selection observer
     def addSelection(self, doc, obj, sub, pnt):
-        selLinkOK = False
-        # Since both 3D view clicks and manual tree selection gets into the same callback
-        # we will determine by clicked coordinates
-        # for manual tree selections the coordinates are (0,0,0)
-        # 3D view click
-        if pnt != (0,0,0):
-            selObj = Gui.Selection.getSelection()[0]
-            selPath = Asm4.getSelectionPath(doc, obj, sub)
-            if selObj and len(selPath) > 2:
-                selLinkName = selPath[2]
-                selLink = self.activeDoc.getObject(selLinkName)
-                if selLink:
-                    selLinkOK = True
-            else:
-                self.parentList.setCurrentIndex( 1 )
-        # if selection has been found
-        if selLinkOK:
-            # if the selected datum belongs to the part to be placed
-            if selLink and selLink==self.selectedLink:
+        parentFound = False
+        # selected object
+        selObj = Gui.Selection.getSelection()[0]
+        selPath = Asm4.getSelectionPath(doc, obj, sub)
+        # check that a datum object is selected
+        if selObj.TypeId in Asm4.datumTypes and len(selPath) > 2:
+            selLink = self.activeDoc.getObject(selPath[2])
+            # if it's the selected link to be placed:
+            if selLink == self.selectedLink:
+                # try to find the selected LCS in the partLCS list
                 found = self.partLCSlist.findItems(Asm4.labelName(selObj), QtCore.Qt.MatchExactly)
                 if len(found) > 0:
                     self.partLCSlist.clearSelection()
-                    found[0].setSelected(True)
                     self.partLCSlist.scrollToItem(found[0])
                     self.partLCSlist.setCurrentItem(found[0])
                     # show and highlight LCS
                     selObj.Visibility=True
-                    #self.onLCSclicked()
+                    # highlight the entire object if selected in the 3D window
+                    if pnt != (0,0,0):
+                        pass
+                    # preview the part's placement
                     self.Apply()
-            # if the selected datum belongs to another part
-            else:
+            # if it's a child in the assembly:
+            elif selLink in self.parentTable:
+                # find the parent
                 idx = self.parentList.findText(Asm4.labelName(selLink), QtCore.Qt.MatchExactly)
-                # the selected LCS is in a child part
                 if idx >= 0:
                     self.parentList.setCurrentIndex(idx)
-                # the parent was not found in the child part list
-                # may-be the selected LCS is in the Parent Assembly
-                elif selLink.TypeId in Asm4.datumTypes:
-                    self.parentList.setCurrentIndex(1)
+                    # this has triggered to fill in the attachment LCS list
+                    parentFound = True
+            # if it's the object itself, then it belongs to the root assembly 
+            elif selLink == selObj and obj == self.rootAssembly.Name:
+                self.parentList.setCurrentIndex(1)
                 # this has triggered to fill in the attachment LCS list
+                parentFound = True
+            # if a parent was found
+            if parentFound:
                 # now lets try to find the selected LCS in this list
                 found = self.attLCSlist.findItems(Asm4.labelName(selObj), QtCore.Qt.MatchExactly)
                 if len(found) > 0:
                     self.attLCSlist.clearSelection()
-                    found[0].setSelected(True)
                     self.attLCSlist.scrollToItem(found[0])
                     self.attLCSlist.setCurrentItem(found[0])
                     # show and highlight LCS
                     selObj.Visibility=True
-                    #self.onLCSclicked()
+                    # highlight the entire object if selected in the 3D window
+                    if pnt != (0,0,0):
+                        pass
+                    # preview the part's placement
                     self.Apply()
+
 
 
     # Reorientation
@@ -699,6 +705,7 @@ class placeLinkUI():
         |                    the UI                     |
         +-----------------------------------------------+
     """
+
     # initialize the UI for the selected link
     def initUI(self):
         # clear the parent name (if any)
