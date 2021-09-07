@@ -12,10 +12,10 @@ import os
 import shutil
 ### to have the dir of external configuration file
 wbPath = os.path.dirname(__file__)
-InfoKeysFile = os.path.join( wbPath , 'InfoKeys.py' )
-InfoScript = os.path.join( wbPath , 'InfoScript.py' )
-InfoKeysFileInit = os.path.join( wbPath , 'InfoKeys.py' )
-InfoScriptInit = os.path.join( wbPath , 'InfoScript.py' )
+InfoKeysFile       = os.path.join( wbPath, 'InfoKeys.py' )
+InfoScript         = os.path.join( wbPath, 'InfoScript.py' )
+InfoKeysFileInit   = os.path.join( wbPath, 'InfoKeysInit.py' )
+InfoScriptInit     = os.path.join( wbPath, 'InfoScriptInit.py' )
 
 
 from PySide import QtGui, QtCore

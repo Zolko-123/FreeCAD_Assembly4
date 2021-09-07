@@ -2,9 +2,8 @@
 # coding: utf-8
 #
 # LGPL
-# Copyright HUBERT Zoltán
 #
-# libraries for FreeCAD's Assembly 4 workbench
+# InfoKeysInit.py
 
 
 
@@ -16,7 +15,9 @@
 
 # Entitled of the informations for your part
 
-partInfo =[     'PartID',                       \
+partInfo = [    'PartID',                       \
                 'PartName',                     \
                 'PartDescription',              \
                 'PartSupplier']
+
+
