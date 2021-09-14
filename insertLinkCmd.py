@@ -60,18 +60,21 @@ class insertLink():
         self.drawUI()
 
         # initialise stuff
-        self.activeDoc = App.ActiveDocument
-        self.rootAssembly  = Asm4.getAssembly()
-        self.origLink = None
+        self.activeDoc    = App.ActiveDocument
+        self.rootAssembly = None
+        self.origLink     = None
+        self.brokenLink   = False
         self.allParts = []
         self.partsDoc = []
         self.filterPartList.clear()
         self.partList.clear()
         self.linkNameInput.clear()
-        self.brokenLink = False
 
+        # if an Asm4 Assembly is present, that's where we put the link
+        if Asm4.getAssembly():
+            self.rootAssembly  = Asm4.getAssembly()
         # an App::Part at the root of the document is selected, we insert the link there
-        if Asm4.getSelectedRootPart():
+        elif Asm4.getSelectedRootPart():
             self.rootAssembly = Asm4.getSelectedRootPart()
         # if a link is selected, we see if we can duplicate it
         elif Asm4.getSelectedLink():
@@ -94,11 +97,10 @@ class insertLink():
                     self.UI.setWindowTitle('Re-link broken link')
                     self.insertButton.setText('Replace')
                     self.linkNameInput.setText(Asm4.labelName(selObj))
-                    # self.linkNameInput.setReadOnly(True)
                     self.linkNameInput.setEnabled(False)
 
         if self.rootAssembly is None:
-            Asm4.warningBox( 'Please create an Assembly Model' )
+            Asm4.warningBox( 'Please create an Assembly' )
             return
 
         # Search for all App::Parts and PartDesign::Body in all open documents
@@ -145,13 +147,6 @@ class insertLink():
                 if lastChar.isnumeric():
                     (rootName,sep,num) = origName.rpartition('_')
                     proposedLinkName = Asm4.nextInstance(rootName)
-                    '''
-                    rootName = origName[:-1]
-                    instanceNum = int(lastChar)
-                    while App.ActiveDocument.getObject( rootName+str(instanceNum) ):
-                        instanceNum += 1
-                    proposedLinkName = rootName+str(instanceNum)
-                    '''
                 # else we append a _2 to the original name (Label)
                 else:
                     #proposedLinkName = origName+'_2'
@@ -171,7 +166,6 @@ class insertLink():
     """
     def onCreateLink(self):
         # parse the selected items 
-        # TODO : there should only be 1
         selectedPart = []
         for selected in self.partList.selectedIndexes():
             # get the selected part
@@ -190,34 +184,39 @@ class insertLink():
             # ... but only if we're in an Asm4 Model
             if self.rootAssembly == Asm4.getAssembly():
                 Gui.runCommand( 'Asm4_placeLink' )
-
         # only create link if there is a Part object and a name
         elif self.rootAssembly and selectedPart and linkName:
-            # create the App::Link with the user-provided name
-            #createdLink = self.activeDoc.getObject('Model').newObject( 'App::Link', linkName )
-            createdLink = self.rootAssembly.newObject( 'App::Link', linkName )
-            # assign the user-selected selectedPart to it
-            createdLink.LinkedObject = selectedPart
-            # If the name was already chosen, and a UID was generated:
-            if createdLink.Name != linkName:
-                # we try to set the label to the chosen name
-                createdLink.Label = linkName
-            # add the Asm4 properties
-            Asm4.makeAsmProperties(createdLink)
-            # update the link
-            createdLink.recompute()
-            # close the dialog UI...
-            self.UI.close()
-            # ... and launch the placement of the inserted part
-            Gui.Selection.clearSelection()
-            Gui.Selection.addSelection( self.activeDoc.Name, self.rootAssembly.Name, createdLink.Name+'.' )
-            # ... but only if we're in an Asm4 Model
-            if self.rootAssembly == Asm4.getAssembly():
-                Gui.runCommand( 'Asm4_placeLink' )
+            # check that the current document had been saved
+            # or that it's the same document as that of the selected part
+            if App.ActiveDocument.FileName!='' or App.ActiveDocument==selectedPart.Document:
+                # create the App::Link with the user-provided name
+                #createdLink = self.activeDoc.getObject('Model').newObject( 'App::Link', linkName )
+                createdLink = self.rootAssembly.newObject( 'App::Link', linkName )
+                # assign the user-selected selectedPart to it
+                createdLink.LinkedObject = selectedPart
+                # If the name was already chosen, and a UID was generated:
+                if createdLink.Name != linkName:
+                    # we try to set the label to the chosen name
+                    createdLink.Label = linkName
+                # add the Asm4 properties
+                Asm4.makeAsmProperties(createdLink)
+                # update the link
+                createdLink.recompute()
+                # close the dialog UI...
+                self.UI.close()
+                # ... and launch the placement of the inserted part
+                Gui.Selection.clearSelection()
+                Gui.Selection.addSelection( self.activeDoc.Name, self.rootAssembly.Name, createdLink.Name+'.' )
+                # ... but only if we're in an Asm4 Model
+                if self.rootAssembly == Asm4.getAssembly():
+                    Gui.runCommand( 'Asm4_placeLink' )
+            else:
+                Asm4.warningBox('The current document must be saved before inserting an external part')
+                return
+
 
         # if still open, close the dialog UI
         self.UI.close()
-
 
 
     def onItemClicked( self, item ):
@@ -225,17 +224,17 @@ class insertLink():
             # get the selected part
             part = self.allParts[ selected.row() ]
             doc  = self.partsDoc[ selected.row() ]
-
-            # if the App::Part has been renamed by the user, we suppose it's important
-            # thus we append the Label to the link's name
-            # this might happen if there are multiple App::Parts in a document
-            if doc == self.activeDoc:
-                proposedLinkName = part.Label
-            else:
-                if part.Name == 'Model':
+            # by default, the link shall have the same name as the original part
+            proposedLinkName = part.Label
+            # if it's a sub-assembly
+            if part.Name == 'Model' or part.Name == 'Assembly':
+                # if it has been renamed, we take the name given by the user
+                if part.Name == part.Label:
                     proposedLinkName = part.Document.Name
+                # if not, we take the document
                 else:
-                    proposedLinkName = part.Document.Name+'_'+part.Label
+                    proposedLinkName = part.Label
+            # set the proposed name into the text field, unless it's a broken link
             if not self.brokenLink:
                 self.linkNameInput.setText( proposedLinkName )
 
