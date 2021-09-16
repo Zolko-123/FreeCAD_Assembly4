@@ -16,6 +16,7 @@ from FreeCAD import Console as FCC
 
 import Asm4_libs as Asm4
 import infoPartCmd
+import InfoKeys
 crea = infoPartCmd.infoPartUI.makePartInfo
 rempli = infoPartCmd.infoPartUI.infoDefault
 
@@ -216,7 +217,7 @@ class makeBOM:
                     else:
                         self.PartsList[object.Label] = dict()
                         self.PartsList[object.Label]['Qty.'] = 1
-                        for prop in Asm4.partInfo:
+                        for prop in InfoKeys.partInfo:
                             try:
                                 getattr(object,prop)
                                 self.PartsList[object.Label][prop] = getattr(object,prop)
