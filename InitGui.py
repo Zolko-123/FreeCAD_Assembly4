@@ -137,8 +137,6 @@ class Assembly4Workbench(Workbench):
         self.dot()
         import configurationEngine # save/restore configuration
         self.dot()
-        import test
-        self.dot
 
         # Fasteners
         if self.checkWorkbench('FastenersWorkbench'):
@@ -213,7 +211,6 @@ class Assembly4Workbench(Workbench):
                         "Asm4_shapeBinder", 
                         #"Asm4_placeDatum", 
                         "Separator",
-                        "Asm4_test",
                         "Asm4_infoPart", 
                         "Asm4_makeBOM", 
                         "Asm4_Measure", 
@@ -234,6 +231,7 @@ class Assembly4Workbench(Workbench):
                         "Asm4_newPart", 
                         "Asm4_newBody", 
                         "Asm4_newGroup", 
+                        "Asm4_infoPart", 
                         "Asm4_insertLink", 
                         self.FastenersCmd, 
                         "Separator",
@@ -249,17 +247,13 @@ class Assembly4Workbench(Workbench):
                         #"Asm4_placeDatum", 
                         "Asm4_mirrorPart", 
                         "Asm4_circularArray", 
-                        "Separator", 
+                        "Separator",
+                        "Asm4_makeBOM", 
                         "Asm4_Measure", 
                         "Asm4_variablesCmd",
                         "Asm4_openConfigurations", 
                         "Asm4_Animate",
-                        "Asm4_updateAssembly",
-                        "Separator", 
-                        "Asm4_test",
-                        "Asm4_infoPart",
-                        "Asm4_makeBOM",
-                        ]
+                        "Asm4_updateAssembly"]
         return commandList
 
 
