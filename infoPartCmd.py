@@ -21,9 +21,9 @@ import Asm4_libs as Asm4
 #wbPath = os.path.dirname(__file__)
 wbPath = Asm4.wbPath
 InfoKeysFile       = os.path.join( wbPath, 'InfoKeys.py' )
-InfoScript         = os.path.join( wbPath, 'InfoScript.py' )
+# InfoScript         = os.path.join( wbPath, 'InfoScript.py' )
 InfoKeysFileInit   = os.path.join( wbPath, 'InfoKeysInit.py' )
-InfoScriptInit     = os.path.join( wbPath, 'InfoScriptInit.py' )
+# InfoScriptInit     = os.path.join( wbPath, 'InfoScriptInit.py' )
 
 
 ### try to open existing external configuration file of user
@@ -36,6 +36,7 @@ except :
     shutil.copyfile( InfoKeysFileInit , InfoKeysFile )
     import InfoKeys as InfoKeys
 ### try to open existing external configuration file of user
+'''
 try :
     fichier = open(InfoScript, 'r')
     fichier.close()
@@ -44,7 +45,7 @@ try :
 except :
     shutil.copyfile( InfoScriptInit ,InfoScript)
     import InfoScript as autoInfo
-
+'''
 
 
 """
@@ -151,9 +152,14 @@ class infoPartUI():
                     text=self.infos[i].text()
                     setattr(self.part,prop[0],str(text))
 
+    # edit info keys
+    def editKeys(self):
+        pass
+
     # InfoDefault
-    def infoDefault(self):
-        autoInfo.infoDefault(self)    
+    def loadTemplate(self):
+        #autoInfo.infoDefault(self)
+        pass
 
     # close
     def finish(self):
@@ -204,8 +210,8 @@ class infoPartUI():
         self.form.setLayout(self.mainLayout)
 
         # Actions
-        self.editFields.clicked.connect(self.addNew)
-        self.loadTemplate.clicked.connect(self.infoDefault)
+        self.editFields.clicked.connect(self.editKeys)
+        self.loadTemplate.clicked.connect(self.loadTemplate)
 
 
 
