@@ -8,15 +8,7 @@
 
 
 
-import os
-import shutil
-### to have the dir of external configuration file
-wbPath = os.path.dirname(__file__)
-InfoKeysFile       = os.path.join( wbPath, 'InfoKeys.py' )
-InfoScript         = os.path.join( wbPath, 'InfoScript.py' )
-InfoKeysFileInit   = os.path.join( wbPath, 'InfoKeysInit.py' )
-InfoScriptInit     = os.path.join( wbPath, 'InfoScriptInit.py' )
-
+import os, shutil
 
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
@@ -24,6 +16,16 @@ import FreeCAD as App
 from FreeCAD import Console as FCC
 
 import Asm4_libs as Asm4
+
+### to have the dir of external configuration file
+#wbPath = os.path.dirname(__file__)
+wbPath = Asm4.wbPath
+InfoKeysFile       = os.path.join( wbPath, 'InfoKeys.py' )
+InfoScript         = os.path.join( wbPath, 'InfoScript.py' )
+InfoKeysFileInit   = os.path.join( wbPath, 'InfoKeysInit.py' )
+InfoScriptInit     = os.path.join( wbPath, 'InfoScriptInit.py' )
+
+
 ### try to open existing external configuration file of user
 try :
     fichier = open(InfoKeysFile, 'r')
@@ -51,18 +53,18 @@ except :
     +-----------------------------------------------+
 """
 
-# allowed types to edit info
-partTypes = [ 'App::Part', 'PartDesign::Body']
-
+'''
 def checkPart():
+    # allowed types to edit info
+    partTypes = [ 'App::Part', 'PartDesign::Body']
     selectedPart = None
     # if an App::Part is selected
     if len(Gui.Selection.getSelection())==1:
-        selectedObj = Gui.Selection.getSelection()[0]
-        if selectedObj.TypeId in partTypes:
-            selectedPart = selectedObj
+        selObj = Gui.Selection.getSelection()[0]
+        if selObj.TypeId in partTypes:
+            selectedPart = selObj
     return selectedPart
-
+'''
 
 
 """
@@ -75,14 +77,16 @@ class infoPartCmd():
         super(infoPartCmd,self).__init__()
 
     def GetResources(self):
-        return {"MenuText": "Edit Part Information",
-                "ToolTip": "Edit Part Information",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_PartInfo.svg')
-                }
+        tooltip  = "Edit part information. "
+        tooltip += "The default part information keys are in the file "
+        tooltip += "\"FreeCAD/Mod/Assembly4/InfoKeys.py\", edit as you need"
+        iconFile = os.path.join( Asm4.iconPath, 'Asm4_PartInfo.svg' )
+        return {"MenuText": "Edit Part Information", "ToolTip": tooltip, "Pixmap": iconFile }
 
     def IsActive(self):
-        # We only insert a link into an Asm4  Model
-        if App.ActiveDocument and checkPart():
+        # We only add infos for some objects
+        # if App.ActiveDocument and checkPart():
+        if App.ActiveDocument and Asm4.getSelectedContainer():
             return True
         return False
 
@@ -107,7 +111,8 @@ class infoPartUI():
         self.form.setWindowTitle("Edit Part Information")
        
         # hey-ho, let's go
-        self.part = checkPart()
+        self.part = Asm4.getSelectedContainer()
+        self.infoKeys = InfoKeys.partInfo
         self.makePartInfo()
         self.infoTable = []
         self.getPartInfo()
@@ -124,9 +129,9 @@ class infoPartUI():
                     value = self.part.getPropertyByName(prop)
                     self.infoTable.append([prop,value])
 
+    # add the default part information
     def makePartInfo( self, reset=False ):
-        # add the default part information
-        for info in InfoKeys.partInfo:
+        for info in self.infoKeys:
             try :
                 self.part
                 if not hasattr(self.part,info):
@@ -189,18 +194,18 @@ class infoPartUI():
         
         # Buttons
         self.buttonsLayout = QtGui.QHBoxLayout()
-        self.AddNew = QtGui.QPushButton('Add New Info')
-        self.InfoDefault = QtGui.QPushButton('automatic info')
-        self.buttonsLayout.addWidget(self.AddNew)
+        self.editFields = QtGui.QPushButton('Edit Fields')
+        self.loadTemplate = QtGui.QPushButton('Load Template')
+        self.buttonsLayout.addWidget(self.editFields)
         self.buttonsLayout.addStretch()
-        self.buttonsLayout.addWidget(self.InfoDefault)
+        self.buttonsLayout.addWidget(self.loadTemplate)
 
         self.mainLayout.addLayout(self.buttonsLayout)
         self.form.setLayout(self.mainLayout)
 
         # Actions
-        self.AddNew.clicked.connect(self.addNew)
-        self.InfoDefault.clicked.connect(self.infoDefault)
+        self.editFields.clicked.connect(self.addNew)
+        self.loadTemplate.clicked.connect(self.infoDefault)
 
 
 
