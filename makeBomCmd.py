@@ -15,10 +15,10 @@ import FreeCAD as App
 from FreeCAD import Console as FCC
 
 import Asm4_libs as Asm4
-import infoPartCmd
+#import infoPartCmd
 import InfoKeys
-crea = infoPartCmd.infoPartUI.makePartInfo
-rempli = infoPartCmd.infoPartUI.infoDefault
+#crea = infoPartCmd.infoPartUI.makePartInfo
+#rempli = infoPartCmd.infoPartUI.infoDefault
 
 
 
@@ -222,9 +222,12 @@ class makeBOM:
                                 getattr(object,prop)
                                 self.PartsList[object.Label][prop] = getattr(object,prop)
                             except AttributeError:
-                                print ('création fiche info marquante pour',object.Label)
-                                crea(object)
-                                rempli(object)
+                                print ('L\'object \"',object.Label,'\" n\'a pas d\'info \"',prop,'\"')
+                                # create an entry for that part under its name
+                                if prop=='PartName':
+                                    self.PartsList[object.Label][prop] = object.Label
+                                # crea(object)
+                                # rempli(object)
                             
                         '''tab[object.FullName]["var"] = {} '''
     
@@ -329,7 +332,7 @@ class makeBOM:
         else:
             return False
 
-
+    '''
     def checkModel(self):
         # check whether there is already a Model in the document
         # Returns True if there is an object called 'Assembly' or 'Model' for old version
@@ -339,6 +342,7 @@ class makeBOM:
             return(True)
         else:
             return(False)
+    '''
 
 ### def onCopy by FarmingSoul - Copy on Spreadsheet
 

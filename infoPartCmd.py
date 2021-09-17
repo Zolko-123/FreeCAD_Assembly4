@@ -114,6 +114,9 @@ class infoPartUI():
         # hey-ho, let's go
         self.part = Asm4.getSelectedContainer()
         self.infoKeys = InfoKeys.partInfo
+        # the attribute PartName is mandatory in the info-keys
+        if not 'PartName' in self.infoKeys:
+            self.infoKeys.append('PartName')
         self.makePartInfo()
         self.infoTable = []
         self.getPartInfo()
@@ -157,7 +160,7 @@ class infoPartUI():
         pass
 
     # InfoDefault
-    def loadTemplate(self):
+    def infoDefault(self):
         #autoInfo.infoDefault(self)
         pass
 
@@ -211,7 +214,7 @@ class infoPartUI():
 
         # Actions
         self.editFields.clicked.connect(self.editKeys)
-        self.loadTemplate.clicked.connect(self.loadTemplate)
+        self.loadTemplate.clicked.connect(self.infoDefault)
 
 
 
