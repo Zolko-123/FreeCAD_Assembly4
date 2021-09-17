@@ -201,17 +201,17 @@ class infoPartUI():
         # Buttons
         self.buttonsLayout = QtGui.QHBoxLayout()
         self.editFields = QtGui.QPushButton('Edit Fields')
-        self.loadTemplate = QtGui.QPushButton('Load Template')
+        self.loadTemplateBut = QtGui.QPushButton('Load Template')
         self.buttonsLayout.addWidget(self.editFields)
         self.buttonsLayout.addStretch()
-        self.buttonsLayout.addWidget(self.loadTemplate)
+        self.buttonsLayout.addWidget(self.loadTemplateBut)
 
         self.mainLayout.addLayout(self.buttonsLayout)
         self.form.setLayout(self.mainLayout)
 
         # Actions
         self.editFields.clicked.connect(self.editKeys)
-        self.loadTemplate.clicked.connect(self.loadTemplate)
+        self.loadTemplateBut.clicked.connect(self.loadTemplate)
 
 
 

@@ -18,7 +18,7 @@ import Asm4_libs as Asm4
 import infoPartCmd
 import InfoKeys
 crea = infoPartCmd.infoPartUI.makePartInfo
-rempli = infoPartCmd.infoPartUI.infoDefault
+rempli = infoPartCmd.infoPartUI.loadTemplate
 
 
 
