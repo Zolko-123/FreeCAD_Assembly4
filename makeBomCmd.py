@@ -166,10 +166,10 @@ class makeBOM:
         super(makeBOM,self).__init__()
 
     def GetResources(self):
-        return {"MenuText": "Create Part List",
-                "ToolTip": "Create the Bom (Bill of Materials) of an Assembly4 Model",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_PartsList.svg')
-                }
+        tooltip  = "EXPERIMENTAL !!! "
+        tooltip += "Create the Bill of Materials of an Assembly"
+        iconFile = os.path.join( Asm4.iconPath, 'Asm4_PartsList.svg' )
+        return {"MenuText": "Create Part List", "ToolTip": tooltip, "Pixmap": iconFile }
 
 
     def IsActive(self):
@@ -187,11 +187,17 @@ class makeBOM:
         try :
             self.model = self.modelDoc.Assembly
         except:
-            print("ancien Model")
+            try:
+                self.model = self.modelDoc.Model
+                print("legacy Assembly4 Model")
+            except:
+                print("Hum, this might not work")
+        '''
         try :
             self.model = self.modelDoc.Model
         except:
             print("nouveau Assembly")
+        '''
         self.drawUI()
         self.UI.show()
         self.BOM.clear()
