@@ -46,27 +46,8 @@ except :
     shutil.copyfile( InfoScriptInit ,InfoScript)
     import InfoScript as autoInfo
 '''
-
-
-"""
-    +-----------------------------------------------+
-    |               Helper functions                |
-    +-----------------------------------------------+
-"""
-
-'''
-def checkPart():
-    # allowed types to edit info
-    partTypes = [ 'App::Part', 'PartDesign::Body']
-    selectedPart = None
-    # if an App::Part is selected
-    if len(Gui.Selection.getSelection())==1:
-        selObj = Gui.Selection.getSelection()[0]
-        if selObj.TypeId in partTypes:
-            selectedPart = selObj
-    return selectedPart
-'''
-
+### but for the moment use internal configuration file
+import InfoScriptInit as autoInfo
 
 """
     +-----------------------------------------------+
@@ -115,8 +96,8 @@ class infoPartUI():
         self.part = Asm4.getSelectedContainer()
         self.infoKeys = InfoKeys.partInfo
         # the attribute PartName is mandatory in the info-keys
-        if not 'PartName' in self.infoKeys:
-            self.infoKeys.append('PartName')
+        #if not 'PartName' in self.infoKeys:
+            #self.infoKeys.append('PartName')
         self.makePartInfo()
         self.infoTable = []
         self.getPartInfo()
@@ -161,8 +142,8 @@ class infoPartUI():
 
     # InfoDefault
     def infoDefault(self):
-        #autoInfo.infoDefault(self)
-        pass
+        autoInfo.infoDefault(self)
+        #pass
 
     # close
     def finish(self):
@@ -203,18 +184,18 @@ class infoPartUI():
         
         # Buttons
         self.buttonsLayout = QtGui.QHBoxLayout()
-        self.editFields = QtGui.QPushButton('Edit Fields')
-        self.loadTemplate = QtGui.QPushButton('Load Template')
-        self.buttonsLayout.addWidget(self.editFields)
+        self.confFields = QtGui.QPushButton('Config')
+        self.autoFill = QtGui.QPushButton('auto-filling')
+        self.buttonsLayout.addWidget(self.confFields)
         self.buttonsLayout.addStretch()
-        self.buttonsLayout.addWidget(self.loadTemplate)
+        self.buttonsLayout.addWidget(self.autoFill)
 
         self.mainLayout.addLayout(self.buttonsLayout)
         self.form.setLayout(self.mainLayout)
 
         # Actions
-        self.editFields.clicked.connect(self.editKeys)
-        self.loadTemplate.clicked.connect(self.infoDefault)
+        self.confFields.clicked.connect(self.editKeys)
+        self.autoFill.clicked.connect(self.infoDefault)
 
 
 
