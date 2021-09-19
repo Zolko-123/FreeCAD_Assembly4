@@ -2,3 +2,5 @@ __pycache__/*
 *.directory
 AnimationLib_translated.py
 .gitignore
+InfoKeys.py
+InfoScript.py

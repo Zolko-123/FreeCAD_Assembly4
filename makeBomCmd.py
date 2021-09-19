@@ -15,7 +15,10 @@ import FreeCAD as App
 from FreeCAD import Console as FCC
 
 import Asm4_libs as Asm4
-
+#import infoPartCmd
+import InfoKeys
+#crea = infoPartCmd.infoPartUI.makePartInfo
+#rempli = infoPartCmd.infoPartUI.infoDefault
 
 
 
@@ -163,10 +166,10 @@ class makeBOM:
         super(makeBOM,self).__init__()
 
     def GetResources(self):
-        return {"MenuText": "Create Part List",
-                "ToolTip": "Create the Bom (Bill of Materials) of an Assembly4 Model",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_PartsList.svg')
-                }
+        tooltip  = "EXPERIMENTAL !!! "
+        tooltip += "Create the Bill of Materials of an Assembly"
+        iconFile = os.path.join( Asm4.iconPath, 'Asm4_PartsList.svg' )
+        return {"MenuText": "Create Part List", "ToolTip": tooltip, "Pixmap": iconFile }
 
 
     def IsActive(self):
@@ -175,76 +178,138 @@ class makeBOM:
             return False
         else: 
             return True
-        
 
     def Activated(self):
         self.UI = QtGui.QDialog()
         # get the current active document to avoid errors if user changes tab
         self.modelDoc = App.ActiveDocument
-        # self.model = self.modelDoc.Model
-        self.model = Asm4.getAssembly()
+        # for the compatibility with the old Model
+        try :
+            self.model = self.modelDoc.Assembly
+        except:
+            try:
+                self.model = self.modelDoc.Model
+                print("legacy Assembly4 Model")
+            except:
+                print("Hum, this might not work")
+        '''
+        try :
+            self.model = self.modelDoc.Model
+        except:
+            print("nouveau Assembly")
+        '''
         self.drawUI()
         self.UI.show()
         self.BOM.clear()
-        self.PartsList = ''
+        self.PartsList = {}
         self.listParts(self.model)
-        self.BOM.setPlainText(self.PartsList)
+        self.BOM.setPlainText(str(self.PartsList))
 
+### def listParts by FarmingSoul - use of Part info Edit
 
-    def listParts( self, obj, level=0 ):
-        indent = '\n'+'\t'*level
-        if obj.Document == self.modelDoc:
-            docName = ''
+    def listParts(self,object,level=0):
+        forbbox = ('PartDesign::Body', 'Part::Feature', 'Part::FeaturePython')
+        if object == None:
+            return
+        if self.PartsList == None:
+            self.PartsList = {}
+        if object.TypeId=='App::Link':
+            self.listParts(object.LinkedObject,level+1)
         else:
-            docName = obj.Document.Name+'#'
-        #partBB = App.BoundBox()
-        # list the Variables
-        if obj.Name=='Variables':
-            #print(indent+'Variables:')
-            self.PartsList += indent+'Variables:'
-            for prop in obj.PropertiesList:
-                if obj.getGroupOfProperty(prop)=='Variables' :
-                    propValue = obj.getPropertyByName(prop)
-                    self.PartsList += indent+'\t'+prop+' = '+str(propValue)
-        # if it's part we look for sub-objects
-        elif obj.TypeId=='App::Part':
-            self.PartsList += indent +docName +obj.Label
-            for objname in obj.getSubObjects():
-                subobj = obj.Document.getObject( objname[0:-1] )
-                self.listParts( subobj, level+1 )
-        # if its a link, look for the linked object
-        elif obj.TypeId=='App::Link':
-            self.PartsList += indent+obj.Label+' -> '
-            self.listParts( obj.LinkedObject, level )
-        # if its a Body container we also add the document name and the size
-        elif obj.TypeId=='PartDesign::Body':
-            self.PartsList += indent +docName +obj.Label
-            if obj.Label2:
-                self.PartsList += ' ('+obj.Label2+')'
-            bb = obj.Shape.BoundBox
-            if abs(max(bb.XLength,bb.YLength,bb.ZLength)) < 1e+10:
-                Xsize = str(int((bb.XLength * 10)+0.099)/10)
-                Ysize = str(int((bb.YLength * 10)+0.099)/10)
-                Zsize = str(int((bb.ZLength * 10)+0.099)/10)
-                self.PartsList += ', Size: '+Xsize+' x '+Ysize+' x '+Zsize
-        # everything else except datum objects
-        elif obj.TypeId not in Asm4.datumTypes:
-            self.PartsList += indent+obj.Label
-            if obj.Label2:
-                self.PartsList += ' ('+obj.Label2+')'
-            else:
-                self.PartsList += ' ('+obj.TypeId+')'
-            # if the object has a shape, add it at the end of the line
-            if hasattr(obj,'Shape') and obj.Shape.BoundBox.isValid():
-                bb = obj.Shape.BoundBox
-                if max(bb.XLength,bb.YLength,bb.ZLength) < 1e+10:
-                    Xsize = str(int((bb.XLength * 10)+0.099)/10)
-                    Ysize = str(int((bb.YLength * 10)+0.099)/10)
-                    Zsize = str(int((bb.ZLength * 10)+0.099)/10)
-                    self.PartsList += ', Size: '+Xsize+' x '+Ysize+' x '+Zsize
+            if object.TypeId=='App::Part':
+                if level > 0:
+                    if object.Label in self.PartsList:
+                        self.PartsList[object.Label]['Qty.'] = self.PartsList[object.Label]['Qty.'] + 1
+                    else:
+                        self.PartsList[object.Label] = dict()
+                        self.PartsList[object.Label]['Qty.'] = 1
+                        for prop in InfoKeys.partInfo:
+                            try:
+                                getattr(object,prop)
+                                self.PartsList[object.Label][prop] = getattr(object,prop)
+                            except AttributeError:
+                                print ('L\'object \"',object.Label,'\" n\'a pas d\'info \"',prop,'\"')
+                                # create an entry for that part under its name
+                                if prop=='PartName':
+                                    self.PartsList[object.Label][prop] = object.Label
+                                # crea(object)
+                                # rempli(object)
+                            
+                        '''tab[object.FullName]["var"] = {} '''
+    
+                '''# look for Variables
+                if object.Document.getObject( 'Variables' ):
+                    print(indent+'  Variables:')
+                    vars = object.Document.getObject( 'Variables' )
+                    for prop in vars.PropertiesList:
+                        if vars.getGroupOfProperty(prop)=='Variables' :
+                            propValue = vars.getPropertyByName(prop)
+                            print(indent+'	'+prop+' = '+str(propValue))
+                            if not object.FullName in tab:
+                                tab[object.FullName] = {}
+                                tab[object.FullName]['fullname'] = object.FullName
+                                tab[object.FullName]["var"] = {}
+                            tab[object.FullName]["var"][prop] = str(propValue) '''
+                # look for sub-objects
+                for objname in object.getSubObjects():
+                    subobj = object.Document.getObject( objname[0:-1] )
+                    self.listParts(subobj,level+1)
         return
 
-
+### def listParts by Zolko - not use of Part info Edit
+###    def listParts( self, obj, level=0 ):
+###        indent = '\n'+'\t'*level
+###        if obj.Document == self.modelDoc:
+###            docName = ''
+###        else:
+###            docName = obj.Document.Name+'#'
+###        #partBB = App.BoundBox()
+###        # list the Variables
+###        if obj.Name=='Variables':
+###            #print(indent+'Variables:')
+###            self.PartsList += indent+'Variables:'
+###            for prop in obj.PropertiesList:
+###                if obj.getGroupOfProperty(prop)=='Variables' :
+###                    propValue = obj.getPropertyByName(prop)
+###                    self.PartsList += indent+'\t'+prop+' = '+str(propValue)
+###        # if it's part we look for sub-objects
+###        elif obj.TypeId=='App::Part':
+###            self.PartsList += indent +docName +obj.Label
+###            for objname in obj.getSubObjects():
+###                subobj = obj.Document.getObject( objname[0:-1] )
+###                self.listParts( subobj, level+1 )
+###        # if its a link, look for the linked object
+###        elif obj.TypeId=='App::Link':
+###            self.PartsList += indent+obj.Label+' -> '
+###            self.listParts( obj.LinkedObject, level )
+###        # if its a Body container we also add the document name and the size
+###        elif obj.TypeId=='PartDesign::Body':
+###            self.PartsList += indent +docName +obj.Label
+###            if obj.Label2:
+###                self.PartsList += ' ('+obj.Label2+')'
+###            bb = obj.Shape.BoundBox
+###            if abs(max(bb.XLength,bb.YLength,bb.ZLength)) < 1e+10:
+###                Xsize = str(int((bb.XLength * 10)+0.099)/10)
+###                Ysize = str(int((bb.YLength * 10)+0.099)/10)
+###                Zsize = str(int((bb.ZLength * 10)+0.099)/10)
+###                self.PartsList += ', Size: '+Xsize+' x '+Ysize+' x '+Zsize
+###        # everything else except datum objects
+###        elif obj.TypeId not in Asm4.datumTypes:
+###            self.PartsList += indent+obj.Label
+###            if obj.Label2:
+###                self.PartsList += ' ('+obj.Label2+')'
+###            else:
+###                self.PartsList += ' ('+obj.TypeId+')'
+###            # if the object has a shape, add it at the end of the line
+###            if hasattr(obj,'Shape') and obj.Shape.BoundBox.isValid():
+###                bb = obj.Shape.BoundBox
+###                if max(bb.XLength,bb.YLength,bb.ZLength) < 1e+10:
+###                    Xsize = str(int((bb.XLength * 10)+0.099)/10)
+###                    Ysize = str(int((bb.YLength * 10)+0.099)/10)
+###                    Zsize = str(int((bb.ZLength * 10)+0.099)/10)
+###                    self.PartsList += ', Size: '+Xsize+' x '+Ysize+' x '+Zsize
+###        return
+    
     def onSave(self):
         #pass
         """Saves ASCII tree to user system file"""
@@ -276,20 +341,49 @@ class makeBOM:
     '''
     def checkModel(self):
         # check whether there is already a Model in the document
-        # Returns True if there is an object called 'Model'
-        if App.ActiveDocument and App.ActiveDocument.getObject('Model') and App.ActiveDocument.Model.TypeId=='App::Part':
+        # Returns True if there is an object called 'Assembly' or 'Model' for old version
+        if App.ActiveDocument and App.ActiveDocument.getObject('Assembly') and App.ActiveDocument.Assembly.TypeId == 'App::Part':
+            return(True)
+        elif App.ActiveDocument and App.ActiveDocument.getObject('Model') and App.ActiveDocument.Model.TypeId == 'App::Part':
             return(True)
         else:
             return(False)
     '''
 
+### def onCopy by FarmingSoul - Copy on Spreadsheet
 
     def onCopy(self):
-        """Copies Parts List to clipboard"""
-        self.BOM.selectAll()
-        self.BOM.copy()
-        self.BOM.setPlainText("Copied BoM to clipboard")
-        QtCore.QTimer.singleShot(3000, lambda:self.BOM.setPlainText(self.PartsList))
+        """Copies Parts List to Spreadsheet"""
+        document = App.ActiveDocument
+        plist = self.PartsList
+        if len(plist) == 0:
+            return
+
+        if not hasattr(document, 'BOM'):
+            spreadsheet = document.addObject('Spreadsheet::Sheet','BOM')
+        else:
+            spreadsheet = document.BOM
+
+        spreadsheet.Label = "BOM"
+        spreadsheet.clearAll()
+
+        def wrow(drow: [str], row: int):
+            for i, d in enumerate(drow):
+                spreadsheet.set(str(chr(ord('a') + i)).upper()+str(row+1), str(d))
+	
+        for i, (_,data) in enumerate(plist.items(), start=1):
+            wrow(data.keys(),0)
+            wrow(data.values(),i)
+        
+        document.recompute()
+
+### def onCopy by Zolko - Copy on clipboard
+###    def onCopy(self):
+###        '''Copies Parts List to clipboard'''
+###        self.BOM.selectAll()
+###        self.BOM.copy()
+###        self.BOM.setPlainText("Copied BoM to clipboard")
+###        QtCore.QTimer.singleShot(3000, lambda:self.BOM.setPlainText(self.PartsList))
 
 
     def onOK(self):
@@ -320,7 +414,7 @@ class makeBOM:
         self.buttonLayout = QtGui.QHBoxLayout()
         self.buttonLayout.addStretch()
         # Save button
-        self.CopyButton = QtGui.QPushButton('Copy')
+        self.CopyButton = QtGui.QPushButton('In Spreadsheet')
         self.buttonLayout.addWidget(self.CopyButton)
         # Save button
         #self.SaveButton = QtGui.QPushButton('Save')

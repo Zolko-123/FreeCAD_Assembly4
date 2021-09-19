@@ -12,7 +12,7 @@ import FreeCAD as App
 from FreeCAD import Console as FCC
 
 import Asm4_libs as Asm4
-from Asm4_objects import CircularArray, ViewProviderLink
+from Asm4_objects import CircularArray, ViewProviderArray
 
 
 
@@ -70,7 +70,7 @@ class makeCircularArray():
             #array.SourceObject.ViewObject.hide()
             selObj.Visibility = False
             # set the viewprovider
-            ViewProviderLink( array.ViewObject )
+            ViewProviderArray( array.ViewObject )
             # update
             array.recompute()
             array.ElementCount = 7
@@ -142,7 +142,7 @@ def makeMyLink(obj):
     # addObject() API is extended to accept extra parameters in order to 
     # let the python object override the type of C++ view provider
     link = obj.Document.addObject("App::FeaturePython",'LinkArray',LinkArray(),None,True)
-    #ViewProviderLink(link.ViewObject)
+    #ViewProviderArray(link.ViewObject)
     link.setLink(obj)
     return link
 

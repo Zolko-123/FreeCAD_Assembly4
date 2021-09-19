@@ -8,7 +8,7 @@
 
 
 
-import os
+import os, shutil
 
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
@@ -17,6 +17,35 @@ from FreeCAD import Console as FCC
 
 import Asm4_libs as Asm4
 
+### to have the dir of external configuration file
+#wbPath = os.path.dirname(__file__)
+wbPath = Asm4.wbPath
+InfoKeysFile       = os.path.join( wbPath, 'InfoKeys.py' )
+# InfoScript         = os.path.join( wbPath, 'InfoScript.py' )
+InfoKeysFileInit   = os.path.join( wbPath, 'InfoKeysInit.py' )
+# InfoScriptInit     = os.path.join( wbPath, 'InfoScriptInit.py' )
+
+
+### try to open existing external configuration file of user
+try :
+    fichier = open(InfoKeysFile, 'r')
+    fichier.close()
+    import InfoKeys as InfoKeys
+### else make the default external configuration file
+except :
+    shutil.copyfile( InfoKeysFileInit , InfoKeysFile )
+    import InfoKeys as InfoKeys
+### try to open existing external configuration file of user
+'''
+try :
+    fichier = open(InfoScript, 'r')
+    fichier.close()
+    import InfoScript as autoInfo
+### else make the default external configuration file
+except :
+    shutil.copyfile( InfoScriptInit ,InfoScript)
+    import InfoScript as autoInfo
+'''
 
 
 """
@@ -25,18 +54,18 @@ import Asm4_libs as Asm4
     +-----------------------------------------------+
 """
 
-# allowed types to edit info
-partTypes = [ 'App::Part', 'PartDesign::Body']
-
+'''
 def checkPart():
+    # allowed types to edit info
+    partTypes = [ 'App::Part', 'PartDesign::Body']
     selectedPart = None
     # if an App::Part is selected
     if len(Gui.Selection.getSelection())==1:
-        selectedObj = Gui.Selection.getSelection()[0]
-        if selectedObj.TypeId in partTypes:
-            selectedPart = selectedObj
+        selObj = Gui.Selection.getSelection()[0]
+        if selObj.TypeId in partTypes:
+            selectedPart = selObj
     return selectedPart
-
+'''
 
 
 """
@@ -49,14 +78,16 @@ class infoPartCmd():
         super(infoPartCmd,self).__init__()
 
     def GetResources(self):
-        return {"MenuText": "Edit Part Information",
-                "ToolTip": "Edit Part Information",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_PartInfo.svg')
-                }
+        tooltip  = "Edit part information. "
+        tooltip += "The default part information keys are in the file "
+        tooltip += "\"FreeCAD/Mod/Assembly4/InfoKeys.py\", edit as you need"
+        iconFile = os.path.join( Asm4.iconPath, 'Asm4_PartInfo.svg' )
+        return {"MenuText": "Edit Part Information", "ToolTip": tooltip, "Pixmap": iconFile }
 
     def IsActive(self):
-        # We only insert a link into an Asm4  Model
-        if App.ActiveDocument and checkPart():
+        # We only add infos for some objects
+        # if App.ActiveDocument and checkPart():
+        if App.ActiveDocument and Asm4.getSelectedContainer():
             return True
         return False
 
@@ -78,10 +109,14 @@ class infoPartUI():
         self.form = self.base        
         iconFile = os.path.join( Asm4.iconPath , 'Asm4_PartInfo.svg')
         self.form.setWindowIcon(QtGui.QIcon( iconFile ))
-        self.form.setWindowTitle("Edit Part Information (Doesn't work yet)")
+        self.form.setWindowTitle("Edit Part Information")
        
         # hey-ho, let's go
-        self.part = checkPart()
+        self.part = Asm4.getSelectedContainer()
+        self.infoKeys = InfoKeys.partInfo
+        # the attribute PartName is mandatory in the info-keys
+        if not 'PartName' in self.infoKeys:
+            self.infoKeys.append('PartName')
         self.makePartInfo()
         self.infoTable = []
         self.getPartInfo()
@@ -91,18 +126,43 @@ class infoPartUI():
 
 
     def getPartInfo(self):
+        self.infoTable.clear()
         for prop in self.part.PropertiesList:
             if self.part.getGroupOfProperty(prop)=='PartInfo' :
                 if self.part.getTypeIdOfProperty(prop)=='App::PropertyString' :
                     value = self.part.getPropertyByName(prop)
                     self.infoTable.append([prop,value])
 
+    # add the default part information
     def makePartInfo( self, reset=False ):
-        # add the default part information
-        for info in Asm4.partInfo:
-            if not hasattr(self.part,info):
-                self.part.addProperty( 'App::PropertyString', info, 'PartInfo' )
+        for info in self.infoKeys:
+            try :
+                self.part
+                if not hasattr(self.part,info):
+                    #object with part
+                    self.part.addProperty( 'App::PropertyString', info, 'PartInfo' )
+            except AttributeError :
+                if self.TypeId == 'App::Part' :
+                    #object part
+                    self.addProperty( 'App::PropertyString', info, 'PartInfo' )    
         return
+    
+    # AddNew
+    def addNew(self):
+        for i,prop in enumerate(self.infoTable):
+            if self.part.getGroupOfProperty(prop[0])=='PartInfo' :
+                if self.part.getTypeIdOfProperty(prop[0])=='App::PropertyString' :
+                    text=self.infos[i].text()
+                    setattr(self.part,prop[0],str(text))
+
+    # edit info keys
+    def editKeys(self):
+        pass
+
+    # InfoDefault
+    def infoDefault(self):
+        #autoInfo.infoDefault(self)
+        pass
 
     # close
     def finish(self):
@@ -118,8 +178,7 @@ class infoPartUI():
 
     # OK: we insert the selected part
     def accept(self):
-        for prop in self.infoTable:
-            prop[1] = str()
+        self.addNew()
         self.finish()
 
 
@@ -128,31 +187,34 @@ class infoPartUI():
         # Place the widgets with layouts
         self.mainLayout = QtGui.QVBoxLayout(self.form)
         self.formLayout = QtGui.QFormLayout()
-
-        for prop in self.infoTable:
+        self.infos=[]
+        for i,prop in enumerate(self.infoTable):
             checkLayout = QtGui.QHBoxLayout()
-            propValue   = QtGui.QLineEdit()
-            propValue.setText( str(prop[1]) )
+            propValue = QtGui.QLineEdit()
+            propValue.setText( prop[1] )
             checked     = QtGui.QCheckBox()
             checkLayout.addWidget(propValue)
             checkLayout.addWidget(checked)
             self.formLayout.addRow(QtGui.QLabel(prop[0]),checkLayout)
+            self.infos.append(propValue)
 
         self.mainLayout.addLayout(self.formLayout)
         self.mainLayout.addWidget(QtGui.QLabel())
         
         # Buttons
         self.buttonsLayout = QtGui.QHBoxLayout()
-        self.AddNew = QtGui.QPushButton('Add New Info')
-        self.Delete = QtGui.QPushButton('Delete Selected')
-        self.buttonsLayout.addWidget(self.AddNew)
+        self.editFields = QtGui.QPushButton('Edit Fields')
+        self.loadTemplate = QtGui.QPushButton('Load Template')
+        self.buttonsLayout.addWidget(self.editFields)
         self.buttonsLayout.addStretch()
-        self.buttonsLayout.addWidget(self.Delete)
+        self.buttonsLayout.addWidget(self.loadTemplate)
 
         self.mainLayout.addLayout(self.buttonsLayout)
         self.form.setLayout(self.mainLayout)
 
         # Actions
+        self.editFields.clicked.connect(self.editKeys)
+        self.loadTemplate.clicked.connect(self.infoDefault)
 
 
 
