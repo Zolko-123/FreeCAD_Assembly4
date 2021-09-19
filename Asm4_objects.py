@@ -17,10 +17,130 @@ import Asm4_libs as Asm4
 
 """
     +-----------------------------------------------+
+    |              a variant link class             |
+    +-----------------------------------------------+
+
+see:
+    https://forum.freecadweb.org/viewtopic.php?f=10&t=38970&start=50#p343116
+    https://forum.freecadweb.org/viewtopic.php?f=22&t=42331
+
+asmDoc = App.ActiveDocument
+tmpDoc = App.newDocument('TmpDoc', hidden=True, temp=True)
+App.setActiveDocument(asmDoc.Name)
+beamCopy = tmpDoc.copyObject( asmDoc.getObject( 'Beam'), 'True' )
+asmDoc.getObject('Beam_2').LinkedObject = beamCopy
+asmDoc.getObject('Beam_3').LinkedObject = beamCopy
+asmDoc.getObject('Beam_4').LinkedObject = beamCopy
+copyVars = beamCopy.getObject('Variables')
+copyVars.Length=50
+copyVars.Size=50
+asmDoc.recompute()
+
+from Asm4_objects import VariantLink
+var = App.ActiveDocument.addObject("Part::FeaturePython", 'varLink', VariantLink(),None,True)
+tmpDoc = App.newDocument( 'TmpDoc', hidden=True, temp=True )
+tmpDoc.addObject('App::Part
+"""
+class VariantLink( object ):
+    def __init__(self):
+        FCC.PrintMessage('Initialising ...\n')
+        self.Object = None
+    
+    def __getstate__(self):
+        return
+
+    def __setstate__(self,_state):
+        return
+    
+    # new Python API for overriding C++ view provider of the binding object
+    def getViewProviderName(self,_obj):
+        return 'Gui::ViewProviderLinkPython'
+
+    # Python API called after the document is restored
+    def onDocumentRestored(self, obj):
+        FCC.PrintMessage('Document restored, fixing things ...\n')
+        # this sets up the link infrastructure
+        self.linkSetup(obj)
+        # restore the variant
+        obj.LinkedObject = obj.SourceObject
+        self.makeVarLink(obj)
+
+    # new Python API called when the object is newly created
+    def attach(self,obj):
+        FCC.PrintMessage('Attaching ...\n')
+        # the source object for the variant object
+        obj.addProperty("App::PropertyXLink","SourceObject"," Link",
+                        'Original object from which this variant is derived')
+        # the actual linked object property with a customized name
+        obj.addProperty("App::PropertyXLink","LinkedObject"," Link",
+                        'Link to the modified object')
+        # install the actual extension
+        obj.addExtension('App::LinkExtensionPython')
+        # initiate the extension
+        self.linkSetup(obj)
+
+    # helper function for both initialization (attach()) and restore (onDocumentRestored())
+    def linkSetup(self,obj):
+        FCC.PrintMessage('Setting-up link ...\n')
+        assert getattr(obj,'Proxy',None)==self
+        self.Object = obj
+        # Tell LinkExtension which additional properties are available.
+        # This information is not persistent, so the following function must 
+        # be called by at both attach(), and restore()
+        obj.configLinkProperty('Placement', LinkedObject='LinkedObject')
+        # hide the scale properties
+        if hasattr( obj, 'Scale' ):
+            obj.setPropertyStatus('Scale', 'Hidden')
+        if hasattr( obj, 'ScaleList' ):
+            obj.setPropertyStatus('ScaleList', 'Hidden')
+        return
+
+    # Execute when a property changes.
+    def onChanged(self, obj, prop):
+        # this changes the available variant parameters
+        if prop == 'SourceObject':
+            FCC.PrintMessage('Source Object changed, updating variant ...\n')
+            # setting the LinkedObject to the SourceObject temporarily
+            obj.LinkedObject = obj.SourceObject
+            # self.makeVariant(obj)
+
+    # test
+    def onLostLinkToObject(self, obj):
+        FCC.PrintMessage('Triggered onLostLinkToObject() in VariantLink\n')
+        obj.LinkedObject = obj.SourceObject
+        return
+
+    # test
+    def setupObject(self, obj):
+        FCC.PrintMessage('Triggered by setupObject() in VariantLink\n')
+        obj.LinkedObject = obj.SourceObject
+
+
+    # triggered in recompute()
+    def execute(self, obj):
+        FCC.PrintMessage('Triggered execute() in VariantLink\n')
+
+    # do the actual variant, here is the real magic
+    def makeVarLink(self, obj):
+        FCC.PrintMessage('Making the variant link ...\n')
+        # create a new, empty, hidden, temporary document
+        tmpDoc = App.newDocument( 'varTmpDoc', hidden=True, temp=True )
+        # deep-copy the source object
+        variant = tmpDoc.copyObject(obj.SourceObject,True)
+        # set the linked object to the new variant
+        obj.LinkedObject = variant
+        
+
+
+"""
+    +-----------------------------------------------+
     |           a general link array class          |
     +-----------------------------------------------+
     see: 
     https://github.com/realthunder/FreeCAD_assembly3/wiki/Link#app-namespace
+
+from Asm4_objects import LinkArray
+la = App.ActiveDocument.addObject("Part::FeaturePython", 'linkArray', LinkArray(),None,True)
 """
 class LinkArray( object ):
     def __init__(self):
@@ -32,16 +152,24 @@ class LinkArray( object ):
     def __setstate__(self,_state):
         return
     
+    # new Python API for overriding C++ view provider of the binding object
+    def getViewProviderName(self,_obj):
+        return 'Gui::ViewProviderLinkPython'
+
+    # Python API called on document restore
+    def onDocumentRestored(self, obj):
+        self.linkSetup(obj)
+
     # new Python API called when the object is newly created
     def attach(self,obj):
         # the actual link property with a customized name
-        obj.addProperty("App::PropertyLink","SourceObject",   " Link",'')
-        # the placement with the default name
-        #obj.addProperty("App::PropertyPlacement","Placement", " Link",'')
+        obj.addProperty("App::PropertyLink", "SourceObject", " Link",'')
         # the following two properties are required to support link array
-        obj.addProperty("App::PropertyBool",   "ShowElement", "Array",'')
+        obj.addProperty("App::PropertyBool", "ShowElement", "Array",
+                        'Shows each individual element')
         obj.addProperty("App::PropertyInteger","ElementCount","Array",
                         'Number of elements in the array (including the original)')
+        obj.ElementCount=1
         # install the actual extension
         obj.addExtension('App::LinkExtensionPython')
         # initiate the extension
@@ -55,14 +183,11 @@ class LinkArray( object ):
         # This information is not persistent, so the following function must 
         # be called by at both attach(), and restore()
         obj.configLinkProperty('ShowElement','ElementCount','Placement', LinkedObject='SourceObject')
-
-    # new Python API for overriding C++ view provider of the binding object
-    def getViewProviderName(self,_obj):
-        return 'Gui::ViewProviderLinkPython'
-
-    # Python API called on document restore
-    def onDocumentRestored(self, obj):
-        self.linkSetup(obj)
+        # hide the scale properties
+        if hasattr( obj, 'Scale' ):
+            obj.setPropertyStatus('Scale', 'Hidden')
+        if hasattr( obj, 'ScaleList' ):
+            obj.setPropertyStatus('ScaleList', 'Hidden')
 
     # Execute when a property changes.
     def onChanged(self, obj, prop):
@@ -74,8 +199,12 @@ class LinkArray( object ):
                     obj.setPropertyStatus('PlacementList','-Immutable')
                 else:
                     obj.setPropertyStatus('PlacementList', 'Immutable')
-                    
-            
+        # you cannot have less than 1 elements in an array
+        elif prop == 'ElementCount':
+            if obj.ElementCount < 1:
+                obj.ElementCount=1
+
+
 
 
 """
@@ -83,7 +212,7 @@ class LinkArray( object ):
     |                   ViewProvider                |
     +-----------------------------------------------+
 """
-class ViewProviderLink(object):
+class ViewProviderArray(object):
     def __init__( self, vobj ):
         vobj.Proxy = self
         self.attach(vobj)
@@ -193,6 +322,7 @@ class CircularArray(LinkArray):
             obj.setPropertyStatus('PlacementList', 'Immutable')
         return False     # to call LinkExtension::execute()   <= is this rally needed ?
 
+    '''
     #Execute when a property is changed.
     def onChanged(self, obj, prop):
         super().onChanged(obj, prop)
@@ -200,7 +330,7 @@ class CircularArray(LinkArray):
         if prop == 'ElementCount':
             if obj.ElementCount < 1:
                 obj.ElementCount=1
-
+    '''
 
 
 
@@ -230,7 +360,6 @@ def makeMyLink(obj):
     # addObject() API is extended to accept extra parameters in order to 
     # let the python object override the type of C++ view provider
     link = obj.Document.addObject("App::FeaturePython",'LinkArray',LinkArray(),None,True)
-    #ViewProviderLink(link.ViewObject)
     link.setLink(obj)
     return link
 
