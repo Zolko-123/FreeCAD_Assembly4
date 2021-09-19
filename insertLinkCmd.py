@@ -77,7 +77,7 @@ class insertLink():
         elif Asm4.getSelectedRootPart():
             self.rootAssembly = Asm4.getSelectedRootPart()
         # if a link is selected, we see if we can duplicate it
-        elif Asm4.getSelectedLink():
+        if Asm4.getSelectedLink():
             selObj = Asm4.getSelectedLink()
             parent = selObj.getParentGeoFeatureGroup()
             # if the selected link is in a root App::Part
@@ -122,11 +122,14 @@ class insertLink():
         # build the list
         for part in self.allParts:
             newItem = QtGui.QListWidgetItem()
+            '''
             if part.Name == part.Label:
                 partText = part.Name 
             else:
                 partText = part.Label + ' (' +part.Name+ ')' 
             newItem.setText( part.Document.Name +"#"+ partText )
+            '''
+            newItem.setText( part.Document.Name +"#"+ Asm4.labelName(part) )
             newItem.setIcon(part.ViewObject.Icon)
             self.partList.addItem(newItem)
 
@@ -135,9 +138,11 @@ class insertLink():
             origPart = self.origLink.LinkedObject
             # try to find the original part of the selected link
             # MatchExactly, MatchContains, MatchEndsWith, MatchStartsWith ...
-            origPartText = origPart.Document.Name +"#"+ origPart.Label
+            origPartText = origPart.Document.Name +"#"+ Asm4.labelName(origPart)
+            print('origPartText = ',origPartText)
             # if Label!=Name then the string still starts with Label
-            partFound = self.partList.findItems( origPartText, QtCore.Qt.MatchStartsWith )
+            #partFound = self.partList.findItems( origPartText, QtCore.Qt.MatchStartsWith )
+            partFound = self.partList.findItems( origPartText, QtCore.Qt.MatchExactly )
             if partFound:
                 self.partList.setCurrentItem(partFound[0])
                 # set the proposed name to a duplicate of the original link name
