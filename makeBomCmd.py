@@ -34,8 +34,133 @@ import InfoKeys
     +-----------------------------------------------+
     |               prints a parts list             |
     +-----------------------------------------------+
-"""
+def Partlist(object,level=0):
+    indent = '  '*level
+    # list the Variables
+    if object.Name=='Variables':
+        print(indent+'Variables:')
+        vars = object
+        for prop in vars.PropertiesList:
+            if vars.getGroupOfProperty(prop)=='Variables' :
+                propValue = vars.getPropertyByName(prop)
+                print(indent+'  '+prop+' = '+str(propValue))
+    # if its a link, look for the linked object
+    elif object.TypeId=='App::Link':
+        print(indent+object.Label+' -> '+object.LinkedObject.Document.Name+'#'+object.LinkedObject.Label)
+        Partlist(object.LinkedObject,level+1)
+    # everything else
+    else:
+        print(indent+object.Label+' ('+object.TypeId+')')
+        # if it's a part, look for sub-objects
+        if object.TypeId=='App::Part':
+            for objname in object.getSubObjects():
+                subobj = object.Document.getObject( objname[0:-1] )
+                Partlist(subobj,level+1)
+    return
+    
+    
+    
+    
+import FreeCAD,Draft
+import csv
 
+forbbox = ('PartDesign::Body', 'Part::Feature', 'Part::FeaturePython')
+
+def Partlist(object,level=0,tab=None):
+    indent = '  '*level
+    if tab is None:
+        tab = {}
+    if object.TypeId=='App::Link':
+        print(indent+object.Label+' -> '+object.LinkedObject.Document.Name+'#'+object.LinkedObject.Label+' => '+object.LinkedObject.FullName)
+        Partlist(object.LinkedObject,level+1,tab)
+    else:
+        print(indent+object.Label+' ('+object.TypeId+')')
+        if hasattr(object, 'Shape') and object.TypeId in forbbox:
+            if object.FullName in tab:
+                tab[object.FullName]["count"] = tab[object.FullName]["count"] + 1
+            else:
+                tab[object.FullName] = {}
+                tab[object.FullName]["var"] = {} 
+                tab[object.FullName]["count"] = 1
+
+            tab[object.FullName]['label'] = object.Label
+            tab[object.FullName]['fullname'] = object.FullName
+            tab[object.FullName]['Id'] = object.Label
+            bb=object.Shape.BoundBox
+            tab[object.FullName]['xlen'] = bb.XLength
+            tab[object.FullName]['ylen'] = bb.YLength
+            tab[object.FullName]['zlen'] = bb.ZLength
+            tab[object.FullName]['volume'] = str(object.Shape.Volume)
+
+            if hasattr(object, 'AttachedTo'):
+                tab[object.FullName]['attachedto'] = object.AttachedTo
+
+            print (indent+" => BBox: "+str(object.Shape.BoundBox))		
+            print (indent+" => Volume: "+str(object.Shape.Volume))		
+        if object.TypeId=='App::Part':
+            # look for Variables
+            if object.Document.getObject( 'Variables' ):
+                print(indent+'  Variables:')
+                vars = object.Document.getObject( 'Variables' )
+                for prop in vars.PropertiesList:
+                    if vars.getGroupOfProperty(prop)=='Variables' :
+                        propValue = vars.getPropertyByName(prop)
+                        print(indent+'    '+prop+' = '+str(propValue))
+                        if not object.FullName in tab:
+                            tab[object.FullName] = {}
+                            tab[object.FullName]['fullname'] = object.FullName
+                            tab[object.FullName]["var"] = {}
+                        tab[object.FullName]["var"][prop] = str(propValue) 
+            # look for sub-objects
+            for objname in object.getSubObjects():
+                subobj = object.Document.getObject( objname[0:-1] )
+                Partlist(subobj,level+1, tab)
+    return tab
+
+
+def dictoarr(tab): 
+    keys = {}
+    for obj in tab.keys():
+        if isinstance(tab[obj], dict):
+            for key in tab[obj].keys():
+                if isinstance(tab[obj][key], dict):
+                    for inner_key in tab[obj][key].keys():
+                        keys[key+"."+inner_key] = {};
+                        keys[key+"."+inner_key][0] = key;
+                        keys[key+"."+inner_key][1] = inner_key;
+                else:
+                        keys[key] = 1;
+    headings = sorted(keys.keys())
+
+    arr = [ headings ]
+    for obj in sorted(tab.keys()):
+        line = []
+        for head in headings:
+            value = ''
+            lookup = keys[head]
+            if isinstance(lookup, dict):
+                if lookup[0] in tab[obj] and lookup[1] in tab[obj][lookup[0]]: 	
+                    value = tab[obj][lookup[0]][lookup[1]]
+            else:
+                if head in tab[obj]:
+                    value = tab[obj][head]
+            line.append(value)
+        arr.append(line)	
+    return arr
+
+
+a = Partlist(FreeCAD.ActiveDocument.getObject("Model"), 0)
+print("\n\n")
+print(a)
+t = dictoarr(a)
+print("\n\n")
+print(t)
+
+with open('/tmp/table.csv', 'w') as csvfile:
+    writer = csv.writer(csvfile, delimiter="\t")
+    writer.writerows(t)
+    
+"""
 class makeBOM:
     def __init__(self):
         super(makeBOM,self).__init__()
@@ -67,6 +192,12 @@ class makeBOM:
                 print("legacy Assembly4 Model")
             except:
                 print("Hum, this might not work")
+        '''
+        try :
+            self.model = self.modelDoc.Model
+        except:
+            print("nouveau Assembly")
+        '''
         self.drawUI()
         self.UI.show()
         self.BOM.clear()
@@ -74,51 +205,114 @@ class makeBOM:
         self.listParts(self.model)
         self.BOM.setPlainText(str(self.PartsList))
 
-### def listParts use of Part info Edit
+### def listParts by FarmingSoul - use of Part info Edit
 
     def listParts(self,object,level=0):
+        forbbox = ('PartDesign::Body', 'Part::Feature', 'Part::FeaturePython')
         if object == None:
             return
         if self.PartsList == None:
             self.PartsList = {}
-        # research App::Part because the partInfo attribute is on
         if object.TypeId=='App::Link':
             self.listParts(object.LinkedObject,level+1)
         else:
             if object.TypeId=='App::Part':
                 if level > 0:
-                    # write PartsList
-                    # test if the part already exist on PartsList
                     if object.Label in self.PartsList:
-                        # if already exist =+ 1 in qty of this part count
                         self.PartsList[object.Label]['Qty.'] = self.PartsList[object.Label]['Qty.'] + 1
                     else:
-                        # if not exist , create a dict() for this part
                         self.PartsList[object.Label] = dict()
                         self.PartsList[object.Label]['Qty.'] = 1
                         for prop in InfoKeys.partInfo:
                             try:
-                                # try to get partInfo in part
                                 getattr(object,prop)
                                 self.PartsList[object.Label][prop] = getattr(object,prop)
                             except AttributeError:
-                                print ('you don\'t have fill the info of this Part :',object.Label,prop)
+                                print ('L\'object \"',object.Label,'\" n\'a pas d\'info \"',prop,'\"')
                                 # create an entry for that part under its name
-                                # usually the first entered is the name or id
-                                self.PartsList[object.Label][prop] = object.Label
-                                return
+                                if prop=='PartName':
+                                    self.PartsList[object.Label][prop] = object.Label
                                 # crea(object)
                                 # rempli(object)
+                            
+                        '''tab[object.FullName]["var"] = {} '''
+    
+                '''# look for Variables
+                if object.Document.getObject( 'Variables' ):
+                    print(indent+'  Variables:')
+                    vars = object.Document.getObject( 'Variables' )
+                    for prop in vars.PropertiesList:
+                        if vars.getGroupOfProperty(prop)=='Variables' :
+                            propValue = vars.getPropertyByName(prop)
+                            print(indent+'	'+prop+' = '+str(propValue))
+                            if not object.FullName in tab:
+                                tab[object.FullName] = {}
+                                tab[object.FullName]['fullname'] = object.FullName
+                                tab[object.FullName]["var"] = {}
+                            tab[object.FullName]["var"][prop] = str(propValue) '''
                 # look for sub-objects
                 for objname in object.getSubObjects():
                     subobj = object.Document.getObject( objname[0:-1] )
                     self.listParts(subobj,level+1)
         return
 
- 
-    """def onSave(self):
+### def listParts by Zolko - not use of Part info Edit
+###    def listParts( self, obj, level=0 ):
+###        indent = '\n'+'\t'*level
+###        if obj.Document == self.modelDoc:
+###            docName = ''
+###        else:
+###            docName = obj.Document.Name+'#'
+###        #partBB = App.BoundBox()
+###        # list the Variables
+###        if obj.Name=='Variables':
+###            #print(indent+'Variables:')
+###            self.PartsList += indent+'Variables:'
+###            for prop in obj.PropertiesList:
+###                if obj.getGroupOfProperty(prop)=='Variables' :
+###                    propValue = obj.getPropertyByName(prop)
+###                    self.PartsList += indent+'\t'+prop+' = '+str(propValue)
+###        # if it's part we look for sub-objects
+###        elif obj.TypeId=='App::Part':
+###            self.PartsList += indent +docName +obj.Label
+###            for objname in obj.getSubObjects():
+###                subobj = obj.Document.getObject( objname[0:-1] )
+###                self.listParts( subobj, level+1 )
+###        # if its a link, look for the linked object
+###        elif obj.TypeId=='App::Link':
+###            self.PartsList += indent+obj.Label+' -> '
+###            self.listParts( obj.LinkedObject, level )
+###        # if its a Body container we also add the document name and the size
+###        elif obj.TypeId=='PartDesign::Body':
+###            self.PartsList += indent +docName +obj.Label
+###            if obj.Label2:
+###                self.PartsList += ' ('+obj.Label2+')'
+###            bb = obj.Shape.BoundBox
+###            if abs(max(bb.XLength,bb.YLength,bb.ZLength)) < 1e+10:
+###                Xsize = str(int((bb.XLength * 10)+0.099)/10)
+###                Ysize = str(int((bb.YLength * 10)+0.099)/10)
+###                Zsize = str(int((bb.ZLength * 10)+0.099)/10)
+###                self.PartsList += ', Size: '+Xsize+' x '+Ysize+' x '+Zsize
+###        # everything else except datum objects
+###        elif obj.TypeId not in Asm4.datumTypes:
+###            self.PartsList += indent+obj.Label
+###            if obj.Label2:
+###                self.PartsList += ' ('+obj.Label2+')'
+###            else:
+###                self.PartsList += ' ('+obj.TypeId+')'
+###            # if the object has a shape, add it at the end of the line
+###            if hasattr(obj,'Shape') and obj.Shape.BoundBox.isValid():
+###                bb = obj.Shape.BoundBox
+###                if max(bb.XLength,bb.YLength,bb.ZLength) < 1e+10:
+###                    Xsize = str(int((bb.XLength * 10)+0.099)/10)
+###                    Ysize = str(int((bb.YLength * 10)+0.099)/10)
+###                    Zsize = str(int((bb.ZLength * 10)+0.099)/10)
+###                    self.PartsList += ', Size: '+Xsize+' x '+Ysize+' x '+Zsize
+###        return
+    
+    def onSave(self):
         #pass
-        ###Saves ASCII tree to user system file
+        """Saves ASCII tree to user system file"""
         _path = QtGui.QFileDialog.getSaveFileName()
         if _path[0]:
             save_file = QtCore.QFile(_path[0])
@@ -134,41 +328,62 @@ class makeBOM:
         else:
             self.BOM.setPlainText("ERROR : Can't open file : " + _path[0])
         QtCore.QTimer.singleShot(3000, lambda:self.BOM.setPlainText(self.PartsList))
-        #self.UI.close()"""
+        #self.UI.close()
 
 
-### def onCopy - Copy on Spreadsheet
+    def isReal( bb ):
+        # check if the BoundingBox is a real one
+        if bb.isValid() and abs(max(bb.XLength,bb.YLength,bb.ZLength)) < 1e+10:
+            return True
+        else:
+            return False
+
+    '''
+    def checkModel(self):
+        # check whether there is already a Model in the document
+        # Returns True if there is an object called 'Assembly' or 'Model' for old version
+        if App.ActiveDocument and App.ActiveDocument.getObject('Assembly') and App.ActiveDocument.Assembly.TypeId == 'App::Part':
+            return(True)
+        elif App.ActiveDocument and App.ActiveDocument.getObject('Model') and App.ActiveDocument.Model.TypeId == 'App::Part':
+            return(True)
+        else:
+            return(False)
+    '''
+
+### def onCopy by FarmingSoul - Copy on Spreadsheet
 
     def onCopy(self):
         """Copies Parts List to Spreadsheet"""
         document = App.ActiveDocument
-        # init plist whit dict() PartsList
         plist = self.PartsList
         if len(plist) == 0:
             return
-        # BOM on Spreadsheet
+
         if not hasattr(document, 'BOM'):
             spreadsheet = document.addObject('Spreadsheet::Sheet','BOM')
         else:
             spreadsheet = document.BOM
 
         spreadsheet.Label = "BOM"
-        # clean the BOM
         spreadsheet.clearAll()
-        # to write line in spreadsheet
+
         def wrow(drow: [str], row: int):
             for i, d in enumerate(drow):
                 spreadsheet.set(str(chr(ord('a') + i)).upper()+str(row+1), str(d))
-        # to make list of values of dict() plist
-        data = list(plist.values())
-        # to write first line with keys
-        wrow(data[0].keys(),0)
-        # to write line by line BoM in Spreadsheet
-        for i,_ in enumerate(data):
-            wrow(data[i].values(),i+1)
+	
+        for i, (_,data) in enumerate(plist.items(), start=1):
+            wrow(data.keys(),0)
+            wrow(data.values(),i)
         
         document.recompute()
 
+### def onCopy by Zolko - Copy on clipboard
+###    def onCopy(self):
+###        '''Copies Parts List to clipboard'''
+###        self.BOM.selectAll()
+###        self.BOM.copy()
+###        self.BOM.setPlainText("Copied BoM to clipboard")
+###        QtCore.QTimer.singleShot(3000, lambda:self.BOM.setPlainText(self.PartsList))
 
 
     def onOK(self):
