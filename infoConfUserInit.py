@@ -12,4 +12,4 @@
 
 
 partInfo = \
-{'LabelDoc': {'userData': 'LabelDocUser', 'active': True}, 'LabelPart': {'userData': 'LabelPartUser', 'active': True}, 'man1': {'userData': 'testenew', 'active': True}}
+{'LabelDoc': {'userData': 'LabelDocUser', 'active': True}, 'LabelPart': {'userData': 'LabelPartUser', 'active': True}, 'man1': {'userData': 'newfield1', 'active': True}, 'man2': {'userData': 'newfield2_not_actrivate_-->', 'active': False}}

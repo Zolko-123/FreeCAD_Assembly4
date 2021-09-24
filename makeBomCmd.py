@@ -7,7 +7,7 @@
 
 
 
-import os
+import os, shutil
 import importlib
 
 from PySide import QtGui, QtCore
@@ -20,6 +20,21 @@ import infoPartCmd
 import InfoKeys
 import infoConfUser
 
+# protection against update of userconf
+
+### to have the dir of external configuration file
+wbPath = Asm4.wbPath
+ConfUserFile       = os.path.join( wbPath, 'infoConfUser.py' )
+ConfUserFileInit   = os.path.join( wbPath, 'infoConfUserInit.py' )
+### try to open existing external configuration file of user
+try :
+    fichier = open(ConfUserFile, 'r')
+    fichier.close()
+    fichier.close()
+### else make the default external configuration file
+except :
+    shutil.copyfile( ConfUserFileInit , ConfUserFile )
+    
 crea = infoPartCmd.infoPartUI.makePartInfo
 fill = infoPartCmd.infoPartUI.infoDefault
 

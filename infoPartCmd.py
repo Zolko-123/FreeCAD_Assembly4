@@ -21,9 +21,20 @@ import Asm4_libs as Asm4
 import InfoKeys
 import infoConfUser as ConfUser
 
+# protection against update of userconf
+
 ### to have the dir of external configuration file
 wbPath = Asm4.wbPath
 ConfUserFile       = os.path.join( wbPath, 'infoConfUser.py' )
+ConfUserFileInit   = os.path.join( wbPath, 'infoConfUserInit.py' )
+### try to open existing external configuration file of user
+try :
+    fichier = open(ConfUserFile, 'r')
+    fichier.close()
+    fichier.close()
+### else make the default external configuration file
+except :
+    shutil.copyfile( ConfUserFileInit , ConfUserFile )
 
 
 
