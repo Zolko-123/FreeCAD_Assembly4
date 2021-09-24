@@ -89,8 +89,8 @@ def cloneObject(obj):
         #if result.Document:
         result.Document.recompute()
     return result
- 
- 
+
+
 def placeObjectToLCS( attObj, attLink, attDoc, attLCS ):
     expr = makeExpressionDatum( attLink, attDoc, attLCS )
     # indicate the this fastener has been placed with the Assembly4 workbench
@@ -172,7 +172,7 @@ def createVariables():
 # views/view_custom.py
 # https://wiki.freecadweb.org/Viewprovider
 # https://wiki.freecadweb.org/Custom_icon_in_tree_view
-# 
+#
 # obj = App.ActiveDocument.addObject("App::FeaturePython", "Name")
 # obj.ViewObject.Proxy = ViewProviderCustomIcon( obj, path + "FreeCADIco.png")
 # icon download to file
@@ -185,7 +185,7 @@ class setCustomIcon():
     def __init__( self, obj, iconFile):
         #obj.Proxy = self
         self.customIcon = os.path.join( iconPath, iconFile )
-        
+
     def getIcon(self):                                              # GetIcon
         return self.customIcon
 
@@ -245,18 +245,18 @@ def isLinkToPart(obj):
 # the last is the object name
 # elements are separated by '.' (dot)
 # usage:
-# ( obj, tree ) = Asm4.getSelectionTree()
-def getSelectionTree():
+# ( obj, tree ) = Asm4.getSelectionTree(index=0)
+def getSelectionTree(index=0):
     retval = (None,None)
     # we obviously need something selected
-    if len(Gui.Selection.getSelection())>0:
-        selObj = Gui.Selection.getSelection()[0]
+    if len(Gui.Selection.getSelection()) >= index:
+        selObj = Gui.Selection.getSelection()[index]
         retval = ( selObj, None )
         # objects at the document root dont have a selection tree
-        if len(Gui.Selection.getSelectionEx("", 0)[0].SubElementNames)>0:
-            # we only treat thefirst selected object 
+        if len(Gui.Selection.getSelectionEx("", 0)[0].SubElementNames) >= index:
+            # we only treat thefirst selected object
             # this is a dot-separated list of the selection hierarchy
-            selList = Gui.Selection.getSelectionEx("", 0)[0].SubElementNames[0]
+            selList = Gui.Selection.getSelectionEx("", 0)[0].SubElementNames[index]
             # this is the final tree table
             # this first element will be overwritten later
             selTree = ['root part']
@@ -337,7 +337,7 @@ def getPartLCS( part ):
     return partLCS
 
 
-# get the document group called Part 
+# get the document group called Part
 # (if it exists, else return None
 def getPartsGroup():
     retval = None
@@ -411,7 +411,7 @@ def isLine(shape):
                         and hasattr(shape,'Placement'):
         return True
     return False
-   
+
 def isSegment(shape):
     if shape.isValid()  and hasattr(shape,'Curve') \
                         and shape.Curve.TypeId=='Part::GeomLine' \
@@ -589,7 +589,7 @@ def makeExpressionPart( attLink, attDoc, attLCS, linkedDoc, linkLCS ):
     # if everything is defined
     if attLink and attLCS and linkedDoc and linkLCS:
         # this is where all the magic is, see:
-        # 
+        #
         # https://forum.freecadweb.org/viewtopic.php?p=278124#p278124
         #
         # as of FreeCAD v0.19 the syntax is different:
@@ -662,7 +662,7 @@ def splitExpressionLink( expr, parent ):
         # an external part is linked to the assembly or a part in the same document as the assembly
         if parent == 'Parent Assembly':
             # we're attached to an LCS in the parent assembly
-            # expr = LCS_assembly.Placement * AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
+            # expr = LCS_assembly.Placement * AttachmentOffset * LinkedPart#LCS.Placement ^ -1'
             ( attLCS,     separator, rest1 ) = expr.partition('.Placement * AttachmentOffset * ')
             ( linkedDoc,  separator, rest2 ) = rest1.partition('#')
             ( linkLCS,    separator, rest3 ) = rest2.partition('.Placement ^ ')
@@ -680,7 +680,7 @@ def splitExpressionLink( expr, parent ):
             restFinal = rest4[0:2]
     elif nbHash==2:
         # linked part and sister part in external documents to the parent assembly:
-        # expr = ParentLink.Placement * ParentPart#LCS.Placement * AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
+        # expr = ParentLink.Placement * ParentPart#LCS.Placement * AttachmentOffset * LinkedPart#LCS.Placement ^ -1'
         ( attLink,    separator, rest1 ) = expr.partition('.Placement * ')
         ( attPart,    separator, rest2 ) = rest1.partition('#')
         ( attLCS,     separator, rest3 ) = rest2.partition('.Placement * AttachmentOffset * ')
@@ -801,7 +801,7 @@ def getSelectedVarLink():
             retval = selObj
     return retval
 
-def getSelectedDatum():    
+def getSelectedDatum():
     selectedObj = None
     # check that something is selected
     if len(Gui.Selection.getSelection())==1:
