@@ -134,7 +134,7 @@ class importDatumCmd():
             # we can only import a datum to another datum at the root of the same container
             if targetDatum.getParentGeoFeatureGroup() != rootContainer:
                 message = Asm4.labelName(targetDatum)+'is not in the root container '+Asm4.labelName(rootContainer)
-                Asm4.messageBox(message)
+                Asm4.warningBox(message)
                 return
             # target datum is free
             if targetDatum.MapMode == 'Deactivated':
@@ -142,7 +142,7 @@ class importDatumCmd():
                 for objName in selTree[1:-1]:
                     message += '> '+objName+'\n'
                 message += '> '+Asm4.labelName(selDatum)
-                Asm4.messageBox(message)
+                Asm4.warningBox(message)
                 confirm = True
             # target datum is attached
             else:
