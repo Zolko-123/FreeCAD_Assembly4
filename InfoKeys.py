@@ -2,18 +2,11 @@
 # coding: utf-8
 #
 # LGPL
-# Copyright HUBERT Zoltán
 #
-# libraries for FreeCAD's Assembly 4 workbench
+# infoKeys.py
 
 import infoPartCmd
 import infoConfUser
-
-"""
-    +-----------------------------------------------+
-    |               customizable file               |
-    +-----------------------------------------------+
-"""
 
 # Autofilling info ref
 
