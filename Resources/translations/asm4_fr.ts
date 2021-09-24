@@ -19,7 +19,7 @@
     <message>
         <location filename="../InitGui.py" line="75"/>
         <source>Leaving Assembly4 WorkBench</source>
-        <translation type="unfinished"></translation>
+        <translation>Quiter l&apos;atelier Assembly4</translation>
     </message>
     <message>
         <location filename="../InitGui.py" line="95"/>
@@ -29,7 +29,7 @@
     <message>
         <location filename="../InitGui.py" line="294"/>
         <source>Assembly</source>
-        <translation type="unfinished"></translation>
+        <translation>Assembly</translation>
     </message>
     <message>
         <location filename="../InitGui.py" line="160"/>
@@ -67,7 +67,7 @@
     <message>
         <location filename="../AnimationLib.py" line="162"/>
         <source>Select Variable (only float)</source>
-        <translation type="unfinished"></translation>
+        <translation>Selectionner une variable (seulement de type &apos;float&apos;)</translation>
     </message>
     <message>
         <location filename="../AnimationLib.py" line="506"/>
@@ -77,17 +77,17 @@
     <message>
         <location filename="../AnimationLib.py" line="480"/>
         <source>Range Begin</source>
-        <translation type="unfinished"></translation>
+        <translation>Départ au début</translation>
     </message>
     <message>
         <location filename="../AnimationLib.py" line="485"/>
         <source>Range End</source>
-        <translation type="unfinished"></translation>
+        <translation>Départ à la fin</translation>
     </message>
     <message>
         <location filename="../AnimationLib.py" line="491"/>
         <source>Step Size</source>
-        <translation type="unfinished"></translation>
+        <translation>Taille des étapes</translation>
     </message>
     <message>
         <location filename="../AnimationLib.py" line="499"/>
@@ -184,6 +184,19 @@
     </message>
 </context>
 <context>
+    <name>Asm4_editPartInfoUI</name>
+    <message>
+        <location filename="../infoPartCmd.py" line="69"/>
+        <source>Edit part information. </source>
+        <translation>Edition des informations liées à la Part</translation>
+    </message>
+    <message>
+        <location filename="../infoPartCmd.py" line="100"/>
+        <source>Edit Part Information</source>
+        <translation>Edition des informations liées à la Part</translation>
+    </message>
+</context>
+<context>
     <name>Asm4_gotoDocument</name>
     <message>
         <location filename="../gotoDocumentCmd.py" line="32"/>
@@ -201,12 +214,12 @@
     <message>
         <location filename="../showHideLcsCmd.py" line="67"/>
         <source>Hide LCS</source>
-        <translation type="unfinished"></translation>
+        <translation>Masquer LCS</translation>
     </message>
     <message>
         <location filename="../showHideLcsCmd.py" line="68"/>
         <source>Hide LCS and Datums of selected part and its children</source>
-        <translation type="unfinished"></translation>
+        <translation>Masquer LCS et les données de la part selectionné et ses enfants</translation>
     </message>
 </context>
 <context>
@@ -227,7 +240,7 @@
     <message>
         <location filename="../InitGui.py" line="145"/>
         <source>&amp;Assembly</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Assembly</translation>
     </message>
     <message>
         <location filename="../InitGui.py" line="151"/>
