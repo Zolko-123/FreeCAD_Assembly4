@@ -64,11 +64,9 @@ class VariantLink( object ):
 
     # triggered in recompute(), update variant parameters
     def execute(self, obj):
-        FCC.PrintMessage('Triggered execute() in VariantLink\n')
-        # get the Variables container of the LinkedObject
         # should be a copy of the one of the SourceObject
         if obj.LinkedObject is not None and obj.LinkedObject.isValid():
-            FCC.PrintMessage('updating the parameters of the VariantLink\n')
+            # get the Variables container of the LinkedObject
             variantVariables = obj.LinkedObject.getObject('Variables')
             if variantVariables is not None:
                 # parse all variant variables and apply them to the linked object
@@ -81,14 +79,12 @@ class VariantLink( object ):
                 obj.LinkedObject.recompute()
                 obj.LinkedObject.Document.recompute()
         elif obj.SourceObject is not None and obj.SourceObject.isValid():
-            FCC.PrintMessage('Creating a new VariantLink ?\n')
             self.makeVarLink(obj)
             self.fillVariantProperties(obj)
 
     # do the actual variant: this creates a new hidden temporary document
     # deep-copies the source object there, and re-links the copy
     def makeVarLink(self, obj):
-        FCC.PrintMessage('Making the variant link ...\n')
         # create a new, empty, hidden, temporary document
         tmpDocName = 'varTmpDoc_'
         i = 1
@@ -107,7 +103,6 @@ class VariantLink( object ):
 
     # Python API called after the document is restored
     def onDocumentRestored(self, obj):
-        FCC.PrintMessage('Document restored, fixing things ...\n')
         # this sets up the link infrastructure
         self.linkSetup(obj)
         # restore the variant
@@ -121,7 +116,7 @@ class VariantLink( object ):
 
     # new Python API called when the object is newly created
     def attach(self,obj):
-        FCC.PrintMessage('Attaching ...\n')
+        FCC.PrintMessage('Attaching VariantLink ...\n')
         # the source object for the variant object
         obj.addProperty("App::PropertyXLink","SourceObject"," Link",
                         'Original object from which this variant is derived')
@@ -135,7 +130,6 @@ class VariantLink( object ):
 
     # helper function for both initialization (attach()) and restore (onDocumentRestored())
     def linkSetup(self,obj):
-        FCC.PrintMessage('Setting-up link ...\n')
         assert getattr(obj,'Proxy',None)==self
         self.Object = obj
         # Tell LinkExtension which additional properties are available.
@@ -156,7 +150,7 @@ class VariantLink( object ):
         if self.isLoaded(obj):
             # this changes the available variant parameters
             if prop == 'SourceObject':
-                FCC.PrintMessage('Source Object changed ...\n')
+                pass
                 '''
                 if obj.LinkedObject is None:
                     FCC.PrintMessage('Creating new variant ...\n')

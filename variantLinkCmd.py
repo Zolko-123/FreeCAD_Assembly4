@@ -41,8 +41,11 @@ class makeVariantLink():
                 }
 
     def IsActive(self):
-        # we only insert variant links in Assembl4 and root Parts
+        # we only insert variant links into assemblies and root parts 
         if Asm4.getAssembly() or Asm4.getSelectedRootPart():
+            return True
+        # if an existing variant link is selected, we duplicate it
+        if Asm4.getSelectedVarLink():
             return True
         return False
 
@@ -59,7 +62,7 @@ class makeVariantLink():
         # initialise stuff
         self.activeDoc    = App.ActiveDocument
         self.rootAssembly = None
-        self.origLink     = None
+        self.origPart     = None
         self.brokenLink   = False
         self.allParts = []
         self.partsDoc = []
@@ -73,15 +76,16 @@ class makeVariantLink():
         # an App::Part at the root of the document is selected, we insert the link there
         elif Asm4.getSelectedRootPart():
             self.rootAssembly = Asm4.getSelectedRootPart()
-        '''
-        # if a link is selected, we see if we can duplicate it
-        if Asm4.getSelectedLink():
-            selObj = Asm4.getSelectedLink()
+
+        # if a variant link is selected, we see if we can duplicate it
+        if Asm4.getSelectedVarLink():
+            selObj = Asm4.getSelectedVarLink()
             parent = selObj.getParentGeoFeatureGroup()
             # if the selected link is in a root App::Part
             if parent.TypeId == 'App::Part' and parent.getParentGeoFeatureGroup() is None:
                 self.rootAssembly = parent
-                self.origLink = selObj
+                self.origPart = selObj.SourceObject
+        '''
         # if a broken link is selected
         elif len(Gui.Selection.getSelection())==1 :
             selObj = Gui.Selection.getSelection()[0]
@@ -125,19 +129,16 @@ class makeVariantLink():
             newItem.setIcon(part.ViewObject.Icon)
             self.partList.addItem(newItem)
 
-        '''
         # if an existing valid App::Link was selected
-        if self.origLink and not self.brokenLink:
-            origPart = self.origLink.LinkedObject
+        if self.origPart and not self.brokenLink:
             # try to find the original part of the selected link
+            origPartText = self.origPart.Document.Name +"#"+ Asm4.labelName(self.origPart)
             # MatchExactly, MatchContains, MatchEndsWith, MatchStartsWith ...
-            origPartText = origPart.Document.Name +"#"+ Asm4.labelName(origPart)
-            print('origPartText = ',origPartText)
-            # if Label!=Name then the string still starts with Label
-            #partFound = self.partList.findItems( origPartText, QtCore.Qt.MatchStartsWith )
             partFound = self.partList.findItems( origPartText, QtCore.Qt.MatchExactly )
             if partFound:
                 self.partList.setCurrentItem(partFound[0])
+                self.onItemClicked(partFound[0])
+                '''
                 # set the proposed name to a duplicate of the original link name
                 origName = self.origLink.Label
                 # if the last character is a number, we increment this number
@@ -151,7 +152,7 @@ class makeVariantLink():
                     proposedLinkName = Asm4.nextInstance(origName)
                 if not self.brokenLink:
                     self.linkNameInput.setText( proposedLinkName )
-        '''
+                '''
 
         # show the UI
         self.UI.show()
@@ -248,7 +249,7 @@ class makeVariantLink():
                     proposedLinkName = Asm4.nextInstance(rootName)
                 # if that name is already taken
                 if self.activeDoc.getObject(proposedLinkName):
-                    proposedName = Asm4.nextInstance(proposedLinkName)
+                    proposedLinkName = Asm4.nextInstance(proposedLinkName)
                 self.linkNameInput.setText( proposedLinkName )
 
     # filter to display only parts that match this filter
