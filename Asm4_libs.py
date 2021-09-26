@@ -152,11 +152,18 @@ def createVariables():
     # check whether there already is a Variables object
     variables = App.ActiveDocument.getObject('Variables')
     if variables:
+        # signature or a PropertyContainer
+        if not hasattr(variables,'Type'):
+            variables.addProperty('App::PropertyString', 'Type')
+            variables.Type = 'App::PropertyContainer'            
         retval = variables
     # there is none, so we create it
     else:
         variables = App.ActiveDocument.addObject('App::FeaturePython','Variables')
         variables.ViewObject.Proxy = setCustomIcon(object,'Asm4_Variables.svg')
+        # signature or a PropertyContainer
+        variables.addProperty('App::PropertyString', 'Type')
+        variables.Type = 'App::PropertyContainer'
         retval = variables
     return retval
 
@@ -769,7 +776,7 @@ def getSelectedContainer():
             retval = selObj
     return retval
 
-
+# returns the selected App::Link
 def getSelectedLink():
     # check that there is an App::Part called 'Model'
     #if App.ActiveDocument.getObject('Model') and App.ActiveDocument.Model.TypeId == 'App::Part':
@@ -783,6 +790,16 @@ def getSelectedLink():
             retval = selObj
     return retval
 
+# returns the selected Asm4 variant link
+def getSelectedVarLink():
+    retval = None
+    selection = Gui.Selection.getSelection()
+    if len(selection)==1:
+        selObj = selection[0]
+        # it's an App::Link
+        if selObj.TypeId=='Part::FeaturePython' and selObj.Type=='Asm4::VariantLink':
+            retval = selObj
+    return retval
 
 def getSelectedDatum():    
     selectedObj = None

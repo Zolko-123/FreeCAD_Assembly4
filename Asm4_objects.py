@@ -56,14 +56,68 @@ class VariantLink( object ):
     def getViewProviderName(self,_obj):
         return 'Gui::ViewProviderLinkPython'
 
+    # returns True only of the object has been successfully restored
+    def isLoaded(self,obj):
+        if hasattr(obj,'SourceObject') and obj.SourceObject is not None:
+            return obj.SourceObject.isValid()
+        return False
+
+    # triggered in recompute(), update variant parameters
+    def execute(self, obj):
+        FCC.PrintMessage('Triggered execute() in VariantLink\n')
+        # get the Variables container of the LinkedObject
+        # should be a copy of the one of the SourceObject
+        if obj.LinkedObject is not None and obj.LinkedObject.isValid():
+            FCC.PrintMessage('updating the parameters of the VariantLink\n')
+            variantVariables = obj.LinkedObject.getObject('Variables')
+            if variantVariables is not None:
+                # parse all variant variables and apply them to the linked object
+                variantProps = obj.PropertiesList
+                sourceProps = variantVariables.PropertiesList
+                for prop in variantProps:
+                    if prop in sourceProps and obj.getGroupOfProperty(prop) == 'VariantVariables':
+                        setattr( variantVariables, prop, getattr( obj, prop ))
+                variantVariables.recompute()
+                obj.LinkedObject.recompute()
+                obj.LinkedObject.Document.recompute()
+        elif obj.SourceObject is not None and obj.SourceObject.isValid():
+            FCC.PrintMessage('Creating a new VariantLink ?\n')
+            self.makeVarLink(obj)
+            self.fillVariantProperties(obj)
+
+    # do the actual variant: this creates a new hidden temporary document
+    # deep-copies the source object there, and re-links the copy
+    def makeVarLink(self, obj):
+        FCC.PrintMessage('Making the variant link ...\n')
+        # create a new, empty, hidden, temporary document
+        tmpDocName = 'varTmpDoc_'
+        i = 1
+        while i<100 and tmpDocName+str(i) in App.listDocuments():
+            i += 1
+        if i<100:
+            tmpDocName = 'varTmpDoc_'+str(i)
+            tmpDoc = App.newDocument( tmpDocName, hidden=True, temp=True )
+            # deep-copy the source object
+            variant = tmpDoc.copyObject(obj.SourceObject,True)
+            # set the linked object to the new variant
+            obj.LinkedObject = variant
+        else:
+            FCC.PrintWarning('100 temporary variant documents are already in use, not creating a new one.\n')
+        return
+
     # Python API called after the document is restored
     def onDocumentRestored(self, obj):
         FCC.PrintMessage('Document restored, fixing things ...\n')
         # this sets up the link infrastructure
         self.linkSetup(obj)
         # restore the variant
-        obj.LinkedObject = obj.SourceObject
-        self.makeVarLink(obj)
+        if obj.SourceObject is not None and obj.SourceObject.isValid():
+            obj.LinkedObject = obj.SourceObject
+            # update obj
+            self.makeVarLink(obj)
+            self.execute(obj)
+            obj.Type='Asm4::VariantLink'
+            obj.recompute()
 
     # new Python API called when the object is newly created
     def attach(self,obj):
@@ -87,7 +141,7 @@ class VariantLink( object ):
         # Tell LinkExtension which additional properties are available.
         # This information is not persistent, so the following function must 
         # be called by at both attach(), and restore()
-        obj.configLinkProperty('Placement', LinkedObject='LinkedObject')
+        obj.configLinkProperty( 'Placement', LinkedObject='LinkedObject')
         # hide the scale properties
         if hasattr( obj, 'Scale' ):
             obj.setPropertyStatus('Scale', 'Hidden')
@@ -97,12 +151,24 @@ class VariantLink( object ):
 
     # Execute when a property changes.
     def onChanged(self, obj, prop):
-        # this changes the available variant parameters
-        if prop == 'SourceObject':
-            FCC.PrintMessage('Source Object changed, updating variant ...\n')
-            # setting the LinkedObject to the SourceObject temporarily
-            obj.LinkedObject = obj.SourceObject
-            # self.makeVariant(obj)
+        # check that the SourceObject is valid, this should ensure 
+        # that the object has been successsfully loaded
+        if self.isLoaded(obj):
+            # this changes the available variant parameters
+            if prop == 'SourceObject':
+                FCC.PrintMessage('Source Object changed ...\n')
+                '''
+                if obj.LinkedObject is None:
+                    FCC.PrintMessage('Creating new variant ...\n')
+                    self.makeVarLink(obj)
+                    self.fillVariantProperties(obj)
+                elif hasattr(obj.LinkedObject,'Document'):
+                    FCC.PrintMessage('Updating variant ...\n')
+                    oldVarDoc = obj.LinkedObject.Document
+                # setting the LinkedObject to the SourceObject temporarily
+                # obj.LinkedObject = obj.SourceObject
+                # self.makeVariant(obj)
+                '''
 
     # test
     def onLostLinkToObject(self, obj):
@@ -115,21 +181,24 @@ class VariantLink( object ):
         FCC.PrintMessage('Triggered by setupObject() in VariantLink\n')
         obj.LinkedObject = obj.SourceObject
 
+    # find all 'Variables' in the original part, 
+    # and create corresponding properties in the variant
+    def fillVariantProperties(self,obj):
+        variables = obj.SourceObject.getObject('Variables')
+        if variables is None:
+            FCC.PrintVarning('No \"Variables\" container in source object\n')
+        else: 
+            for prop in variables.PropertiesList:
+                # fetch all properties in the Variables group
+                if variables.getGroupOfProperty(prop) == 'Variables':
+                    # if the corresponding variables doesn't yet exist
+                    if not hasattr(obj,prop):
+                        # create a same property with same value in the variant
+                        propType = variables.getTypeIdOfProperty(prop)
+                        obj.addProperty(propType,prop,'VariantVariables')
+                        setattr( obj, prop, getattr( variables, prop ))
 
-    # triggered in recompute()
-    def execute(self, obj):
-        FCC.PrintMessage('Triggered execute() in VariantLink\n')
 
-    # do the actual variant, here is the real magic
-    def makeVarLink(self, obj):
-        FCC.PrintMessage('Making the variant link ...\n')
-        # create a new, empty, hidden, temporary document
-        tmpDoc = App.newDocument( 'varTmpDoc', hidden=True, temp=True )
-        # deep-copy the source object
-        variant = tmpDoc.copyObject(obj.SourceObject,True)
-        # set the linked object to the new variant
-        obj.LinkedObject = variant
-        
 
 
 """
