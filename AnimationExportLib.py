@@ -153,10 +153,11 @@ class animationExporter():
         for i, img in enumerate(self.imageList):
             tmp = img.convert(mode='P', palette=Image.ADAPTIVE, colors=256)
             img = img.convert('RGB')
-            self.imageList[i] = img.quantize(256, Image.FASTOCTREE, 0, tmp, Image.FLOYDSTEINBERG)
+            #self.imageList[i] = img.quantize(256, Image.FASTOCTREE, 0, tmp, Image.FLOYDSTEINBERG)
+            self.imageList[i] = tmp
 
         # export as animated gif
-        loops = self.expDiag.sbOutLoops.value()
+        loops = self.expDiag.sbOutLoops.value()-1
         frameMSec = int(1000/self.expDiag.sbOutFPS.value())
         self.imageList[0].save(filename, save_all=True, append_images=self.imageList[1:], optimize=True, duration=frameMSec, loop=loops)
 
@@ -444,12 +445,12 @@ class exportDialog(QtGui.QDialog):
         self.pilImage = None
 
         # The Gui-related things
-        # self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         self.setWindowTitle('Animation Export Preview')
         self.setWindowIcon(QtGui.QIcon(os.path.join(Asm4.iconPath, 'FreeCad.svg')))
         self.setMinimumWidth(640)
         self.setMinimumHeight(480)
         self.setModal(False)
+        self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
 
         # add and layout widgets
         # upper part
