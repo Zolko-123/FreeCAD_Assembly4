@@ -151,8 +151,7 @@ class insertLink():
                 else:
                     proposedLinkName = Asm4.nextInstance(origName)
                 # set the proposed name in the entry field
-                if not self.brokenLink:
-                    self.linkNameInput.setText( proposedLinkName )
+                self.linkNameInput.setText( proposedLinkName )
 
         # show the UI
         self.UI.show()
