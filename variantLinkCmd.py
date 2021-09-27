@@ -62,7 +62,7 @@ class makeVariantLink():
         # initialise stuff
         self.activeDoc    = App.ActiveDocument
         self.rootAssembly = None
-        self.origPart     = None
+        self.origLink     = None
         self.brokenLink   = False
         self.allParts = []
         self.partsDoc = []
@@ -84,6 +84,7 @@ class makeVariantLink():
             # if the selected link is in a root App::Part
             if parent.TypeId == 'App::Part' and parent.getParentGeoFeatureGroup() is None:
                 self.rootAssembly = parent
+                self.origLink = selObj
                 self.origPart = selObj.SourceObject
         '''
         # if a broken link is selected
@@ -130,29 +131,27 @@ class makeVariantLink():
             self.partList.addItem(newItem)
 
         # if an existing valid App::Link was selected
-        if self.origPart and not self.brokenLink:
+        if self.origLink and not self.brokenLink:
+            origPart = self.origLink.SourceObject
             # try to find the original part of the selected link
-            origPartText = self.origPart.Document.Name +"#"+ Asm4.labelName(self.origPart)
+            origPartText = origPart.Document.Name +"#"+ Asm4.labelName(origPart)
             # MatchExactly, MatchContains, MatchEndsWith, MatchStartsWith ...
             partFound = self.partList.findItems( origPartText, QtCore.Qt.MatchExactly )
             if partFound:
                 self.partList.setCurrentItem(partFound[0])
-                self.onItemClicked(partFound[0])
-                '''
-                # set the proposed name to a duplicate of the original link name
-                origName = self.origLink.Label
+                # self.onItemClicked(partFound[0])
                 # if the last character is a number, we increment this number
+                origName = self.origLink.Label
                 lastChar = origName[-1]
                 if lastChar.isnumeric():
                     (rootName,sep,num) = origName.rpartition('_')
-                    proposedLinkName = Asm4.nextInstance(rootName)
-                # else we append a _2 to the original name (Label)
+                    proposedLinkName = Asm4.nextInstance(rootName,startAtOne=True)
+                # else we take the next instance
                 else:
-                    #proposedLinkName = origName+'_2'
                     proposedLinkName = Asm4.nextInstance(origName)
+                # set the proposed name in the entry field
                 if not self.brokenLink:
                     self.linkNameInput.setText( proposedLinkName )
-                '''
 
         # show the UI
         self.UI.show()

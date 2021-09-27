@@ -127,13 +127,6 @@ class insertLink():
         # build the list
         for part in self.allParts:
             newItem = QtGui.QListWidgetItem()
-            '''
-            if part.Name == part.Label:
-                partText = part.Name 
-            else:
-                partText = part.Label + ' (' +part.Name+ ')' 
-            newItem.setText( part.Document.Name +"#"+ partText )
-            '''
             newItem.setText( part.Document.Name +"#"+ Asm4.labelName(part) )
             newItem.setIcon(part.ViewObject.Icon)
             self.partList.addItem(newItem)
@@ -142,25 +135,22 @@ class insertLink():
         if self.origLink and not self.brokenLink:
             origPart = self.origLink.LinkedObject
             # try to find the original part of the selected link
-            # MatchExactly, MatchContains, MatchEndsWith, MatchStartsWith ...
             origPartText = origPart.Document.Name +"#"+ Asm4.labelName(origPart)
-            print('origPartText = ',origPartText)
-            # if Label!=Name then the string still starts with Label
-            #partFound = self.partList.findItems( origPartText, QtCore.Qt.MatchStartsWith )
+            # MatchExactly, MatchContains, MatchEndsWith, MatchStartsWith ...
             partFound = self.partList.findItems( origPartText, QtCore.Qt.MatchExactly )
             if partFound:
                 self.partList.setCurrentItem(partFound[0])
-                # set the proposed name to a duplicate of the original link name
-                origName = self.origLink.Label
+                # self.onItemClicked(partFound[0])
                 # if the last character is a number, we increment this number
+                origName = self.origLink.Label
                 lastChar = origName[-1]
                 if lastChar.isnumeric():
                     (rootName,sep,num) = origName.rpartition('_')
-                    proposedLinkName = Asm4.nextInstance(rootName)
-                # else we append a _2 to the original name (Label)
+                    proposedLinkName = Asm4.nextInstance(rootName,startAtOne=True)
+                # else we take the next instance
                 else:
-                    #proposedLinkName = origName+'_2'
                     proposedLinkName = Asm4.nextInstance(origName)
+                # set the proposed name in the entry field
                 if not self.brokenLink:
                     self.linkNameInput.setText( proposedLinkName )
 
