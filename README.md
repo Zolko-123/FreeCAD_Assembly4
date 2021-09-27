@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.10.7
+Current version 0.10.8
 
 
 
@@ -51,6 +51,9 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 
 ## Release notes
+
+* 2021.09.26 (**0.10.8**) :  
+first version of variantLink: EXPERIMENTAL, use with caution  
 
 * 2021.09.19 (**0.10.7**) :  
 fixed some minor bugs  
