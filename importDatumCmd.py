@@ -93,7 +93,7 @@ class importDatumCmd():
                 message += '> '+Asm4.labelName(selDatum)
                 confirm = Asm4.confirmBox(message)
 
-            if confirm == True:
+            if confirm:
                 self.setupTargetDatum(targetDatum, self.getDatumExpression(selTree))
 
                 # hide initial datum
