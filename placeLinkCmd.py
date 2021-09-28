@@ -71,7 +71,7 @@ class placeLinkCmd():
             selection = Asm4.getSelectedVarLink()
         # or a regular Part or Body ?
         if selection is None:
-            selection = Asm4.getSelectedContainer
+            selection = Asm4.getSelectedContainer()
         # the selected object is not valid here
         if selection is None:
             FCC.PrintWarning("Please select a part or a link to a part\n")

@@ -80,7 +80,7 @@ class VariantLink( object ):
                 obj.LinkedObject.Document.recompute()
         elif obj.SourceObject is not None and obj.SourceObject.isValid():
             self.makeVarLink(obj)
-            self.fillVariantProperties(obj)
+            self.fillVarProperties(obj)
 
     # do the actual variant: this creates a new hidden temporary document
     # deep-copies the source object there, and re-links the copy
@@ -93,10 +93,8 @@ class VariantLink( object ):
         if i<100:
             tmpDocName = 'varTmpDoc_'+str(i)
             tmpDoc = App.newDocument( tmpDocName, hidden=True, temp=True )
-            # deep-copy the source object
-            variant = tmpDoc.copyObject(obj.SourceObject,True)
-            # set the linked object to the new variant
-            obj.LinkedObject = variant
+            # deep-copy the source object and link it back
+            obj.LinkedObject = tmpDoc.copyObject( obj.SourceObject, True )
         else:
             FCC.PrintWarning('100 temporary variant documents are already in use, not creating a new one.\n')
         return
@@ -110,9 +108,50 @@ class VariantLink( object ):
             obj.LinkedObject = obj.SourceObject
             # update obj
             self.makeVarLink(obj)
+            self.fillVarProperties(obj)
+            self.restorePlacementEE(obj)
             self.execute(obj)
             obj.Type='Asm4::VariantLink'
             obj.recompute()
+
+    # make the Placement::ExpressionEngine acording to the properties stored in the varLink object
+    # this is necessary because the placement refers to the LinkedObject's document *name*,
+    # which is a temporary document, and this document may be different on restore
+    def restorePlacementEE( self, obj ):
+        # only attempt this on fully restored objects
+        if self.isLoaded(obj) and obj.LinkedObject.isValid():
+            # if it's indeed an Asm4 object
+            # LCS_Origin.Placement * AttachmentOffset * varTmpDoc_3#LCS_Origin.Placement ^ -1
+            if Asm4.isAsm4EE(obj) and obj.SolverId=='Placement::ExpressionEngine':
+                # retrive the info from the object's properties
+                (a_Link,sep,a_LCS) = obj.AttachedTo.partition('#')
+                if a_Link=='Parent Assembly':
+                    a_Part = None
+                else:
+                    a_Part = obj.Document.getObject(a_Link).LinkedObject.Document.Name
+                l_Part = obj.LinkedObject.Document.Name
+                l_LCS = obj.AttachedBy[1:]
+                # build the expression
+                expr = Asm4.makeExpressionPart( a_Link, a_Part, a_LCS, l_Part, l_LCS )
+                # set the expression
+                obj.setExpression('Placement', expr )
+
+    # find all 'Variables' in the original part, 
+    # and create corresponding properties in the variant
+    def fillVarProperties(self,obj):
+        variables = obj.SourceObject.getObject('Variables')
+        if variables is None:
+            FCC.PrintVarning('No \"Variables\" container in source object\n')
+        else: 
+            for prop in variables.PropertiesList:
+                # fetch all properties in the Variables group
+                if variables.getGroupOfProperty(prop) == 'Variables':
+                    # if the corresponding variables doesn't yet exist
+                    if not hasattr(obj,prop):
+                        # create a same property with same value in the variant
+                        propType = variables.getTypeIdOfProperty(prop)
+                        obj.addProperty(propType,prop,'VariantVariables')
+                        setattr( obj, prop, getattr( variables, prop ))
 
     # new Python API called when the object is newly created
     def attach(self,obj):
@@ -155,7 +194,7 @@ class VariantLink( object ):
                 if obj.LinkedObject is None:
                     FCC.PrintMessage('Creating new variant ...\n')
                     self.makeVarLink(obj)
-                    self.fillVariantProperties(obj)
+                    self.fillVarProperties(obj)
                 elif hasattr(obj.LinkedObject,'Document'):
                     FCC.PrintMessage('Updating variant ...\n')
                     oldVarDoc = obj.LinkedObject.Document
@@ -164,33 +203,17 @@ class VariantLink( object ):
                 # self.makeVariant(obj)
                 '''
 
-    # test
+    # this is never actually called
     def onLostLinkToObject(self, obj):
         FCC.PrintMessage('Triggered onLostLinkToObject() in VariantLink\n')
         obj.LinkedObject = obj.SourceObject
         return
 
-    # test
+    # this is never actually called
     def setupObject(self, obj):
         FCC.PrintMessage('Triggered by setupObject() in VariantLink\n')
         obj.LinkedObject = obj.SourceObject
 
-    # find all 'Variables' in the original part, 
-    # and create corresponding properties in the variant
-    def fillVariantProperties(self,obj):
-        variables = obj.SourceObject.getObject('Variables')
-        if variables is None:
-            FCC.PrintVarning('No \"Variables\" container in source object\n')
-        else: 
-            for prop in variables.PropertiesList:
-                # fetch all properties in the Variables group
-                if variables.getGroupOfProperty(prop) == 'Variables':
-                    # if the corresponding variables doesn't yet exist
-                    if not hasattr(obj,prop):
-                        # create a same property with same value in the variant
-                        propType = variables.getTypeIdOfProperty(prop)
-                        obj.addProperty(propType,prop,'VariantVariables')
-                        setattr( obj, prop, getattr( variables, prop ))
 
 
 
