@@ -46,25 +46,14 @@ class importDatumCmd():
             return False
 
     def getSelectedDatums(self):
-        retval = None
         selection = Gui.Selection.getSelection()
-        if len(selection)==1:
-            selObj = selection[0]
-            if selObj.TypeId in Asm4.datumTypes:
-                retval = selection
-        elif len(selection)==2:
-            selObj1 = selection[0]
-            selObj2 = selection[1]
-            if selObj1.TypeId in Asm4.datumTypes and selObj2.TypeId in Asm4.datumTypes:
-                retval = selection
-        else:
-            for selObj in selection:
-                if selObj.TypeId not in Asm4.datumTypes:
-                    retval = None
-                else:
-                    retval = selection
 
-        return retval
+        # Need to have all the selected objects to be one of the datum types
+        for selObj in selection:
+            if selObj.TypeId not in Asm4.datumTypes:
+                return None
+
+        return selection
 
     """
     +-----------------------------------------------+
