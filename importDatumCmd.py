@@ -105,7 +105,7 @@ class importDatumCmd():
                 targetDatum.ViewObject.ShapeColor   = selDatum.ViewObject.ShapeColor
                 targetDatum.ViewObject.Transparency = selDatum.ViewObject.Transparency
 
-                self.setupTargetDatum(targetDatum, self.getDatumExpression(selTree, selTree[1]))
+                self.setupTargetDatum(targetDatum, self.getDatumExpression(selTree))
 
                 # hide initial datum
                 selDatum.Visibility = False
@@ -143,7 +143,7 @@ class importDatumCmd():
                 confirm = Asm4.confirmBox(message)
 
             if confirm:
-                self.setupTargetDatum(targetDatum, self.getDatumExpression(selTree, selTree[1]))
+                self.setupTargetDatum(targetDatum, self.getDatumExpression(selTree))
 
                 # hide initial datum
                 selDatum.Visibility = False
@@ -179,7 +179,7 @@ class importDatumCmd():
                     targetDatum.ViewObject.ShapeColor   = selDatum.ViewObject.ShapeColor
                     targetDatum.ViewObject.Transparency = selDatum.ViewObject.Transparency
 
-                    self.setupTargetDatum(targetDatum, self.getDatumExpression(selTree, selTree[1]))
+                    self.setupTargetDatum(targetDatum, self.getDatumExpression(selTree))
 
                     # hide initial datum
                     selDatum.Visibility = False
@@ -207,12 +207,12 @@ class importDatumCmd():
         # recompute the object to apply the placement:
         targetDatum.recompute()
 
-    def getDatumExpression(self, selTree, selDatum):
+    def getDatumExpression(self, selTree):
         # build the Placement expression
         # the first [0] object is at the document root and its Placement is ignored
         # the second [1] object gets a special treatment, it is always in the current document
-        expression = selDatum+'.Placement'
-        obj1 = App.ActiveDocument.getObject(selDatum)
+        expression = selTree[1]+'.Placement'
+        obj1 = App.ActiveDocument.getObject(selTree[1])
         # the document where an object is
         if obj1.isDerivedFrom('App::Link') and obj1.LinkedObject.Document != App.ActiveDocument:
             doc = obj1.LinkedObject.Document
