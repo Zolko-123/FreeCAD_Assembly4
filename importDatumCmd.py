@@ -72,7 +72,7 @@ class importDatumCmd():
         selection = self.getSelectedDatums()
 
         # special case where 2 objects are selected in order to update the placement of the second one
-        if len(selection)==2 and selection[0]==rootContainer and selection[1].getParentGeoFeatureGroup() == rootContainer:
+        if len(selection)==2 and selection[1].getParentGeoFeatureGroup() == rootContainer:
             confirm = False
             targetDatum = selection[1]
 
