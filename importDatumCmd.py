@@ -29,11 +29,10 @@ class importDatumCmd():
         super(importDatumCmd,self).__init__()
 
     def GetResources(self):
-        tooltip  = "Imports the selected Datum object from a sub-part into the root assembly.\n"
+        tooltip  = "Imports the selected Datum object(s) from a sub-part into the root assembly.\n"
         tooltip += "This creates a new datum of the same type, and with the same global placement\n\n"
         tooltip += "This command can also be used to override the placement of an existing datum :\n"
-        tooltip += "select a second datum in the same root container as the first selected datum\n\n"
-        tooltip += "Selecting multiple Datum objects (3+) will import all of them with default names"
+        tooltip += "select a second datum in the same root container as the first selected datum"
         iconFile = os.path.join( Asm4.iconPath , 'Import_Datum.svg')
         return {"MenuText": "Import Datum object",
                 "ToolTip" : tooltip,
@@ -67,53 +66,16 @@ class importDatumCmd():
             message = selDatum.Name + ' is already at the top-level and cannot be imported'
             Asm4.warningBox(message)
             return
+
         # the root parent container is the first in the selection tree
         rootContainer = App.ActiveDocument.getObject(selTree[0])
-
         selection = self.getSelectedDatums()
-        # if a single datum object is selected
-        if len(selection)==1:
-            # create a new datum object
-            proposedName = selTree[-2]+'_'+selDatum.Label
-            message = 'Create a new '+selDatum.TypeId+' in '+Asm4.labelName(rootContainer)+' \nsuperimposed on:\n\n'
-            for objName in selTree[1:]:
-                message += '> '+objName+'\n'
-            message += '\nEnter name for this datum :'+' '*40
-            text,ok = QtGui.QInputDialog.getText(None,'Import Datum',
-                    message, text = proposedName)
-            if ok and text:
-                targetDatum = rootContainer.newObject( selDatum.TypeId, text )
-                targetDatum.Label = text
-                # apply existing view properties if applicable
-                if hasattr(selDatum,'ResizeMode') and selDatum.ResizeMode == 'Manual':
-                    targetDatum.ResizeMode = 'Manual'
-                    if hasattr(selDatum,'Length'):
-                        targetDatum.Length = selDatum.Length
-                    if hasattr(selDatum,'Width'):
-                        targetDatum.Width = selDatum.Width
-                targetDatum.ViewObject.ShapeColor   = selDatum.ViewObject.ShapeColor
-                targetDatum.ViewObject.Transparency = selDatum.ViewObject.Transparency
 
-                self.setupTargetDatum(targetDatum, self.getDatumExpression(selTree))
-
-                # hide initial datum
-                selDatum.Visibility = False
-
-                # select the newly created datum
-                Gui.Selection.clearSelection()
-                Gui.Selection.addSelection( App.ActiveDocument.Name, rootContainer.Name, targetDatum.Name+'.' )
-
-        # two datum objects are selected
-        # the second is superimposed on the first
-        # Can be of different types, doesn't matter
-        elif len(selection)==2:
+        # special case where 2 objects are selected in order to update the placement of the second one
+        if len(selection)==2 and selection[1].getParentGeoFeatureGroup() == rootContainer:
             confirm = False
             targetDatum = selection[1]
-            # we can only import a datum to another datum at the root of the same container
-            if targetDatum.getParentGeoFeatureGroup() != rootContainer:
-                message = Asm4.labelName(targetDatum)+'is not in the root container '+Asm4.labelName(rootContainer)
-                Asm4.warningBox(message)
-                return
+
             # target datum is free
             if targetDatum.MapMode == 'Deactivated':
                 message = 'This will superimpose '+Asm4.labelName(targetDatum)+' in '+Asm4.labelName(rootContainer)+' on:\n\n'
@@ -141,41 +103,58 @@ class importDatumCmd():
                 Gui.Selection.clearSelection()
                 Gui.Selection.addSelection( App.ActiveDocument.Name, rootContainer.Name, targetDatum.Name+'.' )
 
-        # Multiple selection
+                # recompute assembly
+                rootContainer.recompute(True)
+
+            # Done with the special case, no need to continue with the normal process
+            return
+
+        # Single or Multiple selection(s) for regular case
         # Notify user that default names will be used and import all the objects
+        proposedName = selTree[-2]+'_'+selDatum.Label
+
+        if len(selection) == 1:
+            message = 'Create a new '+selDatum.TypeId+' in '+Asm4.labelName(rootContainer)+' \nsuperimposed on:\n\n'
+            for objName in selTree[1:]:
+                message += '> '+objName+'\n'
+            message += '\nEnter name for this datum :'+' '*40
+            userSpecifiedName,confirm = QtGui.QInputDialog.getText(None,'Import Datum',
+                    message, text = proposedName)
         else:
-            proposedName = selTree[-2]+'_'+selDatum.Label
             message = str(len(selection)) + " selected datum objects will be imported into the root assembly\n"
             message += "with their default names such as:\n"
             message += proposedName
             confirm = Asm4.confirmBox(message)
 
-            if confirm:
-                for index in range(len(selection)):
-                    ( selDatum, selTree ) = Asm4.getSelectionTree(index)
-                    # create a new datum object
+        if confirm:
+            for index in range(len(selection)):
+                ( selDatum, selTree ) = Asm4.getSelectionTree(index)
+                # create a new datum object
+                if len(selection) == 1:
+                    proposedName = userSpecifiedName
+                else:
                     proposedName = selTree[-2]+'_'+selDatum.Label
 
-                    targetDatum = rootContainer.newObject(selDatum.TypeId, proposedName)
-                    targetDatum.Label = proposedName
-                    # apply existing view properties if applicable
-                    if hasattr(selDatum,'ResizeMode') and selDatum.ResizeMode == 'Manual':
-                        targetDatum.ResizeMode = 'Manual'
-                        if hasattr(selDatum,'Length'):
-                            targetDatum.Length = selDatum.Length
-                        if hasattr(selDatum,'Width'):
-                            targetDatum.Width = selDatum.Width
-                    targetDatum.ViewObject.ShapeColor   = selDatum.ViewObject.ShapeColor
-                    targetDatum.ViewObject.Transparency = selDatum.ViewObject.Transparency
+                targetDatum = rootContainer.newObject(selDatum.TypeId, proposedName)
+                targetDatum.Label = proposedName
+                # apply existing view properties if applicable
+                if hasattr(selDatum,'ResizeMode') and selDatum.ResizeMode == 'Manual':
+                    targetDatum.ResizeMode = 'Manual'
+                    if hasattr(selDatum,'Length'):
+                        targetDatum.Length = selDatum.Length
+                    if hasattr(selDatum,'Width'):
+                        targetDatum.Width = selDatum.Width
+                targetDatum.ViewObject.ShapeColor   = selDatum.ViewObject.ShapeColor
+                targetDatum.ViewObject.Transparency = selDatum.ViewObject.Transparency
 
-                    self.setupTargetDatum(targetDatum, self.getDatumExpression(selTree))
+                self.setupTargetDatum(targetDatum, self.getDatumExpression(selTree))
 
-                    # hide initial datum
-                    selDatum.Visibility = False
+                # hide initial datum
+                selDatum.Visibility = False
 
-                # select the last created datum
-                Gui.Selection.clearSelection()
-                Gui.Selection.addSelection( App.ActiveDocument.Name, rootContainer.Name, targetDatum.Name+'.' )
+            # select the last created datum
+            Gui.Selection.clearSelection()
+            Gui.Selection.addSelection( App.ActiveDocument.Name, rootContainer.Name, targetDatum.Name+'.' )
 
         # recompute assembly
         rootContainer.recompute(True)
