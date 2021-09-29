@@ -817,6 +817,10 @@ def getSelectedDatum():
     +-----------------------------------------------+
     |                 Unit Spin Box                 |
     +-----------------------------------------------+
+
+usage:
+
+self.YtranslSpinBox = QtGui.QDoubleSpinBox() → self.YtranslSpinBox = Asm4.QUnitSpinBox()
 """
 class QUnitSpinBox(QtGui.QDoubleSpinBox):
     def __init__(self, *args, **kwargs):
