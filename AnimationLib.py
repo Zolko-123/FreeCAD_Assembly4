@@ -467,11 +467,16 @@ class animateVariable(animationProvider):
 
     def onExport(self):
         self.onStop()
-        if not self.exporter:
-            # Only import the export-lib if requested. Helps to keep WB loading times in check.
-            import AnimationExportLib
-            self.exporter = AnimationExportLib.animationExporter(self)
-        self.exporter.openUI()
+        # check for OpenCV module installed (cv2)
+        try:
+            import cv2
+            if not self.exporter:
+                # Only import the export-lib if requested. Helps to keep WB loading times in check.
+                import AnimationExportLib
+                self.exporter = AnimationExportLib.animationExporter(self)
+            self.exporter.openUI()
+        except:
+            Asm4.warningBox('The Python module \"OpenCV\" is not installed')
 
     def onDocChanged(self):
         if App.ActiveDocument != self.ActiveDocument:
