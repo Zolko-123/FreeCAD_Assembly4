@@ -529,7 +529,7 @@ class selectionObserver():
         self.Pt2  = None
         PtS       = None
 
-    def render_distance(self, distance: int) -> str:
+    def render_distance(self, distance: float) -> str:
         return App.Units.schemaTranslate(
             App.Units.Quantity(str(distance) + " mm"),
             App.Units.getSchema(),
