@@ -230,9 +230,6 @@ class insertLink():
                 # if it has been renamed, we take the name given by the user
                 if part.Name == part.Label:
                     proposedLinkName = part.Document.Name
-                # if not, we take the document
-                else:
-                    proposedLinkName = part.Label
             # set the proposed name into the text field, unless it's a broken link
             if not self.brokenLink:
                 self.linkNameInput.setText( proposedLinkName )
