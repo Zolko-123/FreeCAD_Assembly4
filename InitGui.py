@@ -125,6 +125,8 @@ class Assembly4Workbench(Workbench):
         self.dot()
         import makeArrayCmd        # creates a new array of App::Link
         self.dot()
+        import variantLinkCmd      # creates a variant link
+        self.dot()
         import gotoDocumentCmd     # opens the documentof the selected App::Link
         self.dot()
         import Asm4_Measure        # Measure tool in the Task panel
@@ -205,6 +207,8 @@ class Assembly4Workbench(Workbench):
                         "Asm4_releaseAttachment", 
                         "Asm4_mirrorPart", 
                         "Asm4_circularArray", 
+                        "Asm4_variantLink", 
+                        "Separator",
                         "Asm4_placeFastener", 
                         "Asm4_cloneFastenersToAxes", 
                         "Asm4_importDatum", 
@@ -247,6 +251,7 @@ class Assembly4Workbench(Workbench):
                         #"Asm4_placeDatum", 
                         "Asm4_mirrorPart", 
                         "Asm4_circularArray", 
+                        "Asm4_variantLink", 
                         "Separator",
                         "Asm4_makeBOM", 
                         "Asm4_Measure", 

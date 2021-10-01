@@ -64,11 +64,17 @@ class placeLinkCmd():
     def Activated(self):
         #Handle single selected App::Link
         selectedLink = None
-        #parentAssembly = None
+        # try with a regular App::Link
         selection = Asm4.getSelectedLink()
-        if not selection :
-            # This shouldn't happen
-            FCC.PrintWarning("Please select a linked part\n")
+        # may-be an Asm4::VariantLink ?
+        if selection is None:
+            selection = Asm4.getSelectedVarLink()
+        # or a regular Part or Body ?
+        if selection is None:
+            selection = Asm4.getSelectedContainer()
+        # the selected object is not valid here
+        if selection is None:
+            FCC.PrintWarning("Please select a part or a link to a part\n")
             return
         else:
             parent = selection.getParentGeoFeatureGroup()
@@ -133,19 +139,23 @@ class placeLinkUI():
         self.activeDoc = App.ActiveDocument
 
         # we have checked before that all this is correct 
-        self.selectedLink = Asm4.getSelectedLink()
-        #self.rootAssembly = self.selectedLink.getParentGeoFeatureGroup()
+        selection = Asm4.getSelectedLink()
+        if selection is None:
+            selection = Asm4.getSelectedVarLink()
+        self.selectedObj = selection
+
+        #self.rootAssembly = self.selectedObj.getParentGeoFeatureGroup()
         self.rootAssembly = Asm4.getAssembly()
 
         # has been checked before, this is for security only
-        if Asm4.isAsm4EE(self.selectedLink):
+        if Asm4.isAsm4EE(self.selectedObj):
             # get the old values
-            self.old_AO = self.selectedLink.AttachmentOffset
-            self.old_linkLCS = self.selectedLink.AttachedBy[1:]
+            self.old_AO = self.selectedObj.AttachmentOffset
+            self.old_linkLCS = self.selectedObj.AttachedBy[1:]
         else:
             # this shouldn't happen
             FCC.PrintWarning("WARNING : unsupported Assembly/Solver/Part combination, you shouldn't be seeing this\n")
-            Asm4.makeAsmProperties(self.selectedLink)
+            Asm4.makeAsmProperties(self.selectedObj)
             self.old_AO = []
             self.old_linkLCS = ''
 
@@ -161,9 +171,9 @@ class placeLinkUI():
         self.drawUI(self.form)
 
         #save original AttachmentOffset of linked part
-        self.old_LinkAttachmentOffset = self.selectedLink.AttachmentOffset
-        self.old_LinkRotation = self.selectedLink.AttachmentOffset.Rotation
-        self.old_LinkPosition = self.selectedLink.AttachmentOffset.Base
+        self.old_LinkAttachmentOffset = self.selectedObj.AttachmentOffset
+        self.old_LinkRotation = self.selectedObj.AttachmentOffset.Rotation
+        self.old_LinkPosition = self.selectedObj.AttachmentOffset.Base
         # default values correspond to original AttachmentOffset of linked part
         self.Xtranslation = self.old_LinkPosition[0]
         self.Ytranslation = self.old_LinkPosition[1]
@@ -173,17 +183,17 @@ class placeLinkUI():
         self.ZrotationAngle = self.old_LinkRotation.toEuler()[2]
         
         # save previous view properties
-        self.old_OverrideMaterial = self.selectedLink.ViewObject.OverrideMaterial
-        self.old_DrawStyle = self.selectedLink.ViewObject.DrawStyle
-        self.old_LineWidth = self.selectedLink.ViewObject.LineWidth
-        self.old_DiffuseColor = self.selectedLink.ViewObject.ShapeMaterial.DiffuseColor
-        self.old_Transparency = self.selectedLink.ViewObject.ShapeMaterial.Transparency
+        self.old_OverrideMaterial = self.selectedObj.ViewObject.OverrideMaterial
+        self.old_DrawStyle = self.selectedObj.ViewObject.DrawStyle
+        self.old_LineWidth = self.selectedObj.ViewObject.LineWidth
+        self.old_DiffuseColor = self.selectedObj.ViewObject.ShapeMaterial.DiffuseColor
+        self.old_Transparency = self.selectedObj.ViewObject.ShapeMaterial.Transparency
         # set new view properties
-        self.selectedLink.ViewObject.OverrideMaterial = True
-        self.selectedLink.ViewObject.DrawStyle = DrawStyle
-        self.selectedLink.ViewObject.LineWidth = LineWidth
-        self.selectedLink.ViewObject.ShapeMaterial.DiffuseColor = DiffuseColor
-        self.selectedLink.ViewObject.ShapeMaterial.Transparency = Transparency
+        self.selectedObj.ViewObject.OverrideMaterial = True
+        self.selectedObj.ViewObject.DrawStyle = DrawStyle
+        self.selectedObj.ViewObject.LineWidth = LineWidth
+        self.selectedObj.ViewObject.ShapeMaterial.DiffuseColor = DiffuseColor
+        self.selectedObj.ViewObject.ShapeMaterial.Transparency = Transparency
         
 
         # get the old values
@@ -195,11 +205,11 @@ class placeLinkUI():
         linkedDoc       = ''
         old_linkLCS     = ''
         # get and store the current expression engine:
-        self.old_EE = Asm4.placementEE(self.selectedLink.ExpressionEngine)
+        self.old_EE = Asm4.placementEE(self.selectedObj.ExpressionEngine)
 
         # decode the old ExpressionEngine
         # if the decode is unsuccessful, old_Expression is set to False and the other things are set to 'None'
-        (self.old_Parent, separator, self.old_parentLCS) = self.selectedLink.AttachedTo.partition('#')
+        (self.old_Parent, separator, self.old_parentLCS) = self.selectedObj.AttachedTo.partition('#')
         ( old_Parent, old_attLCS, old_linkLCS ) = self.splitExpressionLink( self.old_EE, self.old_Parent )
         # sometimes, the object is in << >> which is an error by FreeCAD,
         # because that's reserved for labels, but we still look for it
@@ -220,7 +230,7 @@ class placeLinkUI():
             if obj.TypeId=='App::Link' and hasattr(obj.LinkedObject,'isDerivedFrom'):
                 if obj.LinkedObject.isDerivedFrom('App::Part') or obj.LinkedObject.isDerivedFrom('PartDesign::Body'):
                 # ... except if it's the selected link itself
-                    if obj != self.selectedLink:
+                    if obj != self.selectedObj:
                         self.parentTable.append( obj )
                         # add to the drop-down combo box with the assembly tree's parts
                         objIcon = obj.LinkedObject.ViewObject.Icon
@@ -228,7 +238,7 @@ class placeLinkUI():
                         self.parentList.addItem( objIcon, objText, obj)
 
         # find all the LCS in the selected link
-        self.partLCStable = Asm4.getPartLCS( self.selectedLink.LinkedObject )
+        self.partLCStable = Asm4.getPartLCS( self.selectedObj.LinkedObject )
         # build the list
         self.partLCSlist.clear()
         for lcs in self.partLCStable:
@@ -283,7 +293,7 @@ class placeLinkUI():
         Gui.Selection.removeObserver(self)
         self.restoreView()
         Gui.Selection.clearSelection()
-        Gui.Selection.addSelection( self.activeDoc.Name, self.rootAssembly.Name, self.selectedLink.Name+'.' )
+        Gui.Selection.addSelection( self.activeDoc.Name, self.rootAssembly.Name, self.selectedObj.Name+'.' )
         # restore previous selection filter (if any)
         if self.selectionFilterStatus:
             selectionFilter.observerEnable()
@@ -292,11 +302,11 @@ class placeLinkUI():
 
     # restore initial view properties
     def restoreView(self, normal=True):
-        self.selectedLink.ViewObject.OverrideMaterial = False
-        self.selectedLink.ViewObject.DrawStyle    = self.old_DrawStyle
-        self.selectedLink.ViewObject.LineWidth    = self.old_LineWidth
-        self.selectedLink.ViewObject.ShapeMaterial.DiffuseColor = self.old_DiffuseColor
-        self.selectedLink.ViewObject.ShapeMaterial.Transparency = self.old_Transparency
+        self.selectedObj.ViewObject.OverrideMaterial = False
+        self.selectedObj.ViewObject.DrawStyle    = self.old_DrawStyle
+        self.selectedObj.ViewObject.LineWidth    = self.old_LineWidth
+        self.selectedObj.ViewObject.ShapeMaterial.DiffuseColor = self.old_DiffuseColor
+        self.selectedObj.ViewObject.ShapeMaterial.Transparency = self.old_Transparency
 
 
     # standard FreeCAD Task panel buttons
@@ -319,10 +329,10 @@ class placeLinkUI():
     # Cancel, restore previous values if available
     def reject(self):
         if self.old_AO:
-            self.selectedLink.AttachmentOffset = self.old_AO
+            self.selectedObj.AttachmentOffset = self.old_AO
         if self.old_EE:
-            self.selectedLink.setExpression( 'Placement', self.old_EE )
-        self.selectedLink.recompute()
+            self.selectedObj.setExpression( 'Placement', self.old_EE )
+        self.selectedObj.recompute()
         # highlight in the 3D window the object we placed
         self.finish()
 
@@ -333,9 +343,9 @@ class placeLinkUI():
             self.Apply()
         elif button == QtGui.QDialogButtonBox.Ignore:
             # ask for confirmation before resetting everything
-            msgName = Asm4.labelName(self.selectedLink)
+            msgName = Asm4.labelName(self.selectedObj)
             # see whether the ExpressionEngine field is filled
-            if self.selectedLink.ExpressionEngine :
+            if self.selectedObj.ExpressionEngine :
                 # if yes, then ask for confirmation
                 confirmed = Asm4.confirmBox('This command will release all attachments on '+msgName+' and set it to manual positioning in its current location.')
                 # if not, then it's useless to bother the user
@@ -343,9 +353,9 @@ class placeLinkUI():
                 confirmed = True
             if confirmed:
                 # unset the ExpressionEngine for the Placement
-                self.selectedLink.setExpression('Placement', None)
+                self.selectedObj.setExpression('Placement', None)
                 # reset the assembly properties
-                Asm4.makeAsmProperties( self.selectedLink, reset=True )
+                Asm4.makeAsmProperties( self.selectedObj, reset=True )
                 # finish
                 FCC.PrintMessage("Part is now manually placed\n")
                 self.finish()
@@ -384,7 +394,7 @@ class placeLinkUI():
             a_LCS = None
 
         # the linked App::Part's name
-        l_Part = self.selectedLink.LinkedObject.Document.Name
+        l_Part = self.selectedObj.LinkedObject.Document.Name
 
         # the LCS's name in the linked part to be used for its attachment
         # check that something is selected in the QlistWidget
@@ -398,11 +408,11 @@ class placeLinkUI():
         # constrName has been checked at the beginning
         if a_Link and a_LCS and l_Part and l_LCS :
             # add the Asm4 properties if it's a pure App::Link
-            Asm4.makeAsmProperties(self.selectedLink)
-            # self.selectedLink.AssemblyType = 'Part::Link'
-            self.selectedLink.AttachedBy = '#'+l_LCS
-            self.selectedLink.AttachedTo = a_Link+'#'+a_LCS
-            self.selectedLink.SolverId = 'Placement::ExpressionEngine'
+            Asm4.makeAsmProperties(self.selectedObj)
+            # self.selectedObj.AssemblyType = 'Part::Link'
+            self.selectedObj.AttachedBy = '#'+l_LCS
+            self.selectedObj.AttachedTo = a_Link+'#'+a_LCS
+            self.selectedObj.SolverId = 'Placement::ExpressionEngine'
             # build the expression for the ExpressionEngine
             # this is where all the magic is, see:
             # 
@@ -415,9 +425,9 @@ class placeLinkUI():
             # expr = LCS_in_the_assembly.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
             expr = Asm4.makeExpressionPart( a_Link, a_Part, a_LCS, l_Part, l_LCS )
             # load the expression into the link's Expression Engine
-            self.selectedLink.setExpression('Placement', expr )
+            self.selectedObj.setExpression('Placement', expr )
             # recompute the object to apply the placement:
-            self.selectedLink.recompute()
+            self.selectedObj.recompute()
             self.rootAssembly.recompute(True)
             return True
         else:
@@ -488,7 +498,7 @@ class placeLinkUI():
         if len(self.partLCSlist.selectedItems())>0:
             p_LCS = self.partLCStable[ self.partLCSlist.currentRow() ]
             p_LCS.Visibility = True
-            p_LCStext = self.selectedLink.Name+'.'+p_LCS.Name+'.'
+            p_LCStext = self.selectedObj.Name+'.'+p_LCS.Name+'.'
             p_LCS_selected = True
         # LCS in the parent
         if len(self.attLCSlist.selectedItems())>0:
@@ -530,7 +540,7 @@ class placeLinkUI():
         if selObj.TypeId in Asm4.datumTypes and len(selPath) > 2:
             selLink = self.activeDoc.getObject(selPath[2])
             # if it's the selected link to be placed:
-            if selLink == self.selectedLink:
+            if selLink == self.selectedObj:
                 # try to find the selected LCS in the partLCS list
                 found = self.partLCSlist.findItems(Asm4.labelName(selObj), QtCore.Qt.MatchExactly)
                 if len(found) > 0:
@@ -583,8 +593,8 @@ class placeLinkUI():
         rotationY = App.Placement( App.Vector(0.00, 0.00, 0.00), App.Rotation( App.Vector(0,1,0), self.YrotationAngle - self.old_LinkRotation.toEuler()[1] ))
         rotationZ = App.Placement( App.Vector(0.00, 0.00, 0.00), App.Rotation( App.Vector(0,0,1), self.ZrotationAngle - self.old_LinkRotation.toEuler()[2] ))
 
-        self.selectedLink.AttachmentOffset = moveXYZ * rotationX * rotationY * rotationZ
-        self.selectedLink.recompute()
+        self.selectedObj.AttachmentOffset = moveXYZ * rotationX * rotationY * rotationZ
+        self.selectedObj.recompute()
 
         
     def onXTranslValChanged(self):
@@ -636,9 +646,9 @@ class placeLinkUI():
         # external document:
         # expr = LCS_target.Placement * AttachmentOffset * linkedPart#LCS_attachment.Placement ^ -1
         # expr = sisterLink.Placement * sisterPart#LCS_target.Placement * AttachmentOffset * linkedPart#LCS_attachment.Placement ^ -1
-        retval = ( expr, 'None', 'None' )
+        retval    = ( expr, 'None', 'None' )
         restFinal = ''
-        attLink = ''
+        attLink   = ''
         # expr is empty
         if not expr:
             return retval
@@ -661,28 +671,37 @@ class placeLinkUI():
                 ( linkLCS,    separator, rest3 ) = rest2.partition('.Placement ^ ')
                 restFinal = rest3[0:2]
         elif nbHash==1:
-            # an external part is linked to the assembly or a part in the same document as the assembly
+            # an external part is linked to the assembly
             if parent == 'Parent Assembly':
                 # we're attached to an LCS in the parent assembly
-                # expr = LCS_assembly.Placement * AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
+                # expr = LCS_assembly.Placement * AttachmentOffset * LinkedPart#LCS.Placement ^ -1
                 ( attLCS,     separator, rest1 ) = expr.partition('.Placement * AttachmentOffset * ')
                 ( linkedDoc,  separator, rest2 ) = rest1.partition('#')
                 ( linkLCS,    separator, rest3 ) = rest2.partition('.Placement ^ ')
                 restFinal = rest3[0:2]
                 attLink = parent
                 attPart = 'None'
-            # a part from the document is attached to an external part
             else:
-                # expr = Rail_40x40_Y.Placement * Rails_V_Slot#LCS_AR.Placement * AttachmentOffset * LCS_Plaque_Laterale_sym.Placement ^ -1
-                # expr = parentLink.Placement * externalDoc#LCS_parentPart * AttachmentOffset * LCS_linkedPart.Placement ^ -1
-                ( attLink,    separator, rest1 ) = expr.partition('.Placement * ')
-                ( linkedDoc,  separator, rest2 ) = rest1.partition('#')
-                ( attLCS,     separator, rest3 ) = rest2.partition('.Placement * AttachmentOffset * ')
-                ( linkLCS,    separator, rest4 ) = rest3.partition('.Placement ^ ')
-                restFinal = rest4[0:2]
+                # if parent is in another document as the assembly
+                if self.rootAssembly.Document.getObject(parent) is None:
+                    # expr = Rail_40x40_Y.Placement * Rails_V_Slot#LCS_AR.Placement * AttachmentOffset * LCS_Plaque_Laterale_sym.Placement ^ -1
+                    # expr = parentLink.Placement * externalDoc#LCS_parentPart * AttachmentOffset * LCS_linkedPart.Placement ^ -1
+                    ( attLink,    separator, rest1 ) = expr.partition('.Placement * ')
+                    ( linkedDoc,  separator, rest2 ) = rest1.partition('#')
+                    ( attLCS,     separator, rest3 ) = rest2.partition('.Placement * AttachmentOffset * ')
+                    ( linkLCS,    separator, rest4 ) = rest3.partition('.Placement ^ ')
+                    restFinal = rest4[0:2]
+                # parent is in this document and link is a part in another document
+                else:
+                    # expr = Part001.Placement * LCS_0.Placement * AttachmentOffset * varTmpDoc_4#LCS_1.Placement ^ -1
+                    ( attLink,    separator, rest1 ) = expr.partition('.Placement * ')
+                    ( attLCS,     separator, rest2 ) = rest1.partition('.Placement * AttachmentOffset * ')
+                    ( linkedDoc,  separator, rest3 ) = rest2.partition('#')
+                    ( linkLCS,    separator, rest4 ) = rest3.partition('.Placement ^ ')
+                    restFinal = rest4[0:2]                    
         elif nbHash==2:
             # linked part and sister part in external documents to the parent assembly:
-            # expr = ParentLink.Placement * ParentPart#LCS.Placement * AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
+            # expr = ParentLink.Placement * ParentPart#LCS.Placement * AttachmentOffset * LinkedPart#LCS.Placement ^ -1
             ( attLink,    separator, rest1 ) = expr.partition('.Placement * ')
             ( attPart,    separator, rest2 ) = rest1.partition('#')
             ( attLCS,     separator, rest3 ) = rest2.partition('.Placement * AttachmentOffset * ')
@@ -695,7 +714,6 @@ class placeLinkUI():
         # final check, all options should give the correct data
         if restFinal=='-1' and attLink==parent :
             # wow, everything went according to plan
-            # retval = ( expr, attPart, attLCS, constrLink, partLCS )
             retval = ( attLink, attLCS, linkLCS )
         return retval
 
@@ -713,13 +731,13 @@ class placeLinkUI():
         self.partLCSlist.clear()
         self.attLCSlist.clear()
         # the selected link's name 
-        self.linkName.setText( Asm4.labelName(self.selectedLink) )
+        self.linkName.setText( Asm4.labelName(self.selectedObj) )
         # linked part & doc
         dText = ''
-        if self.selectedLink.LinkedObject.Document != self.activeDoc :
-            dText = self.selectedLink.LinkedObject.Document.Name +'#'
+        if self.selectedObj.LinkedObject.Document != self.activeDoc :
+            dText = self.selectedObj.LinkedObject.Document.Name +'#'
         # if the linked part has been renamed by the user, keep the label and add (.Name)
-        pText = Asm4.labelName(self.selectedLink.LinkedObject)
+        pText = Asm4.labelName(self.selectedObj.LinkedObject)
         self.linkedDoc.setText( dText + pText )
         # Initialize the assembly tree with the Parent Assembly as first element
         # clear the available parents combo box
@@ -799,7 +817,7 @@ class placeLinkUI():
         # X Translation Value
         self.XoffsetLayout = QtGui.QHBoxLayout(Form)
         self.XtranslSpinBoxLabel = self.XoffsetLayout.addWidget(QtGui.QLabel("X Translation :"))
-        self.XtranslSpinBox = QtGui.QDoubleSpinBox(Form)
+        self.XtranslSpinBox = Asm4.QUnitSpinBox(Form)
         self.XtranslSpinBox.setRange(-999999.00, 999999.00)
         #self.XtranslSpinBox.setValue(self.Xtranslation)
         self.XtranslSpinBox.setToolTip("Translation along X axis")
@@ -814,7 +832,7 @@ class placeLinkUI():
         # Y Translation Value
         self.YoffsetLayout = QtGui.QHBoxLayout(Form)
         self.YtranslSpinBoxLabel = self.YoffsetLayout.addWidget(QtGui.QLabel("Y Translation :"))
-        self.YtranslSpinBox = QtGui.QDoubleSpinBox(Form)
+        self.YtranslSpinBox = Asm4.QUnitSpinBox(Form)
         self.YtranslSpinBox.setRange(-999999.00, 999999.00)
         #self.YtranslSpinBox.setValue(self.Ytranslation)
         self.YtranslSpinBox.setToolTip("Translation along Y")
@@ -829,7 +847,7 @@ class placeLinkUI():
         # Z Translation Value
         self.ZoffsetLayout = QtGui.QHBoxLayout(Form)
         self.ZtranslSpinBoxLabel = self.ZoffsetLayout.addWidget(QtGui.QLabel("Z Translation :"))
-        self.ZtranslSpinBox = QtGui.QDoubleSpinBox(Form)
+        self.ZtranslSpinBox = Asm4.QUnitSpinBox(Form)
         self.ZtranslSpinBox.setRange(-999999.00, 999999.00)
         #self.ZtranslSpinBox.setValue(self.Ztranslation)
         self.ZtranslSpinBox.setToolTip("Translation along Z:")
