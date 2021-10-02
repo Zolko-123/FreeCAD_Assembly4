@@ -605,7 +605,7 @@ class placeFastenerUI():
         # X Translation Value
         self.XoffsetLayout = QtGui.QHBoxLayout()
         self.XtranslSpinBoxLabel = self.XoffsetLayout.addWidget(QtGui.QLabel("X Translation :"))
-        self.XtranslSpinBox = QtGui.QDoubleSpinBox()
+        self.XtranslSpinBox = Asm4.QUnitSpinBox()
         self.XtranslSpinBox.setRange(-999999.00, 999999.00)
         self.XtranslSpinBox.setToolTip("Translation along X axis")
         self.RotXButton = QtGui.QPushButton('Rotate X +90°')
@@ -619,7 +619,7 @@ class placeFastenerUI():
         # Y Translation Value
         self.YoffsetLayout = QtGui.QHBoxLayout()
         self.YtranslSpinBoxLabel = self.YoffsetLayout.addWidget(QtGui.QLabel("Y Translation :"))
-        self.YtranslSpinBox = QtGui.QDoubleSpinBox()
+        self.YtranslSpinBox = Asm4.QUnitSpinBox()
         self.YtranslSpinBox.setRange(-999999.00, 999999.00)
         self.YtranslSpinBox.setToolTip("Translation along Y")
         self.RotYButton = QtGui.QPushButton('Rotate Y +90°')
@@ -633,7 +633,7 @@ class placeFastenerUI():
         # Z Translation Value
         self.ZoffsetLayout = QtGui.QHBoxLayout()
         self.ZtranslSpinBoxLabel = self.ZoffsetLayout.addWidget(QtGui.QLabel("Z Translation :"))
-        self.ZtranslSpinBox = QtGui.QDoubleSpinBox()
+        self.ZtranslSpinBox = Asm4.QUnitSpinBox()
         self.ZtranslSpinBox.setRange(-999999.00, 999999.00)
         self.ZtranslSpinBox.setToolTip("Translation along Z:")
         self.RotZButton = QtGui.QPushButton('Rotate Z +90°')
