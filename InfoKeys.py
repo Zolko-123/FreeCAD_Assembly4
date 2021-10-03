@@ -20,7 +20,7 @@ infoToolTip = {'LabelDoc':'Return the Label of Document','LabelPart':'Return the
 # protection against update of user configuration
 ### to have the dir of external configuration file
 ConfUserDir = os.path.join(App.getUserAppDataDir(),'Templates')
-ConfUserFilename = "infoConfUser.json"
+ConfUserFilename = "Asm4_infoPartConf.json"
 ConfUserFilejson = os.path.join(ConfUserDir, ConfUserFilename)
 
 
@@ -33,7 +33,10 @@ except :
     partInfoDef = dict()
     for prop in partInfo:
         partInfoDef.setdefault(prop,{'userData':prop + 'User','active':True})
-    os.mkdir(ConfUserDir)
+    try:
+        os.mkdir(ConfUserDir)
+    except:
+        pass
     file = open(ConfUserFilejson, 'x')
     json.dump(partInfoDef,file)
     file.close()

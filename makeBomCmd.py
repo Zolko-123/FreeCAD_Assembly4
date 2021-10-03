@@ -22,7 +22,7 @@ import InfoKeys
 
 ### to have the dir of external configuration file
 ConfUserDir = os.path.join(App.getUserAppDataDir(),'Templates')
-ConfUserFilename = "infoConfUser.json"
+ConfUserFilename = "Asm4_infoPartConf.json"
 ConfUserFilejson = os.path.join(ConfUserDir, ConfUserFilename)
 
 
