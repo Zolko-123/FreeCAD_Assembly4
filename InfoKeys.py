@@ -35,8 +35,6 @@ except :
         partInfoDef.setdefault(prop,{'userData':prop + 'User','active':True})
     try:
         os.mkdir(ConfUserDir)
-    except:
-        pass
     file = open(ConfUserFilejson, 'x')
     json.dump(partInfoDef,file)
     file.close()
