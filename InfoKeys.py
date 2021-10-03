@@ -5,13 +5,19 @@
 #
 # libraries for FreeCAD's Assembly 4 workbench
 
-import os
-import json
+import os, json
 
 import FreeCAD as App
+import infoPartCmd
+
+
+# Autofilling info ref
+partInfo =[     'LabelDoc',                 \
+                'LabelPart'  ]
+
+infoToolTip = {'LabelDoc':'Return the Label of Document','LabelPart':'Return the Label of Part'}
 
 # protection against update of user configuration
-
 ### to have the dir of external configuration file
 ConfUserDir = os.path.join(App.getUserAppDataDir(),'Asm4_UserConf')
 ConfUserFilename = "infoConfUser.json"
@@ -25,7 +31,7 @@ try :
 ### else make the default external configuration file
 except :
     partInfoDef = dict()
-    for prop in InfoKeys.partInfo:
+    for prop in partInfo:
         partInfoDef.setdefault(prop,{'userData':prop + 'User','active':True})
     os.mkdir(ConfUserDir)
     file = open(ConfUserFilejson, 'x')
@@ -37,15 +43,6 @@ file = open(ConfUserFilejson, 'r')
 infoKeysUser = json.load(file).copy()
 file.close()
 
-
-import infoPartCmd
-
-# Autofilling info ref
-
-partInfo =[     'LabelDoc',                 \
-                'LabelPart'  ]
-
-infoToolTip = {'LabelDoc':'Return the Label of Document','LabelPart':'Return the Label of Part'}
 
 def infoDefault(self):
     ### auto filling module
@@ -144,7 +141,4 @@ def LabelPart(self,PART):
         except AttributeError:
         ### if field is not actived
             pass
-
-
-    
     pass
