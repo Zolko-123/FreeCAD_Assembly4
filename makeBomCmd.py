@@ -21,7 +21,7 @@ import InfoKeys
 # protection against update of user configuration
 
 ### to have the dir of external configuration file
-ConfUserDir = os.path.join(App.getUserAppDataDir(),'Asm4_UserConf')
+ConfUserDir = os.path.join(App.getUserAppDataDir(),'Templates')
 ConfUserFilename = "infoConfUser.json"
 ConfUserFilejson = os.path.join(ConfUserDir, ConfUserFilename)
 
