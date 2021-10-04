@@ -146,6 +146,26 @@ class infoPartUI():
         Gui.Control.closeDialog()
         Gui.Control.showDialog( infoPartConfUI() )
         #pass
+        
+    def reInit(self):
+        #init of list of all Properties
+        List = self.part.PropertiesList
+        listpi=[]
+        #make list of PartInfo Properties
+        for prop in List :
+            if self.part.getGroupOfProperty(prop) == 'PartInfo' :
+                listpi.append(prop)
+        # delete all PartInfo Properties
+        for suppr in listpi :
+            self.part.removeProperty(suppr)
+        # message for user
+        mb = QtGui.QMessageBox()
+        mb.setText("Your fields \n has been re-initilize")
+        mb.setWindowTitle("RE-INITIALISATION")
+        mb.exec_() 
+        # close
+        self.finish()
+        
 
     # InfoDefault
     def infoDefault(self):
@@ -195,9 +215,11 @@ class infoPartUI():
         # Buttons
         self.buttonsLayout = QtGui.QHBoxLayout()
         self.confFields = QtGui.QPushButton('Config')
+        self.reinit = QtGui.QPushButton('re-init')
+        self.reinit.setToolTip('To re-initialize your PartInfo Field of your part')
         self.autoFill = QtGui.QPushButton('auto-filling')
         self.buttonsLayout.addWidget(self.confFields)
-        self.buttonsLayout.addStretch()
+        self.buttonsLayout.addWidget(self.reinit)
         self.buttonsLayout.addWidget(self.autoFill)
 
         self.mainLayout.addLayout(self.buttonsLayout)
@@ -205,6 +227,7 @@ class infoPartUI():
 
         # Actions
         self.confFields.clicked.connect(self.editKeys)
+        self.reinit.clicked.connect(self.reInit)
         self.autoFill.clicked.connect(self.infoDefault)
         
         if self.infoTable[0][1]=='':
