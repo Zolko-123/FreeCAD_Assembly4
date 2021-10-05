@@ -43,17 +43,17 @@ except :
     json.dump(partInfoDef,file)
     file.close()
     
-'''
+
 ### now user configuration is :
 file = open(ConfUserFilejson, 'r')
 infoKeysUser = json.load(file).copy()
 file.close()
-'''
+
 def infoDefault(self):
     ### auto filling module
     ### load infoKeysUser    
     file = open(ConfUserFilejson, 'r')
-    self.infoKeysUser = json.load(file).copy()
+    infoKeysUser = json.load(file).copy()
     file.close()
     ### part variable creation
     try :
@@ -97,7 +97,7 @@ write new def like that :
 
 def newautoinfofieldname(self,PART(option : DOC , BODY , PAD , SKETCH):
 ###you can use DOC - PART - BODY - PAD - SKETCH
-    auto_info_field = self.infoKeysUser.get('newautoinfofieldname').get('userData')
+    auto_info_field = infoKeysUser.get('newautoinfofieldname').get('userData')
     auto_info_fill = newautoinfofield information
     try:
         ### if the command comes from makeBom write autoinfo directly on Part
@@ -118,7 +118,7 @@ def newautoinfofieldname(self,PART(option : DOC , BODY , PAD , SKETCH):
 
 def ShapeLength(self,PART,SKETCH):
 ###you can use DOC - PART - BODY - PAD - SKETCH
-    auto_info_field = self.infoKeysUser.get('ShapeLength').get('userData')
+    auto_info_field = infoKeysUser.get('ShapeLength').get('userData')
     try :
         auto_info_fill = SKETCH.Shape.Length
     except AttributeError:
@@ -141,7 +141,7 @@ def ShapeLength(self,PART,SKETCH):
 
 def PadLength(self,PART,PAD):
 ###you can use DOC - PART - BODY - PAD - SKETCH
-    auto_info_field = self.infoKeysUser.get('PadLength').get('userData')
+    auto_info_field = infoKeysUser.get('PadLength').get('userData')
     try :
         auto_info_fill = PAD.Length
     except AttributeError:
@@ -164,7 +164,7 @@ def PadLength(self,PART,PAD):
 
         
 def LabelDoc(self,PART,DOC):
-    docLabel = self.infoKeysUser.get('LabelDoc').get('userData')
+    docLabel = infoKeysUser.get('LabelDoc').get('userData')
     try:
         ### if the command comes from makeBom write autoinfo directly on Part
         self.TypeId
@@ -181,7 +181,7 @@ def LabelDoc(self,PART,DOC):
             pass
         
 def LabelPart(self,PART):
-    partLabel = self.infoKeysUser.get('LabelPart').get('userData')
+    partLabel = infoKeysUser.get('LabelPart').get('userData')
     try:
         ### if the command comes from makeBom write autoinfo directly on Part
         self.TypeId
