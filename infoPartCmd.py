@@ -374,16 +374,7 @@ class infoPartConfUI():
     # Define the deleteField action   
     def deleteField(self):
         # delete all ref line and infos.text()
-        delField = self.suppCombo.currentText()
-        # door for not delete Asm4 autofield
-        for prop in self.confTemplate:
-            if self.confTemplate.get(prop).get('userData') == delField:
-                if prop[0:3] != 'man' :
-                    mb = QtGui.QMessageBox()
-                    mb.setText(" You can not DELETE \n Asm4 Auto-infoField \n But you can DISABLE IT")
-                    mb.setWindowTitle("UNABLE TO DELETE")
-                    mb.exec_() 
-                    return
+        delField = writeXml(self.suppCombo.currentText())
         i=0
         for prop in self.confTemplate:
             if self.confTemplate.get(prop).get('userData') == delField:
@@ -393,7 +384,7 @@ class infoPartConfUI():
                 self.infos.remove(self.infos[i])
                 self.checker[i].deleteLater()
                 self.checker.remove(self.checker[i])
-                self.suppCombo.removeItem(i)
+                self.suppCombo.removeItem(i-len(self.infoKeysDefault))
                 self.refField = str(prop)
             i+=1
         # delete it on confTemplate
@@ -475,7 +466,8 @@ class infoPartConfUI():
         # delete
         self.suppCombo =  QtGui.QComboBox()
         for prop in self.confTemplate:
-            self.suppCombo.addItem(self.confTemplate.get(prop).get('userData'))
+            if prop[0:3] == 'man' :
+                self.suppCombo.addItem(decodeXml(self.confTemplate.get(prop).get('userData')))
         self.gridLayoutButtons.addWidget(self.suppCombo,1,1)
         
         # make a third column of QCheckBox for activate or not
