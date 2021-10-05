@@ -8,8 +8,7 @@
 
 
 
-import os
-import json
+import os, json
 
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
@@ -111,8 +110,11 @@ class infoPartUI():
         for prop in self.part.PropertiesList:
             if self.part.getGroupOfProperty(prop)=='PartInfo' :
                 if self.part.getTypeIdOfProperty(prop)=='App::PropertyString' :
-                    value = self.part.getPropertyByName(prop)
-                    self.infoTable.append([prop,value])
+                    for propuser in self.infoKeysUser :
+                        if self.infoKeysUser.get(propuser).get('userData') == prop :
+                            if self.infoKeysUser.get(propuser).get('active'):
+                                value = self.part.getPropertyByName(prop)
+                                self.infoTable.append([prop,value])
 
     # add the default part information
     def makePartInfo( self, object , reset=False ):
@@ -229,8 +231,13 @@ class infoPartUI():
         self.confFields.clicked.connect(self.editKeys)
         self.reinit.clicked.connect(self.reInit)
         self.autoFill.clicked.connect(self.infoDefault)
-        
-        if self.infoTable[0][1]=='':
+        test=False
+        try:
+            if self.infoTable[0][1]=='':
+                test=True
+        except IndexError:
+            test=True
+        if test :
             self.infoDefault()
             self.addNew()
 
