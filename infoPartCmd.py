@@ -337,14 +337,6 @@ class infoPartConfUI():
             newref = nameref + str(indexref)
         # init new user name
         newField=self.newOne.text()
-        if newField != newField.encode('ascii', 'replace').decode() :
-            # message for user
-            mb = QtGui.QMessageBox()
-            mb.setText("You can only use\nASCII charactere\nfor your field label\nsorry")
-            mb.setWindowTitle("WRITTING OF NEW CONFIG")
-            mb.exec_() 
-            # return
-            return
         self.newOne.setText('')
         self.addNewField(newref,newField)
     
