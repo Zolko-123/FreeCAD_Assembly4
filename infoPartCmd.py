@@ -47,6 +47,18 @@ user configuration = json.load(file).copy()
 file.close()
 """
 
+"""
+    +-----------------------------------------------+
+    |                  The Help Tools               |
+    +-----------------------------------------------+
+"""
+def writeXml(text):
+    text=text.encode('unicode_escape').decode().replace('\\','_x_m_l_')
+    return text
+
+def decodeXml(text):
+    text=text.replace('_x_m_l_','\\').encode().decode('unicode_escape')
+    return text
 
 """
     +-----------------------------------------------+
@@ -208,7 +220,7 @@ class infoPartUI():
                         propValue = QtGui.QLineEdit()
                         propValue.setText( prop[1] )
                         checkLayout.addWidget(propValue)
-                        self.formLayout.addRow(QtGui.QLabel(prop[0]),checkLayout)
+                        self.formLayout.addRow(QtGui.QLabel(decodeXml(prop[0])),checkLayout)
                         self.infos.append(propValue)
 
         self.mainLayout.addLayout(self.formLayout)
@@ -296,7 +308,8 @@ class infoPartConfUI():
         # creation of dict() for user config file
         config=dict()
         for prop in self.confTemplate:
-            config.setdefault(prop,{'userData':self.infos[i].text().replace(" ", "_"),'active':self.checker[i].isChecked()})
+            uData=writeXml(self.infos[i].text())
+            config.setdefault(prop,{'userData':uData.replace(" ", "_"),'active':self.checker[i].isChecked()})
             i+=1
         # write user config file
         file = open(ConfUserFilejson, 'w')
@@ -450,7 +463,7 @@ class infoPartConfUI():
         i=1
         for prop in self.confTemplate:
             propValue = QtGui.QLineEdit()
-            propValue.setText( self.confTemplate.get(prop).get('userData') )
+            propValue.setText( decodeXml(self.confTemplate.get(prop).get('userData')) )
             self.gridLayout.addWidget(propValue,i,1)
             self.infos.append(propValue)
             i+=1

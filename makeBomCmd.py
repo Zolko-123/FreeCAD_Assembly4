@@ -174,7 +174,10 @@ class makeBOM:
         # to write line in spreadsheet
         def wrow(drow: [str], row: int):
             for i, d in enumerate(drow):
-                spreadsheet.set(str(chr(ord('a') + i)).upper()+str(row+1), str(d))
+                if row==0:
+                    spreadsheet.set(str(chr(ord('a') + i)).upper()+str(row+1),infoPartCmd.decodeXml(str(d)))
+                else :
+                    spreadsheet.set(str(chr(ord('a') + i)).upper()+str(row+1),str(d))
         # to make list of values of dict() plist
         data = list(plist.values())
         # to write first line with keys
