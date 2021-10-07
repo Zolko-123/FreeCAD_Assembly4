@@ -82,6 +82,7 @@ class infoPartCmd():
 """
     +-----------------------------------------------+
     |    The UI and functions in the Task panel     |
+    |      edit the part info field contents        |
     +-----------------------------------------------+
 """
 class infoPartUI():
@@ -206,11 +207,18 @@ class infoPartUI():
         # Actions
         self.confFields.clicked.connect(self.editKeys)
         self.autoFill.clicked.connect(self.infoDefault)
-        
+
         if self.infoTable[0][1]=='':
             self.infoDefault()
             self.addNew()
 
+
+"""
+    +-----------------------------------------------+
+    |    The UI and functions in the Task panel     |
+    |            edit the part info keys            |
+    +-----------------------------------------------+
+"""
 class infoPartConfUI():
 
     def __init__(self):
@@ -237,7 +245,7 @@ class infoPartConfUI():
     # close
     def finish(self):
         Gui.Control.closeDialog()
-        print('exit config')
+        print('exit PartInfo config')
 
     # standard panel UI buttons
     def getStandardButtons(self):
@@ -245,7 +253,6 @@ class infoPartConfUI():
 
     # Cancel
     def reject(self):
-        print("Cancel")
         self.finish()
 
     # OK: we write a new config
