@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.11.1
+Current version 0.11.2
 
 
 
@@ -51,6 +51,10 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 
 ## Release notes
+
+* 2021.10.08 (**0.11.2**) :  
+added "Open File" to insertLink  
+BOM and infoPart improvements  
 
 * 2021.10.01 (**0.11.1**) :  
 reverted Asm4.QUnitSpinBox() to QtGui.QDoubleSpinBox() because of incompatibilites with some locale (',' comma decimal separators)  

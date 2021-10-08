@@ -67,10 +67,10 @@ class insertLink():
         self.rootAssembly = None
         self.origLink     = None
         self.brokenLink   = False
-        self.allParts = []
-        self.partsDoc = []
+        #self.allParts = []
+        #self.partsDoc = []
         self.filterPartList.clear()
-        self.partList.clear()
+        #self.partList.clear()
         self.linkNameInput.clear()
 
         # if an Asm4 Assembly is present, that's where we put the link
@@ -106,6 +106,10 @@ class insertLink():
             Asm4.warningBox( 'Please create an Assembly' )
             return
 
+        # build the list of available parts
+        self.lookForParts()
+
+        '''
         # Search for all App::Parts and PartDesign::Body in all open documents
         # Also store the document of the part
         for doc in App.listDocuments().values():
@@ -130,6 +134,7 @@ class insertLink():
             newItem.setText( part.Document.Name +"#"+ Asm4.labelName(part) )
             newItem.setIcon(part.ViewObject.Icon)
             self.partList.addItem(newItem)
+        '''
 
         # if an existing valid App::Link was selected
         if self.origLink and not self.brokenLink:
@@ -156,6 +161,74 @@ class insertLink():
         # show the UI
         self.UI.show()
 
+    # Search for all App::Parts and PartDesign::Body in all open documents
+    # Also store the document of the part
+    def lookForParts( self, doc=None ):
+        self.allParts = []
+        self.partsDoc = []
+        self.partList.clear()
+        if doc is None:
+            docList = App.listDocuments().values()
+        else:
+            docList = [doc]
+        for doc in docList:
+            # don't consider temporary documents
+            if not doc.Temporary:
+                for obj in doc.findObjects("App::Part"):
+                    # we don't want to link to itself to the 'Model' object
+                    # other App::Part in the same document are OK 
+                    # but only those at top level (not nested inside other containers)
+                    if obj != self.rootAssembly and obj.getParentGeoFeatureGroup() is None:
+                        self.allParts.append( obj )
+                        self.partsDoc.append( doc )
+                for obj in doc.findObjects("PartDesign::Body"):
+                    # but only those at top level (not nested inside other containers)
+                    if obj.getParentGeoFeatureGroup() is None:
+                        self.allParts.append( obj )
+                        self.partsDoc.append( doc )
+        # build the list
+        for part in self.allParts:
+            newItem = QtGui.QListWidgetItem()
+            newItem.setText( part.Document.Name +"#"+ Asm4.labelName(part) )
+            newItem.setIcon(part.ViewObject.Icon)
+            self.partList.addItem(newItem)
+
+
+    # from A2+
+    def openFile(self):
+        filename = None
+        importDoc = None
+        importDocIsOpen = False
+        dialog = QtGui.QFileDialog( QtGui.QApplication.activeWindow(),
+                                    "Select FreeCAD document to import part from" )
+        # set option "DontUseNativeDialog"=True, as native Filedialog shows
+        # misbehavior on Unbuntu 18.04 LTS. It works case sensitively, what is not wanted...
+        '''
+        if a2plib.getNativeFileManagerUsage():
+            dialog.setOption(QtGui.QFileDialog.DontUseNativeDialog, False)
+        else:
+            dialog.setOption(QtGui.QFileDialog.DontUseNativeDialog, True)
+        '''
+        dialog.setNameFilter("Supported Formats *.FCStd *.fcstd (*.FCStd *.fcstd);;All files (*.*)")
+        if dialog.exec_():
+            filename = str(dialog.selectedFiles()[0])
+            # look only for filenames, not paths, as there are problems on WIN10 (Address-translation??)
+            requestedFile = os.path.split(filename)[1]
+            # see whether the file is already open
+            for d in App.listDocuments().values():
+                recentFile = os.path.split(d.FileName)[1]
+                if requestedFile == recentFile:
+                    importDoc = d # file is already open...
+                    importDocIsOpen = True
+                    break
+            # if not, open it
+            if not importDocIsOpen:
+                if filename.lower().endswith('.fcstd'):
+                    importDoc = App.openDocument(filename)
+                    App.setActiveDocument( self.activeDoc.Name )
+                    # update the part list
+                    self.lookForParts(importDoc)
+        return
 
 
     """
@@ -279,6 +352,8 @@ class insertLink():
         self.linkNameInput = QtGui.QLineEdit(self.UI)
         # Cancel button
         self.cancelButton = QtGui.QPushButton('Cancel', self.UI)
+        # Cancel button
+        self.openFileButton = QtGui.QPushButton('Open file', self.UI)
         # Insert Link button
         self.insertButton = QtGui.QPushButton('Insert', self.UI)
         self.insertButton.setDefault(True)
@@ -295,12 +370,15 @@ class insertLink():
         self.buttonsLayout = QtGui.QHBoxLayout()
         self.buttonsLayout.addWidget(self.cancelButton)
         self.buttonsLayout.addStretch()
+        self.buttonsLayout.addWidget(self.openFileButton)
+        self.buttonsLayout.addStretch()
         self.buttonsLayout.addWidget(self.insertButton)
         self.mainLayout.addLayout(self.buttonsLayout)
         self.UI.setLayout(self.mainLayout)
 
         # Actions
         self.cancelButton.clicked.connect(self.onCancel)
+        self.openFileButton.clicked.connect(self.openFile)
         self.insertButton.clicked.connect(self.onCreateLink)
         self.partList.itemClicked.connect( self.onItemClicked)
         self.filterPartList.textChanged.connect(self.onFilterChange)
