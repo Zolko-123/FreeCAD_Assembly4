@@ -797,8 +797,9 @@ def getSelectedVarLink():
     if len(selection)==1:
         selObj = selection[0]
         # it's an App::Link
-        if selObj.TypeId=='Part::FeaturePython' and selObj.Type=='Asm4::VariantLink':
-            retval = selObj
+        if selObj.TypeId=='Part::FeaturePython':
+            if hasattr(selObj,'Type') and selObj.Type=='Asm4::VariantLink':
+                retval = selObj
     return retval
 
 def getSelectedDatum():

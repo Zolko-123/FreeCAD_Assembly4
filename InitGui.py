@@ -157,6 +157,10 @@ class Assembly4Workbench(Workbench):
         self.appendMenu(QT_TRANSLATE_NOOP("Workbench", "&Assembly"), self.assemblyMenuItems())
         self.dot()
 
+        # put all constraints related commands in a sperate menu
+        self.appendMenu("&Constraints",self.constraintsMenuItems())
+        self.dot()
+
         # self.appendMenu("&Geometry",["Asm4_newPart"])
 
         # additional entry in the Help menu
@@ -196,24 +200,15 @@ class Assembly4Workbench(Workbench):
                         "Asm4_newSketch", 
                         'Asm4_createDatum',
                         self.FastenersCmd, 
-                        #"Asm4_newLCS", 
-                        #"Asm4_newPlane", 
-                        #"Asm4_newAxis", 
-                        #"Asm4_newPoint", 
-                        #"Asm4_newHole", 
                         "Separator",
                         "Asm4_insertLink", 
-                        "Asm4_placeLink", 
-                        "Asm4_releaseAttachment", 
                         "Asm4_mirrorPart", 
                         "Asm4_circularArray", 
                         "Asm4_variantLink", 
                         "Separator",
-                        "Asm4_placeFastener", 
                         "Asm4_cloneFastenersToAxes", 
                         "Asm4_importDatum", 
                         "Asm4_shapeBinder", 
-                        #"Asm4_placeDatum", 
                         "Separator",
                         "Asm4_infoPart", 
                         "Asm4_makeBOM", 
@@ -222,14 +217,19 @@ class Assembly4Workbench(Workbench):
                         'Asm4_hideLcs',
                         "Asm4_addVariable", 
                         "Asm4_delVariable", 
-                        #"Asm4_applyConfiguration", 
                         "Asm4_openConfigurations", 
-                        #'Asm4_saveConfiguration',
-                        #'Asm4_newConfiguration',
                         "Asm4_Animate", 
-                        "Asm4_updateAssembly"]
+                        "Asm4_updateAssembly",
+                        ]
         return commandList
-        
+
+    def constraintsMenuItems(self):
+        commandList = [ "Asm4_placeLink",
+                        "Asm4_releaseAttachment", 
+                        "Separator",
+                        ]
+        return commandList
+
     def assemblyToolbarItems(self):
         commandList = [ "Asm4_makeAssembly",
                         "Asm4_newPart", 
@@ -246,9 +246,7 @@ class Assembly4Workbench(Workbench):
                         "Separator",
                         "Asm4_placeLink", 
                         "Asm4_releaseAttachment", 
-                        'Asm4_placeFastener',
-                        #'Asm4_cloneFastenersToAxes',
-                        #"Asm4_placeDatum", 
+                        "Separator",
                         "Asm4_mirrorPart", 
                         "Asm4_circularArray", 
                         "Asm4_variantLink", 
@@ -289,12 +287,10 @@ class Assembly4Workbench(Workbench):
                         'Asm4_showLcs'       ,
                         'Asm4_hideLcs'       ]
         # commands to appear in the 'Assembly' sub-menu in the contextual menu (right-click)
-        assemblySubMenu =[ "Asm4_insertLink"    , 
+        assemblySubMenu =[ "Asm4_insertLink" , 
                         "Asm4_placeLink"     , 
                         "Asm4_importDatum"   ,
                         'Asm4_FSparameters'  ,
-                        'Asm4_placeFastener' ,
-                        'Asm4_cloneFastenersToAxes' ,
                         'Separator'          ,
                         'Asm4_applyConfiguration']
         # commands to appear in the 'Create' sub-menu in the contextual menu (right-click)
