@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.11.2
+Current version 0.11.3
 
 
 
@@ -51,6 +51,10 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 
 ## Release notes
+
+* 2021.10.09 (**0.11.3**) :  
+Merged all placement of parts (links, fasteners, anything with a "Placement" into a single command, which launches the corresponding task UI  
+Created the "Constraints" menu and moved the placement command there (in preparation of the merge of the A2+ solver)  
 
 * 2021.10.08 (**0.11.2**) :  
 added "Open File" to insertLink  
