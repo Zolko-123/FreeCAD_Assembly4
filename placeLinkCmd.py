@@ -66,16 +66,18 @@ class placeLinkCmd():
         return False
 
     def Activated(self):
-        #Handle single selected App::Link
-        selectedLink = None
         # try with a regular App::Link
         selection = Asm4.getSelectedLink()
         # may-be an Asm4::VariantLink ?
         if selection is None:
             selection = Asm4.getSelectedVarLink()
-
         # if we found a valid link
         if selection is not None:
+            """
+    +-----------------------------------------------+
+    |            placement of a link                |
+    +-----------------------------------------------+
+            """
             # check that it's in the root assembly
             parent = selection.getParentGeoFeatureGroup()
             if parent and parent == Asm4.getAssembly():
@@ -95,6 +97,11 @@ class placeLinkCmd():
             else:
                 Asm4.warningBox('Please select a link in the assembly Model.')
         else:
+            """
+    +-----------------------------------------------+
+    |    placement of any object with a Placement   |
+    +-----------------------------------------------+
+            """
             # or any part that has a Placement ?
             if len(Gui.Selection.getSelection())==1:
                 selection = Gui.Selection.getSelection()[0]
