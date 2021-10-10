@@ -19,22 +19,6 @@ import selectionFilter
 
 
 
-"""
-    +-----------------------------------------------+
-    |                Global variables               |
-    +-----------------------------------------------+
-"""
-#global taskUI
-
-# link being placed view properties overrides
-DrawStyle = 'Solid'
-LineWidth = 3.0
-DiffuseColor = (1.0, 1.0, 1.0, 0.0)
-Transparency = 0.50
-
-LineHighlight = (1.0, 1.0, 0.0, 0.0)
-
-
 
 """
     +-----------------------------------------------+
@@ -108,7 +92,9 @@ class placeLinkCmd():
                 # object has a Placement property
                 if hasattr(selection,'Placement') and selection.getTypeIdOfProperty('Placement')=='App::PropertyPlacement':
                     # we don't want to mess with obects that are attached with the Attacher (MapMode)
-                    if not hasattr(selection,'MapMode'):
+                    if hasattr(selection,'MapMode'):
+                        FCC.PrintMessage('Object has MapMode property, we don\'t mess with those\n')
+                    else:
                         # check that it's in the root assembly
                         parent = selection.getParentGeoFeatureGroup()
                         if parent and parent == Asm4.getAssembly():
