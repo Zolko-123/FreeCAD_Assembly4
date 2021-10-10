@@ -375,7 +375,7 @@ class placePartUI():
 
     # fill in the GUI
     def initUI(self):
-        self.FStype.setText( self.selectedObj.Label )
+        self.selectedObject.setText( self.selectedObj.Label )
         self.attLCSlist.clear()
         # Initialize the assembly tree with the Parent Assembly as first element
         # clear the available parents combo box
@@ -399,9 +399,9 @@ class placePartUI():
 
         # the name as seen in the tree of the selected link
         self.formLayout = QtGui.QFormLayout()
-        self.FStype = QtGui.QLineEdit()
-        self.FStype.setReadOnly(True)
-        self.formLayout.addRow(QtGui.QLabel('Fastener :'),self.FStype)
+        self.selectedObject = QtGui.QLineEdit()
+        self.selectedObject.setReadOnly(True)
+        self.formLayout.addRow(QtGui.QLabel('Selected Object :'),self.selectedObject)
         # combobox showing all available App::Link
         self.parentList = QtGui.QComboBox()
         self.parentList.setMaximumWidth(300)
