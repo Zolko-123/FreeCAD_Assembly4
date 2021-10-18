@@ -715,7 +715,7 @@ class placeLinkUI():
         # X Translation Value
         self.XoffsetLayout = QtGui.QHBoxLayout(Form)
         self.XtranslSpinBoxLabel = self.XoffsetLayout.addWidget(QtGui.QLabel("X Translation :"))
-        self.XtranslSpinBox = QtGui.QDoubleSpinBox(Form)
+        self.XtranslSpinBox = Asm4.QUnitSpinBox(Form)
         self.XtranslSpinBox.setRange(-999999.00, 999999.00)
         #self.XtranslSpinBox.setValue(self.Xtranslation)
         self.XtranslSpinBox.setToolTip("Translation along X axis")
@@ -730,7 +730,7 @@ class placeLinkUI():
         # Y Translation Value
         self.YoffsetLayout = QtGui.QHBoxLayout(Form)
         self.YtranslSpinBoxLabel = self.YoffsetLayout.addWidget(QtGui.QLabel("Y Translation :"))
-        self.YtranslSpinBox = QtGui.QDoubleSpinBox(Form)
+        self.YtranslSpinBox = Asm4.QUnitSpinBox(Form)
         self.YtranslSpinBox.setRange(-999999.00, 999999.00)
         #self.YtranslSpinBox.setValue(self.Ytranslation)
         self.YtranslSpinBox.setToolTip("Translation along Y")
@@ -745,7 +745,7 @@ class placeLinkUI():
         # Z Translation Value
         self.ZoffsetLayout = QtGui.QHBoxLayout(Form)
         self.ZtranslSpinBoxLabel = self.ZoffsetLayout.addWidget(QtGui.QLabel("Z Translation :"))
-        self.ZtranslSpinBox = QtGui.QDoubleSpinBox(Form)
+        self.ZtranslSpinBox = Asm4.QUnitSpinBox(Form)
         self.ZtranslSpinBox.setRange(-999999.00, 999999.00)
         #self.ZtranslSpinBox.setValue(self.Ztranslation)
         self.ZtranslSpinBox.setToolTip("Translation along Z:")
