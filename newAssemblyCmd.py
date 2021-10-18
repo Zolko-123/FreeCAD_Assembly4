@@ -82,6 +82,8 @@ def makeAssembly():
         lcs0.Support = [(assembly.Origin.OriginFeatures[0],'')]
         lcs0.MapMode = 'ObjectXY'
         lcs0.MapReversed = False
+        # create an object Variables to hold variables to be used in this document
+        assembly.addObject(Asm4.createVariables())
         # create a group Constraints to store future solver constraints there
         assembly.newObject('App::DocumentObjectGroup','Constraints')
         # create a group Configurations to store future solver constraints there
