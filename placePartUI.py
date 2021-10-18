@@ -375,7 +375,7 @@ class placePartUI():
 
     # fill in the GUI
     def initUI(self):
-        self.FStype.setText( self.selectedObj.Label )
+        self.selectedObject.setText( self.selectedObj.Label )
         self.attLCSlist.clear()
         # Initialize the assembly tree with the Parent Assembly as first element
         # clear the available parents combo box
@@ -399,9 +399,9 @@ class placePartUI():
 
         # the name as seen in the tree of the selected link
         self.formLayout = QtGui.QFormLayout()
-        self.FStype = QtGui.QLineEdit()
-        self.FStype.setReadOnly(True)
-        self.formLayout.addRow(QtGui.QLabel('Fastener :'),self.FStype)
+        self.selectedObject = QtGui.QLineEdit()
+        self.selectedObject.setReadOnly(True)
+        self.formLayout.addRow(QtGui.QLabel('Selected Object :'),self.selectedObject)
         # combobox showing all available App::Link
         self.parentList = QtGui.QComboBox()
         self.parentList.setMaximumWidth(300)
@@ -422,7 +422,7 @@ class placePartUI():
         # X Translation Value
         self.XoffsetLayout = QtGui.QHBoxLayout()
         self.XtranslSpinBoxLabel = self.XoffsetLayout.addWidget(QtGui.QLabel("X Translation :"))
-        self.XtranslSpinBox = QtGui.QDoubleSpinBox()
+        self.XtranslSpinBox = Asm4.QUnitSpinBox()
         self.XtranslSpinBox.setRange(-999999.00, 999999.00)
         self.XtranslSpinBox.setToolTip("Translation along X axis")
         self.RotXButton = QtGui.QPushButton('Rotate X +90°')
@@ -436,7 +436,7 @@ class placePartUI():
         # Y Translation Value
         self.YoffsetLayout = QtGui.QHBoxLayout()
         self.YtranslSpinBoxLabel = self.YoffsetLayout.addWidget(QtGui.QLabel("Y Translation :"))
-        self.YtranslSpinBox = QtGui.QDoubleSpinBox()
+        self.YtranslSpinBox = Asm4.QUnitSpinBox()
         self.YtranslSpinBox.setRange(-999999.00, 999999.00)
         self.YtranslSpinBox.setToolTip("Translation along Y")
         self.RotYButton = QtGui.QPushButton('Rotate Y +90°')
@@ -450,7 +450,7 @@ class placePartUI():
         # Z Translation Value
         self.ZoffsetLayout = QtGui.QHBoxLayout()
         self.ZtranslSpinBoxLabel = self.ZoffsetLayout.addWidget(QtGui.QLabel("Z Translation :"))
-        self.ZtranslSpinBox = QtGui.QDoubleSpinBox()
+        self.ZtranslSpinBox = Asm4.QUnitSpinBox()
         self.ZtranslSpinBox.setRange(-999999.00, 999999.00)
         self.ZtranslSpinBox.setToolTip("Translation along Z:")
         self.RotZButton = QtGui.QPushButton('Rotate Z +90°')

@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.11.3
+Current version 0.11.4
 
 
 
@@ -51,6 +51,10 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 
 ## Release notes
+
+* 2021.10.18 (**0.11.4**) :  
+translations in placements of parts respect user preferences units  
+small tweaks  
 
 * 2021.10.09 (**0.11.3**) :  
 Merged all placement of parts (links, fasteners, anything with a "Placement" into a single command, which launches the corresponding task UI  

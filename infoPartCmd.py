@@ -119,10 +119,10 @@ class infoPartUI():
 
     def getPartInfo(self):
         self.infoTable.clear()
-        for prop in self.part.PropertiesList:
-            if self.part.getGroupOfProperty(prop)=='PartInfo' :
-                if self.part.getTypeIdOfProperty(prop)=='App::PropertyString' :
-                    for propuser in self.infoKeysUser :
+        for propuser in self.infoKeysUser :
+            for prop in self.part.PropertiesList:
+                if self.part.getGroupOfProperty(prop)=='PartInfo' :
+                    if self.part.getTypeIdOfProperty(prop)=='App::PropertyString' :
                         if self.infoKeysUser.get(propuser).get('userData') == prop :
                             if self.infoKeysUser.get(propuser).get('active'):
                                 value = self.part.getPropertyByName(prop)

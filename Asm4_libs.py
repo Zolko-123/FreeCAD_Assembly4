@@ -825,24 +825,22 @@ self.YtranslSpinBox = QtGui.QDoubleSpinBox() → self.YtranslSpinBox = Asm4.QUni
 """
 class QUnitSpinBox(QtGui.QDoubleSpinBox):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.setSuffix(" " + self.get_default_unit())
+        super().__init__(*args, **kwargs)        
+        _, self.length_divisor, self.default_unit = (
+            App.Units.schemaTranslate(
+                App.Units.Quantity("1 mm"),
+                App.Units.getSchema()
+            )
+        )
+        self.setSuffix(" " + self.default_unit)
 
     def value(self) -> float:
         """gets the value in mm"""
-        return float(App.Units.Quantity(
-            str(super().value()) + " " + self.get_default_unit(),
-        ))
+        return super().value() * self.length_divisor
 
     def setValue(self, distance: float):
-        """sets the value in mm"""
-        super().setValue(float(App.Units.schemaTranslate(
-            App.Units.Quantity(str(distance) + " mm"),
-            App.Units.getSchema(),
-        )[0].split()[0]))
-
-    def get_default_unit(self) -> str:
-        return App.Units.schemaTranslate(
-            App.Units.Quantity("1 mm"),
-            App.Units.getSchema()
-        )[2]
+        """sets the value in mm"""        
+        return super().setValue(
+            distance / self.length_divisor,
+        ) 
+        

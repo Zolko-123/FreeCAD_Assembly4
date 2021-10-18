@@ -219,13 +219,14 @@ class Assembly4Workbench(Workbench):
                         "Asm4_delVariable", 
                         "Asm4_openConfigurations", 
                         "Asm4_Animate", 
-                        "Asm4_updateAssembly",
                         ]
         return commandList
 
     def constraintsMenuItems(self):
         commandList = [ "Asm4_placeLink",
                         "Asm4_releaseAttachment", 
+                        "Separator",
+                        "Asm4_updateAssembly",
                         "Separator",
                         ]
         return commandList
@@ -246,6 +247,7 @@ class Assembly4Workbench(Workbench):
                         "Separator",
                         "Asm4_placeLink", 
                         "Asm4_releaseAttachment", 
+                        "Asm4_updateAssembly",
                         "Separator",
                         "Asm4_mirrorPart", 
                         "Asm4_circularArray", 
@@ -256,7 +258,7 @@ class Assembly4Workbench(Workbench):
                         "Asm4_variablesCmd",
                         "Asm4_openConfigurations", 
                         "Asm4_Animate",
-                        "Asm4_updateAssembly"]
+                        ]
         return commandList
 
 
