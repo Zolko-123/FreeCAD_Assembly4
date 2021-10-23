@@ -80,10 +80,22 @@ def infoDefault(self):
                         print('there is no Sketch on a Pad of : ',PART.FullName )
 
     ### start all autoinfofield
-    LabelDoc(self,PART,DOC)
-    LabelPart(self,PART)
-    PadLength(self,PART,PAD)
-    ShapeLength(self,PART,SKETCH)
+    try :
+        LabelDoc(self,PART,DOC)
+    except NameError :
+        print('there is no DOC for this part : ',PART.FullName )
+    try :
+        LabelPart(self,PART)
+    except NameError :
+        print('there is no Part' )
+    try :    
+        PadLength(self,PART,PAD)
+    except NameError :
+        print('there is no PAD for this Part : ',PART.FullName )
+    try :
+        ShapeLength(self,PART,SKETCH)
+    except NameError :
+        print('there is no Sketch for this Part : ',PART.FullName )
 """
 how make a new autoinfofield :
 
