@@ -99,7 +99,9 @@ class cloneFastenersToAxesCmd():
                                     Asm4.placeObjectToLCS(newFstnr, axisData[2], axis.Document.Name, axisData[3])
                                     
             Gui.Selection.clearSelection()
-            Gui.Selection.addSelection( fstnr.Document.Name, self.rootAssembly.Name, fstnr.Name +'.')
+            self.rootAssembly = Asm4.getAssembly()
+            if rootAssembly:
+                Gui.Selection.addSelection( fstnr.Document.Name, self.rootAssembly.Name, fstnr.Name +'.')
 
 
     def getSelectedAxes(self):
