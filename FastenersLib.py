@@ -747,10 +747,11 @@ class insertFastener:
                 try:
                     fs = screwTables[selObj.type][0]
                     if fs in ['Screw','Nut','Washer']:
-                        fsClass = fs
-                        fsType  = selObj.type
+                        fsClass   = fs
+                        fsType    = selObj.type
+                        container = selObj.getParentGeoFeatureGroup()
                 except:
-                    FCC.PrintMessage("the selected object doesn't seem to be a valid fastener, ignoring\n")
+                    FCC.PrintMessage("Selected object doesn't seem to be a valid fastener, ignoring\n")
         # create the fastener
         newFastener = App.ActiveDocument.addObject("Part::FeaturePython",fsClass)
         # if a previous fastener was selected, we match its parameters
@@ -763,7 +764,7 @@ class insertFastener:
                 try:
                     newFastener.length = selObj.length
                 except:
-                    FCC.PrintMessage("the length "+selObj.length+" is not available, ignoring\n")
+                    FCC.PrintMessage("Length \""+selObj.length+"\" is not available, ignoring\n")
         # we crate a new fastener as asked
         else:
             if fsClass == 'Screw':
