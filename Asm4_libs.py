@@ -280,45 +280,6 @@ def getSelectionTree(index=0):
                     retval = ( selObj, selTree )
     return retval
 
-'''
-# get from the selected object the corresponding parent instance (link)
-# deprecated for getSelectionTree()
-def getLinkAndObj():
-    retval = (None,None)
-    # only for Asm4
-    if checkModel() and len(Gui.Selection.getSelection())==1:
-        parentAssembly = App.ActiveDocument.Model
-        # find all the links to Part or Body objects
-        childrenTable = []
-        for objStr in parentAssembly.getSubObjects():
-            # the string ends with a . that must be removed
-            obj = App.ActiveDocument.getObject( objStr[0:-1] )
-            if isLinkToPart(obj):
-                # add it to our tree table if it's a link to an App::Part ...
-                childrenTable.append( obj )
-        # the selected datum
-        selObj = Gui.Selection.getSelection()[0]
-        # if indeed a datum is selected
-        # if selObj.TypeId in datumTypes:
-        if selObj.isDerivedFrom('Part::Feature'):
-            # return at least the selected object
-            retval = (None,selObj)
-            # this returns the selection hierarchy in the form 'linkName.datumName.'
-            selTree = Gui.Selection.getSelectionEx("", 0)[0].SubElementNames[0]
-            (parents, toto, dot) = selTree.partition('.'+selObj.Name)
-            link = App.ActiveDocument.getObject( parents )
-            # if indeed the datum is the child of a link
-            if dot =='.' and link in childrenTable:
-                retval = (link,selObj)
-            else:
-                # see whether the datum is in a group, some people like to do that
-                (parents2, dot, groupName) = parents.partition('.')
-                link2 = App.ActiveDocument.getObject( parents2 )
-                group = App.ActiveDocument.getObject( groupName )
-                if link2 and group and link2 in childrenTable and group.TypeId=='App::DocumentObjectGroup':
-                    retval = (link2,selObj)
-    return retval
-'''
 
 # get all datums in a part
 def getPartLCS( part ):
@@ -556,14 +517,6 @@ rotZ = App.Placement( App.Vector(0,0,0), App.Rotation( App.Vector(0,0,1), 90. ) 
     +-----------------------------------------------+
     |         returns the object Label (Name)       |
     +-----------------------------------------------+
-def nameLabel( obj ):
-    if obj:
-        txt = obj.Name
-        if obj.Name!=obj.Label:
-            txt += ' ('+obj.Label+')'
-        return txt
-    else:
-        return None
 """
 
 
@@ -619,130 +572,6 @@ def makeExpressionDatum( attLink, attPart, attLCS ):
         expr = False
     return expr
 
-
-"""
-    +-----------------------------------------------+
-    |  split the ExpressionEngine of a linked part  |
-    |          to find the old attachment LCS       |
-    |   (in the parent assembly or a sister part)   |
-    |   and the old target LCS in the linked Part   |
-    +-----------------------------------------------+
-
-def splitExpressionLink( expr, parent ):
-    # same document:
-    # expr = LCS_target.Placement * AttachmentOffset * LCS_attachment.Placement ^ -1
-    # external document:
-    # expr = LCS_target.Placement * AttachmentOffset * linkedPart#LCS_attachment.Placement ^ -1
-    # expr = sisterLink.Placement * sisterPart#LCS_target.Placement * AttachmentOffset * linkedPart#LCS_attachment.Placement ^ -1
-    retval = ( expr, 'None', 'None' )
-    restFinal = ''
-    attLink = ''
-    # expr is empty
-    if not expr:
-        return retval
-    nbHash = expr.count('#')
-    if nbHash==0:
-        # linked part, sister part and assembly in the same document
-        if parent == 'Parent Assembly':
-            # we're attached to an LCS in the parent assembly
-            # expr = LCS_in_the_assembly.Placement * AttachmentOffset * LCS_linkedPart.Placement ^ -1
-            ( attLCS,     separator, rest1 ) = expr.partition('.Placement * AttachmentOffset * ')
-            ( linkLCS,    separator, rest2 ) = rest1.partition('.Placement ^ ')
-            restFinal = rest2[0:2]
-            attLink = parent
-            attPart = 'None'
-        else:
-            # we're attached to an LCS in a sister part
-            # expr = ParentLink.Placement * LCS_parent.Placement * AttachmentOffset * LCS_linkedPart.Placement ^ -1
-            ( attLink,    separator, rest1 ) = expr.partition('.Placement * ')
-            ( attLCS,     separator, rest2 ) = rest1.partition('.Placement * AttachmentOffset * ')
-            ( linkLCS,    separator, rest3 ) = rest2.partition('.Placement ^ ')
-            restFinal = rest3[0:2]
-    elif nbHash==1:
-        # an external part is linked to the assembly or a part in the same document as the assembly
-        if parent == 'Parent Assembly':
-            # we're attached to an LCS in the parent assembly
-            # expr = LCS_assembly.Placement * AttachmentOffset * LinkedPart#LCS.Placement ^ -1'
-            ( attLCS,     separator, rest1 ) = expr.partition('.Placement * AttachmentOffset * ')
-            ( linkedDoc,  separator, rest2 ) = rest1.partition('#')
-            ( linkLCS,    separator, rest3 ) = rest2.partition('.Placement ^ ')
-            restFinal = rest3[0:2]
-            attLink = parent
-            attPart = 'None'
-        # a part from the document is attached to an external part
-        else:
-            # expr = Rail_40x40_Y.Placement * Rails_V_Slot#LCS_AR.Placement * AttachmentOffset * LCS_Plaque_Laterale_sym.Placement ^ -1
-            # expr = parentLink.Placement * externalDoc#LCS_parentPart * AttachmentOffset * LCS_linkedPart.Placement ^ -1
-            ( attLink,    separator, rest1 ) = expr.partition('.Placement * ')
-            ( linkedDoc,  separator, rest2 ) = rest1.partition('#')
-            ( attLCS,     separator, rest3 ) = rest2.partition('.Placement * AttachmentOffset * ')
-            ( linkLCS,    separator, rest4 ) = rest3.partition('.Placement ^ ')
-            restFinal = rest4[0:2]
-    elif nbHash==2:
-        # linked part and sister part in external documents to the parent assembly:
-        # expr = ParentLink.Placement * ParentPart#LCS.Placement * AttachmentOffset * LinkedPart#LCS.Placement ^ -1'
-        ( attLink,    separator, rest1 ) = expr.partition('.Placement * ')
-        ( attPart,    separator, rest2 ) = rest1.partition('#')
-        ( attLCS,     separator, rest3 ) = rest2.partition('.Placement * AttachmentOffset * ')
-        ( linkedDoc,  separator, rest4 ) = rest3.partition('#')
-        ( linkLCS,    separator, rest5 ) = rest4.partition('.Placement ^ ')
-        restFinal = rest5[0:2]
-    else:
-        # complicated stuff, we'll do it later
-        pass
-    # final check, all options should give the correct data
-    if restFinal=='-1' and attLink==parent :
-        # wow, everything went according to plan
-        # retval = ( expr, attPart, attLCS, constrLink, partLCS )
-        retval = ( attLink, attLCS, linkLCS )
-    return retval
-"""
-
-
-
-
-
-
-"""
-    +-----------------------------------------------+
-    |           split the ExpressionEngine          |
-    |        of a linked Datum object to find       |
-    |         the old attachment Part and LCS       |
-    +-----------------------------------------------+
-def splitExpressionDatum( expr ):
-    retval = ( expr, 'None', 'None' )
-    # expr is empty
-    if not expr:
-        return retval
-    restFinal = ''
-    attLink = ''
-    if expr:
-        # Look for a # to see whether the linked part is in the same document
-        # expr = Link.Placement * LinkedPart#LCS.Placement * AttachmentOffset
-        # expr = Link.Placement * LCS.Placement * AttachmentOffset
-        if '#' in expr:
-            # the linked part is in another document
-            # expr = Link.Placement * LinkedPart#LCS.Placement * AttachmentOffset
-            ( attLink, separator, rest1 ) = expr.partition('.Placement * ')
-            ( attPart, separator, rest2 ) = rest1.partition('#')
-            ( attLCS,  separator, rest3 ) = rest2.partition('.Placement * ')
-            restFinal = rest3[0:16]
-        else:
-            # the linked part is in the same document
-            # expr = Link.Placement * LCS.Placement * AttachmentOffset
-            ( attLink, separator, rest1 ) =  expr.partition('.Placement * ')
-            ( attLCS,  separator, rest2 ) = rest1.partition('.Placement * ')
-            restFinal = rest2[0:16]
-            attPart = 'unimportant'
-        if restFinal=='AttachmentOffset':
-            # wow, everything went according to plan
-            retval = ( attLink, attPart, attLCS )
-            #self.expression.setText( attPart +'***'+ attLCS )
-        else:
-            # rats ! But still, if the decode is unsuccessful, put some text
-            retval = ( restFinal, 'None', 'None' )
-    return retval
-"""
 
 
 
