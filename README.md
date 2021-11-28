@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.11.4
+Current version 0.11.5
 
 
 
@@ -61,6 +61,10 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 
 ## Release notes
+
+* 2021.11.3 (**0.11.5**) :  
+added AttachmentEngine (MapMode) to all created Parts, Bodies and Fasteners  
+Small fixes  
 
 * 2021.10.18 (**0.11.4**) :  
 translations in placements of parts respect user preferences units  
