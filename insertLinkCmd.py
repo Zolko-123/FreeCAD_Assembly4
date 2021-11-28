@@ -84,7 +84,7 @@ class insertLink():
             selObj = Asm4.getSelectedLink()
             parent = selObj.getParentGeoFeatureGroup()
             # if the selected link is in a root App::Part
-            if parent.TypeId == 'App::Part' and parent.getParentGeoFeatureGroup() is None:
+            if parent is not None and parent.TypeId == 'App::Part' and parent.getParentGeoFeatureGroup() is None:
                 self.rootAssembly = parent
                 self.origLink = selObj
         # if a broken link is selected

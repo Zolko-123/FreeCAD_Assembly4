@@ -93,7 +93,7 @@ class placeLinkCmd():
                 if hasattr(selection,'Placement') and selection.getTypeIdOfProperty('Placement')=='App::PropertyPlacement':
                     # we don't want to mess with obects that are attached with the Attacher (MapMode)
                     if hasattr(selection,'MapMode'):
-                        FCC.PrintMessage('Object has MapMode property, we don\'t mess with those\n')
+                        FCC.PrintMessage('Object has MapMode property, you should use that\n')
                     else:
                         # check that it's in the root assembly
                         parent = selection.getParentGeoFeatureGroup()

@@ -77,13 +77,15 @@ class newPart:
         if ok and text:
             # create Part
             newPart = App.ActiveDocument.addObject(self.partType,text)
-            # add LCS if appropriate (not for groups)
+            # add stuff if appropriate (not for groups)
             if self.partType in Asm4.containerTypes:
                 # add an LCS at the root of the Part, and attach it to the 'Origin'
                 lcs0 = newPart.newObject('PartDesign::CoordinateSystem','LCS_0')
                 lcs0.Support = [(newPart.Origin.OriginFeatures[0],'')]
                 lcs0.MapMode = 'ObjectXY'
                 lcs0.MapReversed = False
+                # add AttachmentEngine
+                newPart.addExtension("Part::AttachExtensionPython")
             # If an App::Part container is selected, move the created part/body/group there
             container = None
             if len(Gui.Selection.getSelection())==1:
