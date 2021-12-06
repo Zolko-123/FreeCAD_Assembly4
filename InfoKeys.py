@@ -18,7 +18,11 @@ partInfo =[     'LabelDoc',                 \
                 'ShapeLength',              \
                 'ShapeVolume']
 
-infoToolTip = {'LabelDoc':'Return the Label of Document','LabelPart':'Return the Label of Part','PadLength':'Return the Length of Pad','ShapeLength':'Return the Length of Shape','ShapeVolume':'Return the 3 Length of Shape x , y , z'}
+infoToolTip = { 'LabelDoc':'Return the Label of Document',          \
+                'LabelPart':'Return the Label of Part',             \
+                'PadLength':'Return the Length of Pad',             \
+                'ShapeLength':'Return the Length of Shape',         \
+                'ShapeVolume':'Return the 3 Length of Shape x , y , z'}
 
 # protection against update of user configuration
 ### to have the dir of external configuration file
@@ -96,10 +100,10 @@ def infoDefault(self):
     try :
         ShapeLength(self,PART,SKETCH)
     except NameError :
-        print('there is no Sketch for this Part : ',PART.FullName )
-try :
+        print('ShapeLength : there is no Sketch for this Part : ',PART.FullName )
+    try :
         ShapeVolume(self,PART,BODY)
-    except NameError :
+    except:
         print('there is no Shape on Volume : ',PART.FullName )
 
 
@@ -107,7 +111,7 @@ def ShapeVolume(self,PART, BODY):
 ###you can use DOC - PART - BODY - PAD - SKETCH
     auto_info_field = infoKeysUser.get('ShapeVolume').get('userData')
     bbc = BODY.Shape.BoundBox
-    auto_info_fill = str(bbc.ZLength) + str(bbc.YLength) + str(bbc.XLength)
+    auto_info_fill = str(round(bbc.ZLength,3)) +str(' mm x ')+ str(round(bbc.YLength,3)) +str(' mm x ')+ str(round(bbc.XLength,3))+str(' mm')
     try:
         ### if the command comes from makeBom write autoinfo directly on Part
         self.TypeId
@@ -183,7 +187,7 @@ def PadLength(self,PART,PAD):
 ###you can use DOC - PART - BODY - PAD - SKETCH
     auto_info_field = infoKeysUser.get('PadLength').get('userData')
     try :
-        auto_info_fill = PAD.Length
+        auto_info_fill = str(PAD.Length).replace('mm','')
     except AttributeError:
         return
     try:
