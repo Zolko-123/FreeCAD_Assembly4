@@ -15,9 +15,14 @@ import infoPartCmd
 partInfo =[     'LabelDoc',                 \
                 'LabelPart',                \
                 'PadLength',                \
-                'ShapeLength']
+                'ShapeLength',              \
+                'ShapeVolume']
 
-infoToolTip = {'LabelDoc':'Return the Label of Document','LabelPart':'Return the Label of Part','PadLength':'Return the Length of Pad','ShapeLength':'Return the Length of Shape'}
+infoToolTip = { 'LabelDoc':'Return the Label of Document',          \
+                'LabelPart':'Return the Label of Part',             \
+                'PadLength':'Return the Length of Pad',             \
+                'ShapeLength':'Return the Length of Shape',         \
+                'ShapeVolume':'Return the 3 Length of Shape x , y , z'}
 
 # protection against update of user configuration
 ### to have the dir of external configuration file
@@ -95,7 +100,34 @@ def infoDefault(self):
     try :
         ShapeLength(self,PART,SKETCH)
     except NameError :
-        print('there is no Sketch for this Part : ',PART.FullName )
+        print('ShapeLength : there is no Sketch for this Part : ',PART.FullName )
+    try :
+        ShapeVolume(self,PART,BODY)
+    except:
+        print('there is no Shape on Volume : ',PART.FullName )
+
+
+def ShapeVolume(self,PART, BODY):
+###you can use DOC - PART - BODY - PAD - SKETCH
+    auto_info_field = infoKeysUser.get('ShapeVolume').get('userData')
+    bbc = BODY.Shape.BoundBox
+    auto_info_fill = str(round(bbc.ZLength,3)) +str(' mm x ')+ str(round(bbc.YLength,3)) +str(' mm x ')+ str(round(bbc.XLength,3))+str(' mm')
+    try:
+        ### if the command comes from makeBom write autoinfo directly on Part
+        self.TypeId
+        setattr(PART,auto_info_field,str(auto_info_fill))
+    except AttributeError:
+        ### if the command comes from infoPartUI write autoinfo on autofilling field on UI
+        try :
+        ### if field is actived
+            for i in range(len(self.infoTable)):
+                if self.infoTable[i][0]== auto_info_field :
+                    self.infos[i].setText(str(auto_info_fill))
+        except AttributeError:
+        ### if field is not actived
+            pass
+
+
 """
 how make a new autoinfofield :
 
@@ -155,7 +187,7 @@ def PadLength(self,PART,PAD):
 ###you can use DOC - PART - BODY - PAD - SKETCH
     auto_info_field = infoKeysUser.get('PadLength').get('userData')
     try :
-        auto_info_fill = PAD.Length
+        auto_info_fill = str(PAD.Length).replace('mm','')
     except AttributeError:
         return
     try:

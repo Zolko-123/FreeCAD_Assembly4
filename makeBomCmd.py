@@ -212,8 +212,17 @@ class makeBOM:
         self.mainLayout = QtGui.QVBoxLayout(self.UI)
         
         # Help and Log :
-        self.LabelBOM = QtGui.QLabel('BoM:\n\nThis tool make BoM with the Info and Config of Edit Part Information. \n\nIf you have auto-infoField in your Config you can use BoM directly.\nBoM complet automaticaly your auto-infoField.\n\nLog :')
-        self.mainLayout.addWidget(self.LabelBOM)
+        self.LabelBOML1 = QtGui.QLabel()
+        self.LabelBOML1.setText('BoM:\n\nThis tool make BoM with the Info and Config of Edit Part Information. \n\nIf you have auto-infoField in your Config you can use BoM directly.\nBoM complet automaticaly your auto-infoField.\n\n')
+        self.LabelBOML2 = QtGui.QLabel()
+        self.LabelBOML2.setText("<a href='https://github.com/Zolko-123/FreeCAD_Assembly4/tree/master/Examples/ConfigBOM/README.md'>-=Tuto=-</a>")
+        self.LabelBOML2.setOpenExternalLinks(True) 
+        self.LabelBOML3 = QtGui.QLabel()
+        self.LabelBOML3.setText('\n\nLog :')
+        
+        self.mainLayout.addWidget(self.LabelBOML1)
+        self.mainLayout.addWidget(self.LabelBOML2)
+        self.mainLayout.addWidget(self.LabelBOML3)
         
         # The Log (Verbose) is a plain text field
         self.BOM = QtGui.QPlainTextEdit()
