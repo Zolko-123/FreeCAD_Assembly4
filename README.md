@@ -85,7 +85,7 @@ reverted Asm4.QUnitSpinBox() to QtGui.QDoubleSpinBox() because of incompatibilit
 first version of variantLink: EXPERIMENTAL, use with caution  
 multiple datum imports (thanx abetis)  
 improved BoM and PartInfo (thax FarmingSoul)  
-added supprot for user preferences in distance units (thanx xoviat)  
+added support for user preferences in distance units (thanx xoviat)  
 
 * 2021.09.19 (**0.10.7**) :  
 fixed some minor bugs  

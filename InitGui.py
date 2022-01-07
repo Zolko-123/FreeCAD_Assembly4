@@ -157,8 +157,8 @@ class Assembly4Workbench(Workbench):
         self.appendMenu(QT_TRANSLATE_NOOP("Workbench", "&Assembly"), self.assemblyMenuItems())
         self.dot()
 
-        # put all constraints related commands in a sperate menu
-        self.appendMenu("&Constraints",self.constraintsMenuItems())
+        # put all constraints related commands in a separate menu
+        self.appendMenu("&Constraints", self.constraintsMenuItems())
         self.dot()
 
         # self.appendMenu("&Geometry",["Asm4_newPart"])

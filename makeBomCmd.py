@@ -149,16 +149,16 @@ class makeBOM:
                 for objname in object.getSubObjects():
                     subobj = object.Document.getObject( objname[0:-1] )
                     self.listParts(subobj,level+1)
-        
-        return 
+
+        return
         self.Verbose+='Your Bill of Materials is Done\n'
 
 ### def Copy - Copy on Spreadsheet
 
     def inSpreadsheet(self):
-        #Copies Parts List to Spreadsheet
+        # Copies Parts List to Spreadsheet
         document = App.ActiveDocument
-        # init plist whit dict() PartsList
+        # init plist with dict() PartsList
         plist = self.PartsList
         if len(plist) == 0:
             return
@@ -210,16 +210,16 @@ class makeBOM:
         self.UI.setModal(False)
         # set main window widgets layout
         self.mainLayout = QtGui.QVBoxLayout(self.UI)
-        
+
         # Help and Log :
         self.LabelBOML1 = QtGui.QLabel()
-        self.LabelBOML1.setText('BoM:\n\nThis tool make BoM with the Info and Config of Edit Part Information. \n\nIf you have auto-infoField in your Config you can use BoM directly.\nBoM complet automaticaly your auto-infoField.\n\n')
+        self.LabelBOML1.setText('BoM:\n\nThis tool makes a BoM with the Info and Config of Edit Part Information. \n\nIf you have auto-infoField in your Config you can use BoM directly.\nBoM complete automatically your auto-infoField.\n\n')
         self.LabelBOML2 = QtGui.QLabel()
         self.LabelBOML2.setText("<a href='https://github.com/Zolko-123/FreeCAD_Assembly4/tree/master/Examples/ConfigBOM/README.md'>-=Tuto=-</a>")
-        self.LabelBOML2.setOpenExternalLinks(True) 
+        self.LabelBOML2.setOpenExternalLinks(True)
         self.LabelBOML3 = QtGui.QLabel()
         self.LabelBOML3.setText('\n\nLog :')
-        
+
         self.mainLayout.addWidget(self.LabelBOML1)
         self.mainLayout.addWidget(self.LabelBOML2)
         self.mainLayout.addWidget(self.LabelBOML3)
