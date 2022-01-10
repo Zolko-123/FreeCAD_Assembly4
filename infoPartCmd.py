@@ -160,7 +160,7 @@ class infoPartUI():
         Gui.Control.closeDialog()
         Gui.Control.showDialog( infoPartConfUI() )
         #pass
-        
+
     def reInit(self):
         #init of list of all Properties
         List = self.part.PropertiesList
@@ -299,7 +299,7 @@ class infoPartConfUI():
             if self.infos[i].text() == '':
                 mb = QtGui.QMessageBox()
                 mb.setText("YOU CAN NOT LEAVE A FIELD BLANK \n DISABLE IT OR DELETE IT")
-                mb.setWindowTitle("WRITTING OF NEW CONFIG")
+                mb.setWindowTitle("WRITING OF NEW CONFIG")
                 mb.exec_() 
                 return
             i+=1
@@ -322,7 +322,7 @@ class infoPartConfUI():
         # message for user
         mb = QtGui.QMessageBox()
         mb.setText("Your configuration \n has been saved")
-        mb.setWindowTitle("WRITTING OF NEW CONFIG")
+        mb.setWindowTitle("WRITING OF NEW CONFIG")
         mb.exec_() 
         # close
         self.finish()
@@ -383,7 +383,7 @@ class infoPartConfUI():
         self.confTemplate.pop(self.refField)
         return
     
-    # fonction of return if autofield list is update or no and what is new
+    # function of return if autofield list is update or no and what is new
     def updateAutoFieldlist(self):
         # init list
         listUser=[]

@@ -85,7 +85,8 @@ class newPart:
                 lcs0.MapMode = 'ObjectXY'
                 lcs0.MapReversed = False
                 # add AttachmentEngine
-                newPart.addExtension("Part::AttachExtensionPython")
+                # oooops, no, creates problems because it creates an AttachmentOffset property that collides with Asm4
+                # newPart.addExtension("Part::AttachExtensionPython")
             # If an App::Part container is selected, move the created part/body/group there
             container = None
             if len(Gui.Selection.getSelection())==1:

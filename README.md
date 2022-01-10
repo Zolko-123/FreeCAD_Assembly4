@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.11.5
+Current version 0.11.6
 
 
 
@@ -62,6 +62,9 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 ## Release notes
 
+* 2022.01.10 (**0.11.6**) :  
+bugfix: removed AttachmentEngine (MapMode) to all created Parts, Bodies and Fasteners, because that creates an AttachmentOffset that conflicts with the placement by Asm4  
+
 * 2021.11.3 (**0.11.5**) :  
 added AttachmentEngine (MapMode) to all created Parts, Bodies and Fasteners  
 Small fixes  
@@ -85,7 +88,7 @@ reverted Asm4.QUnitSpinBox() to QtGui.QDoubleSpinBox() because of incompatibilit
 first version of variantLink: EXPERIMENTAL, use with caution  
 multiple datum imports (thanx abetis)  
 improved BoM and PartInfo (thax FarmingSoul)  
-added supprot for user preferences in distance units (thanx xoviat)  
+added support for user preferences in distance units (thanx xoviat)  
 
 * 2021.09.19 (**0.10.7**) :  
 fixed some minor bugs  

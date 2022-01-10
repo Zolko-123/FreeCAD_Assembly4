@@ -765,7 +765,7 @@ class insertFastener:
                     newFastener.length = selObj.length
                 except:
                     FCC.PrintMessage("Length \""+selObj.length+"\" is not available, ignoring\n")
-        # we crate a new fastener as asked
+        # we create a new fastener as asked
         else:
             if fsClass == 'Screw':
                 FS.FSScrewObject( newFastener, 'ISO7045', None )
@@ -787,7 +787,8 @@ class insertFastener:
         except:
             FCC.PrintMessage("unknown fastener type \""+str(fsClass)+"\", ignoring\n")
         # add AttachmentEngine
-        newFastener.addExtension("Part::AttachExtensionPython")
+        # oooops, no, creates problems because it creates an AttachmentOffset property that collides with Asm4
+        # newFastener.addExtension("Part::AttachExtensionPython")
         # ... and select it
         newFastener.recompute()
         Gui.Selection.clearSelection()
