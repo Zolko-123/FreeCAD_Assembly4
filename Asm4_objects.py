@@ -114,7 +114,7 @@ class VariantLink( object ):
             obj.Type='Asm4::VariantLink'
             obj.recompute()
 
-    # make the Placement::ExpressionEngine acording to the properties stored in the varLink object
+    # make the Placement::ExpressionEngine according to the properties stored in the varLink object
     # this is necessary because the placement refers to the LinkedObject's document *name*,
     # which is a temporary document, and this document may be different on restore
     def restorePlacementEE( self, obj ):
@@ -123,7 +123,7 @@ class VariantLink( object ):
             # if it's indeed an Asm4 object
             # LCS_Origin.Placement * AttachmentOffset * varTmpDoc_3#LCS_Origin.Placement ^ -1
             if Asm4.isAsm4EE(obj) and obj.SolverId=='Placement::ExpressionEngine':
-                # retrive the info from the object's properties
+                # retrieve the info from the object's properties
                 (a_Link,sep,a_LCS) = obj.AttachedTo.partition('#')
                 if a_Link=='Parent Assembly':
                     a_Part = None
@@ -184,8 +184,8 @@ class VariantLink( object ):
 
     # Execute when a property changes.
     def onChanged(self, obj, prop):
-        # check that the SourceObject is valid, this should ensure 
-        # that the object has been successsfully loaded
+        # check that the SourceObject is valid, this should ensure
+        # that the object has been successfully loaded
         if self.isLoaded(obj):
             # this changes the available variant parameters
             if prop == 'SourceObject':
@@ -352,7 +352,7 @@ class CircularArray(LinkArray):
         obj.addProperty("App::PropertyAngle",       "FullAngle",    "Array", '')
         # obj.FullAngle.setRange(-3600, 3600)
         obj.addProperty("App::PropertyAngle",       "IntervalAngle","Array", '')
-        tooltip = 'Steps perpandicular to the array plane to form a spiral'
+        tooltip = 'Steps perpendicular to the array plane to form a spiral'
         obj.addProperty("App::PropertyFloat",       "LinearSteps",  "Array", tooltip)
         # do the attach of the LinkArray class
         super().attach(obj)

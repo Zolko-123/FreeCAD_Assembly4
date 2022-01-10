@@ -64,7 +64,7 @@ def makeAssembly():
             # abort
             return
 
-        # there is not oject called "Assembly"
+        # there is no object called "Assembly"
         # create a group 'Parts' to hold all parts in the assembly document (if any)
         # must be done before creating the assembly
         partsGroup = App.ActiveDocument.getObject('Parts')

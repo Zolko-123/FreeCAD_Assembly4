@@ -119,12 +119,12 @@ def ShapeVolume(self,PART, BODY):
     except AttributeError:
         ### if the command comes from infoPartUI write autoinfo on autofilling field on UI
         try :
-        ### if field is actived
+        ### if field is active
             for i in range(len(self.infoTable)):
                 if self.infoTable[i][0]== auto_info_field :
                     self.infos[i].setText(str(auto_info_fill))
         except AttributeError:
-        ### if field is not actived
+        ### if field is not active
             pass
 
 
@@ -150,12 +150,12 @@ def newautoinfofieldname(self,PART(option : DOC , BODY , PAD , SKETCH):
     except AttributeError:
         ### if the command comes from infoPartUI write autoinfo on autofilling field on UI
         try :
-        ### if field is actived
+        ### if field is active
             for i in range(len(self.infoTable)):
                 if self.infoTable[i][0]== auto_info_field :
                     self.infos[i].setText(str(auto_info_fill))
         except AttributeError:
-        ### if field is not actived
+        ### if field is not active
             pass
 
 """
@@ -174,12 +174,12 @@ def ShapeLength(self,PART,SKETCH):
     except AttributeError:
         ### if the command comes from infoPartUI write autoinfo on autofilling field on UI
         try :
-        ### if field is actived
+        ### if field is active
             for i in range(len(self.infoTable)):
                 if self.infoTable[i][0]== auto_info_field :
                     self.infos[i].setText(str(auto_info_fill))
         except AttributeError:
-        ### if field is not actived
+        ### if field is not active
             pass
             
 
@@ -197,12 +197,12 @@ def PadLength(self,PART,PAD):
     except AttributeError:
         ### if the command comes from infoPartUI write autoinfo on autofilling field on UI
         try :
-        ### if field is actived
+        ### if field is active
             for i in range(len(self.infoTable)):
                 if self.infoTable[i][0]== auto_info_field :
                     self.infos[i].setText(str(auto_info_fill))
         except AttributeError:
-        ### if field is not actived
+        ### if field is not active
             pass
 
 
@@ -216,12 +216,12 @@ def LabelDoc(self,PART,DOC):
     except AttributeError:
         ### if the command comes from infoPartUI write autoinfo on autofilling field on UI
         try :
-        ### if field is actived
+        ### if field is active
             for i in range(len(self.infoTable)):
                 if self.infoTable[i][0]==docLabel:
                     self.infos[i].setText(DOC.Label)
         except AttributeError:
-        ### if field is not actived
+        ### if field is not active
             pass
         
 def LabelPart(self,PART):
@@ -233,12 +233,12 @@ def LabelPart(self,PART):
     except AttributeError:
         ### if the command comes from infoPartUI write autoinfo on autofilling field on UI
         try :
-        ### if field is actived
+        ### if field is active
             for i in range(len(self.infoTable)):
                 if self.infoTable[i][0]== partLabel:
                     self.infos[i].setText(PART.Label)
         except AttributeError:
-        ### if field is not actived
+        ### if field is not active
             pass
 
 

@@ -32,10 +32,10 @@ class makeShapeBinder():
         tooltip += "(face, edge, point) in the root assembly\n"
         tooltip += "Only shapes belonging to the same part can be imported in a single step"
         iconFile = os.path.join( Asm4.iconPath, 'Asm4_shapeBinder.svg' )
-        return {"MenuText": "Create a shape binder", "ToolTip":  tooltip, "Pixmap": iconFile }
+        return {"MenuText": "Create a shape binder", "ToolTip":  tooltip, "Pixmap": iconFile}
 
     def IsActive(self):
-        # only od this for assembly objects and all selected shapes must be in the same part
+        # only do this for assembly objects and all selected shapes must be in the same part
         if Asm4.getAssembly() and len(Gui.Selection.getSelection())==1:
             return True
         else:
