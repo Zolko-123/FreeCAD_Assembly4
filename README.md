@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.11.5
+Current version 0.11.6
 
 
 
@@ -61,6 +61,9 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 
 ## Release notes
+
+* 2022.01.10 (**0.11.6**) :  
+bugfix: removed AttachmentEngine (MapMode) to all created Parts, Bodies and Fasteners, because that creates an AttachmentOffset that conflicts with the placement by Asm4  
 
 * 2021.11.3 (**0.11.5**) :  
 added AttachmentEngine (MapMode) to all created Parts, Bodies and Fasteners  
