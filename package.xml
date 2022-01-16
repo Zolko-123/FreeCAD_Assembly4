@@ -15,6 +15,7 @@
       <classname>Assembly4Workbench</classname>
       <subdirectory>./</subdirectory>
       <icon>Resources/icons/Assembly4.svg</icon>
+      <tag>assembly</tag
       <freecadmin>0.19.0</freecadmin>
     </workbench>
   </content>
