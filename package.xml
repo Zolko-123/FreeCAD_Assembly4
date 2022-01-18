@@ -1,15 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <package format="1">
   <name>Assembly4</name>
-<<<<<<< HEAD
-  <description>This assembly workbench allows you to assemble into a standard Part container other FreeCAD objects (Parts, Bodies) using links, and place them relative to the assembly and to each other.</description>
+  <description>This assembly workbench allows you to assemble into a standard Part container other FreeCAD parts (of type Part or Body) using links, and place them relative to the assembly and to each other.</description>
   <version>0.11.6</version>
   <date>2022.01.10</date>
-=======
-  <description>This assembly workbench allows you to assemble into a single Part container under a single coordinate system other FreeCAD objects using links, and place them relative to the assembly and to each other.</description>
-  <version>0.11.6</version>
-  <date>2022-01-10</date>
->>>>>>> b3b63934acb4aa65a70b428921be4f6cac8283cd
   <maintainer email="Zolko-123@">Zolko-123</maintainer>
   <license file="LICENSE">GPL-2</license>
   <url type="repository" branch="master">https://github.com/Zolko-123/FreeCAD_Assembly4</url>
@@ -21,7 +15,7 @@
       <classname>Assembly4Workbench</classname>
       <subdirectory>./</subdirectory>
       <icon>Resources/icons/Assembly4.svg</icon>
-      <tag>assembly</tag
+      <tag>assembly</tag>
       <freecadmin>0.19.0</freecadmin>
     </workbench>
   </content>
