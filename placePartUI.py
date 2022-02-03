@@ -25,8 +25,7 @@ import Asm4_libs as Asm4
 class placePartUI():
     
     def __init__(self):
-        self.base = QtGui.QWidget()
-        self.form = self.base
+        self.form = QtGui.QWidget()
         iconFile = os.path.join( Asm4.iconPath , 'Place_Link.svg')
         self.form.setWindowIcon(QtGui.QIcon( iconFile ))
         self.form.setWindowTitle('Place a Part in the assembly')
@@ -57,16 +56,14 @@ class placePartUI():
         # now self.parentList and self.parentTable are available
 
         # find all the linked parts in the assembly
-        for objName in self.rootAssembly.getSubObjects():
-            # remove the trailing .
-            obj = self.activeDoc.getObject(objName[0:-1])
-            if obj.TypeId=='App::Link' and hasattr(obj.LinkedObject,'isDerivedFrom'):
+        for obj in self.activeDoc.findObjects("App::Link"):
+            if self.rootAssembly.getObject(obj.Name) is not None and hasattr(obj.LinkedObject,'isDerivedFrom'):
                 linkedObj = obj.LinkedObject
                 if linkedObj.isDerivedFrom('App::Part') or linkedObj.isDerivedFrom('PartDesign::Body'):
                     # add to the object table holding the objects ...
                     self.parentTable.append( obj )
                     # ... and add to the drop-down combo box with the assembly tree's parts
-                    objIcon = obj.LinkedObject.ViewObject.Icon
+                    objIcon = linkedObj.ViewObject.Icon
                     objText = Asm4.labelName(obj)
                     self.parentList.addItem( objIcon, objText, obj)
 

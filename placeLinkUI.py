@@ -71,8 +71,9 @@ class placeLinkUI():
 
         # define the GUI
         # draw the GUI, objects are defined later down
-        self.UI = QtGui.QWidget()
-        self.form = self.UI        
+        # self.UI = QtGui.QWidget()
+        # self.form = self.UI
+        self.form = QtGui.QWidget()
         iconFile = os.path.join( Asm4.iconPath , 'Place_Link.svg')
         self.form.setWindowIcon(QtGui.QIcon( iconFile ))
         self.form.setWindowTitle('Place linked Part')
@@ -134,12 +135,13 @@ class placeLinkUI():
         # find all the linked parts in the assembly
         for obj in self.activeDoc.findObjects("App::Link"):
             if self.rootAssembly.getObject(obj.Name) is not None and hasattr(obj.LinkedObject,'isDerivedFrom'):
-                if obj.LinkedObject.isDerivedFrom('App::Part') or obj.LinkedObject.isDerivedFrom('PartDesign::Body'):
+                linkedObj = obj.LinkedObject
+                if linkedObj.isDerivedFrom('App::Part') or linkedObj.isDerivedFrom('PartDesign::Body'):
                 # ... except if it's the selected link itself
                     if obj != self.selectedObj:
                         self.parentTable.append( obj )
                         # add to the drop-down combo box with the assembly tree's parts
-                        objIcon = obj.LinkedObject.ViewObject.Icon
+                        objIcon = linkedObj.ViewObject.Icon
                         objText = Asm4.labelName(obj)
                         self.parentList.addItem( objIcon, objText, obj)
 
