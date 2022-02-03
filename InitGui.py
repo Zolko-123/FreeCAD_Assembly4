@@ -54,9 +54,7 @@ class Assembly4Workbench(Workbench):
 
     def Activated(self):
         "This function is executed when the workbench is activated"
-
-        FreeCAD.Console.PrintMessage(_atr("Asm4", "Activating Assembly4 WorkBench") + '\n')
-
+        # FreeCAD.Console.PrintMessage(_atr("Asm4", "Activating Assembly4 WorkBench") + '\n')
         # make buttons of the selection toolbar checkable
         from PySide import QtGui
         mainwin = Gui.getMainWindow()
@@ -73,7 +71,7 @@ class Assembly4Workbench(Workbench):
     def Deactivated(self):
         "This function is executed when the workbench is deactivated"
         selectionFilter.observerDisable()
-        FreeCAD.Console.PrintMessage(_atr("Asm4", "Leaving Assembly4 WorkBench") + "\n")
+        # FreeCAD.Console.PrintMessage(_atr("Asm4", "Leaving Assembly4 WorkBench") + "\n")
         return
 
     def GetClassName(self):
@@ -87,11 +85,19 @@ class Assembly4Workbench(Workbench):
         """
     def Initialize(self):
         # Assembly4 version info
+        # with file VERSION
         versionPath = os.path.join( Asm4_path, 'VERSION' )
         versionFile = open(versionPath,"r")
         version = versionFile.readlines()[1]
         Asm4_version = version[:-1]
         versionFile.close()
+        '''
+        # with file package.xml
+        packageFile  = os.path.join( Asm4_path, 'package.xml' )
+        metadata     = FreeCAD.Metadata(packageFile)
+        Asm4_date    = metadata.Date
+        Asm4_version = metadata.Version
+        '''
         FreeCAD.Console.PrintMessage(_atr("Asm4", "Initializing Assembly4 workbench")+ ' ('+Asm4_version+') .')
         FreeCADGui.updateGui()
         # import all stuff

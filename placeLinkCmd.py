@@ -39,9 +39,8 @@ class placeLinkCmd():
         # We only insert a link into an Asm4  Model
         if App.ActiveDocument:
             ( obj, tree ) = Asm4.getSelectionTree()
-            # something at 2nd level is selected
-            if tree and len(tree)==2:
-                # the root container must be an App::Part
+            if tree and len(tree)>=2:
+                # the root container is the first element and must be an App::Part
                 root = App.ActiveDocument.getObject(tree[0])
                 if root and root.TypeId=='App::Part':
                     # check that the object has a Placement property

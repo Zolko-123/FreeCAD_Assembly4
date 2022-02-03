@@ -71,8 +71,9 @@ class placeLinkUI():
 
         # define the GUI
         # draw the GUI, objects are defined later down
-        self.UI = QtGui.QWidget()
-        self.form = self.UI        
+        # self.UI = QtGui.QWidget()
+        # self.form = self.UI
+        self.form = QtGui.QWidget()
         iconFile = os.path.join( Asm4.iconPath , 'Place_Link.svg')
         self.form.setWindowIcon(QtGui.QIcon( iconFile ))
         self.form.setWindowTitle('Place linked Part')
@@ -132,16 +133,15 @@ class placeLinkUI():
         # now self.parentList and self.parentTable are available
 
         # find all the linked parts in the assembly
-        for objName in self.rootAssembly.getSubObjects():
-            # remove the trailing .
-            obj = self.activeDoc.getObject(objName[0:-1])
-            if obj.TypeId=='App::Link' and hasattr(obj.LinkedObject,'isDerivedFrom'):
-                if obj.LinkedObject.isDerivedFrom('App::Part') or obj.LinkedObject.isDerivedFrom('PartDesign::Body'):
+        for obj in self.activeDoc.findObjects("App::Link"):
+            if self.rootAssembly.getObject(obj.Name) is not None and hasattr(obj.LinkedObject,'isDerivedFrom'):
+                linkedObj = obj.LinkedObject
+                if linkedObj.isDerivedFrom('App::Part') or linkedObj.isDerivedFrom('PartDesign::Body'):
                 # ... except if it's the selected link itself
                     if obj != self.selectedObj:
                         self.parentTable.append( obj )
                         # add to the drop-down combo box with the assembly tree's parts
-                        objIcon = obj.LinkedObject.ViewObject.Icon
+                        objIcon = linkedObj.ViewObject.Icon
                         objText = Asm4.labelName(obj)
                         self.parentList.addItem( objIcon, objText, obj)
 
@@ -581,7 +581,8 @@ class placeLinkUI():
                 attPart = 'None'
             else:
                 # if parent is in another document as the assembly
-                if self.rootAssembly.Document.getObject(parent) is None:
+                parentObj = self.rootAssembly.Document.getObject(parent)
+                if parentObj and parentObj.isDerivedFrom('App::Link') and not parentObj.LinkedObject.Document==self.rootAssembly.Document:
                     # expr = Rail_40x40_Y.Placement * Rails_V_Slot#LCS_AR.Placement * AttachmentOffset * LCS_Plaque_Laterale_sym.Placement ^ -1
                     # expr = parentLink.Placement * externalDoc#LCS_parentPart * AttachmentOffset * LCS_linkedPart.Placement ^ -1
                     ( attLink,    separator, rest1 ) = expr.partition('.Placement * ')

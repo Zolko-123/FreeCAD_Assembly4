@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.11.7
+Current version 0.11.8
 
 
 
@@ -61,6 +61,9 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 
 ## Release notes
+
+* 2022.02.03 (**0.11.8**) :  
+added possibility to use parts (links) in groups inside the assembly. Works also for fasteners  
 
 * 2022.01.27 (**0.11.7**) :  
 bugfix: corrected default name when duplicating an existing link  
