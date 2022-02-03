@@ -114,12 +114,10 @@ class placeLinkUI():
         old_linkLCS     = ''
         # get and store the current expression engine:
         self.old_EE = Asm4.placementEE(self.selectedObj.ExpressionEngine)
-        FCC.PrintMessage("old Expression = "+self.old_EE)
 
         # decode the old ExpressionEngine
         # if the decode is unsuccessful, old_Expression is set to False and the other things are set to 'None'
         (self.old_Parent, separator, self.old_parentLCS) = self.selectedObj.AttachedTo.partition('#')
-        FCC.PrintMessage("old Parent = "+self.old_Parent)
         ( old_Parent, old_attLCS, old_linkLCS ) = self.splitExpressionLink( self.old_EE, self.old_Parent )
         # sometimes, the object is in << >> which is an error by FreeCAD,
         # because that's reserved for labels, but we still look for it
@@ -590,7 +588,6 @@ class placeLinkUI():
                     ( attLCS,     separator, rest3 ) = rest2.partition('.Placement * AttachmentOffset * ')
                     ( linkLCS,    separator, rest4 ) = rest3.partition('.Placement ^ ')
                     restFinal = rest4[0:2]
-                    FCC.PrintMessage("decode : "+attLink+"*"+linkedDoc+"*"+attLCS+"*"+linkLCS+"*"+restFinal)
                 # parent is in this document and link is a part in another document
                 else:
                     # expr = Part001.Placement * LCS_0.Placement * AttachmentOffset * varTmpDoc_4#LCS_1.Placement ^ -1
