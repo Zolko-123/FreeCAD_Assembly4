@@ -32,26 +32,36 @@ class showLcsCmd:
 
     def IsActive(self):
         # treats all container types : Body and Part
-        if Asm4.getSelectedContainer() or Asm4.getAssembly() or Asm4.getSelectedLink():
+        #if Asm4.getSelectedContainer() or Asm4.getAssembly() or Asm4.getSelectedLink():
+        #    return True
+        # We only need to know IF there is anything selected at all.
+        # We can ignore things later.
+        # If the ActiveDocument.Name is selected,
+        # it doesn't trigger the hasSelection()
+        if Gui.Selection.hasSelection():
             return True
         return False
 
     def Activated(self):
         #global processedLinks
         # reset processed links cache
-        processedLinks = []
-
-        #model = Asm4.getModelSelected()
-        container = Asm4.getSelectedContainer()
-        if not container:
-            container = Asm4.getAssembly()
-        link = Asm4.getSelectedLink()
-        if link:
-            showChildLCSs(link, True, processedLinks)
-        elif container:
-            for objName in container.getSubObjects(1):
-                showChildLCSs(container.getSubObject(objName, 1), True, processedLinks)
-
+#         processedLinks = []
+# 
+#         #model = Asm4.getModelSelected()
+#         container = Asm4.getSelectedContainer()
+#         if not container:
+#             container = Asm4.getAssembly()
+#         link = Asm4.getSelectedLink()
+#         if link:
+#             showChildLCSs(link, True, processedLinks)
+#         elif container:
+#             for objName in container.getSubObjects(1):
+#                 showChildLCSs(container.getSubObject(objName, 1), True, processedLinks)
+        # It doesn't matter how much, many,
+        # or where the Objects are marked for selection.
+        # If it contains one or more Datum Types, it will be processed.
+        DependenciesList=Asm4.getDependenciesList(Gui.Selection.getCompleteSelection())
+        showChildLCSs(DependenciesList, True)
 
 """
     +-----------------------------------------------+
@@ -70,25 +80,27 @@ class hideLcsCmd:
 
     def IsActive(self):
         # Will handle LCSs only for the Assembly4 model
-        if Asm4.getSelectedContainer() or Asm4.getAssembly() or Asm4.getSelectedLink():
+        #if Asm4.getSelectedContainer() or Asm4.getAssembly() or Asm4.getSelectedLink():
+        if Gui.Selection.hasSelection():
             return True
         return False
 
     def Activated(self):
         #global processedLinks
         # reset processed links cache
-        processedLinks = []
-
-        container = Asm4.getSelectedContainer()
-        if not container:
-            container = Asm4.getAssembly()
-        link = Asm4.getSelectedLink()
-        if link:
-            showChildLCSs(link, False, processedLinks)
-        elif container:
-            for objName in container.getSubObjects(1):
-                showChildLCSs(container.getSubObject(objName, 1), False, processedLinks)
-
+#         processedLinks = []
+# 
+#         container = Asm4.getSelectedContainer()
+#         if not container:
+#             container = Asm4.getAssembly()
+#         link = Asm4.getSelectedLink()
+#         if link:
+#             showChildLCSs(link, False, processedLinks)
+#         elif container:
+#             for objName in container.getSubObjects(1):
+#                 showChildLCSs(container.getSubObject(objName, 1), False, processedLinks)
+        DependenciesList=Asm4.getDependenciesList(Gui.Selection.getCompleteSelection())
+        showChildLCSs(DependenciesList, False)
 
 
 """
@@ -97,33 +109,43 @@ class hideLcsCmd:
     |   the provided object and all its children    |
     +-----------------------------------------------+
 """
-def showChildLCSs(obj, show, processedLinks):
-    #global processedLinks
-    # if its a datum apply the visibility
-    if obj.TypeId in Asm4.datumTypes:
-        obj.Visibility = show
-    # if it's a link, look for subObjects
-    elif obj.TypeId == 'App::Link' and obj.Name not in processedLinks:
-        processedLinks.append(obj.Name)
-        for objName in obj.LinkedObject.getSubObjects(1):
-            linkedObj = obj.LinkedObject.Document.getObject(objName[0:-1])
-            showChildLCSs(linkedObj, show, processedLinks)
-    # if it's a container
-    else:
-        if obj.TypeId in Asm4.containerTypes:
-            for subObjName in obj.getSubObjects(1):
-                subObj = obj.getSubObject(subObjName, 1)    # 1 for returning the real object
-                if subObj != None:
-                    if subObj.TypeId in Asm4.datumTypes:
-                        #subObj.Visibility = show
-                        # Apparently obj.Visibility API is very slow
-                        # Using the ViewObject.show() and ViewObject.hide() API runs at least twice faster
-                        if show:
-                            subObj.ViewObject.show()
-                        else:
-                            subObj.ViewObject.hide()
+# def showChildLCSs(obj, show, processedLinks):
+#     #global processedLinks
+#     # if its a datum apply the visibility
+#     if obj.TypeId in Asm4.datumTypes:
+#         obj.Visibility = show
+#     # if it's a link, look for subObjects
+#     elif obj.TypeId == 'App::Link' and obj.Name not in processedLinks:
+#         processedLinks.append(obj.Name)
+#         for objName in obj.LinkedObject.getSubObjects(1):
+#             linkedObj = obj.LinkedObject.Document.getObject(objName[0:-1])
+#             showChildLCSs(linkedObj, show, processedLinks)
+#     # if it's a container
+#     else:
+#         if obj.TypeId in Asm4.containerTypes:
+#             for subObjName in obj.getSubObjects(1):
+#                 subObj = obj.getSubObject(subObjName, 1)    # 1 for returning the real object
+#                 if subObj != None:
+#                     if subObj.TypeId in Asm4.datumTypes:
+#                         #subObj.Visibility = show
+#                         # Apparently obj.Visibility API is very slow
+#                         # Using the ViewObject.show() and ViewObject.hide() API runs at least twice faster
+#                         if show:
+#                             subObj.ViewObject.show()
+#                         else:
+#                             subObj.ViewObject.hide()
 
-
+# showChildLCSs takes a List of Dependencies or rather Objects,
+# of the marked Objects in the Document.
+# Every Object that is a Datum Type, gets their visibility changed.
+def showChildLCSs(ListofDeps, show):
+    for dep in ListofDeps:
+        if hasattr(dep[0],'TypeId'):
+            if dep[0].TypeId in Asm4.datumTypes:
+                if show:
+                    dep[0].ViewObject.show()
+                else:
+                    dep[0].ViewObject.hide()
 
 
 """
