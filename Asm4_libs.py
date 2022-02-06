@@ -307,6 +307,41 @@ def getPartsGroup():
         retval = partsGroup
     return retval
 
+# Get almost all Objects within the passed Selection.
+# A Selection is one or more marked Object(s) anywhere
+# in the opened Document. The idea is to get a similar
+# Selection back, as If you would "copy" the marked Objects.
+# The Window that pops up and shows are affected Objects, calls it
+# The Dependencies
+# Objects within Compounds and Bodys and also Linked Objects are left out.
+
+# Note: Theoretically we could use the App.ActiveDocument.DependencyGraph function,
+# to get really every Object behind a selection.
+
+def getDependenciesList( CompleteSelection ):
+    deDendenciesList = [ ]
+    for Selection in CompleteSelection:
+        # A possible container for more Sub-Objects
+        SubObjects = [ ]
+        # If an Object has more objects to offer, get them
+        if hasattr(Selection,'getSubObjects'):
+            SubObjNames=Selection.getSubObjects()
+            # Some Objects return None Objects,
+            # even if it has the 'getSubObjects' attribute
+            # 'getSubObjects' delivers uniqe Names with a trailing .
+            for SubObjName in SubObjNames:              
+                SubObjects.append(App.ActiveDocument.getObject(SubObjName[0:-1]))
+        # If they are more Sub-Objects within that particular selection,
+        # go get them. It doesn't matter If it is a Group or Part or Link.
+        if SubObjects is not None:            
+            SubObjects = getDependenciesList(SubObjects)
+            # Adding the Sub-Objects in that way, prevents nested Objects in Objects
+            for SubObject in SubObjects:
+                deDendenciesList.append(SubObject)
+        # In order to make not iterable, single Objects,
+        # iterable enclosing [] are nedded
+        deDendenciesList.append([Selection])
+    return deDendenciesList
 
 
 """
