@@ -56,19 +56,18 @@ class placeLinkCmd():
             selection = Asm4.getSelectedVarLink()
         # if we found a valid link
         if selection is not None:
-            """
-    +-----------------------------------------------+
-    |            placement of a link                |
-    +-----------------------------------------------+
-            """
             # check that it's in the root assembly
             parent = selection.getParentGeoFeatureGroup()
             if parent and parent == Asm4.getAssembly():
                 # if it's a valid assembly and part
                 if Asm4.isAsm4EE(selection):
-                    # launch the UI in the task panel
-                    ui = placeLinkUI()
-                    Gui.Control.showDialog(ui)
+                    # BUGFIX: if the part was corrupted by Assembly4 v0.11.5:
+                    if hasattr(selection,'MapMode'):
+                        Asm4.warningBox("This Part has the Attachment extension, it can only be placed manually")
+                    else:
+                        # launch the UI in the task panel
+                        ui = placeLinkUI()
+                        Gui.Control.showDialog(ui)
                 # else try to convert it
                 else:
                     convert = Asm4.confirmBox("This Part wasn't assembled with this Assembly4 WorkBench, but I can convert it.")
@@ -80,11 +79,6 @@ class placeLinkCmd():
             else:
                 Asm4.warningBox('Please select a link in the assembly Model.')
         else:
-            """
-    +-----------------------------------------------+
-    |    placement of any object with a Placement   |
-    +-----------------------------------------------+
-            """
             # or any part that has a Placement ?
             if len(Gui.Selection.getSelection())==1:
                 selection = Gui.Selection.getSelection()[0]
