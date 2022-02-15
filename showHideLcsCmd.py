@@ -3,7 +3,7 @@
 #
 # showHideLcsCmd.py
 
-import math, re, os
+import os
 
 import FreeCADGui as Gui
 import FreeCAD as App
@@ -31,26 +31,15 @@ class showLcsCmd:
                 }
 
     def IsActive(self):
-        # treats all container types : Body and Part
-        if Asm4.getSelectedContainer() or Asm4.getAssembly() or Asm4.getSelectedLink():
+        # if something is selected or an Asm4 assembly present
+        if Gui.Selection.hasSelection() or Asm4.getAssembly():
             return True
         return False
 
     def Activated(self):
-        #global processedLinks
-        # reset processed links cache
-        processedLinks = []
+        # show
+        showHide(True)
 
-        #model = Asm4.getModelSelected()
-        container = Asm4.getSelectedContainer()
-        if not container:
-            container = Asm4.getAssembly()
-        link = Asm4.getSelectedLink()
-        if link:
-            showChildLCSs(link, True, processedLinks)
-        elif container:
-            for objName in container.getSubObjects(1):
-                showChildLCSs(container.getSubObject(objName, 1), True, processedLinks)
 
 
 """
@@ -69,26 +58,14 @@ class hideLcsCmd:
                 }
 
     def IsActive(self):
-        # Will handle LCSs only for the Assembly4 model
-        if Asm4.getSelectedContainer() or Asm4.getAssembly() or Asm4.getSelectedLink():
+        # if something is selected or an Asm4 assembly present
+        if Gui.Selection.hasSelection() or Asm4.getAssembly():
             return True
         return False
 
     def Activated(self):
-        #global processedLinks
-        # reset processed links cache
-        processedLinks = []
-
-        container = Asm4.getSelectedContainer()
-        if not container:
-            container = Asm4.getAssembly()
-        link = Asm4.getSelectedLink()
-        if link:
-            showChildLCSs(link, False, processedLinks)
-        elif container:
-            for objName in container.getSubObjects(1):
-                showChildLCSs(container.getSubObject(objName, 1), False, processedLinks)
-
+        # hide
+        showHide(False)
 
 
 """
@@ -97,6 +74,23 @@ class hideLcsCmd:
     |   the provided object and all its children    |
     +-----------------------------------------------+
 """
+def showHide( show ):
+    # reset processed links cache
+    processedLinks = []
+    # if something is selected
+    if Gui.Selection.hasSelection():
+        for sel in Gui.Selection.getSelection():
+            if sel.isDerivedFrom('App::Link'):
+                showChildLCSs(sel, show, processedLinks)
+            elif sel.TypeId in Asm4.containerTypes:
+                for objName in sel.getSubObjects(1):
+                    showChildLCSs(sel.getSubObject(objName, 1), show, processedLinks)
+    # if not, apply it to the assembly
+    elif Asm4.getAssembly():
+        asm = Asm4.getAssembly()
+        for objName in asm.getSubObjects(1):
+            showChildLCSs(asm.getSubObject(objName, 1), show, processedLinks)
+
 def showChildLCSs(obj, show, processedLinks):
     #global processedLinks
     # if its a datum apply the visibility

@@ -122,11 +122,9 @@ class openConfigurationsCmd:
         Gui.Control.showDialog(ui)
 
 
-
 class openConfigurationsUI():
     def __init__(self):
-        self.base = QtGui.QWidget()
-        self.form = self.base
+        self.form = QtGui.QWidget()
         iconFile = os.path.join( Asm4.iconPath , 'Asm4_Variables.svg')
         self.form.setWindowIcon(QtGui.QIcon( iconFile ))
         self.form.setWindowTitle('Assembly Configurations')
@@ -137,7 +135,8 @@ class openConfigurationsUI():
 
     # standard FreeCAD Task panel buttons
     def getStandardButtons(self):
-        return int(QtGui.QDialogButtonBox.Cancel | QtGui.QDialogButtonBox.Apply | QtGui.QDialogButtonBox.Ok)
+        # return int(QtGui.QDialogButtonBox.Cancel | QtGui.QDialogButtonBox.Apply | QtGui.QDialogButtonBox.Ok)
+        return int( QtGui.QDialogButtonBox.Close | QtGui.QDialogButtonBox.Apply )
 
     # OK = apply and close
     def accept(self):
@@ -194,7 +193,7 @@ class openConfigurationsUI():
             SaveConfiguration( confName, confDescr )
 
 
-    # Cancel
+    # Cancel / Close
     def reject(self):
         Gui.Control.closeDialog()
 
@@ -316,7 +315,7 @@ class newConfigurationCmd:
             Asm4.warningBox('Please specify configuration name!')
             self.configName.setFocus()
             return
-        # if no description provided, set the name as description
+        # if no description provided, give a single space to avoid errors
         if confDescr == '':
             confDescr = ' '
         SaveConfiguration( confName, confDescr )
@@ -410,7 +409,7 @@ def SaveConfiguration(confName, description):
         conf = createConfig(confName, description)
 
     assy = Asm4.getAssembly()
-    link  = Asm4.getSelectedLink()
+    link = Asm4.getSelectedLink()
     if link:
         SaveObject(conf, link)
     else:
@@ -421,8 +420,8 @@ def SaveConfiguration(confName, description):
 def SaveSubObjects(conf, container):
     for objName in container.getSubObjects():
         obj = container.getSubObject(objName, 1)
-        # only save properties of objects that are derived from Part::Feature
-        if obj.isDerivedFrom('Part::Feature'):
+        # only save properties of certain objects
+        if obj.isDerivedFrom('Part::Feature') or obj.isDerivedFrom('App::Link') or obj.isDerivedFrom('App::Part'):
             SaveObject(conf, obj)
 
 
@@ -446,7 +445,7 @@ def SaveObject(conf, obj):
     conf.set( OBJECT_VISIBLE_COL    + row,  str(obj.ViewObject.Visibility) )
     # check how this object is assembled
     asmType = '-'
-    if hasattr(obj,'AssemblyType'):
+    if hasattr(obj,'AssemblyType') and obj.AssemblyType!='' :
         asmType = obj.AssemblyType
     conf.set( OBJECT_ASM_TYPE_COL       + row,  str(asmType) )
     if asmType == 'Asm4EE':
@@ -485,6 +484,7 @@ def restoreSubObjects(conf, container):
         obj = container.getSubObject(objName, 1)
         restoreObject(conf, obj)
 
+
 def restoreObject(conf, obj):
     # parse App::Part containers, and only those
     if obj.TypeId == 'App::Part':
@@ -501,18 +501,21 @@ def restoreObject(conf, obj):
 
     vis   = conf.get( OBJECT_VISIBLE_COL   + row )
     obj.ViewObject.Visibility = (vis=='True')
-    asm   = str(conf.get( OBJECT_ASM_TYPE_COL  + row ))
-    if asm == 'Asm4EE':
-        x     = conf.get( OFFSET_POS_X_COL     + row )
-        y     = conf.get( OFFSET_POS_Y_COL     + row )
-        z     = conf.get( OFFSET_POS_Z_COL     + row )
-        yaw   = conf.get( OFFSET_ROT_YAW_COL   + row )
-        pitch = conf.get( OFFSET_ROT_PITCH_COL + row )
-        roll  = conf.get( OFFSET_ROT_ROLL_COL  + row )
-        position = App.Vector(x, y, z)
-        rotation = App.Rotation(yaw, pitch, roll)
-        offset = App.Placement(position, rotation)
-        obj.AttachmentOffset = offset
+    try:
+        asmType = str(conf.get( OBJECT_ASM_TYPE_COL  + row ))
+        if asmType == 'Asm4EE':
+            x     = conf.get( OFFSET_POS_X_COL     + row )
+            y     = conf.get( OFFSET_POS_Y_COL     + row )
+            z     = conf.get( OFFSET_POS_Z_COL     + row )
+            yaw   = conf.get( OFFSET_ROT_YAW_COL   + row )
+            pitch = conf.get( OFFSET_ROT_PITCH_COL + row )
+            roll  = conf.get( OFFSET_ROT_ROLL_COL  + row )
+            position = App.Vector(x, y, z)
+            rotation = App.Rotation(yaw, pitch, roll)
+            offset = App.Placement(position, rotation)
+            obj.AttachmentOffset = offset
+    except:
+        FCC.PrintMessage('Unknown AssemblyType for object "' + objName + '" in configuration "' + conf.Name + '"\n')
 
 
 """
@@ -526,12 +529,14 @@ def isAsm4Config(sheet):
     else:
         return False
 
+
 def getConfGroup():
     confGroup = App.ActiveDocument.getObject('Configurations')
     if confGroup and confGroup.TypeId == 'App::DocumentObjectGroup':
         return confGroup
     else:
         return None
+
 
 def getConfig(name, groupName='Configurations'):
     retval = None
