@@ -64,6 +64,7 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 * 2022.02.15 (**0.11.9**) :  
 Bugfix of the configurationEngine  
+Bugfix for parts corrupted by v0.11.5 : print a warning, part cannot be fixed automatically  
 
 * 2022.02.03 (**0.11.8**) :  
 added possibility to use parts (links) in groups inside the assembly. Works also for fasteners  
