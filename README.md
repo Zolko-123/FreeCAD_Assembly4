@@ -2,6 +2,8 @@
 
 Current version 0.11.9
 
+**Important Note:** version v0.11.5 had a hidden nasty bug that also corrupted the parts that were *created* with it. Unfortunately, these parts cannot be automatically fixed, they must be re-created. Only parts *created* with v0.11.5 are affected, not those that where merely *used* with it.
+
 
 
 ## Overview
