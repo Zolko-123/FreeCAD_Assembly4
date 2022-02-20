@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.11.9
+Current version 0.11.10
 
 **Important Note:** version v0.11.5 had a hidden nasty bug that also corrupted the parts that were *created* with it. Unfortunately, these parts cannot be automatically fixed, they must be re-created. Only parts *created* with v0.11.5 are affected, not those that where merely *used* with it.
 
@@ -63,6 +63,9 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 
 ## Release notes
+
+* 2022.02.20 (**0.11.10**) :  
+Improved configurationEngine for compatibility  
 
 * 2022.02.15 (**0.11.9**) :  
 Bugfix of the configurationEngine  
