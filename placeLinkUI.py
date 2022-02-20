@@ -165,6 +165,12 @@ class placeLinkUI():
         if lcs_found:
             # ... and select it
             self.partLCSlist.setCurrentItem( lcs_found[0] )
+        else:
+            # If no LCS is selected, select the first LCS if there is only one
+            if self.partLCSlist.count()==1:
+                firstLCSItem = self.partLCSlist.item(0)
+                if firstLCSItem is not None:
+                    self.partLCSlist.setCurrentItem(firstLCSItem)
 
         # find the oldPart in the part list...
         if old_Parent == 'Parent Assembly':

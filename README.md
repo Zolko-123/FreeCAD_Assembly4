@@ -66,6 +66,7 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 * 2022.02.20 (**0.11.10**) :  
 Improved configurationEngine for compatibility  
+Preselect the sole LCS if there is only 1  
 
 * 2022.02.15 (**0.11.9**) :  
 Bugfix of the configurationEngine  
