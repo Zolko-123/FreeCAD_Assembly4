@@ -104,7 +104,7 @@ def placeObjectToLCS( attObj, attLink, attDoc, attLCS ):
     # load the built expression into the Expression field of the constraint
     attObj.setExpression( 'Placement', expr )
     # Which solver is used
-    attObj.SolverId = 'Placement::ExpressionEngine'
+    attObj.SolverId = 'Asm4EE'
     # recompute the object to apply the placement:
     attObj.recompute()
     container = attObj.getParentGeoFeatureGroup()
@@ -468,7 +468,7 @@ def isAsm4EE(obj):
         return False
     # we only need to check for the SolverId
     if hasattr(obj,'SolverId') :
-        if obj.SolverId == 'Placement::ExpressionEngine' or obj.SolverId == '' :
+        if obj.SolverId=='Asm4EE' or obj.SolverId=='Placement::ExpressionEngine' or obj.SolverId=='' :
             return True
     # legacy check
     elif hasattr(obj,'AssemblyType') :

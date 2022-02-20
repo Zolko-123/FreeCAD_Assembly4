@@ -114,7 +114,7 @@ class VariantLink( object ):
             obj.Type='Asm4::VariantLink'
             obj.recompute()
 
-    # make the Placement::ExpressionEngine according to the properties stored in the varLink object
+    # make the Asm4EE according to the properties stored in the varLink object
     # this is necessary because the placement refers to the LinkedObject's document *name*,
     # which is a temporary document, and this document may be different on restore
     def restorePlacementEE( self, obj ):
@@ -122,7 +122,7 @@ class VariantLink( object ):
         if self.isLoaded(obj) and obj.LinkedObject.isValid():
             # if it's indeed an Asm4 object
             # LCS_Origin.Placement * AttachmentOffset * varTmpDoc_3#LCS_Origin.Placement ^ -1
-            if Asm4.isAsm4EE(obj) and obj.SolverId=='Placement::ExpressionEngine':
+            if Asm4.isAsm4EE(obj) and ( obj.SolverId=='Asm4EE' or obj.SolverId=='Placement::ExpressionEngine' ):
                 # retrieve the info from the object's properties
                 (a_Link,sep,a_LCS) = obj.AttachedTo.partition('#')
                 if a_Link=='Parent Assembly':

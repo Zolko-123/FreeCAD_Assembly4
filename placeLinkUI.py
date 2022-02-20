@@ -320,7 +320,7 @@ class placeLinkUI():
             # self.selectedObj.AssemblyType = 'Part::Link'
             self.selectedObj.AttachedBy = '#'+l_LCS
             self.selectedObj.AttachedTo = a_Link+'#'+a_LCS
-            self.selectedObj.SolverId = 'Placement::ExpressionEngine'
+            self.selectedObj.SolverId = 'Asm4EE'
             # build the expression for the ExpressionEngine
             # this is where all the magic is, see:
             # 

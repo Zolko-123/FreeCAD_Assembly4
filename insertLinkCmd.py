@@ -274,6 +274,7 @@ class insertLink():
                     createdLink.Label = linkName
                 # add the Asm4 properties
                 Asm4.makeAsmProperties(createdLink)
+                createdLink.AssemblyType = "Part::Link"
                 # update the link
                 createdLink.recompute()
                 # close the dialog UI...

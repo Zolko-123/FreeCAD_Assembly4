@@ -445,11 +445,31 @@ def SaveObject(conf, obj):
     conf.set( OBJECT_VISIBLE_COL    + row,  str(obj.ViewObject.Visibility) )
     # check how this object is assembled
     asmType = '-'
-    if hasattr(obj,'AssemblyType') and obj.AssemblyType!='' :
+    if hasattr(obj,'AttacherType'):
+        asmType = 'Attacher'
+    elif hasattr(obj,'SolverId') and obj.SolverId!='' :
+        asmType = obj.SolverId
+    elif hasattr(obj,'AssemblyType') and obj.AssemblyType!='' :
         asmType = obj.AssemblyType
-    conf.set( OBJECT_ASM_TYPE_COL       + row,  str(asmType) )
-    if asmType == 'Asm4EE':
+    # if the object has a AttacherExtension (MapMode), we leave it alone
+    if asmType == 'Attacher':
+        conf.set( OBJECT_ASM_TYPE_COL   + row,  str(asmType) )
+    # if it's an Assembly4 object
+    elif asmType=='Asm4EE' or asmType=='Part::Link' or asmType=='Placement::ExpressionEngine':
+        asmType = 'Asm4EE'
+        conf.set( OBJECT_ASM_TYPE_COL   + row,  str(asmType) )
         offset = obj.AttachmentOffset
+        conf.set( OFFSET_POS_X_COL      + row,  str(offset.Base.x) )
+        conf.set( OFFSET_POS_Y_COL      + row,  str(offset.Base.y) )
+        conf.set( OFFSET_POS_Z_COL      + row,  str(offset.Base.z) )
+        conf.set( OFFSET_ROT_YAW_COL    + row,  str(offset.Rotation.toEuler()[0]) )
+        conf.set( OFFSET_ROT_PITCH_COL  + row,  str(offset.Rotation.toEuler()[1]) )
+        conf.set( OFFSET_ROT_ROLL_COL   + row,  str(offset.Rotation.toEuler()[2]) )
+    # if it's manually placed
+    elif hasattr(obj,'Placement'):
+        asmType = 'Manual'
+        conf.set( OBJECT_ASM_TYPE_COL   + row,  str(asmType) )
+        offset = obj.Placement
         conf.set( OFFSET_POS_X_COL      + row,  str(offset.Base.x) )
         conf.set( OFFSET_POS_Y_COL      + row,  str(offset.Base.y) )
         conf.set( OFFSET_POS_Z_COL      + row,  str(offset.Base.z) )
@@ -493,29 +513,44 @@ def restoreObject(conf, obj):
     parentObj, objFullName = obj.Parents[0]
     #objName = App.ActiveDocument.Name + '.' + parentObj.Name + '.' + objFullName
     objName = parentObj.Name + '.' + objFullName
-
+    # find the row in the spreadsheet
     row = GetObjectRow(conf, objName)
     if row is None:
-        FCC.PrintMessage('No data for object "' + objName + '" in configuration "' + conf.Name + '"\n')
+        if obj.isDerivedFrom('Part::Feature') or obj.isDerivedFrom('App::Link'):
+            FCC.PrintMessage('No data for object "' + objName + '" in configuration "' + conf.Name + '"\n')
         return
-
-    vis   = conf.get( OBJECT_VISIBLE_COL   + row )
+    # set visibility, valid for all objects
+    vis = conf.get( OBJECT_VISIBLE_COL   + row )
     obj.ViewObject.Visibility = (vis=='True')
+    # try to set the placement
     try:
         asmType = str(conf.get( OBJECT_ASM_TYPE_COL  + row ))
-        if asmType == 'Asm4EE':
-            x     = conf.get( OFFSET_POS_X_COL     + row )
-            y     = conf.get( OFFSET_POS_Y_COL     + row )
-            z     = conf.get( OFFSET_POS_Z_COL     + row )
-            yaw   = conf.get( OFFSET_ROT_YAW_COL   + row )
-            pitch = conf.get( OFFSET_ROT_PITCH_COL + row )
-            roll  = conf.get( OFFSET_ROT_ROLL_COL  + row )
-            position = App.Vector(x, y, z)
-            rotation = App.Rotation(yaw, pitch, roll)
-            offset = App.Placement(position, rotation)
+        # if it's an Asm4 object
+        if asmType=='Asm4EE' or asmType=='Part::Link' or asmType=='Placement::ExpressionEngine':
+            x         = conf.get( OFFSET_POS_X_COL     + row )
+            y         = conf.get( OFFSET_POS_Y_COL     + row )
+            z         = conf.get( OFFSET_POS_Z_COL     + row )
+            yaw       = conf.get( OFFSET_ROT_YAW_COL   + row )
+            pitch     = conf.get( OFFSET_ROT_PITCH_COL + row )
+            roll      = conf.get( OFFSET_ROT_ROLL_COL  + row )
+            position  = App.Vector(x, y, z)
+            rotation  = App.Rotation(yaw, pitch, roll)
+            offset    = App.Placement(position, rotation)
             obj.AttachmentOffset = offset
+        # if it's manually placed
+        elif asmType=='Manual':
+            x         = conf.get( OFFSET_POS_X_COL     + row )
+            y         = conf.get( OFFSET_POS_Y_COL     + row )
+            z         = conf.get( OFFSET_POS_Z_COL     + row )
+            yaw       = conf.get( OFFSET_ROT_YAW_COL   + row )
+            pitch     = conf.get( OFFSET_ROT_PITCH_COL + row )
+            roll      = conf.get( OFFSET_ROT_ROLL_COL  + row )
+            position  = App.Vector(x, y, z)
+            rotation  = App.Rotation(yaw, pitch, roll)
+            placement = App.Placement(position, rotation)
+            obj.Placement = placement
     except:
-        FCC.PrintMessage('Unknown AssemblyType for object "' + objName + '" in configuration "' + conf.Name + '"\n')
+        FCC.PrintMessage('Unknown AssemblyType "'+asmType+'" for object "' + objName + '" in configuration "' + conf.Name + '"\n')
 
 
 """
@@ -524,8 +559,12 @@ def restoreObject(conf, obj):
     +-----------------------------------------------+
 """
 def isAsm4Config(sheet):
-    if sheet and sheet.TypeId=='Spreadsheet::Sheet' and sheet.get(HEADER_CELL)==ASM4_CONFIG_TYPE:
-        return True
+    if sheet and sheet.TypeId=='Spreadsheet::Sheet':
+        if sheet.get(HEADER_CELL)==ASM4_CONFIG_TYPE:
+            return True
+        # old/legacy config header
+        elif sheet.get(HEADER_CELL)=='Assembly4 configuration table':
+            return True
     else:
         return False
 

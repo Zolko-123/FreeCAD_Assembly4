@@ -169,7 +169,7 @@ class placeFastenerCmd():
             Asm4.makeAsmProperties(selection)
         # we only deal with Asm4 or empty types
         asmType = selection.SolverId
-        if asmType=='Placement::ExpressionEngine' or asmType=='':
+        if asmType=='Asm4EE' or asmType=='Placement::ExpressionEngine' or asmType=='':
             # now we should be safe, call the UI
             Gui.Control.showDialog( placeFastenerUI() )
         else:
@@ -177,7 +177,7 @@ class placeFastenerCmd():
             if convert:
                 Asm4.makeAsmProperties( selection, reset=True )
                 # selection.AssemblyType = 'Part::Link'
-                selection.SolverId = 'Placement::ExpressionEngine'
+                selection.SolverId = 'Asm4EE'
                 Gui.Control.showDialog( placeFastenerUI() )
             return
 

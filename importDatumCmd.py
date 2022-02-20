@@ -61,53 +61,49 @@ class importDatumCmd():
     """
     def Activated(self):
         ( selDatum, selTree ) = Asm4.getSelectionTree()
-        # the selected datum is not deep enough
-        if not selTree or len(selTree)<3:
-            message = selDatum.Name + ' is already at the top-level and cannot be imported'
-            Asm4.warningBox(message)
-            return
+        if selTree:
+            # the root parent container is the first in the selection tree
+            rootContainer = App.ActiveDocument.getObject(selTree[0])
+            selection = self.getSelectedDatums()
+            
+            # special case where 2 objects are selected in order to update the placement of the second one
+            if len(selection)==2 and selection[0].getParentGeoFeatureGroup() == rootContainer:
+                confirm = False
+                selDatum = selection[0]
+                ( targetDatum, selTree ) = Asm4.getSelectionTree(1)
+                # target datum is free
+                if selDatum.MapMode == 'Deactivated':
+                    message = 'This will superimpose '+Asm4.labelName(selDatum)+' in '+Asm4.labelName(rootContainer)+' on:\n\n'
+                    for objName in selTree[1:-1]:
+                        message += '> '+objName+'\n'
+                    message += '> '+Asm4.labelName(selDatum)
+                    Asm4.warningBox(message)
+                    confirm = True
+                # selected datum is attached
+                else:
+                    message = Asm4.labelName(selDatum)+' in '+Asm4.labelName(rootContainer)+' is already attached to some geometry. '
+                    message += 'This will superimpose its Placement on:\n\n'
+                    for objName in selTree[1:-1]:
+                        message += '> '+objName+'\n'
+                    message += '> '+Asm4.labelName(selDatum)
+                    confirm = Asm4.confirmBox(message)
+                if confirm:
+                    self.setupTargetDatum(selDatum, self.getDatumExpression(selTree))
+                    # hide initial datum
+                    targetDatum.Visibility = False
+                    # select the newly created datum
+                    Gui.Selection.clearSelection()
+                    Gui.Selection.addSelection( App.ActiveDocument.Name, rootContainer.Name, selDatum.Name+'.' )
+                    # recompute assembly
+                    rootContainer.recompute(True)
+                # Done with the special case, no need to continue with the normal process
+                return
 
-        # the root parent container is the first in the selection tree
-        rootContainer = App.ActiveDocument.getObject(selTree[0])
-        selection = self.getSelectedDatums()
-
-        # special case where 2 objects are selected in order to update the placement of the second one
-        if len(selection)==2 and selection[1].getParentGeoFeatureGroup() == rootContainer:
-            confirm = False
-            targetDatum = selection[1]
-
-            # target datum is free
-            if targetDatum.MapMode == 'Deactivated':
-                message = 'This will superimpose '+Asm4.labelName(targetDatum)+' in '+Asm4.labelName(rootContainer)+' on:\n\n'
-                for objName in selTree[1:-1]:
-                    message += '> '+objName+'\n'
-                message += '> '+Asm4.labelName(selDatum)
+            # the selected datum is not deep enough
+            if len(selTree)<3:
+                message = selDatum.Name + ' is already at the top-level and cannot be imported'
                 Asm4.warningBox(message)
-                confirm = True
-            # target datum is attached
-            else:
-                message = Asm4.labelName(targetDatum)+' in '+Asm4.labelName(rootContainer)+' is already attached to some geometry. '
-                message += 'This will superimpose its Placement on:\n\n'
-                for objName in selTree[1:-1]:
-                    message += '> '+objName+'\n'
-                message += '> '+Asm4.labelName(selDatum)
-                confirm = Asm4.confirmBox(message)
-
-            if confirm:
-                self.setupTargetDatum(targetDatum, self.getDatumExpression(selTree))
-
-                # hide initial datum
-                selDatum.Visibility = False
-
-                # select the newly created datum
-                Gui.Selection.clearSelection()
-                Gui.Selection.addSelection( App.ActiveDocument.Name, rootContainer.Name, targetDatum.Name+'.' )
-
-                # recompute assembly
-                rootContainer.recompute(True)
-
-            # Done with the special case, no need to continue with the normal process
-            return
+                return
 
         # Single or Multiple selection(s) for regular case
         # Notify user that default names will be used and import all the objects
@@ -167,7 +163,7 @@ class importDatumCmd():
         # Set Asm4 properties
         Asm4.makeAsmProperties( targetDatum, reset=True )
         targetDatum.AttachedBy = 'Origin'
-        targetDatum.SolverId   = 'Placement::ExpressionEngine'
+        targetDatum.SolverId   = 'Asm4EE'
         # set the Placement's ExpressionEngine
         targetDatum.setExpression( 'Placement', expression )
         targetDatum.Visibility = True
