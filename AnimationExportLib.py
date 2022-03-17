@@ -246,7 +246,8 @@ class animationExporter():
 
         # pop up progress dialog...
         pDlg = self.createProgressDlg()
-        # ... and grab frames (no progress in the dialog so far, the animation windows slider updates, tho
+        # ... and grab frames (no progress in the dialog so far, the
+        # animation windows slider updates, though
         gSize = self.getGrabSize()
         mode = "Transparent" if self.bgImage else "Current"
         self.grabFrames(gSize, mode)
