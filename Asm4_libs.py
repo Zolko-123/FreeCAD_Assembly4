@@ -252,7 +252,7 @@ def getSelectionTree(index=0):
     if len(Gui.Selection.getSelection()) >= index:
         selObj = Gui.Selection.getSelection()[index]
         retval = ( selObj, None )
-        # objects at the document root dont have a selection tree
+        # objects at the document root don't have a selection tree
         if len(Gui.Selection.getSelectionEx("", 0)[0].SubElementNames) >= index:
             # we only treat thefirst selected object
             # this is a dot-separated list of the selection hierarchy
@@ -328,7 +328,7 @@ def getDependenciesList( CompleteSelection ):
             SubObjNames=Selection.getSubObjects()
             # Some Objects return None Objects,
             # even if it has the 'getSubObjects' attribute
-            # 'getSubObjects' delivers uniqe Names with a trailing .
+            # 'getSubObjects' delivers unique Names with a trailing .
             for SubObjName in SubObjNames:              
                 SubObjects.append(App.ActiveDocument.getObject(SubObjName[0:-1]))
         # If they are more Sub-Objects within that particular selection,
@@ -339,7 +339,7 @@ def getDependenciesList( CompleteSelection ):
             for SubObject in SubObjects:
                 deDendenciesList.append(SubObject)
         # In order to make not iterable, single Objects,
-        # iterable enclosing [] are nedded
+        # iterable enclosing [] are needed
         deDendenciesList.append([Selection])
     return deDendenciesList
 

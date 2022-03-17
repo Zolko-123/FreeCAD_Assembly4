@@ -246,7 +246,8 @@ class animationExporter():
 
         # pop up progress dialog...
         pDlg = self.createProgressDlg()
-        # ... and grab frames (no progress in the dialog so far, the animation windows slider updates, tho
+        # ... and grab frames (no progress in the dialog so far, the
+        # animation windows slider updates, though
         gSize = self.getGrabSize()
         mode = "Transparent" if self.bgImage else "Current"
         self.grabFrames(gSize, mode)
@@ -698,9 +699,9 @@ class exportDialog(QtGui.QDialog):
 
 
     # grab the close-event and ensure cleanup
-    def closeEvent(self, evnt):
+    def closeEvent(self, event):
         self.owner.onClose()
-        super().closeEvent(evnt)
+        super().closeEvent(event)
 
 
 """
