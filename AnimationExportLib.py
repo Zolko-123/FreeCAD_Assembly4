@@ -699,9 +699,9 @@ class exportDialog(QtGui.QDialog):
 
 
     # grab the close-event and ensure cleanup
-    def closeEvent(self, evnt):
+    def closeEvent(self, event):
         self.owner.onClose()
-        super().closeEvent(evnt)
+        super().closeEvent(event)
 
 
 """
