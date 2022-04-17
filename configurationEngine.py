@@ -424,7 +424,7 @@ def SaveSubObjects(conf, container):
         if obj.isDerivedFrom('Part::Feature') or obj.isDerivedFrom('App::Link') or obj.isDerivedFrom('App::Part'):
             SaveObject(conf, obj)
         # save subobjects in groups, but not the groups themselves. Skip default Asm4 groups
-        elif obj.TypeId == 'App::DocumentObjectGroup' and obj.Name != 'Configurations' and  obj.Name != 'Constraints':
+        elif obj.TypeId == 'App::DocumentObjectGroup' and obj.Name != 'Configurations' and  obj.Name != 'Constraints' and  obj.Name != 'Measures':
             SaveSubObjects(conf, obj)
 
 
