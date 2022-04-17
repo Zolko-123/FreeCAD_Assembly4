@@ -28,6 +28,7 @@ OFFSET_POS_Z_COL        = 'F'
 OFFSET_ROT_YAW_COL      = 'G'
 OFFSET_ROT_PITCH_COL    = 'H'
 OFFSET_ROT_ROLL_COL     = 'I'
+NAME_COL_WIDTH          = 250
 
 
 
@@ -61,6 +62,8 @@ def createConfig(name, description):
     conf.set(OFFSET_ROT_YAW_COL   + headerRow, 'Rot. Yaw')
     conf.set(OFFSET_ROT_PITCH_COL + headerRow, 'Rot. Pitch')
     conf.set(OFFSET_ROT_ROLL_COL  + headerRow, 'Rot. Roll')
+    # Set name column width to default value
+    conf.setColumnWidth(OBJECT_NAME_COL, NAME_COL_WIDTH)
     return conf
 
 
