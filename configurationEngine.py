@@ -423,6 +423,9 @@ def SaveSubObjects(conf, container):
         # only save properties of certain objects
         if obj.isDerivedFrom('Part::Feature') or obj.isDerivedFrom('App::Link') or obj.isDerivedFrom('App::Part'):
             SaveObject(conf, obj)
+        # save subobjects in groups, but not the groups themselves. Skip default Asm4 groups
+        elif obj.TypeId == 'App::DocumentObjectGroup' and obj.Name != 'Configurations' and  obj.Name != 'Constraints':
+            SaveSubObjects(conf, obj)
 
 
 def SaveObject(conf, obj):
@@ -506,8 +509,8 @@ def restoreSubObjects(conf, container):
 
 
 def restoreObject(conf, obj):
-    # parse App::Part containers, and only those
-    if obj.TypeId == 'App::Part':
+    # parse App::Part containers and group subobjects
+    if obj.TypeId == 'App::Part' or obj.TypeId == 'App::DocumentObjectGroup':
         restoreSubObjects(conf, obj)
 
     parentObj, objFullName = obj.Parents[0]
