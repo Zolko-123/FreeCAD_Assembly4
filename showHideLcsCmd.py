@@ -103,19 +103,11 @@ def showChildLCSs(obj, show, processedLinks):
             linkedObj = obj.LinkedObject.Document.getObject(objName[0:-1])
             showChildLCSs(linkedObj, show, processedLinks)
     # if it's a container
-    else:
-        if obj.TypeId in Asm4.containerTypes:
-            for subObjName in obj.getSubObjects(1):
-                subObj = obj.getSubObject(subObjName, 1)    # 1 for returning the real object
-                if subObj != None:
-                    if subObj.TypeId in Asm4.datumTypes:
-                        #subObj.Visibility = show
-                        # Apparently obj.Visibility API is very slow
-                        # Using the ViewObject.show() and ViewObject.hide() API runs at least twice faster
-                        if show:
-                            subObj.ViewObject.show()
-                        else:
-                            subObj.ViewObject.hide()
+    elif obj.TypeId in Asm4.containerTypes:
+        for subObjName in obj.getSubObjects(1):
+            subObj = obj.getSubObject(subObjName, 1)    # 1 for returning the real object
+            if subObj != None:
+                showChildLCSs(subObj, show, processedLinks)
 
 
 

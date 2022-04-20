@@ -1,18 +1,17 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.11.10
-
-**Important Note:** version v0.11.5 had a hidden nasty bug that also corrupted the parts that were *created* with it. Unfortunately, these parts cannot be automatically fixed, they must be re-created. Only parts *created* with v0.11.5 are affected, not those that where merely *used* with it.
+Current version 0.11.11
 
 
 
 ## Overview
 
-This assembly workbench allows to assemble into a single Part container under a single coordinate system other FreeCAD objects using Links, and place them relative to the assembly and to each-other. The parts in the assembly can invariably be in the same document as the assembly or in an external document. When parts are modified in their original document, they are instantly updated in the assembly.
+This assembly workbench allows to assemble into a single assembly container other FreeCAD objects, and place them relative to the assembly and to each-other. The parts in the assembly can be in the same document as the assembly or in an external document. When parts are modified in their original document, they are instantly updated in the assembly.
 
-As an Assembly4 _Assembly_ is a standard FreeCAD `App::Part` container, it can be used and manipulated with any FreeCAD tool handling `App::Part` objects. In particular, it can be inserted into another _Assembly_ to create nested assemblies. It can also contain solids and datum objects. An _Assembly_ can be an assembly, a sub-assembly or a stand-alone part, and any combinations of these; a document can contain only 1 _Assembly_.
+Parts are placed relative to each-other by matching features inside them. Specifically, in Assembly4, these _features_ are virtual objects called LCS (for Local Coordinate System, alse called datum coordinate system) and are attached using FreeCAD's built-in `Part::Attacher` and `ExpressionEngine`. No geometry is used to place and constrain parts relative to each other, thus avoiding a lot of the topological naming problems. 
 
-Parts and linked parts are placed to each-other in the host parent assembly by matching their Datum Coordinate Systems (called LCS for Local Coordinate System) using the built-in FreeCAD *ExpressionEngine.* No geometry is used to place and constrain parts relative to each other, thus avoiding a lot of the topological naming problems. 
+An Assembly4 _Assembly_ is a standard FreeCAD `App::Part` container, therefore it is compatible and can be manipulated with any FreeCAD tool handling `App::Part` objects. In particular, it can be inserted into another _Assembly_ to create nested assemblies to any level. It can also contain solids, datum objects and sketches. A document can contain only 1 _Assembly_. 
+
 
 
 ![](Resources/media/Asm4_wb1.png)
@@ -23,28 +22,23 @@ Parts and linked parts are placed to each-other in the host parent assembly by m
 
 **Please Note:** objects need to be opened in the current session in order to be inserted into an assembly.
 
+**Important Note:** version v0.11.5 had a hidden nasty bug that also corrupted the parts that were *created* with it. Unfortunately, these parts cannot be automatically fixed, they must be re-created. Only parts *created* with v0.11.5 are affected, not those that where merely *used* with it.
 
 
 ## Installation
 
-[![FreeCAD Addon manager status](https://img.shields.io/badge/FreeCAD%20addon%20manager-available-brightgreen)](https://github.com/FreeCAD/FreeCAD-addons)
-
 ### Addon Manager (recommended)
+
+[![FreeCAD Addon manager status](https://img.shields.io/badge/FreeCAD%20addon%20manager-available-brightgreen)](https://github.com/FreeCAD/FreeCAD-addons)
 
 Assembly 4 is available through the FreeCAD Addon Manager (menu **Tools > Addon Manager**). It is called _Assembly4_ in the Addon Repository.  
 
 **Important Note:** Assembly 4 needs FreeCAD v0.19 or above. Assembly4 is **not** compatible with FreeCAD v0.18 and before. 
 
+
 ### Manual Installation
 
-It is possible to install this workbench manually into FreeCAD's local workbench directory. This can be useful for testing local modifications to the workbench, or to remove an old stale version of the workbench. 
-
-In this case, download the Github [FreeCAD_Assembly4-master.zip](https://github.com/Zolko-123/FreeCAD_Assembly4/archive/master.zip) archive from [github.com/Zolko-123/FreeCAD_Assembly4](https://github.com/Zolko-123/FreeCAD_Assembly4) to a temporary directory, and extract the Zip archive. Then, remove any existing Assembly4 directory from FreeCAD's local workbench directory, and copy the folder *FreeCAD_Assembly4-master* into the directory containing all FreeCAD addon modules :
-
-* for Windows: `C:\Users\******\AppData\Roaming\FreeCAD\Mod`
-* for Linux: `~/.FreeCAD/Mod` 
-* for MacOS: `~/Library/Preferences/FreeCAD/Mod/`
-
+It is possible to install this workbench manually into FreeCAD's local workbench directory. See [user instructions](INSTRUCTIONS.md)
 
 
 ## Getting Started
@@ -63,6 +57,9 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 
 ## Release notes
+
+* 2022.04.20 (**0.11.11**) :  
+Small fixes and improvements  
 
 * 2022.02.20 (**0.11.10**) :  
 Improved configurationEngine for compatibility  

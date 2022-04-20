@@ -6,59 +6,37 @@ These instructions present the intended usage and workflow to assembly design us
 
 ## Installation
 
-The recommended way to install Assembly4 is through FreeCAD's [Addon Manager](https://github.com/FreeCAD/FreeCAD-addons/#1-builtin-addon-manager): **Menu > Tools > Addon Manager**. It is called *Assembly4* in the addon repository. Should this fail, please read the **Installation** section in the [technical manual](TECHMANUAL.md) for possible solutions.
+
+### Addon Manager (recommended)
+
+Assembly 4 is available through the FreeCAD Addon Manager (menu **Tools > Addon Manager**). It is called _Assembly4_ in the Addon Repository.  
 
 [![FreeCAD Addon manager status](https://img.shields.io/badge/FreeCAD%20addon%20manager-available-brightgreen)](https://github.com/FreeCAD/FreeCAD-addons)
 
-**Important Note:** Assembly 4 is **not** compatible with FreeCAD v0.18, and needs FreeCAD >= `v0.19.18353`
+**Important Note:** Assembly 4 needs FreeCAD v0.19 or above. Assembly4 is **not** compatible with FreeCAD v0.18 and before. 
 
 **Important Note:** Assembly 4 is **not** compatible with Assembly2+ and Assembly3.
 
 
+### Manual Installation
 
-## Principle
+It is also possible to install this workbench manually into FreeCAD's local workbench directory. This can be useful for testing local modifications to the workbench, or to remove an old stale version of the workbench. 
 
-We present here a short summary of the inner workings of FreeCAD's Assembly4 workbench. For those interested in more technical details please read the [technical manual](TECHMANUAL.md).
+In this case, download the Github [FreeCAD_Assembly4-master.zip](https://github.com/Zolko-123/FreeCAD_Assembly4/archive/master.zip) archive from [github.com/Zolko-123/FreeCAD_Assembly4](https://github.com/Zolko-123/FreeCAD_Assembly4) to a temporary directory, and extract the Zip archive. Then, remove any existing Assembly4 directory from FreeCAD's local workbench directory, and copy the folder *FreeCAD_Assembly4-master* into the directory containing all FreeCAD addon modules :
 
-### Data structure
+* for Windows: `C:\Users\******\AppData\Roaming\FreeCAD\Mod`
+* for MacOS: `~/Library/Preferences/FreeCAD/Mod/`
+* for Linux, _FreeCAD version v0.19_ : `~/.FreeCAD/Mod` 
+* for Linux, _FreeCAD version v0.20_ : `~/.local/share/FreeCAD/Mod/` 
 
-The very principle of Assembly4 is that `App::Part` objects are linked together using the `App::Link` interface introduced in FreeCAD v0.19. The host parent assembly **and** the included child parts are all `App::Part` type objects. The parts that are linked can be in the same document as the assembly or an external document, invariably.
 
-Since a FreeCAD `App::Part` is a container, all objects included in the child part will be included in the parent assembly. To actually insert some geometry, solids or bodies need to be created inside the `App::Part` container and designed using other FreeCAD workbenches.
-
-**Please Note:** objects in the same document as the linked part but outside the `App::Part` container will not be inserted. The *PartDesign* workbench doesn't produce **Parts**, it produces **Bodies**. It is entirely possible to use Parts made with the *Part* workbench with Assembly4, but if you want to use Bodies made with the PartDesign WB you need first to create a Part and move the Body into that Part.
-
-### Part placements
-
-Instances of linked parts are placed in the assembly using their *Placement* property, visible and accessible in their *Property* window. This *Placement* property can be calculated in various ways:
-
-* manually, by setting the parameters in the *Placement* property fields or by using the **Transform** tool (right-click > Transform)
-* by using Assembly4's **Place linked part** tool, which sets an *ExpressionEngine* into the *Placement* property.
-
-When using Assembly4's tool, a local coordinate system in the child part and one in the host parent assembly are matched (superimposed). This is somewhat different from constraints that some other CAD systems use, but once used to it this approach is very powerful.
-
-The result is the following:  
-
-![](Resources/media/Asm4_Bielle_Bague.png)
-
-In this example, the instance *Bague* is highlighted:
-
-* the blue circle shows the *Placement* property 
-  * the blue text in the *Value* field indicates that the *Placement* is calculated by the *ExpressionEngine*
-* the red circle shows the properties of this instance:
-  * *Assembly Type* `Asm4EE` indicates that it's an Assembly4 object
-  * *Attached By* `#LCS_O` indicates that the child part's *LCS_0* is the reference to insert the part into the assembly
-  * *Attached To* `Bielle#LCS_O` indicates that this instance is attached to the child instance *Bielle* (this is the name of the child instance in this assembly and not that of the original part !) and in that child it is targeted at _LCS_0_
-  * the *Attachment Offset* property allows to offset the child's attachment LCS w.r.t. the target LCS. In this example, the child instance *Bague* is offset in the Z-direction by -15mm
-
-All Assembly4 children have these 4 properties; these are the first places to check if something in your assembly doesn't behave as expected.
 
 
 
 
 ## Usage
 
-Assembly4 commands are accessible from the Assembly menu or the Assembly4 toolbar.
+Assembly4 commands are accessible from the Assembly menu or the Assembly4 toolbar. The **Assembly** menu contains tools to _build_ the assembly, and the **Constraints** menu contains tools to _place_ parts relative to each other.
 
 
 ### Toolbar
@@ -169,6 +147,46 @@ Therefore, in order to re-use a coordinate system of a part in an assembly, a co
 ![](Resources/media/Asm4_V4.png)
 
 ![](Resources/media/Lego_House+Garden.png)
+
+
+
+## Principle
+
+We present here a short summary of the inner workings of FreeCAD's Assembly4 workbench. For those interested in more technical details please read the [technical manual](TECHMANUAL.md).
+
+### Data structure
+
+The very principle of Assembly4 is that `App::Part` objects are linked together using the `App::Link` interface introduced in FreeCAD v0.19. The host parent assembly **and** the included child parts are all `App::Part` type objects. The parts that are linked can be in the same document as the assembly or an external document, invariably.
+
+Since a FreeCAD `App::Part` is a container, all objects included in the child part will be included in the parent assembly. To actually insert some geometry, solids or bodies need to be created inside the `App::Part` container and designed using other FreeCAD workbenches.
+
+**Please Note:** objects in the same document as the linked part but outside the `App::Part` container will not be inserted. The *PartDesign* workbench doesn't produce **Parts**, it produces **Bodies**. It is entirely possible to use Parts made with the *Part* workbench with Assembly4, but if you want to use Bodies made with the PartDesign WB you need first to create a Part and move the Body into that Part.
+
+### Part placements
+
+Instances of linked parts are placed in the assembly using their *Placement* property, visible and accessible in their *Property* window. This *Placement* property can be calculated in various ways:
+
+* manually, by setting the parameters in the *Placement* property fields or by using the **Transform** tool (right-click > Transform)
+* by using Assembly4's **Place linked part** tool, which sets an *ExpressionEngine* into the *Placement* property.
+
+When using Assembly4's tool, a local coordinate system in the child part and one in the host parent assembly are matched (superimposed). This is somewhat different from constraints that some other CAD systems use, but once used to it this approach is very powerful.
+
+The result is the following:  
+
+![](Resources/media/Asm4_Bielle_Bague.png)
+
+In this example, the instance *Bague* is highlighted:
+
+* the blue circle shows the *Placement* property 
+  * the blue text in the *Value* field indicates that the *Placement* is calculated by the *ExpressionEngine*
+* the red circle shows the properties of this instance:
+  * *Assembly Type* `Asm4EE` indicates that it's an Assembly4 object
+  * *Attached By* `#LCS_O` indicates that the child part's *LCS_0* is the reference to insert the part into the assembly
+  * *Attached To* `Bielle#LCS_O` indicates that this instance is attached to the child instance *Bielle* (this is the name of the child instance in this assembly and not that of the original part !) and in that child it is targeted at _LCS_0_
+  * the *Attachment Offset* property allows to offset the child's attachment LCS w.r.t. the target LCS. In this example, the child instance *Bague* is offset in the Z-direction by -15mm
+
+All Assembly4 children have these 4 properties; these are the first places to check if something in your assembly doesn't behave as expected.
+
 
 
 
