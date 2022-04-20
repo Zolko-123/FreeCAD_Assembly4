@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.11.10
+Current version 0.11.11
 
 
 
@@ -57,6 +57,9 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 
 ## Release notes
+
+* 2022.04.20 (**0.11.11**) :  
+Small fixes and improvements  
 
 * 2022.02.20 (**0.11.10**) :  
 Improved configurationEngine for compatibility  
