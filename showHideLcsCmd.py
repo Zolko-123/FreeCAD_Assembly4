@@ -102,8 +102,8 @@ def showChildLCSs(obj, show, processedLinks):
         for objName in obj.LinkedObject.getSubObjects(1):
             linkedObj = obj.LinkedObject.Document.getObject(objName[0:-1])
             showChildLCSs(linkedObj, show, processedLinks)
-    # if it's a container
-    elif obj.TypeId in Asm4.containerTypes:
+    # if it's a container or a group
+    elif obj.TypeId in Asm4.containerTypes or obj.TypeId=='App::DocumentObjectGroup':
         for subObjName in obj.getSubObjects(1):
             subObj = obj.getSubObject(subObjName, 1)    # 1 for returning the real object
             if subObj != None:
