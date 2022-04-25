@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.11.11
+Current version 0.11.12
 
 
 
@@ -57,6 +57,9 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 
 ## Release notes
+
+* 2022.04.25 (**0.11.12**) :  
+Removed Groups from containerTypes in Asm4_libs  
 
 * 2022.04.20 (**0.11.11**) :  
 Small fixes and improvements  

@@ -39,7 +39,7 @@ partInfo =[     'PartID',                       \
                 'PartDescription',              \
                 'PartSupplier']
 
-containerTypes = [  'App::Part', 'App::DocumentObjectGroup', 'PartDesign::Body' ]
+containerTypes = [  'App::Part', 'PartDesign::Body' ]
 
 
 
