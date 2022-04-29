@@ -178,7 +178,7 @@ class insertLink():
             # which don't have the Temporary attribute
             try:
                 docTemporary = doc.Temporary 
-            except:
+            except AttributeError:
                 docTemporary = False
                 
             if not docTemporary:
