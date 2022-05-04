@@ -174,8 +174,14 @@ class insertLink():
         else:
             docList = [doc]
         for doc in docList:
-            # don't consider temporary documents
-            if not doc.Temporary:
+            # don't consider temporary documents. Guard against older versions of FreeCad
+            # which don't have the Temporary attribute
+            try:
+                docTemporary = doc.Temporary 
+            except AttributeError:
+                docTemporary = False
+                
+            if not docTemporary:
                 for obj in doc.findObjects("App::Part"):
                     # we don't want to link to itself to the 'Model' object
                     # other App::Part in the same document are OK 
