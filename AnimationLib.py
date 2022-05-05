@@ -142,7 +142,7 @@ class animateVariable(animationProvider):
     def Activated(self):
         # grab the Variables container (just do it always, this prevents problems with newly opened docs)
         self.ActiveDocument = App.ActiveDocument
-        self.Variables = self.AnimatedDocument.getObject('Variables') if self.AnimatedDocument else None
+        self.Variables = self.AnimatedDocument.getObject('Variables') if self.AnimatedDocument in App.listDocuments().values() else None
         # the root assembly in the current document
         self.rootAssembly = Asm4.getAssembly()
 
