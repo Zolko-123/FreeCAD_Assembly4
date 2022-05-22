@@ -615,10 +615,12 @@ class animateVariable(animationProvider):
         self.buttonLayout = QtGui.QHBoxLayout()
         # Close button
         self.CloseButton = QtGui.QPushButton('Close')
+        self.CloseButton.setToolTip("Exit")
         self.buttonLayout.addWidget(self.CloseButton)
         self.buttonLayout.addStretch()
         # Export button
-        self.ExportButton = QtGui.QPushButton('Export')
+        self.ExportButton = QtGui.QPushButton('Save')
+        self.ExportButton.setToolTip("Save this sequence as video")
         self.buttonLayout.addWidget(self.ExportButton)
         self.buttonLayout.addStretch()
         # Stop button
@@ -628,6 +630,7 @@ class animateVariable(animationProvider):
         self.StopButton.setEnabled(False)
         # Run button
         self.RunButton = QtGui.QPushButton('Run')
+        self.RunButton.setToolTip("Run this sequence in the 3D window\n\nIf the model is large and complex,\nit is advisable to try with few frames")
         self.buttonLayout.addWidget(self.RunButton)
 
         # Add an invisibly dummy button to circumvent QDialogs default-button behavior.
