@@ -207,6 +207,7 @@ def checkWorkbench( workbench ):
     return hasWB
 
 # checks whether there is a FreeCAD Assembly at the root of the active document
+# since Asm4 v0.12, reverted back to naming this Model again
 def getAssembly():
     return checkModel()
     '''
