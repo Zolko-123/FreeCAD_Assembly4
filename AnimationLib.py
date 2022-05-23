@@ -636,7 +636,7 @@ class animateVariable(animationProvider):
         self.RunButton = QtGui.QPushButton('Run')
         tt = "Run this sequence in the 3D window"
         tt+= "\n\nIf the model is large and complex,"
-        tt+= "\nit is advisable to try with few frames"
+        tt+= "\nit is advisable to try with 10 frames"
         self.RunButton.setToolTip(tt)
         self.buttonLayout.addWidget(self.RunButton)
 

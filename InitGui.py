@@ -101,7 +101,8 @@ class Assembly4Workbench(Workbench):
         FreeCAD.Console.PrintMessage(_atr("Asm4", "Initializing Assembly4 workbench")+ ' ('+Asm4_version+') .')
         FreeCADGui.updateGui()
         # import all stuff
-        import newAssemblyCmd      # creates a new App::Part container called 'Model'
+        # import newAssemblyCmd    # created an App::Part container called 'Assembly'
+        import newModelCmd         # creates a new App::Part container called 'Model'
         self.dot()
         import newDatumCmd         # creates a new LCS in 'Model'
         self.dot()
@@ -199,7 +200,7 @@ class Assembly4Workbench(Workbench):
     +-----------------------------------------------+
     """
     def assemblyMenuItems(self):
-        commandList = [ "Asm4_makeAssembly",
+        commandList = [ "Asm4_newModel",
                         "Asm4_newPart", 
                         "Asm4_newBody", 
                         "Asm4_newGroup", 
@@ -238,7 +239,7 @@ class Assembly4Workbench(Workbench):
         return commandList
 
     def assemblyToolbarItems(self):
-        commandList = [ "Asm4_makeAssembly",
+        commandList = [ "Asm4_newModel",
                         "Asm4_newPart", 
                         "Asm4_newBody", 
                         "Asm4_newGroup", 
