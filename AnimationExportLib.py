@@ -479,6 +479,9 @@ class exportDialog(QtGui.QDialog):
         self.outputVLayout = QtGui.QVBoxLayout()
         self.gpbOutput = QtGui.QGroupBox("Output", self)
         self.outputFileSel = fileSelectorWidget("save", self.gpbOutput)
+        tt = 'Choose a file\n'
+        tt+= 'Supported extensions are *.gif *.mp4 *.avi *.mov *.mkv'
+        self.outputFileSel.setToolTip(tt)
 
         self.sbOutWidth = QtGui.QSpinBox()
         self.sbOutWidth.setRange(1, 9999)
@@ -529,6 +532,9 @@ class exportDialog(QtGui.QDialog):
         self.gpbBG.setCheckable(True)
         self.gpbBG.setChecked(False)
         self.bgImgFileSel = fileSelectorWidget("read", self.gpbBG)
+        tt = 'Choose an image file\n'
+        tt+= 'Supported extensions are *.png *.jpg *.jpeg *.gif'
+        self.bgImgFileSel.setToolTip(tt)
         self.bgColorSel = colorSelectorWidget((255, 255, 255, 255), self.gpbBG)
 
         self.bgVLayout = QtGui.QVBoxLayout()
@@ -537,70 +543,13 @@ class exportDialog(QtGui.QDialog):
 
         self.gpbBG.setLayout(self.bgVLayout)
 
-        # # # Shadow Group Box # # #
-        '''
-        self.gpbShadow = QtGui.QGroupBox("shadow", self)
-        self.gpbShadow.setCheckable(True)
-        self.gpbShadow.setChecked(False)
-        self.shadowColSel = colorSelectorWidget((0, 0, 0, 150), self.gpbShadow)
-
-        self.sbShadowWidth = QtGui.QSpinBox()
-        self.sbShadowWidth.setRange(1, 100)
-        self.sbShadowWidth.setValue(100)
-        self.sbShadowWidth.setKeyboardTracking(False)
-        self.sbShadowWidth.setSuffix("%")
-        self.sbShadowHeight = QtGui.QSpinBox()
-        self.sbShadowHeight.setRange(1, 100)
-        self.sbShadowHeight.setValue(50)
-        self.sbShadowHeight.setKeyboardTracking(False)
-        self.sbShadowHeight.setSuffix("%")
-
-        self.sbShadowX = QtGui.QSpinBox()
-        self.sbShadowX.setRange(0, 100)
-        self.sbShadowX.setValue(0)
-        self.sbShadowX.setKeyboardTracking(False)
-        self.sbShadowX.setSuffix("%")
-        self.sbShadowY = QtGui.QSpinBox()
-        self.sbShadowY.setRange(0, 100)
-        self.sbShadowY.setValue(50)
-        self.sbShadowY.setKeyboardTracking(False)
-        self.sbShadowY.setSuffix("%")
-
-        self.sbShadowBlur = QtGui.QSpinBox()
-        self.sbShadowBlur.setRange(0, 1000)
-        self.sbShadowBlur.setValue(20)
-        self.sbShadowBlur.setKeyboardTracking(False)
-
-        self.shadowVLayout = QtGui.QVBoxLayout()
-        self.shadowVLayout.addWidget(self.shadowColSel)
-
-        self.shadowHL2 = QtGui.QHBoxLayout()
-        self.shadowHL2.addWidget(QtGui.QLabel("Width:"))
-        self.shadowHL2.addWidget(self.sbShadowWidth)
-        self.shadowHL2.addWidget(QtGui.QLabel("Height:"))
-        self.shadowHL2.addWidget(self.sbShadowHeight)
-        self.shadowVLayout.addLayout(self.shadowHL2)
-
-        self.shadowHL3 = QtGui.QHBoxLayout()
-        self.shadowHL3.addWidget(QtGui.QLabel("X-Offset:"))
-        self.shadowHL3.addWidget(self.sbShadowX)
-        self.shadowHL3.addWidget(QtGui.QLabel("Y-Offset:"))
-        self.shadowHL3.addWidget(self.sbShadowY)
-        self.shadowVLayout.addLayout(self.shadowHL3)
-
-        self.shadowHL4 = QtGui.QHBoxLayout()
-        self.shadowHL4.addStretch(7)
-        self.shadowHL4.addWidget(QtGui.QLabel("Blur:"), 3)
-        self.shadowHL4.addWidget(self.sbShadowBlur, 3)
-        self.shadowVLayout.addLayout(self.shadowHL4)
-
-        self.gpbShadow.setLayout(self.shadowVLayout)
-        '''
-
-         # # # Logo Group Box # # #
+        # # # Logo Group Box # # #
         self.gpbLogo = QtGui.QGroupBox("Logo", self)
         self.logoFileSel = fileSelectorWidget("read", self.gpbLogo)
         self.logoFileSel.setFile(os.path.join(Asm4.iconPath, 'FreeCad.png'))
+        tt = 'Choose an image file\n'
+        tt+= 'Supported extensions are *.png *.jpg *.jpeg *.gif'
+        self.logoFileSel.setToolTip(tt)
 
         self.sbLogoWidth = QtGui.QSpinBox()
         self.sbLogoWidth.setRange(1, 500)
@@ -723,8 +672,8 @@ class fileSelectorWidget(QtGui.QWidget):
         self.label = QtGui.QLabel("File:", parent)
         self.leFilename = QtGui.QLineEdit(parent)
         self.pbSelectFile = QtGui.QPushButton("Select", parent)
-        self.pbSelectFile.resize(50, self.pbSelectFile.height())
-        self.pbSelectFile.setFixedWidth(50)
+        #self.pbSelectFile.resize(50, self.pbSelectFile.height())
+        #self.pbSelectFile.setFixedWidth(50)
 
         self.lowerButtonHLayout = QtGui.QHBoxLayout()
         self.lowerButtonHLayout.addWidget(self.label)
@@ -778,8 +727,8 @@ class colorSelectorWidget(QtGui.QWidget):
         self.leColor = QtGui.QLineEdit(parent)
         self.leColor.setReadOnly(True)
         self.pbSelect = QtGui.QPushButton("Select", parent)
-        self.pbSelect.resize(50, self.pbSelect.height())
-        self.pbSelect.setFixedWidth(50)
+        #self.pbSelect.resize(50, self.pbSelect.height())
+        #self.pbSelect.setFixedWidth(50)
 
         self.lowerButtonHLayout = QtGui.QHBoxLayout()
         self.lowerButtonHLayout.addWidget(self.label)

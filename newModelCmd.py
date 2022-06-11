@@ -35,9 +35,10 @@ def makeAssembly():
 
     """
     def GetResources(self):
-        tooltip = "Create a new Assembly4 Model"
+        tooltip = "Create a new empty Model"
+        tooltip += "\nParts to be added must be open in this session"
         iconFile = os.path.join( Asm4.iconPath , 'Asm4_Model.svg')
-        return {"MenuText": "New Assembly", "ToolTip": tooltip, "Pixmap" : iconFile }
+        return {"MenuText": "New Model", "ToolTip": tooltip, "Pixmap" : iconFile }
 
 
     def IsActive(self):
@@ -48,6 +49,8 @@ def makeAssembly():
 
 
     # checks whether there already is an Asm4 Model in the document
+    '''
+    DEPRECATED : don't use this, use that of Asm4_libs
     def checkModel(self):
         if self.activeDoc.getObject('Model'):
             if self.activeDoc.Model.TypeId=='App::Part' and self.activeDoc.Model.Type=='Assembly4 Model':
@@ -57,6 +60,7 @@ def makeAssembly():
             return(True)
         else:
             return(False)
+    '''
 
 
     # the real stuff
@@ -64,43 +68,48 @@ def makeAssembly():
         # get the current active document to avoid errors if user changes tab
         self.activeDoc = App.activeDocument()
         # check whether there is already Model in the document
-        if not self.checkModel():
-            # create a group 'Parts' to hold all parts in the assembly document (if any)
-            # must be done before creating the Asm4 Model
-            partsGroup = self.activeDoc.getObject('Parts')
-            if partsGroup is None:
-                partsGroup = self.activeDoc.addObject( 'App::DocumentObjectGroup', 'Parts' )
+        # if not self.checkModel():
+        if Asm4.checkModel():
+            Asm4.warningBox("This document already contains a valid Model, please use it")
+            return
 
-            # create a new App::Part called 'Model'
-            assembly = self.activeDoc.addObject('App::Part','Model')
-            # set the type as a "proof" that it's an Assembly4 Model
-            assembly.Type='Assembly'
-            assembly.addProperty( 'App::PropertyString', 'AssemblyType', 'Assembly' )
-            assembly.AssemblyType = 'Part::Link'
-            # add an LCS at the root of the Model, and attach it to the 'Origin'
-            lcs0 = assembly.newObject('PartDesign::CoordinateSystem','LCS_Origin')
-            lcs0.Support = [(assembly.Origin.OriginFeatures[0],'')]
-            lcs0.MapMode = 'ObjectXY'
-            lcs0.MapReversed = False
-            # create a group Constraints to store future solver constraints there
-            assembly.newObject('App::DocumentObjectGroup','Constraints')
-            # create an object Variables to hold variables to be used in this document
-            assembly.addObject(Asm4.createVariables())
-            # create a group Configurations to store future solver constraints there
-            assembly.newObject('App::DocumentObjectGroup','Configurations')
-            
-            # move existing parts and bodies at the document root to the Parts group
-            # not nested inside other parts, to keep hierarchy
-            if partsGroup.TypeId=='App::DocumentObjectGroup':
-                for obj in self.activeDoc.Objects:
-                    if obj.TypeId in Asm4.containerTypes and obj.Name!='Model' and obj.getParentGeoFeatureGroup() is None:
-                        partsGroup.addObject(obj)
-            else:
-                Asm4.warningBox(   'There seems to already be a Parts object, you might get unexpected behaviour' )
+        # create a group 'Parts' to hold all parts in the assembly document (if any)
+        # must be done before creating the Asm4 Model
+        # because of order of visibilities
+        partsGroup = self.activeDoc.getObject('Parts')
+        if partsGroup is None:
+            partsGroup = self.activeDoc.addObject( 'App::DocumentObjectGroup', 'Parts' )
 
-            # recompute to get rid of the small overlays
-            assembly.recompute()
-            self.activeDoc.recompute()
+        # create a new App::Part called 'Model'
+        model = self.activeDoc.addObject('App::Part','Model')
+        # set the type as a "proof" that it's an Assembly4 Model
+        model.Type='Assembly'
+        model.addProperty( 'App::PropertyString', 'AssemblyType', 'Assembly' )
+        model.AssemblyType = 'Part::Link'
+        # add an LCS at the root of the Model, and attach it to the 'Origin'
+        lcs0 = model.newObject('PartDesign::CoordinateSystem','LCS_Origin')
+        lcs0.Support = [(model.Origin.OriginFeatures[0],'')]
+        lcs0.MapMode = 'ObjectXY'
+        lcs0.MapReversed = False
+        # create a group Constraints to store future solver constraints there
+        model.newObject('App::DocumentObjectGroup','Constraints')
+        # create an object Variables to hold variables to be used in this document
+        model.addObject(Asm4.createVariables())
+        # create a group Configurations to store future solver constraints there
+        model.newObject('App::DocumentObjectGroup','Configurations')
+        
+        # move existing parts and bodies at the document root to the Parts group
+        # not nested inside other parts, to keep hierarchy
+        if partsGroup.TypeId=='App::DocumentObjectGroup':
+            for obj in self.activeDoc.Objects:
+                if obj.TypeId in Asm4.containerTypes and obj.Name!='Model' and obj.getParentGeoFeatureGroup() is None:
+                    partsGroup.addObject(obj)
+        else:
+            Asm4.warningBox(   'There seems to already be a Parts object, you might get unexpected behaviour' )
+
+        # recompute to get rid of the small overlays
+        model.recompute()
+        self.activeDoc.recompute()
 
 
 

@@ -207,7 +207,10 @@ def checkWorkbench( workbench ):
     return hasWB
 
 # checks whether there is a FreeCAD Assembly at the root of the active document
+# since Asm4 v0.12, reverted back to naming this Model again
 def getAssembly():
+    return checkModel()
+    '''
     if App.ActiveDocument:
         # should we check for AssemblyType=='Part::Link' ?
         assy = App.ActiveDocument.getObject('Assembly')
@@ -222,13 +225,22 @@ def getAssembly():
                 #FCC.PrintWarning('This is a legacy Asm4 Model\n')
                 return model
     return None
+    '''
 
 # DEPRECATED checks whether there is an Asm4 Model at the root of the active document
+# OOPS: not debrecated after-all
 def checkModel():
     if App.ActiveDocument:
         model = App.ActiveDocument.getObject('Model')
         if model and model.TypeId=='App::Part' and model.getParentGeoFeatureGroup() is None:
             return model
+        else:
+            # compatibility check:
+            assy = App.ActiveDocument.getObject('Assembly')
+            if assy and assy.TypeId=='App::Part'                        \
+                    and assy.Type == 'Assembly'                         \
+                    and assy.getParentGeoFeatureGroup() is None:
+                return assy
     return None
 
 # checks whether an App::Link is to an App::Part

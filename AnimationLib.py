@@ -140,13 +140,17 @@ class animateVariable(animationProvider):
     +-----------------------------------------------+
     """
     def Activated(self):
-        # grab the Variables container (just do it always, this prevents problems with newly opened docs)
-        self.ActiveDocument = App.ActiveDocument
-        self.Variables = self.AnimatedDocument.getObject('Variables') if self.AnimatedDocument else None
         # the root assembly in the current document
         self.rootAssembly = Asm4.getAssembly()
-
+        self.ActiveDocument = App.ActiveDocument
+        # if the previously animated documents has been closed
+        if self.AnimatedDocument not in App.listDocuments().values():
+            self.AnimatedDocument = self.ActiveDocument
         self.updateDocList()
+
+        # grab the Variables container (just do it always, this prevents problems with newly opened docs)
+        #self.Variables = self.AnimatedDocument.getObject('Variables') if self.AnimatedDocument in App.listDocuments().values() else None
+        self.Variables = self.AnimatedDocument.getObject('Variables')
         self.updateVarList()
 
         # in case the dialog is newly opened, register for changes of the selected document
@@ -465,7 +469,7 @@ class animateVariable(animationProvider):
         self.MDIArea.subWindowActivated[QtGui.QMdiSubWindow].disconnect(self.onDocChanged)
         self.UI.close()
 
-    def onExport(self):
+    def onSave(self):
         self.onStop()
         # check for OpenCV module installed (cv2)
         try:
@@ -615,11 +619,13 @@ class animateVariable(animationProvider):
         self.buttonLayout = QtGui.QHBoxLayout()
         # Close button
         self.CloseButton = QtGui.QPushButton('Close')
+        self.CloseButton.setToolTip("Exit")
         self.buttonLayout.addWidget(self.CloseButton)
         self.buttonLayout.addStretch()
         # Export button
-        self.ExportButton = QtGui.QPushButton('Export')
-        self.buttonLayout.addWidget(self.ExportButton)
+        self.SaveButton = QtGui.QPushButton('Save')
+        self.SaveButton.setToolTip("Save this sequence as video")
+        self.buttonLayout.addWidget(self.SaveButton)
         self.buttonLayout.addStretch()
         # Stop button
         self.StopButton = QtGui.QPushButton('Stop')
@@ -628,6 +634,10 @@ class animateVariable(animationProvider):
         self.StopButton.setEnabled(False)
         # Run button
         self.RunButton = QtGui.QPushButton('Run')
+        tt = "Run this sequence in the 3D window"
+        tt+= "\n\nIf the model is large and complex,"
+        tt+= "\nit is advisable to try with 10 frames"
+        self.RunButton.setToolTip(tt)
         self.buttonLayout.addWidget(self.RunButton)
 
         # Add an invisibly dummy button to circumvent QDialogs default-button behavior.
@@ -644,22 +654,22 @@ class animateVariable(animationProvider):
         self.UI.setLayout(self.mainLayout)
 
         # Actions
-        self.docList.currentIndexChanged.connect(self.onSelectDoc)
-        self.docList.popupList.connect(self.updateDocList)
+        self.docList.currentIndexChanged.connect( self.onSelectDoc)
+        self.docList.popupList.connect(           self.updateDocList)
         self.varList.currentIndexChanged.connect( self.onSelectVar )
-        self.varList.popupList.connect(self.updateVarList)
+        self.varList.popupList.connect(           self.updateVarList)
         self.slider.sliderMoved.connect(          self.sliderMoved)
-        self.slider.valueChanged.connect(self.sliderMoved)
-        self.beginValue.valueChanged.connect(self.onBeginValChanged)
-        self.endValue.valueChanged.connect(self.onEndValChanged)
+        self.slider.valueChanged.connect(         self.sliderMoved)
+        self.beginValue.valueChanged.connect(     self.onBeginValChanged)
+        self.endValue.valueChanged.connect(       self.onEndValChanged)
         self.stepValue.valueChanged.connect(      self.onStepValChanged)
-        self.sleepValue.valueChanged.connect(       self.onSleepValChanged)
+        self.sleepValue.valueChanged.connect(     self.onSleepValChanged)
         self.Loop.toggled.connect(                self.onLoop )
         self.Pendulum.toggled.connect(            self.onPendulum )
-        self.ForceRender.toggled.connect(self.onForceRender)
+        self.ForceRender.toggled.connect(         self.onForceRender)
         self.CloseButton.clicked.connect(         self.onClose )
-        self.ExportButton.clicked.connect(self.onExport)
-        self.StopButton.clicked.connect(self.onStop)
+        self.SaveButton.clicked.connect(          self.onSave)
+        self.StopButton.clicked.connect(          self.onStop)
         self.RunButton.clicked.connect(           self.onRun )
 
 
@@ -672,7 +682,7 @@ class animateVariable(animationProvider):
         self.RunButton.setEnabled(state)
         self.Loop.setEnabled(state)
         self.Pendulum.setEnabled(state)
-        self.ExportButton.setEnabled(state)
+        self.SaveButton.setEnabled(state)
 
 
 
