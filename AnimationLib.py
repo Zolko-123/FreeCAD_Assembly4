@@ -347,7 +347,7 @@ class animateVariable(animationProvider):
     def setVarValue(self,name,value):
         setattr( self.Variables, name, value )
         if App.ActiveDocument == self.AnimatedDocument:
-            self.rootAssembly.recompute('True')
+            self.rootAssembly.recompute(True)
         else:
             App.ActiveDocument.recompute(None, True, True)
         self.variableValue.setText('{:.2f}'.format(value))
