@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.12.0
+Current version 0.12.1
 
 
 
@@ -59,6 +59,9 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 
 ## Release notes
+
+* 2022.06.29 (**0.12.1**) :  
+Fixed a bug in AnimationLib  
 
 * 2022.06.11 (**0.12.0**) :  
 Reverted to name "Model"  
