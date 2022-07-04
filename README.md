@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.12.1
+Current version 0.12.2
 
 
 
@@ -59,6 +59,9 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 
 ## Release notes
+
+* 2022.07.04 (**0.12.2**) :  
+Fixed a bug in Asm4.checkModel() for retro-compatibility  
 
 * 2022.06.29 (**0.12.1**) :  
 Fixed a bug in AnimationLib  
