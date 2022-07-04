@@ -206,42 +206,33 @@ def checkWorkbench( workbench ):
             hasWB = True
     return hasWB
 
-# checks whether there is a FreeCAD Assembly at the root of the active document
-# since Asm4 v0.12, reverted back to naming this Model again
+# DEPRECATED since Asm4 v0.12, reverted back to naming this Model again
 def getAssembly():
     return checkModel()
-    '''
-    if App.ActiveDocument:
-        # should we check for AssemblyType=='Part::Link' ?
-        assy = App.ActiveDocument.getObject('Assembly')
-        if assy and assy.TypeId=='App::Part'                        \
-                and assy.Type == 'Assembly'                         \
-                and assy.getParentGeoFeatureGroup() is None:
-            return assy
-        else:
-            # legacy check for compatibility
-            model = checkModel()
-            if model:
-                #FCC.PrintWarning('This is a legacy Asm4 Model\n')
-                return model
-    return None
-    '''
 
-# DEPRECATED checks whether there is an Asm4 Model at the root of the active document
-# OOPS: not debrecated after-all
+# checks and returns whether there is an Asm4 Assembly Model in the active document
 def checkModel():
+    retval = None
     if App.ActiveDocument:
         model = App.ActiveDocument.getObject('Model')
-        if model and model.TypeId=='App::Part' and model.getParentGeoFeatureGroup() is None:
-            return model
+        # the current (as per v0.12) assembly comtainer
+        if model and model.TypeId=='App::Part' \
+                and model.Type == 'Assembly'   \
+                and model.getParentGeoFeatureGroup() is None:
+            retval = model
         else:
-            # compatibility check:
+            # former Assembly compatibility check:
             assy = App.ActiveDocument.getObject('Assembly')
-            if assy and assy.TypeId=='App::Part'                        \
-                    and assy.Type == 'Assembly'                         \
+            if assy and assy.TypeId=='App::Part'  \
+                    and assy.Type == 'Assembly'   \
                     and assy.getParentGeoFeatureGroup() is None:
-                return assy
-    return None
+                retval = assy
+            else:
+                # last chance, very old Asm4 Model
+                if  model   and model.TypeId=='App::Part'  \
+                            and model.getParentGeoFeatureGroup() is None:
+                    retval = model
+    return retval
 
 # checks whether an App::Link is to an App::Part
 def isLinkToPart(obj):
