@@ -215,7 +215,7 @@ def checkModel():
     retval = None
     if App.ActiveDocument:
         model = App.ActiveDocument.getObject('Model')
-        # the current (as per v0.12) assembly comtainer
+        # the current (as per v0.12) assembly container
         if model and model.TypeId=='App::Part' \
                 and model.Type == 'Assembly'   \
                 and model.getParentGeoFeatureGroup() is None:
