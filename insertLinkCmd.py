@@ -35,7 +35,7 @@ class insertLink():
         tooltip  = "<p>Insert a Part into the assembly. "
         tooltip += "This will create a dynamic link to the part, "
         tooltip += "which can be in this document or in another document "
-        tooltip += "which is open in the current session</p>"
+        tooltip += "that is open in the current session</p>"
         tooltip += "<p>This command also enables to repair broken/missing links</p>"
         iconFile = 'Link_Part.svg'
         return {"MenuText" : "Import Part", 
