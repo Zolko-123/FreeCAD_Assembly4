@@ -40,7 +40,7 @@ class updateAssembly:
         for obj in App.ActiveDocument.Objects:
             # ... and update it
             if obj.TypeId == 'App::Part':
-                obj.recompute('True')
+                obj.recompute(True)
         #App.ActiveDocument.recompute()
 
 
