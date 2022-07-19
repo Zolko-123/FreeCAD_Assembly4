@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.12.2
+Current version 0.12.3
 
 
 
@@ -59,6 +59,10 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 
 
 ## Release notes
+
+* 2022.07.19 (**0.12.3**) :  
+Changed the menu entry for insertLink to Import Part  
+Small fixes  
 
 * 2022.07.04 (**0.12.2**) :  
 Fixed a bug in Asm4.checkModel() for retro-compatibility  

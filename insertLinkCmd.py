@@ -32,11 +32,13 @@ class insertLink():
 
 
     def GetResources(self):
-        tooltip  = "Insert a link to a Part. This will create a dynamic link to the part\n"
-        tooltip += "The part to be linked must be open in the current session\n"
-        tooltip += "This command also enables to repair broken/missing links"
+        tooltip  = "<p>Insert a Part into the assembly. "
+        tooltip += "This will create a dynamic link to the part, "
+        tooltip += "which can be in this document or in another document "
+        tooltip += "that is open in the current session</p>"
+        tooltip += "<p>This command also enables to repair broken/missing links</p>"
         iconFile = 'Link_Part.svg'
-        return {"MenuText" : "Insert Link to a Part", 
+        return {"MenuText" : "Import Part", 
                 "ToolTip"  : tooltip, 
                 "Pixmap"   : os.path.join( Asm4.iconPath , iconFile )
                 }
