@@ -719,12 +719,15 @@ class placeLinkUI():
         self.columnsLayout.addLayout(self.rightLayout)
         self.mainLayout.addLayout(self.columnsLayout)
 
+        # The number of decimals in the global configuration
+        numberOfDecimals = App.ParamGet("User parameter:BaseApp/Preferences/Units").GetInt('Decimals')
+
         # X Translation Value
         self.XoffsetLayout = QtGui.QHBoxLayout(Form)
         self.XtranslSpinBoxLabel = self.XoffsetLayout.addWidget(QtGui.QLabel("X Translation :"))
         self.XtranslSpinBox = Asm4.QUnitSpinBox(Form)
         self.XtranslSpinBox.setRange(-999999.00, 999999.00)
-        self.XtranslSpinBox.setDecimals(App.ParamGet("User parameter:BaseApp/Preferences/Units").GetInt('Decimals'))
+        self.XtranslSpinBox.setDecimals(numberOfDecimals)
         #self.XtranslSpinBox.setValue(self.Xtranslation)
         self.XtranslSpinBox.setToolTip("Translation along X axis")
         self.RotXButton = QtGui.QPushButton('Rotate X +90°')
@@ -740,7 +743,7 @@ class placeLinkUI():
         self.YtranslSpinBoxLabel = self.YoffsetLayout.addWidget(QtGui.QLabel("Y Translation :"))
         self.YtranslSpinBox = Asm4.QUnitSpinBox(Form)
         self.YtranslSpinBox.setRange(-999999.00, 999999.00)
-        self.YtranslSpinBox.setDecimals(App.ParamGet("User parameter:BaseApp/Preferences/Units").GetInt('Decimals'))
+        self.YtranslSpinBox.setDecimals(numberOfDecimals)
         #self.YtranslSpinBox.setValue(self.Ytranslation)
         self.YtranslSpinBox.setToolTip("Translation along Y")
         self.RotYButton = QtGui.QPushButton('Rotate Y +90°')
@@ -756,7 +759,7 @@ class placeLinkUI():
         self.ZtranslSpinBoxLabel = self.ZoffsetLayout.addWidget(QtGui.QLabel("Z Translation :"))
         self.ZtranslSpinBox = Asm4.QUnitSpinBox(Form)
         self.ZtranslSpinBox.setRange(-999999.00, 999999.00)
-        self.ZtranslSpinBox.setDecimals(App.ParamGet("User parameter:BaseApp/Preferences/Units").GetInt('Decimals'))
+        self.ZtranslSpinBox.setDecimals(numberOfDecimals)
         #self.ZtranslSpinBox.setValue(self.Ztranslation)
         self.ZtranslSpinBox.setToolTip("Translation along Z:")
         self.RotZButton = QtGui.QPushButton('Rotate Z +90°')
