@@ -87,9 +87,11 @@ class placeLinkUI():
         self.Xtranslation = self.old_LinkPosition[0]
         self.Ytranslation = self.old_LinkPosition[1]
         self.Ztranslation = self.old_LinkPosition[2]
-        self.XrotationAngle = self.old_LinkRotation.toEuler()[0]
-        self.YrotationAngle = self.old_LinkRotation.toEuler()[1]
-        self.ZrotationAngle = self.old_LinkRotation.toEuler()[2]
+
+        # See https://wiki.freecadweb.org/Placement#Position_and_Yaw.2C_Pitch_and_Roll
+        self.XrotationAngle = self.old_LinkRotation.getYawPitchRoll()[2] # Roll is around X
+        self.YrotationAngle = self.old_LinkRotation.getYawPitchRoll()[1] # Pitch is around Y
+        self.ZrotationAngle = self.old_LinkRotation.getYawPitchRoll()[0] # Yaw is around Z
         
         # save previous view properties
         self.old_OverrideMaterial = self.selectedObj.ViewObject.OverrideMaterial
