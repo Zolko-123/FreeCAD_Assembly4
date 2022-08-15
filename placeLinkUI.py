@@ -650,6 +650,9 @@ class placeLinkUI():
         self.XtranslSpinBox.setValue(self.old_LinkPosition[0])
         self.YtranslSpinBox.setValue(self.old_LinkPosition[1])
         self.ZtranslSpinBox.setValue(self.old_LinkPosition[2])
+        self.RotXSpinBox.setValue(self.XrotationAngle)
+        self.RotYSpinBox.setValue(self.YrotationAngle)
+        self.RotZSpinBox.setValue(self.ZrotationAngle)
 
 
 
