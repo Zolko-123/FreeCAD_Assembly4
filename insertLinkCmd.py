@@ -324,13 +324,10 @@ class insertLink():
         filterStr = self.filterPartList.text().strip()
         for x in range(self.partList.count()):
             item = self.partList.item(x)
-            match_object =  re.search(filterStr, item.text(), flags=re.IGNORECASE)
             # check the items's text match the filter ignoring the case
-            if match_object:
-                if filterStr in item.text():
-                    item.setHidden(False)
-                else:
-                    item.setHidden(True)
+            match_object =  re.search(filterStr, item.text(), flags=re.IGNORECASE)
+            if filterStr and not match_object:
+                item.setHidden(True)
             else:
                 item.setHidden(False)
 
