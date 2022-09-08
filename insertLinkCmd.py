@@ -7,6 +7,7 @@
 
 
 import os
+import re
 
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
@@ -321,11 +322,11 @@ class insertLink():
 
     def onFilterChange(self):
         filterStr = self.filterPartList.text().strip()
-
         for x in range(self.partList.count()):
             item = self.partList.item(x)
-            # check it items's text match the filter
-            if filterStr:
+            match_object =  re.search(filterStr, item.text(), flags=re.IGNORECASE)
+            # check the items's text match the filter ignoring the case
+            if match_object:
                 if filterStr in item.text():
                     item.setHidden(False)
                 else:
@@ -373,7 +374,7 @@ class insertLink():
         self.mainLayout = QtGui.QVBoxLayout(self.UI)
         self.mainLayout.addWidget(QtGui.QLabel("Filter"))
         self.mainLayout.addWidget(self.filterPartList)
-        self.mainLayout.addWidget(QtGui.QLabel("Select Part to be inserted"))
+        self.mainLayout.addWidget(QtGui.QLabel("Select the Part to be inserted"))
         self.mainLayout.addWidget(self.partList)
         self.mainLayout.addWidget(QtGui.QLabel("Name for the link"))
         self.mainLayout.addWidget(self.linkNameInput)
