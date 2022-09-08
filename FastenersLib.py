@@ -142,7 +142,7 @@ class insertFastener:
             elif fsClass == 'ThreadedRod':
                 FS.FSThreadedRodObject( newFastener, None )
         # make the Proxy and stuff
-        newFastener.Label = newFastener.Proxy.itemText
+        # newFastener.Label = newFastener.Proxy.itemText
         FS.FSViewProviderTree(newFastener.ViewObject)
         # if a container was selected, put it there
         if container:
