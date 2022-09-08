@@ -1,4 +1,10 @@
+# FreeCAD Assembly4 Workbench
+
 ## Release notes
+
+* 2022.09.08 (**0.12.4**) :  
+Moved the Changelog into a separate file  
+Fixed an error with new version of fasteners WB  
 
 * 2022.07.19 (**0.12.3**) :  
 Changed the menu entry for insertLink to Import Part  

@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.12.3
+Current version 0.12.4
 
 
 ## Overview
@@ -57,7 +57,7 @@ Please offer feedback or connect with the developers in the [dedicated FreeCAD f
 This addon is hosted on a [GitHub repository](https://github.com/Zolko-123/FreeCAD_Assembly4).
 
 ## Release notes
-Release notes can be found in the [CHANGELOG.md](https://github.com/Zolko-123/FreeCAD_Assembly4/CHANGELOG.md) file.
+Release notes can be found in the [CHANGELOG.md](CHANGELOG.md) file.
 
 ## License
 LGPLv2.1 (see [LICENSE](LICENSE))
