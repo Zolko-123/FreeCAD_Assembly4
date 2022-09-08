@@ -119,13 +119,13 @@ class mirrorPartCmd:
         self.mainLayout = QtGui.QVBoxLayout(self.UI)
         
         # the selected (original) part
-        self.mainLayout.addWidget(QtGui.QLabel("Selected Part :"))
+        self.mainLayout.addWidget(QtGui.QLabel("Selected Part"))
         self.selectedPart = QtGui.QLineEdit()
         self.selectedPart.setReadOnly(True)
         self.mainLayout.addWidget(self.selectedPart)
         
         # the symmetry plane
-        self.mainLayout.addWidget(QtGui.QLabel("Select the symmetry plane :"))
+        self.mainLayout.addWidget(QtGui.QLabel("Select the symmetry plane"))
         self.symPlane = QtGui.QComboBox()
         self.symPlane.addItem('X-Y')
         self.symPlane.addItem('X-Z')
@@ -134,7 +134,7 @@ class mirrorPartCmd:
         self.mainLayout.addWidget(self.symPlane)
 
         # the mirrored part's name
-        self.mainLayout.addWidget(QtGui.QLabel("Mirrored part's name :"))
+        self.mainLayout.addWidget(QtGui.QLabel("Mirrored part's name"))
         self.mirroredPartName = QtGui.QLineEdit()
         self.mainLayout.addWidget(self.mirroredPartName)
 

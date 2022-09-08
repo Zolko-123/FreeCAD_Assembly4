@@ -417,13 +417,13 @@ class placeDatumUI():
         self.rotButtonsLayout = QtGui.QHBoxLayout()
         # RotX button
         self.RotXButton = QtGui.QPushButton('Rot X')
-        self.RotXButton.setToolTip("Rotate the Datum around the X axis by 90deg")
+        self.RotXButton.setToolTip("Rotate the Datum around the X axis by 90 deg")
         # RotY button
         self.RotYButton = QtGui.QPushButton('Rot Y')
-        self.RotYButton.setToolTip("Rotate the Datum around the Y axis by 90deg")
+        self.RotYButton.setToolTip("Rotate the Datum around the Y axis by 90 deg")
         # RotZ button
         self.RotZButton = QtGui.QPushButton('Rot Z')
-        self.RotZButton.setToolTip("Rotate the Datum around the Z axis by 90deg")
+        self.RotZButton.setToolTip("Rotate the Datum around the Z axis by 90 deg")
         # add the buttons
         self.rotButtonsLayout.addStretch()
         self.rotButtonsLayout.addWidget(self.RotXButton)

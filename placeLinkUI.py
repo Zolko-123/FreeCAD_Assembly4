@@ -670,14 +670,14 @@ class placeLinkUI():
         # Selected Link (the name as seen in the tree of the selected link)
         self.linkName = QtGui.QLineEdit(Form)
         self.linkName.setReadOnly(True)
-        self.formLayout.addRow(QtGui.QLabel('Selected Link :'),self.linkName)
+        self.formLayout.addRow(QtGui.QLabel('Selected Link:'),self.linkName)
 
         # combobox showing all available App::Link
         self.parentList = QtGui.QComboBox(Form)
         self.parentList.setMaximumWidth(300)
         self.parentList.setToolTip('Choose the part in which the attachment\ncoordinate system is to be found')
         # the parent assembly is hardcoded, and made the first real element
-        self.formLayout.addRow(QtGui.QLabel('Attach to :'),self.parentList)
+        self.formLayout.addRow(QtGui.QLabel('Attach to'),self.parentList)
         self.mainLayout.addLayout(self.formLayout)
 
         # with 2 columns
@@ -687,13 +687,13 @@ class placeLinkUI():
         # Part, left side
         #
         # the document containing the linked part
-        self.leftLayout.addWidget(QtGui.QLabel("Linked Part :"))
+        self.leftLayout.addWidget(QtGui.QLabel("Linked Part"))
         self.linkedDoc = QtGui.QLineEdit(Form)
         self.linkedDoc.setReadOnly(True)
         self.leftLayout.addWidget(self.linkedDoc)
 
         # The list of all LCS in the part is a QListWidget
-        self.leftLayout.addWidget(QtGui.QLabel("Select LCS in Part :"))
+        self.leftLayout.addWidget(QtGui.QLabel("Select LCS in Part"))
         self.partLCSlist = QtGui.QListWidget(self.form)
         self.partLCSlist.setMinimumHeight(200)
         self.partLCSlist.setToolTip('Select a coordinate system from the list')
@@ -702,13 +702,13 @@ class placeLinkUI():
         # Assembly, Right side
         #
         # the document containing the linked object
-        self.rightLayout.addWidget(QtGui.QLabel("Parent Part :"))
+        self.rightLayout.addWidget(QtGui.QLabel("Parent Part"))
         self.parentDoc = QtGui.QLineEdit(Form)
         self.parentDoc.setReadOnly(True)
         self.rightLayout.addWidget(self.parentDoc)
         # The list of all attachment LCS in the assembly is a QListWidget
         # it is populated only when the parent combo-box is activated
-        self.rightLayout.addWidget(QtGui.QLabel("Select LCS in Parent :"))
+        self.rightLayout.addWidget(QtGui.QLabel("Select LCS in Parent"))
         self.attLCSlist = QtGui.QListWidget(self.form)
         self.attLCSlist.setMinimumHeight(200)
         self.attLCSlist.setToolTip('Select a coordinate system from the list')
@@ -721,7 +721,7 @@ class placeLinkUI():
 
         # X Translation Value
         self.XoffsetLayout = QtGui.QHBoxLayout(Form)
-        self.XtranslSpinBoxLabel = self.XoffsetLayout.addWidget(QtGui.QLabel("X Translation :"))
+        self.XtranslSpinBoxLabel = self.XoffsetLayout.addWidget(QtGui.QLabel("X Translation"))
         self.XtranslSpinBox = Asm4.QUnitSpinBox(Form)
         self.XtranslSpinBox.setRange(-999999.00, 999999.00)
         #self.XtranslSpinBox.setValue(self.Xtranslation)
@@ -736,7 +736,7 @@ class placeLinkUI():
 
         # Y Translation Value
         self.YoffsetLayout = QtGui.QHBoxLayout(Form)
-        self.YtranslSpinBoxLabel = self.YoffsetLayout.addWidget(QtGui.QLabel("Y Translation :"))
+        self.YtranslSpinBoxLabel = self.YoffsetLayout.addWidget(QtGui.QLabel("Y Translation"))
         self.YtranslSpinBox = Asm4.QUnitSpinBox(Form)
         self.YtranslSpinBox.setRange(-999999.00, 999999.00)
         #self.YtranslSpinBox.setValue(self.Ytranslation)
@@ -751,7 +751,7 @@ class placeLinkUI():
 
         # Z Translation Value
         self.ZoffsetLayout = QtGui.QHBoxLayout(Form)
-        self.ZtranslSpinBoxLabel = self.ZoffsetLayout.addWidget(QtGui.QLabel("Z Translation :"))
+        self.ZtranslSpinBoxLabel = self.ZoffsetLayout.addWidget(QtGui.QLabel("Z Translation"))
         self.ZtranslSpinBox = Asm4.QUnitSpinBox(Form)
         self.ZtranslSpinBox.setRange(-999999.00, 999999.00)
         #self.ZtranslSpinBox.setValue(self.Ztranslation)

@@ -371,11 +371,11 @@ class insertLink():
 
         # Place the widgets with layouts
         self.mainLayout = QtGui.QVBoxLayout(self.UI)
-        self.mainLayout.addWidget(QtGui.QLabel("Filter :"))
+        self.mainLayout.addWidget(QtGui.QLabel("Filter"))
         self.mainLayout.addWidget(self.filterPartList)
-        self.mainLayout.addWidget(QtGui.QLabel("Select Part to be inserted :"))
+        self.mainLayout.addWidget(QtGui.QLabel("Select Part to be inserted"))
         self.mainLayout.addWidget(self.partList)
-        self.mainLayout.addWidget(QtGui.QLabel("Name for the link :"))
+        self.mainLayout.addWidget(QtGui.QLabel("Name for the link"))
         self.mainLayout.addWidget(self.linkNameInput)
         self.mainLayout.addWidget(QtGui.QLabel(' '))
         self.buttonsLayout = QtGui.QHBoxLayout()

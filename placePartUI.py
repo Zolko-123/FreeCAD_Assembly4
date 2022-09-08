@@ -398,11 +398,11 @@ class placePartUI():
         self.formLayout = QtGui.QFormLayout()
         self.selectedObject = QtGui.QLineEdit()
         self.selectedObject.setReadOnly(True)
-        self.formLayout.addRow(QtGui.QLabel('Selected Object :'),self.selectedObject)
+        self.formLayout.addRow(QtGui.QLabel('Selected Object'),self.selectedObject)
         # combobox showing all available App::Link
         self.parentList = QtGui.QComboBox()
         self.parentList.setMaximumWidth(300)
-        self.formLayout.addRow(QtGui.QLabel('Attach to :'),self.parentList)
+        self.formLayout.addRow(QtGui.QLabel('Attach to'),self.parentList)
         self.mainLayout.addLayout(self.formLayout)
 
         # the document containing the linked object
@@ -412,13 +412,13 @@ class placePartUI():
 
         # The list of all attachment LCS in the assembly is a QListWidget
         # it is populated only when the parent combo-box is activated
-        self.mainLayout.addWidget(QtGui.QLabel("Select attachment LCS in parent Part :"))
+        self.mainLayout.addWidget(QtGui.QLabel("Select attachment LCS in parent Part"))
         self.attLCSlist = QtGui.QListWidget()
         self.mainLayout.addWidget(self.attLCSlist)
 
         # X Translation Value
         self.XoffsetLayout = QtGui.QHBoxLayout()
-        self.XtranslSpinBoxLabel = self.XoffsetLayout.addWidget(QtGui.QLabel("X Translation :"))
+        self.XtranslSpinBoxLabel = self.XoffsetLayout.addWidget(QtGui.QLabel("X Translation"))
         self.XtranslSpinBox = Asm4.QUnitSpinBox()
         self.XtranslSpinBox.setRange(-999999.00, 999999.00)
         self.XtranslSpinBox.setToolTip("Translation along X axis")
@@ -432,7 +432,7 @@ class placePartUI():
 
         # Y Translation Value
         self.YoffsetLayout = QtGui.QHBoxLayout()
-        self.YtranslSpinBoxLabel = self.YoffsetLayout.addWidget(QtGui.QLabel("Y Translation :"))
+        self.YtranslSpinBoxLabel = self.YoffsetLayout.addWidget(QtGui.QLabel("Y Translation"))
         self.YtranslSpinBox = Asm4.QUnitSpinBox()
         self.YtranslSpinBox.setRange(-999999.00, 999999.00)
         self.YtranslSpinBox.setToolTip("Translation along Y")
@@ -446,7 +446,7 @@ class placePartUI():
 
         # Z Translation Value
         self.ZoffsetLayout = QtGui.QHBoxLayout()
-        self.ZtranslSpinBoxLabel = self.ZoffsetLayout.addWidget(QtGui.QLabel("Z Translation :"))
+        self.ZtranslSpinBoxLabel = self.ZoffsetLayout.addWidget(QtGui.QLabel("Z Translation"))
         self.ZtranslSpinBox = Asm4.QUnitSpinBox()
         self.ZtranslSpinBox.setRange(-999999.00, 999999.00)
         self.ZtranslSpinBox.setToolTip("Translation along Z:")
