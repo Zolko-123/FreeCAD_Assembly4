@@ -12,7 +12,7 @@ import FreeCAD as App
 from FreeCAD import Console as FCC
 
 import Asm4_libs as Asm4
-from Asm4_objects import CircularArray, ViewProviderArray
+from Asm4_objects import CircularArray, ViewProviderArray, ExpressionArray
 
 
 
@@ -109,6 +109,70 @@ class makeCircularArray():
         return selObj,selAxis
 
 
+"""
+    +-----------------------------------------------+
+    |    a expression link array class and command    |
+    +-----------------------------------------------+
+"""
+class makeExpressionArray():
+    def __init__(self):
+        pass
+
+    def GetResources(self):
+        tooltip  = "Create a array of the selected object where placement is calculated using expression and element index\n"
+        tooltip += "Select object to make array of\n"
+        iconFile = os.path.join( Asm4.iconPath, 'Asm4_ExpressionArray.svg' )
+        return {"MenuText": "Create a expression Array", "ToolTip":  tooltip, "Pixmap": iconFile }
+
+    def IsActive(self):
+        if App.ActiveDocument:
+            # check correct selections
+            selObj = self.checkObj()
+            if selObj:
+                return (True)
+        else:
+            return (False)
+
+    def Activated(self):
+        # get the selected object
+        selObj = self.checkObj()
+        #FCC.PrintMessage('Selected '+selObj.Name+' of '+selObj.TypeId+' TypeId' )
+        # check that object and axis belong to the same parent
+        objParent  =  selObj.getParentGeoFeatureGroup()
+        # create the array            
+        array = selObj.Document.addObject(  "Part::FeaturePython",
+                                            'XArray_'+selObj.Name,
+                                            ExpressionArray(),None,True)
+        # move array into common parent (if any)
+        if objParent:
+            objParent.addObject(array)
+        # set array parameters
+        array.setLink(selObj)
+        array.Label = 'Array_'+selObj.Label
+        # hide original object
+        #array.SourceObject.ViewObject.hide()
+        selObj.Visibility = False
+        # set the viewprovider
+        ViewProviderArray( array.ViewObject )
+        # update
+        array.recompute()
+        array.ElementCount = 7
+        objParent.recompute()
+        App.ActiveDocument.recompute()
+        Gui.Selection.clearSelection()
+        Gui.Selection.addSelection(objParent.Document.Name,objParent.Name,array.Name+'.')
+
+
+    # check that 1 object (any) and 1 datum axis are selected
+    def checkObj(self):
+        selObj  = None
+        # check that it's an Assembly4 'Model'
+        if len(Gui.Selection.getSelection())==1:
+            selObj = Gui.Selection.getSelection()[0]
+        # return what we have found
+        return selObj
+
+
 
 
 
@@ -158,3 +222,4 @@ def makeArray(obj,count):
 
 # add the command to the workbench
 Gui.addCommand('Asm4_circularArray', makeCircularArray())
+Gui.addCommand('Asm4_expressionArray', makeExpressionArray())
