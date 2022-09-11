@@ -418,6 +418,45 @@ class CircularArray(LinkArray):
                 obj.ElementCount=1
     '''
 
+"""
+    +-----------------------------------------------+
+    |          a expression link array class          |
+    +-----------------------------------------------+
+"""
+class ExpressionArray(LinkArray):
+
+    #Set up the properties when the object is attached.
+    def attach(self, obj):
+        obj.addProperty("App::PropertyString",      "ArrayType",    "Array", '')
+        obj.ArrayType = 'Expression Array'
+        obj.setPropertyStatus('ArrayType', 'ReadOnly')
+        obj.addProperty("App::PropertyPlacement" ,     "ElementPlacement",         "Array", '')
+        obj.addProperty("App::PropertyInteger" ,     "ElementIndex",         "Array", '')
+        obj.ElementIndex = 0
+        super().attach(obj)
+
+    # do the calculation of the elements' Placements
+    def execute(self, obj):
+        #FCC.PrintMessage('Triggered execute() ...')
+        if not obj.SourceObject:
+            return
+        # Source Object
+        sObj = obj.SourceObject
+        parent = sObj.getParentGeoFeatureGroup()
+        if not parent:
+            return
+        plaList = []
+        for i in range(obj.ElementCount):
+            # calculate placement of element i
+            obj.ElementIndex = i
+            obj.recompute()
+            plaElmt = obj.ElementPlacement
+            plaList.append(plaElmt)
+        if not getattr(obj, 'ShowElement', True) or obj.ElementCount != len(plaList):
+            obj.setPropertyStatus('PlacementList', '-Immutable')
+            obj.PlacementList = plaList
+            obj.setPropertyStatus('PlacementList', 'Immutable')
+        return False     # to call LinkExtension::execute()   <= is this rally needed ?
 
 
 """
