@@ -273,7 +273,7 @@ class cloneFastenersToAxesCmd():
                                     
             Gui.Selection.clearSelection()
             self.rootAssembly = Asm4.getAssembly()
-            if rootAssembly:
+            if self.rootAssembly:
                 Gui.Selection.addSelection( fstnr.Document.Name, self.rootAssembly.Name, fstnr.Name +'.')
 
 
