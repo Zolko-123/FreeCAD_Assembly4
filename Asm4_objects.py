@@ -321,8 +321,10 @@ class ViewProviderArray(object):
             tp = self.Object.ArrayType
             if tp=='Circular Array':
                 iconFile = os.path.join( Asm4.iconPath, 'Asm4_PolarArray.svg')
-            if tp=='Linear Array':
+            elif tp=='Linear Array':
                 iconFile = os.path.join( Asm4.iconPath, 'Asm4_LinkArray.svg')
+            elif tp=='Expression Array':
+                iconFile = os.path.join( Asm4.iconPath, 'Asm4_ExpressionArray.svg')
         if iconFile:
             return iconFile
                 
@@ -420,18 +422,21 @@ class CircularArray(LinkArray):
 
 """
     +-----------------------------------------------+
-    |          a expression link array class          |
+    |        an expression link array class         |
     +-----------------------------------------------+
+    array.setExpression('ElementPlacement', 'create(<<placement>>; create(<<Vector>>; 1; 0; 0); create(<<rotation>>; 360 / ElementCount * ElementIndex; 0; 0); LCS_0.Placement.Base) * SourceObject.Placement')
+    array.setExpression('ElementPlacement', 'create(<<placement>>; create(<<Vector>>; 1; 0; 0); create(<<rotation>>; 360 / ElementCount * ElementIndex; 0; 0); LCS_0.Placement.Base) * SourceObject.Placement')
 """
 class ExpressionArray(LinkArray):
 
     #Set up the properties when the object is attached.
     def attach(self, obj):
-        obj.addProperty("App::PropertyString",      "ArrayType",    "Array", '')
+        obj.addProperty("App::PropertyString",     "ArrayType",        "Array", '')
         obj.ArrayType = 'Expression Array'
         obj.setPropertyStatus('ArrayType', 'ReadOnly')
-        obj.addProperty("App::PropertyPlacement" ,     "ElementPlacement",         "Array", '')
-        obj.addProperty("App::PropertyInteger" ,     "ElementIndex",         "Array", '')
+        obj.addProperty("App::PropertyPlacement",  "ElementPlacement", "Array", '')
+        obj.addProperty("App::PropertyInteger",    "ElementIndex",     "Array", '')
+        obj.addProperty("App::PropertyLink",       "Direction",        "Array", '')
         obj.ElementIndex = 0
         super().attach(obj)
 
