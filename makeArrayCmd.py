@@ -125,55 +125,38 @@ class makeExpressionArray():
         return {"MenuText": "Create a expression Array", "ToolTip":  tooltip, "Pixmap": iconFile }
 
     def IsActive(self):
-        if App.ActiveDocument:
-            # check correct selections
-            selObj = self.checkObj()
-            if selObj:
-                return (True)
+        if App.ActiveDocument and len(Gui.Selection.getSelection())==1:
+            return (True)
         else:
             return (False)
 
     def Activated(self):
         # get the selected object
-        selObj = self.checkObj()
-        #FCC.PrintMessage('Selected '+selObj.Name+' of '+selObj.TypeId+' TypeId' )
-        # check that object and axis belong to the same parent
-        objParent  =  selObj.getParentGeoFeatureGroup()
-        # create the array            
-        array = selObj.Document.addObject(  "Part::FeaturePython",
-                                            'XArray_'+selObj.Name,
-                                            ExpressionArray(),None,True)
-        # move array into common parent (if any)
-        if objParent:
-            objParent.addObject(array)
-        # set array parameters
-        array.setLink(selObj)
-        array.Label = 'Array_'+selObj.Label
-        # hide original object
-        #array.SourceObject.ViewObject.hide()
-        selObj.Visibility = False
-        # set the viewprovider
-        ViewProviderArray( array.ViewObject )
-        # update
-        array.recompute()
-        array.ElementCount = 7
-        objParent.recompute()
-        App.ActiveDocument.recompute()
-        Gui.Selection.clearSelection()
-        Gui.Selection.addSelection(objParent.Document.Name,objParent.Name,array.Name+'.')
-
-
-    # check that 1 object (any) and 1 datum axis are selected
-    def checkObj(self):
-        selObj  = None
-        # check that it's an Assembly4 'Model'
         if len(Gui.Selection.getSelection())==1:
             selObj = Gui.Selection.getSelection()[0]
-        # return what we have found
-        return selObj
-
-
-
+            objParent = selObj.getParentGeoFeatureGroup()
+            if objParent:
+                #FCC.PrintMessage('Selected '+selObj.Name+' of '+selObj.TypeId+' TypeId' )
+                array = selObj.Document.addObject(  "Part::FeaturePython",
+                                                    'XArray_'+selObj.Name,
+                                                    ExpressionArray(),None,True)
+                array.Label = 'Array_'+selObj.Label
+                # set the viewprovider
+                ViewProviderArray( array.ViewObject )
+                # move array into common parent (if any)
+                objParent.addObject(array)
+                # hide original object
+                selObj.Visibility = False
+                # set array parameters
+                array.setLink(selObj)
+                array.ElementCount = 7
+                array.setExpression('ElementPlacement', 'create(<<placement>>; create(<<vector>>; 0; 0; 10 * ElementIndex); create(<<rotation>>; create(<<vector>>;0;0;0); 0)) * SourceObject.Placement')
+                # update
+                array.recompute()
+                objParent.recompute()
+                App.ActiveDocument.recompute()
+                Gui.Selection.clearSelection()
+                Gui.Selection.addSelection(objParent.Document.Name,objParent.Name,array.Name+'.')
 
 
 
