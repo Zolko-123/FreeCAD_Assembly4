@@ -426,6 +426,7 @@ class CircularArray(LinkArray):
     +-----------------------------------------------+
     array.setExpression('ElementPlacement', 'create(<<placement>>; create(<<Vector>>; 1; 0; 0); create(<<rotation>>; 360 / ElementCount * ElementIndex; 0; 0); LCS_0.Placement.Base) * SourceObject.Placement')
     array.setExpression('ElementPlacement', 'create(<<placement>>; create(<<Vector>>; 1; 0; 0); create(<<rotation>>; 360 / ElementCount * ElementIndex; 0; 0); LCS_0.Placement.Base) * SourceObject.Placement')
+    create(<<placement>>; create(<<Vector>>; 1; 0; 0); create(<<rotation>>; 360 / ElementCount * ElementIndex; 0; 0); DirBase) * .SourceObject.Placement
 """
 class ExpressionArray(LinkArray):
 
@@ -436,23 +437,38 @@ class ExpressionArray(LinkArray):
         obj.setPropertyStatus('ArrayType', 'ReadOnly')
         obj.addProperty("App::PropertyPlacement",  "ElementPlacement", "Array", '')
         obj.addProperty("App::PropertyInteger",    "ElementIndex",     "Array", '')
-        obj.addProperty("App::PropertyLink",       "Direction",        "Array", '')
+        obj.addProperty("App::PropertyLink",       "Direction",        "Array", 'Object giving a direction reference')
+        obj.addProperty("App::PropertyPlacement",  "DirPlacement",     "Array", '')
+        obj.addProperty("App::PropertyVector",     "DirAxis",          "Array", '')
+        obj.addProperty("App::PropertyVector",     "DirBase",          "Array", '')
+        obj.setExpression('DirAxis', 'DirPlacement.Rotation.Axis')
+        obj.setExpression('DirBase', 'DirPlacement.Base')
+        obj.setPropertyStatus("ElementIndex", "Hidden")
+        obj.setPropertyStatus("DirPlacement", "Hidden")
+        obj.setPropertyStatus("DirAxis",      "Hidden")
+        obj.setPropertyStatus("DirBase",      "Hidden")
         obj.ElementIndex = 0
         super().attach(obj)
 
     # do the calculation of the elements' Placements
     def execute(self, obj):
         #FCC.PrintMessage('Triggered execute() ...')
+        # Source Object
         if not obj.SourceObject:
             return
-        # Source Object
         sObj = obj.SourceObject
+        # we only deal with objects that are in a parent container because we'll put the array there
         parent = sObj.getParentGeoFeatureGroup()
         if not parent:
             return
+        # reference direction for the array
+        if obj.Direction is not None and obj.Direction.Placement is not None:
+            obj.setExpression('DirPlacement', 'Direction.Placement')
+        else:
+            obj.setExpression('DirPlacement', None)
+        # calculate placement of each element i
         plaList = []
         for i in range(obj.ElementCount):
-            # calculate placement of element i
             obj.ElementIndex = i
             obj.recompute()
             plaElmt = obj.ElementPlacement
