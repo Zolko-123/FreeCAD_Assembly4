@@ -434,10 +434,18 @@ class ExpressionArray(LinkArray):
         obj.addProperty("App::PropertyString",     "ArrayType",        "Array", '')
         obj.ArrayType = 'Expression Array'
         obj.setPropertyStatus('ArrayType', 'ReadOnly')
-        obj.addProperty("App::PropertyPlacement",  "ElementPlacement", "Array", '')
-        obj.addProperty("App::PropertyInteger",    "ElementIndex",     "Array", '')
-        obj.addProperty("App::PropertyLink",       "Direction",        "Array", '')
-        obj.ElementIndex = 0
+        obj.addProperty("App::PropertyPlacement",  "ElementPlacement", "Array", 'Copied to each child element while incrementing the ElementIndex from 0 to ElementCount - 1')
+        obj.addProperty("App::PropertyInteger",    "ElementIndex",     "Array", 'Use this in expressions to represent the index of a child element. Only available during recomputing this array.')
+        # default to 1 because then you get a hint from the result when writing expressions
+        obj.ElementIndex = 1
+        obj.setPropertyStatus('ElementIndex', 'Immutable')
+        # prefixed with Step to keep them together in property list
+        obj.addProperty("App::PropertyVector",   "StepLinear",        "Array", 'Expression example: create(<<vector>>; 200 / (ElementCount - 1); 0; 0)')
+        obj.addProperty("App::PropertyAngle",    "StepAngular",       "Array", 'Expression example for full revolution: 360 / ElementCount')
+        # default expressions handling simle linear and polar arrays
+        obj.setExpression('ElementPlacement', 'create(<<placement>>; StepLinear * ElementIndex; create(<<rotation>>; StepAngular * ElementIndex; 0; 0)) * SourceObject.Placement')
+        obj.setExpression('StepLinear', 'create(<<vector>>; 0; 0; 200 / (ElementCount - 1))')
+        obj.setExpression('StepAngular', '360 / ElementCount')
         super().attach(obj)
 
     # do the calculation of the elements' Placements
@@ -451,12 +459,15 @@ class ExpressionArray(LinkArray):
         if not parent:
             return
         plaList = []
+        obj.setPropertyStatus('ElementIndex', '-Immutable')
         for i in range(obj.ElementCount):
             # calculate placement of element i
             obj.ElementIndex = i
             obj.recompute()
             plaElmt = obj.ElementPlacement
             plaList.append(plaElmt)
+        obj.ElementIndex = 1
+        obj.setPropertyStatus('ElementIndex', 'Immutable')
         if not getattr(obj, 'ShowElement', True) or obj.ElementCount != len(plaList):
             obj.setPropertyStatus('PlacementList', '-Immutable')
             obj.PlacementList = plaList

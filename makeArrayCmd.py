@@ -148,7 +148,7 @@ class makeExpressionArray():
             objParent.addObject(array)
         # set array parameters
         array.setLink(selObj)
-        array.Label = 'Array_'+selObj.Label
+        array.Label = 'XArray_'+selObj.Label
         # hide original object
         #array.SourceObject.ViewObject.hide()
         selObj.Visibility = False
