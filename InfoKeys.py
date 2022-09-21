@@ -2,27 +2,31 @@
 # coding: utf-8
 #
 # LGPL
-#
-# libraries for FreeCAD's Assembly 4 workbench
 
 import os, json
 
 import FreeCAD as App
 import infoPartCmd
 
+partInfo = [
+    'Label_Doc',
+    'Label_Part',
+    'Pad_Length',
+    'Shape_Length',
+    'Shape_Volume',
+    'Fastener_Diameter',
+    'Fastener_Lenght',
+    'Fastener_Type']
 
-# Autofilling info ref
-partInfo =[     'LabelDoc',                 \
-                'LabelPart',                \
-                'PadLength',                \
-                'ShapeLength',              \
-                'ShapeVolume']
-
-infoToolTip = { 'LabelDoc':'Return the Label of Document',          \
-                'LabelPart':'Return the Label of Part',             \
-                'PadLength':'Return the Length of Pad',             \
-                'ShapeLength':'Return the Length of Shape',         \
-                'ShapeVolume':'Return the 3 Length of Shape x , y , z'}
+infoToolTip = {
+    'Label_Doc':        'Document filename',
+    'Label_Part':       'Part label',
+    'Pad_Length':       'Pad lenght',
+    'Shape_Length':     'Shape lenght',
+    'Shape_Volume':     'Object dimensions (x, y, z)',
+    'Fastener_Diameter': 'Fastener diameter',
+    'Fastener_Lenght':   'Fastener length',
+    'Fastener_Type':     'Fastener type'}
 
 # protection against update of user configuration
 ### to have the dir of external configuration file
@@ -31,15 +35,13 @@ ConfUserFilename = "Asm4_infoPartConf.json"
 ConfUserFilejson = os.path.join(ConfUserDir, ConfUserFilename)
 
 
-### try to open existing external configuration file of user
 try :
     file = open(ConfUserFilejson, 'r')
     file.close()
-### else make the default external configuration file
 except :
     partInfoDef = dict()
     for prop in partInfo:
-        partInfoDef.setdefault(prop,{'userData':prop + 'User','active':True})
+        partInfoDef.setdefault(prop,{'userData':prop, 'active':True})
     try:
         os.mkdir(ConfUserDir)
     except:
@@ -47,200 +49,191 @@ except :
     file = open(ConfUserFilejson, 'x')
     json.dump(partInfoDef,file)
     file.close()
-    
 
-### now user configuration is :
+
 file = open(ConfUserFilejson, 'r')
 infoKeysUser = json.load(file).copy()
 file.close()
 
-def infoDefault(self):
-    ### auto filling module
-    ### load infoKeysUser    
+
+def infoDefault(self, level):
+
     file = open(ConfUserFilejson, 'r')
     infoKeysUser = json.load(file).copy()
     file.close()
-    ### part variable creation
+
     try :
         self.TypeId
-        PART=self
+        part = self
     except AttributeError:
-        PART=self.part
-    ### you have PART    
-    DOC=PART.Document
-    ### you have DOC
-    ### research
-    for i in range(len(PART.Group)):
-        if PART.Group[i].TypeId == 'PartDesign::Body' :
-            BODY=PART.Group[i]
-            ### you have BODY
-            for i in range(len(BODY.Group)):
-                if BODY.Group[i].TypeId == 'PartDesign::Pad' :
-                    PAD=BODY.Group[i]
-                    ### you have PAD
-                    try :
-                        SKETCH=PAD.Profile[0]
-                        ### you have SKETCH
-                    except NameError :
-                        print('there is no Sketch on a Pad of : ',PART.FullName )
+        part = self.part
 
-    ### start all autoinfofield
-    try :
-        LabelDoc(self,PART,DOC)
-    except NameError :
-        print('there is no DOC for this part : ',PART.FullName )
-    try :
-        LabelPart(self,PART)
-    except NameError :
-        print('there is no Part' )
-    try :    
-        PadLength(self,PART,PAD)
-    except NameError :
-        print('there is no PAD for this Part : ',PART.FullName )
-    try :
-        ShapeLength(self,PART,SKETCH)
-    except NameError :
-        print('ShapeLength : there is no Sketch for this Part : ',PART.FullName )
-    try :
-        ShapeVolume(self,PART,BODY)
-    except:
-        print('there is no Shape on Volume : ',PART.FullName )
+    doc = part.Document
+
+    if part.TypeId == 'App::Part':
+
+        for i in range(len(part.Group)):
+            if part.Group[i].TypeId == 'PartDesign::Body':
+                body = part.Group[i]
+                for i in range(len(body.Group)):
+                    if body.Group[i].TypeId == 'PartDesign::Pad':
+                        pad = body.Group[i]
+                        try :
+                            sketch = pad.Profile[0]
+                        except NameError :
+                            print('There is no Sketch on a Pad of the Part', part.FullName)
+
+            try:
+                LabelDoc(self, part, doc)
+            except NameError:
+                print('LabelDoc: there is no Document on the Part ', part.FullName)
+
+            try:
+                LabelPart(self, part)
+            except NameError:
+                print('LabelPart: Part does not exist')
+
+            try:
+                PadLength(self, part, pad)
+            except NameError:
+                print('PadLenght: there is no Pad on the Part ', part.FullName)
+
+            try:
+                ShapeLength(self, part, sketch)
+            except NameError:
+                print('ShapeLength: there is no Sketch on the Part ', part.FullName)
+
+            try:
+                ShapeVolume(self, part, body)
+            except:
+                print('ShapeVolume: there is no Shape on the Part ', part.FullName)
 
 
-def ShapeVolume(self,PART, BODY):
-###you can use DOC - PART - BODY - PAD - SKETCH
-    auto_info_field = infoKeysUser.get('ShapeVolume').get('userData')
-    bbc = BODY.Shape.BoundBox
-    auto_info_fill = str(round(bbc.ZLength,3)) +str(' mm x ')+ str(round(bbc.YLength,3)) +str(' mm x ')+ str(round(bbc.XLength,3))+str(' mm')
-    try:
-        ### if the command comes from makeBom write autoinfo directly on Part
-        self.TypeId
-        setattr(PART,auto_info_field,str(auto_info_fill))
-    except AttributeError:
-        ### if the command comes from infoPartUI write autoinfo on autofilling field on UI
-        try :
-        ### if field is active
-            for i in range(len(self.infoTable)):
-                if self.infoTable[i][0]== auto_info_field :
-                    self.infos[i].setText(str(auto_info_fill))
-        except AttributeError:
-        ### if field is not active
-            pass
+    elif part.TypeId == 'Part::FeaturePython' and part.Content.find("FastenersCmd") > -1: # fastners
+
+        a  = Fastener_LabelDoc(self, doc, part, level)
+        b  = Fastener_LabelPart(self, part)
+        c  = Fastener_Diameter(self, part)
+        d  = Fastener_Lenght(self, part)
+        e  = Fastener_Type(self, part)
+
+        print("\nObject", part.FullName)
+        print("Fastener_LabelDoc", a)
+        print("Fastener_LabelPart", b)
+        print("Fastener_Diameter", c)
+        print("Fastener_Lenght", d)
+        print("Fastener_Type", e)
 
 
 """
-how make a new autoinfofield :
+How to create a NEW_AUTOINFO_FIELD:
 
-ref newautoinfofield name in partInfo[]
+    Add the ref to the NEW_AUTOINFO_FIELD_NAME in partInfo[]
+    Add the description in infoToolTip = {}
+    Put the NEW_AUTOINFO_FIELD_NAME in infoDefault() at the end with the right arg (pad,sketch...)
 
-make a description in infoToolTip = {}
+    Create a new function like:
 
-put newautoinfofield name in infoDefault() at the end with the right arg (PAD,SKETCH...)
-
-write new def like that :
-
-def newautoinfofieldname(self,PART(option : DOC , BODY , PAD , SKETCH):
-###you can use DOC - PART - BODY - PAD - SKETCH
-    auto_info_field = infoKeysUser.get('newautoinfofieldname').get('userData')
-    auto_info_fill = newautoinfofield information
-    try:
-        ### if the command comes from makeBom write autoinfo directly on Part
-        self.TypeId
-        setattr(PART,auto_info_field,str(auto_info_fill))
-    except AttributeError:
-        ### if the command comes from infoPartUI write autoinfo on autofilling field on UI
-        try :
-        ### if field is active
-            for i in range(len(self.infoTable)):
-                if self.infoTable[i][0]== auto_info_field :
-                    self.infos[i].setText(str(auto_info_fill))
-        except AttributeError:
-        ### if field is not active
-            pass
-
+        def NEW_AUTOINFO_FIELD_NAME(self, part, (optional: doc , body , pad , sketch)):
+            auto_info_field = infoKeysUser.get('NEW_AUTOINFO_FIELD_NAME').get('userData')
+            auto_info_fill = NEW_AUTOINFO_FIELD_INFO
+            try:
+                # If the command comes from makeBom, write the info directly on Part
+                self.TypeId
+                setattr(part, auto_info_field, str(auto_info_fill))
+            except AttributeError:
+                # If the command comes from infoPartUI, write info on autofilling field on UI
+                try :
+                    # If the field is active
+                    for i in range(len(self.infoTable)):
+                        if self.infoTable[i][0]== auto_info_field :
+                            self.infos[i].setText(str(auto_info_fill))
+                except AttributeError:
+                    # If the field is not active
+                    pass
 """
 
-def ShapeLength(self,PART,SKETCH):
-###you can use DOC - PART - BODY - PAD - SKETCH
-    auto_info_field = infoKeysUser.get('ShapeLength').get('userData')
+def LabelDoc(self, part, doc):
+    auto_info_field = infoKeysUser.get('Label_Doc').get('userData')
+    auto_info_fill = doc.Label
+    try:
+        self.TypeId
+        setattr(part, auto_info_field, auto_info_fill)
+    except AttributeError:
+        try :
+            for i in range(len(self.infoTable)):
+                if self.infoTable[i][0] == auto_info_field:
+                    self.infos[i].setText(auto_info_fill)
+        except AttributeError:
+            pass
+
+
+def LabelPart(self, part):
+    auto_info_field = infoKeysUser.get('Label_Part').get('userData')
+    auto_info_fill = part.Label
+    try:
+        self.TypeId
+        setattr(part, auto_info_field, auto_info_fill)
+    except AttributeError:
+        try :
+            for i in range(len(self.infoTable)):
+                if self.infoTable[i][0] == auto_info_field:
+                    self.infos[i].setText(auto_info_fill)
+        except AttributeError:
+            pass
+
+
+def PadLength(self, part, pad):
+    auto_info_field = infoKeysUser.get('Pad_Length').get('userData')
     try :
-        auto_info_fill = SKETCH.Shape.Length
+        auto_info_fill = str(pad.Length).replace('mm','')
     except AttributeError:
         return
-    try:
-        ### if the command comes from makeBom write autoinfo directly on Part
-        self.TypeId
-        setattr(PART,auto_info_field,str(auto_info_fill))
-    except AttributeError:
-        ### if the command comes from infoPartUI write autoinfo on autofilling field on UI
-        try :
-        ### if field is active
-            for i in range(len(self.infoTable)):
-                if self.infoTable[i][0]== auto_info_field :
-                    self.infos[i].setText(str(auto_info_fill))
-        except AttributeError:
-        ### if field is not active
-            pass
-            
 
-def PadLength(self,PART,PAD):
-###you can use DOC - PART - BODY - PAD - SKETCH
-    auto_info_field = infoKeysUser.get('PadLength').get('userData')
+    try:
+        self.TypeId
+        setattr(part, auto_info_field, auto_info_fill)
+    except AttributeError:
+        try :
+            for i in range(len(self.infoTable)):
+                if self.infoTable[i][0] == auto_info_field:
+                    self.infos[i].setText(auto_info_fill)
+        except AttributeError:
+            pass
+
+
+def ShapeLength(self, part, sketch):
+    auto_info_field = infoKeysUser.get('Shape_Length').get('userData')
     try :
-        auto_info_fill = str(PAD.Length).replace('mm','')
+        auto_info_fill = str(sketch.Shape.Length)
     except AttributeError:
         return
+
     try:
-        ### if the command comes from makeBom write autoinfo directly on Part
         self.TypeId
-        setattr(PART,auto_info_field,str(auto_info_fill))
+        setattr(part, auto_info_field, auto_info_fill)
     except AttributeError:
-        ### if the command comes from infoPartUI write autoinfo on autofilling field on UI
         try :
-        ### if field is active
             for i in range(len(self.infoTable)):
-                if self.infoTable[i][0]== auto_info_field :
-                    self.infos[i].setText(str(auto_info_fill))
+                if self.infoTable[i][0] == auto_info_field:
+                    self.infos[i].setText(auto_info_fill)
         except AttributeError:
-        ### if field is not active
             pass
 
 
-        
-def LabelDoc(self,PART,DOC):
-    docLabel = infoKeysUser.get('LabelDoc').get('userData')
+def ShapeVolume(self, part, body):
+    auto_info_field = infoKeysUser.get('Shape_Volume').get('userData')
+    bbc = body.Shape.BoundBox
+    auto_info_fill = str(str(round(bbc.ZLength,3)) + str(' mm x ') + str(round(bbc.YLength,3)) + str(' mm x ') + str(round(bbc.XLength,3)) + str(' mm'))
+
     try:
-        ### if the command comes from makeBom write autoinfo directly on Part
         self.TypeId
-        setattr(PART,docLabel,DOC.Label)
+        setattr(part, auto_info_field, auto_info_fill)
     except AttributeError:
-        ### if the command comes from infoPartUI write autoinfo on autofilling field on UI
         try :
-        ### if field is active
             for i in range(len(self.infoTable)):
-                if self.infoTable[i][0]==docLabel:
-                    self.infos[i].setText(DOC.Label)
+                if self.infoTable[i][0] == auto_info_field:
+                    self.infos[i].setText(auto_info_fill)
         except AttributeError:
-        ### if field is not active
-            pass
-        
-def LabelPart(self,PART):
-    partLabel = infoKeysUser.get('LabelPart').get('userData')
-    try:
-        ### if the command comes from makeBom write autoinfo directly on Part
-        self.TypeId
-        setattr(PART,partLabel,PART.Label)
-    except AttributeError:
-        ### if the command comes from infoPartUI write autoinfo on autofilling field on UI
-        try :
-        ### if field is active
-            for i in range(len(self.infoTable)):
-                if self.infoTable[i][0]== partLabel:
-                    self.infos[i].setText(PART.Label)
-        except AttributeError:
-        ### if field is not active
             pass
 
-
-    
-    pass

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # coding: utf-8
-# 
-# makeBomCmd.py 
+#
+# makeBomCmd.py
 #
 # parses the Asm4 Model tree and creates a list of parts
 
@@ -34,17 +34,17 @@ try :
 except :
     partInfoDef = dict()
     for prop in InfoKeys.partInfo:
-        partInfoDef.setdefault(prop,{'userData':prop + 'User','active':True})
+        partInfoDef.setdefault(prop,{'userData':prop, 'active':True})
     os.mkdir(ConfUserDir)
     file = open(ConfUserFilejson, 'x')
     json.dump(partInfoDef,file)
     file.close()
-    
+
 ### now user configuration is :
 file = open(ConfUserFilejson, 'r')
 infoKeysUser = json.load(file).copy()
 file.close()
-    
+
 crea = infoPartCmd.infoPartUI.makePartInfo
 fill = infoPartCmd.infoPartUI.infoDefault
 
@@ -83,7 +83,7 @@ class makeBOM:
         # return self.checkModel()
         if Asm4.getAssembly() is None:
             return False
-        else: 
+        else:
             return True
 
     def Activated(self):
@@ -96,9 +96,9 @@ class makeBOM:
         except:
             try:
                 self.model = self.modelDoc.Model
-                print("legacy Assembly4 Model")
+                print("Legacy Assembly4 Model")
             except:
-                print("Hum, this might not work")
+                print("Assembly 4 might not work with this file")
         self.drawUI()
         self.UI.show()
         self.BOM.clear()
@@ -108,50 +108,106 @@ class makeBOM:
         self.inSpreadsheet()
         self.BOM.setPlainText(self.Verbose)
 
-### def listParts use of Part info Edit
-
-    def listParts(self,object,level=0):
+    def listParts(self, obj, level=0):
         file = open(ConfUserFilejson, 'r')
         self.infoKeysUser = json.load(file).copy()
         file.close()
-        if object == None:
+        if obj == None:
             return
         if self.PartsList == None:
             self.PartsList = {}
         # research App::Part because the partInfo attribute is on
-        if object.TypeId=='App::Link':
-            self.listParts(object.LinkedObject,level+1)
+        if obj.TypeId=='App::Link':
+            self.listParts(obj.LinkedObject,level+1)
         else:
-            if object.TypeId=='App::Part':
+
+            if obj.TypeId=='App::Part':
+
+                self.Verbose += "> Part: " + obj.Label + ", " + obj.TypeId + "\n"
+
                 if level > 0:
                     # write PartsList
                     # test if the part already exist on PartsList
-                    if object.Label in self.PartsList:
+                    if obj.Label in self.PartsList:
                         # if already exist =+ 1 in qty of this part count
-                        self.PartsList[object.Label]['Qty.'] = self.PartsList[object.Label]['Qty.'] + 1
+                        # self.PartsList[obj.Label]['Qty.'] = self.PartsList[obj.Label]['Qty.'] + 1
+
+                        # if module has to be added, it needs extra check to avoid extra quantity of the Model
+                        if level == 1:
+                            doc = App.ActiveDocument.Name
+                        else:
+                            doc = obj.FullName.split("#")[0].replace("_", "-") # why?
+
+                        if self.PartsList[obj.Label]["Label_Doc"] == doc:
+                            self.PartsList[obj.Label]['Qty.'] = self.PartsList[obj.Label]['Qty.'] + 1
+
                     else:
                         # if not exist , create a dict() for this part
-                        self.PartsList[object.Label] = dict()
+                        self.PartsList[obj.Label] = dict()
                         for prop in self.infoKeysUser:
                             if self.infoKeysUser.get(prop).get('active'):
                                 try:
                                     # try to get partInfo in part
-                                    getattr(object,self.infoKeysUser.get(prop).get('userData'))
+                                    getattr(obj,self.infoKeysUser.get(prop).get('userData'))
                                 except AttributeError:
-                                    self.Verbose+='you don\'t have fill the info of this Part :'+ object.Label +'\n'
-                                    crea(self,object)
-                                    self.Verbose+='info create for :'+ object.Label +'\n'
-                                    fill(object)
-                                    self.Verbose+='info auto filled for :'+ object.Label+'\n'
-                                self.PartsList[object.Label][self.infoKeysUser.get(prop).get('userData')] = getattr(object,self.infoKeysUser.get(prop).get('userData'))
-                        self.PartsList[object.Label]['Qty.'] = 1
-                # look for sub-objects
-                for objname in object.getSubObjects():
-                    subobj = object.Document.getObject( objname[0:-1] )
+                                    self.Verbose+=obj.Label + " info is missing\n"
+                                    crea(self,obj)
+                                    self.Verbose+='- Info field was created\n'
+                                    fill(obj, level)
+                                    self.Verbose+='- Info data was generated\n'
+                                self.PartsList[obj.Label][self.infoKeysUser.get(prop).get('userData')] = getattr(obj,self.infoKeysUser.get(prop).get('userData'))
+                        self.PartsList[obj.Label]['Qty.'] = 1
+                        self.Verbose += '\n'
+
+                # look for sub-objs
+                for objname in obj.getSubObjects():
+                    subobj = obj.Document.getObject( objname[0:-1] )
                     self.listParts(subobj,level+1)
 
+            elif obj.TypeId=='Part::FeaturePython' and obj.Content.find("FastenersCmd") > -1: # fastners
+
+                self.Verbose += "> Fastner: " + obj.Label + ", " + obj.TypeId + "\n"
+
+                if level > 0:
+                    if obj.Label in self.PartsList:
+
+                        if level == 1:
+                            doc = App.ActiveDocument.Name
+                        else:
+                            doc = obj.FullName.split("#")[0].replace("_", "-") # why?
+
+                        if self.PartsList[obj.Label]["Label_Doc"] == doc:
+                            self.PartsList[obj.Label]['Qty.'] = self.PartsList[obj.Label]['Qty.'] + 1
+                    else:
+                        self.PartsList[obj.Label] = dict()
+                        for prop in self.infoKeysUser:
+
+                            if prop == "Label_Doc":
+                                if level == 1:
+                                    data = App.ActiveDocument.Name
+                                else:
+                                    data = obj.FullName.split("#")[0].replace("_", "-") # why?
+                            elif prop == "Label_Part":
+                                data = obj.Label
+                            elif prop == "Fastener_Diameter":
+                                data = obj.diameter
+                            elif prop == "Fastener_Type":
+                                data = obj.type
+                            elif prop == "Fastener_Lenght":
+                                try:
+                                    data = str(obj.length).strip("mm")
+                                except:
+                                    data = ""
+                            else:
+                                data = ""
+
+                            self.PartsList[obj.Label][self.infoKeysUser.get(prop).get('userData')] = data
+
+                        self.PartsList[obj.Label]['Qty.'] = 1
+                        self.Verbose += '\n'
+
         return
-        self.Verbose+='Your Bill of Materials is Done\n'
+        self.Verbose += 'BOM creation is done\n'
 
 ### def Copy - Copy on Spreadsheet
 
@@ -185,10 +241,10 @@ class makeBOM:
         # to write line by line BoM in Spreadsheet
         for i,_ in enumerate(data):
             wrow(data[i].values(),i+1)
-        
+
         document.recompute()
 
-        self.Verbose+='Your Bill of Materials is Write on BOM Spreadsheet\n'
+        self.Verbose+='BOM spreadsheet was created/updated.\n'
 
 
     def onOK(self):
@@ -204,26 +260,25 @@ class makeBOM:
     """
     def drawUI(self):
         # Our main window will be a QDialog
-        self.UI.setWindowTitle('Parts List / BOM')
+        self.UI.setWindowTitle('Parts List (BOM)')
         self.UI.setWindowIcon( QtGui.QIcon( os.path.join( Asm4.iconPath , 'FreeCad.svg' ) ) )
         self.UI.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
         self.UI.setModal(False)
-        # set main window widgets layout
         self.mainLayout = QtGui.QVBoxLayout(self.UI)
 
         # Help and Log :
         self.LabelBOML1 = QtGui.QLabel()
-        self.LabelBOML1.setText('BoM:\n\nThis tool makes a BoM with the Info and Config of Edit Part Information. \n\nIf you have auto-infoField in your Config you can use BoM directly.\nBoM complete automatically your auto-infoField.\n\n')
+        self.LabelBOML1.setText('BOM generates bill of materials.\n\nIt uses the Parts\' info to generate entries on BOM, unless autofill is set.\n')
         self.LabelBOML2 = QtGui.QLabel()
-        self.LabelBOML2.setText("<a href='https://github.com/Zolko-123/FreeCAD_Assembly4/tree/master/Examples/ConfigBOM/README.md'>-=Tuto=-</a>")
+        self.LabelBOML2.setText("Check <a href='https://github.com/Zolko-123/FreeCAD_Assembly4/tree/master/Examples/ConfigBOM/README.md'>BOM tutorial</a>")
         self.LabelBOML2.setOpenExternalLinks(True)
         self.LabelBOML3 = QtGui.QLabel()
-        self.LabelBOML3.setText('\n\nLog :')
+        self.LabelBOML3.setText('\n\nLog:')
 
         self.mainLayout.addWidget(self.LabelBOML1)
         self.mainLayout.addWidget(self.LabelBOML2)
         self.mainLayout.addWidget(self.LabelBOML3)
-        
+
         # The Log (Verbose) is a plain text field
         self.BOM = QtGui.QPlainTextEdit()
         self.BOM.setLineWrapMode(QtGui.QPlainTextEdit.NoWrap)
@@ -231,7 +286,7 @@ class makeBOM:
 
         # the button row definition
         self.buttonLayout = QtGui.QHBoxLayout()
-        
+
         # OK button
         self.OkButton = QtGui.QPushButton('OK')
         self.OkButton.setDefault(True)
