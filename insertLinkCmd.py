@@ -6,7 +6,7 @@
 
 
 
-import os
+import os, re
 
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
@@ -324,12 +324,10 @@ class insertLink():
 
         for x in range(self.partList.count()):
             item = self.partList.item(x)
-            # check it items's text match the filter
-            if filterStr:
-                if filterStr in item.text():
-                    item.setHidden(False)
-                else:
-                    item.setHidden(True)
+            # check the items's text match the filter ignoring the case
+            matchStr =  re.search(filterStr, item.text(), flags=re.IGNORECASE)
+            if filterStr and not matchStr:
+                item.setHidden(True)
             else:
                 item.setHidden(False)
 
