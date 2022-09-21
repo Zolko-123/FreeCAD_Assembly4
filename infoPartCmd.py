@@ -39,7 +39,7 @@ except :
     file = open(ConfUserFilejson, 'x')
     json.dump(partInfoDef,file)
     file.close()
-    
+
 """
 now user configuration is :
 file = open(ConfUserFilejson, 'r')
@@ -72,9 +72,9 @@ class infoPartCmd():
         super(infoPartCmd,self).__init__()
 
     def GetResources(self):
-        tooltip  = "Edit part information. "
+        tooltip  = "Edit part information."
         tooltip += "The default part information can be configured"
-        tooltip += "use the Config button"
+        tooltip += "use the Configure button"
         iconFile = os.path.join( Asm4.iconPath, 'Asm4_PartInfo.svg' )
         return {"MenuText": "Edit Part Information", "ToolTip": tooltip, "Pixmap": iconFile }
 
@@ -103,7 +103,7 @@ class infoPartUI():
         iconFile = os.path.join( Asm4.iconPath , 'Asm4_PartInfo.svg')
         self.form.setWindowIcon(QtGui.QIcon( iconFile ))
         self.form.setWindowTitle("Edit Part Information")
-       
+
         # hey-ho, let's go
         self.part = Asm4.getSelectedContainer()
         file = open(ConfUserFilejson, 'r')
@@ -141,9 +141,9 @@ class infoPartUI():
                     if object.TypeId == 'App::Part' :
                         #object part
                         if not hasattr(object,self.infoKeysUser.get(info).get('userData')):
-                            object.addProperty( 'App::PropertyString', self.infoKeysUser.get(info).get('userData'), 'PartInfo' )    
+                            object.addProperty( 'App::PropertyString', self.infoKeysUser.get(info).get('userData'), 'PartInfo' )
         return
-    
+
     # AddNew
     def addNew(self):
         for i,prop in enumerate(self.infoTable):
@@ -174,16 +174,16 @@ class infoPartUI():
             self.part.removeProperty(suppr)
         # message for user
         mb = QtGui.QMessageBox()
-        mb.setText("Your fields \n has been re-initilize")
-        mb.setWindowTitle("RE-INITIALISATION")
-        mb.exec_() 
+        mb.setWindowTitle("Reset Fields")
+        mb.setText("The part fields\nhave been reset")
+        mb.exec_()
         # close
         self.finish()
-        
+
 
     # InfoDefault
-    def infoDefault(self):
-        InfoKeys.infoDefault(self)
+    def infoDefault(self, level):
+        InfoKeys.infoDefault(self, level)
         #pass
 
     # close
@@ -225,13 +225,15 @@ class infoPartUI():
 
         self.mainLayout.addLayout(self.formLayout)
         self.mainLayout.addWidget(QtGui.QLabel())
-        
+
         # Buttons
         self.buttonsLayout = QtGui.QHBoxLayout()
-        self.confFields = QtGui.QPushButton('Config')
-        self.reinit = QtGui.QPushButton('re-init')
-        self.reinit.setToolTip('To re-initialize your PartInfo Field of your part')
-        self.autoFill = QtGui.QPushButton('auto-filling')
+        self.confFields = QtGui.QPushButton('Configure')
+        self.confFields.setToolTip('Edit fields')
+        self.reinit = QtGui.QPushButton('Reset fields')
+        self.reinit.setToolTip('Reset fields/columns')
+        self.autoFill = QtGui.QPushButton('Autofill data')
+        self.autoFill.setToolTip('Autofill fields')
         self.buttonsLayout.addWidget(self.confFields)
         self.buttonsLayout.addWidget(self.reinit)
         self.buttonsLayout.addWidget(self.autoFill)
@@ -250,7 +252,7 @@ class infoPartUI():
         except IndexError:
             test=True
         if test :
-            self.infoDefault()
+            self.infoDefault(0)
             self.addNew()
 
 class infoPartConfUI():
@@ -261,8 +263,7 @@ class infoPartConfUI():
         iconFile = os.path.join( Asm4.iconPath , 'Asm4_PartInfo.svg')
         self.form.setWindowIcon(QtGui.QIcon( iconFile ))
         self.form.setWindowTitle("Edit Part Info Configuration")
-       
-        # hey-ho, let's go
+
         self.infoKeysDefault = InfoKeys.partInfo.copy()
         self.infoToolTip = InfoKeys.infoToolTip.copy()
         file = open(ConfUserFilejson, 'r')
@@ -271,11 +272,11 @@ class infoPartConfUI():
         # create a dict() of defaultinfokeys and userinfokeys
         self.confTemplate = dict()
         self.confTemplate = self.infoKeysUser.copy()
-                
+
         # the GUI objects are defined later down
         self.drawConfUI()
-  
-    
+
+
     # close
     def finish(self):
         Gui.Control.closeDialog()
@@ -298,9 +299,9 @@ class infoPartConfUI():
         for prop in self.confTemplate:
             if self.infos[i].text() == '':
                 mb = QtGui.QMessageBox()
-                mb.setText("YOU CAN NOT LEAVE A FIELD BLANK \n DISABLE IT OR DELETE IT")
-                mb.setWindowTitle("WRITING OF NEW CONFIG")
-                mb.exec_() 
+                mb.setWindowTitle("BOM Configuration")
+                mb.setText("Fields cannot be blank\nYou must disable/delete it")
+                mb.exec_()
                 return
             i+=1
         # init i
@@ -321,12 +322,12 @@ class infoPartConfUI():
         file.close()
         # message for user
         mb = QtGui.QMessageBox()
-        mb.setText("Your configuration \n has been saved")
-        mb.setWindowTitle("WRITING OF NEW CONFIG")
-        mb.exec_() 
+        mb.setWindowTitle("BOM Configuration")
+        mb.setText("The configuration\nhas been saved")
+        mb.exec_()
         # close
         self.finish()
-    
+
     def addNewManField(self):
         # init new default name
         nameref='man'
@@ -335,12 +336,12 @@ class infoPartConfUI():
         while newref in self.confTemplate :
             indexref+=1
             newref = nameref + str(indexref)
-        # init new user name
-        newField=self.newOne.text()
+        newref = self.newOne.text()
+        newField = ""
         self.newOne.setText('')
-        self.addNewField(newref,newField)
-    
-    def addNewField(self,newref,newField):
+        self.addNewField(newref, newField)
+
+    def addNewField(self, newref, newField):
         # write new field on confTemplate
         self.confTemplate.setdefault(newref,{'userData': newField,'active': True })
         # write new field on line
@@ -362,8 +363,8 @@ class infoPartConfUI():
         # suppcombo
         self.suppCombo.addItem(newField)
         self.i+=1
-    
-    # Define the deleteField action   
+
+    # Define the deleteField action
     def deleteField(self):
         # delete all ref line and infos.text()
         delField = writeXml(self.suppCombo.currentText())
@@ -382,7 +383,7 @@ class infoPartConfUI():
         # delete it on confTemplate
         self.confTemplate.pop(self.refField)
         return
-    
+
     # function of return if autofield list is update or no and what is new
     def updateAutoFieldlist(self):
         # init list
@@ -399,7 +400,7 @@ class infoPartConfUI():
             return None
         else :
             return listDefault
-    
+
     # Define the update autoField module
     # if infoKeys.py Update have new-autoField
     # the user must be able to install them
@@ -407,7 +408,7 @@ class infoPartConfUI():
         upField = self.upCombo.currentText()
         self.upCombo.removeItem(self.upCombo.currentIndex())
         self.addNewField(upField,upField)
-        
+
 
     # Define the iUI
     def drawConfUI(self):
@@ -423,9 +424,9 @@ class infoPartConfUI():
         self.gridLayout = QtGui.QGridLayout()
         self.gridLayoutButtons = QtGui.QGridLayout()
         self.gridLayoutUpdate = QtGui.QGridLayout()
-        
+
         # make a first column with default data
-        default = QtGui.QLabel('default Data')
+        default = QtGui.QLabel('Field')
         self.gridLayout.addWidget(default,0,0)
         i=1
         for prop in self.confTemplate:
@@ -435,13 +436,13 @@ class infoPartConfUI():
             self.label.append(default)
             i+=1
         # make add and delete label
-        self.addnewLab = QtGui.QLabel('add New')
+        self.addnewLab = QtGui.QLabel('Field')
         self.gridLayoutButtons.addWidget(self.addnewLab,0,0)
-        self.suppLab = QtGui.QLabel('Delete')
+        self.suppLab = QtGui.QLabel('Field')
         self.gridLayoutButtons.addWidget(self.suppLab,1,0)
-        
+
         # make a second column with user data in QLinEdit
-        user = QtGui.QLabel('user Data')
+        user = QtGui.QLabel('Data')
         self.gridLayout.addWidget(user,0,1)
         i=1
         for prop in self.confTemplate:
@@ -461,10 +462,10 @@ class infoPartConfUI():
             if prop[0:3] == 'man' :
                 self.suppCombo.addItem(decodeXml(self.confTemplate.get(prop).get('userData')))
         self.gridLayoutButtons.addWidget(self.suppCombo,1,1)
-        
+
         # make a third column of QCheckBox for activate or not
-        active = QtGui.QLabel('active')
-        self.gridLayout.addWidget(active,0,2)
+        active = QtGui.QLabel('Active')
+        self.gridLayout.addWidget(active, 0, 2)
         i=1
         for prop in self.confTemplate:
             checkLayout = QtGui.QVBoxLayout()
@@ -473,41 +474,39 @@ class infoPartConfUI():
             self.gridLayout.addWidget(checked,i,2)
             self.checker.append(checked)
             i+=1
-        self.addnew = QtGui.QPushButton('add New')
+        self.addnew = QtGui.QPushButton('Add')
         self.gridLayoutButtons.addWidget(self.addnew,0,2)
         self.suppBut = QtGui.QPushButton('Delete')
         self.gridLayoutButtons.addWidget(self.suppBut,1,2)
         # Actions
         self.addnew.clicked.connect(self.addNewManField)
         self.suppBut.clicked.connect(self.deleteField)
-            
+
         # insert layout in mainlayout
         self.mainLayout.addLayout(self.gridLayout)
         self.mainLayout.addLayout(self.gridLayoutButtons)
-        
-        # If are there update show there
+
+        # If are there update, show
         if self.updateAutoFieldlist() != None :
-            updateLab = QtGui.QLabel('Update New Auto-infoField')
+            updateLab = QtGui.QLabel('Update auto-info field')
             self.gridLayoutUpdate.addWidget(updateLab,0,0)
             self.upCombo =  QtGui.QComboBox()
             self.gridLayoutUpdate.addWidget(self.upCombo,1,0)
             for prop in self.updateAutoFieldlist() :
                 self.upCombo.addItem(prop)
             self.upBut = QtGui.QPushButton('Update')
-            self.gridLayoutUpdate.addWidget(self.upBut,1,1)
+            self.gridLayoutUpdate.addWidget(self.upBut, 1, 1)
             # Actions
             self.upBut.clicked.connect(self.updateAutoField)
-            
+
             # insert layout in mainlayout
             self.mainLayout.addLayout(self.gridLayoutUpdate)
-        
-        
-        
+
+
 
 """
     +-----------------------------------------------+
     |       add the command to the workbench        |
     +-----------------------------------------------+
 """
-Gui.addCommand( 'Asm4_infoPart', infoPartCmd() )
-
+Gui.addCommand('Asm4_infoPart', infoPartCmd())
