@@ -89,15 +89,20 @@ class makeBOM:
         self.BOM.setPlainText(self.Verbose)
 
     def listParts(self, obj, level=0):
+
         file = open(ConfUserFilejson, 'r')
         self.infoKeysUser = json.load(file).copy()
         file.close()
+
         if obj == None:
             return
+
         if self.PartsList == None:
             self.PartsList = {}
 
         if obj.TypeId == 'App::Link':
+
+            #self.Verbose += "> LINK: " + obj.Label + " (" + obj.FullName + ")\n\n"
             self.listParts(obj.LinkedObject, level + 1)
 
         elif obj.TypeId == 'App::Part':
@@ -182,6 +187,42 @@ class makeBOM:
                                 data = str(obj.length).strip("mm") # Strip unity in case of the custom length (assuming mm)?
                             except:
                                 data = ""
+                        else:
+                            data = "-"
+
+                        self.Verbose +=  data + '\n'
+                        self.PartsList[obj.Label][self.infoKeysUser.get(prop).get('userData')] = data
+
+                    self.PartsList[obj.Label]['Qty.'] = 1
+                    self.Verbose += '\n'
+
+        elif obj.TypeId == 'PartDesign::Body':
+
+            if level > 0:
+
+                self.Verbose += "> PARTDESIGN: " + obj.Label + " (" + obj.FullName + ")\n"
+
+                if obj.Label in self.PartsList: # if the Part was already listed
+
+                    self.Verbose += "- object already added\n\n"
+                    self.PartsList[obj.Label]['Qty.'] = self.PartsList[obj.Label]['Qty.'] + 1
+
+                else: # if the part is a was not added already
+
+                    self.PartsList[obj.Label] = dict()
+                    for prop in self.infoKeysUser:
+
+                        self.Verbose +=  "- " + prop + ': '
+
+                        if prop == 'Doc_Label':
+                            if level == 1:
+                                # data = App.ActiveDocument.Name
+                                data = obj.Document.Name
+                            else:
+                                data = obj.FullName.split("#")[0]
+                                data = data.replace("_", "-") # Why FreeCad converts hyphens to underlines?
+                        elif prop == 'Part_Label':
+                            data = obj.Label
                         else:
                             data = "-"
 
