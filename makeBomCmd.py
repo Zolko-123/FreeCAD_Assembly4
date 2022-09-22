@@ -132,6 +132,9 @@ class makeBOM:
                                 else:
                                     data = "-"
 
+                                if data == "":
+                                    data = "-"
+
                                 self.Verbose +=  data + '\n'
                                 self.PartsList[obj.Label][self.infoKeysUser.get(prop).get('userData')] = data
 
