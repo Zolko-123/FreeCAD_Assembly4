@@ -106,7 +106,7 @@ class infoPartUI():
                         if self.infoKeysUser.get(propuser).get('userData') == prop:
                             if self.infoKeysUser.get(propuser).get('active') and self.infoKeysUser.get(propuser).get('visible'):
                                 value = self.part.getPropertyByName(prop)
-                                self.infoTable.append([prop,value])
+                                self.infoTable.append([prop, value])
 
     def makePartInfo(self, object, reset=False):
         """
@@ -149,9 +149,24 @@ class infoPartUI():
                 listpi.append(prop)
         for suppr in listpi: # delete all PartInfo properties
             self.part.removeProperty(suppr)
+
+        # Recover initial json file since fateners keys are being lost
+        partInfoDef = dict()
+        for prop in InfoKeys.partInfo:
+            partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': True})
+        for prop in InfoKeys.partInfo_Invisible:
+            partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': False})
+        try:
+            os.mkdir(ConfUserDir)
+        except:
+            pass
+        file = open(ConfUserFilejson, 'w')
+        json.dump(partInfoDef, file)
+        file.close()
+
         mb = QtGui.QMessageBox()
-        mb.setWindowTitle("Reset Fields")
-        mb.setText("The part fields\nhave been reset")
+        mb.setWindowTitle("Clear fileds")
+        mb.setText("The Part Info field\nhas been cleared")
         mb.exec_()
         self.finish()
 
@@ -159,9 +174,6 @@ class infoPartUI():
         InfoKeys.infoDefault(self)
 
     def finish(self):
-        """
-        Close dialog
-        """
         Gui.Control.closeDialog()
 
     def getStandardButtons(self):
@@ -186,7 +198,7 @@ class infoPartUI():
         for i, prop in enumerate(self.infoTable):
             for propuser in self.infoKeysUser:
                 if self.infoKeysUser.get(propuser).get('userData') == prop[0]:
-                    if self.infoKeysUser.get(propuser).get('active') and self.infoKeysUser.get(propuser).get('visible'):
+                    if self.infoKeysUser.get(propuser).get('active'): #and self.infoKeysUser.get(propuser).get('visible'):
                         checkLayout = QtGui.QHBoxLayout()
                         propValue = QtGui.QLineEdit()
                         propValue.setText(prop[1])
@@ -199,7 +211,7 @@ class infoPartUI():
 
         # Buttons
         self.buttonsLayout = QtGui.QHBoxLayout()
-        self.confFields = QtGui.QPushButton('Configure')
+        self.confFields = QtGui.QPushButton('Configure fields')
         self.confFields.setToolTip('Edit fields')
         self.reinit = QtGui.QPushButton('Reset fields')
         self.reinit.setToolTip('Reset fields')
@@ -259,23 +271,33 @@ class infoPartConfUI():
     def accept(self):
         i = 0
         for prop in self.confTemplate:
-            if self.infos[i].text() == '':
-                mb = QtGui.QMessageBox()
-                mb.setWindowTitle("BOM Configuration")
-                mb.setText("Fields cannot be blank\nYou must disable or delete it")
-                mb.exec_()
-                return
-            i += 1
+            if self.confTemplate.get(prop).get('visible'):
+                if self.infos[i].text() == '':
+                    mb = QtGui.QMessageBox()
+                    mb.setWindowTitle("BOM Configuration")
+                    mb.setText("Fields Name cannot be blank\nYou must disable or delete it")
+                    mb.exec_()
+                    return
+                i += 1
+
+
+        # Restore file and appen new config
+        partInfoDef = dict()
+        for prop in InfoKeys.partInfo:
+            partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': True})
+        for prop in InfoKeys.partInfo_Invisible:
+            partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': False})
 
         i = 0
-        config = dict()
+        # config = dict()
         for prop in self.confTemplate:
-            uData = writeXml(self.infos[i].text())
-            config.setdefault(prop, {'userData': uData.replace(" ", "_"), 'active': self.checker[i].isChecked(), 'visible': False})
-            i += 1
+            if self.confTemplate.get(prop).get('visible'):
+                uData = writeXml(self.infos[i].text())
+                partInfoDef.setdefault(prop, {'userData': uData.replace(" ", "_"), 'active': self.checker[i].isChecked(), 'visible': True})
+                i += 1
 
         file = open(ConfUserFilejson, 'w')
-        json.dump(config,file)
+        json.dump(partInfoDef, file)
         file.close()
 
         file = open(ConfUserFilejson, 'r')
@@ -328,7 +350,8 @@ class infoPartConfUI():
         self.checker.append(checked)
 
         # Suppcombo
-        self.suppCombo.addItem(newField)
+        self.suppCombo.addItem(newRef + " - " + newField)
+
         self.i += 1
 
     def deleteField(self):
@@ -336,28 +359,32 @@ class infoPartConfUI():
         Delete custom fields
         """
         delField = writeXml(self.suppCombo.currentText())
+        fieldRef = delField.split("-")[0].strip(" ")
+        fieldData = delField.split("-")[1].strip(" ")
         i = 0
         for prop in self.confTemplate:
-            if self.confTemplate.get(prop).get('userData') == delField:
-                self.label[i].deleteLater()
-                self.label.remove(self.label[i])
-                self.infos[i].deleteLater()
-                self.infos.remove(self.infos[i])
-                self.checker[i].deleteLater()
-                self.checker.remove(self.checker[i])
-                self.suppCombo.removeItem(i - len(self.infoKeysDefault))
-                self.refField = str(prop)
-            i += 1
+            if self.confTemplate.get(prop).get('visible'):
+                if str(prop) == fieldRef and self.confTemplate.get(prop).get('userData') == fieldData:
+                    self.label[i].deleteLater()
+                    self.label.remove(self.label[i])
+                    self.infos[i].deleteLater()
+                    self.infos.remove(self.infos[i])
+                    self.checker[i].deleteLater()
+                    self.checker.remove(self.checker[i])
+                    self.suppCombo.removeItem(i - len(self.infoKeysDefault))
+                    self.refField = str(prop)
+                i += 1
 
         self.confTemplate.pop(self.refField)
+
         return
 
     def updateAutoFieldlist(self):
         listUser = []
         for li in self.infoKeysUser:
             listUser.append(li)
-        listDefault = self.infoKeysDefault.copy()
 
+        listDefault = self.infoKeysDefault.copy()
         for li in listUser:
             try:
                 listDefault.remove(li)
@@ -433,8 +460,10 @@ class infoPartConfUI():
         self.suppCombo =  QtGui.QComboBox()
         for prop in self.confTemplate:
             if self.confTemplate.get(prop).get('visible'):
-                if prop[0:6] == 'Field':
-                    self.suppCombo.addItem(decodeXml(self.confTemplate.get(prop).get('userData')))
+                if prop[0:6] == 'Field_':
+                    fieldRef = prop
+                    fieldData = decodeXml(self.confTemplate.get(prop).get('userData'))
+                    self.suppCombo.addItem(fieldRef + " - " + fieldData)
 
         self.gridLayoutButtons.addWidget(self.suppCombo, 1, 1)
 

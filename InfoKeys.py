@@ -42,9 +42,9 @@ try:
     file.close()
 except:
     partInfoDef = dict()
-    for prop in InfoKeys.partInfo:
+    for prop in partInfo:
         partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': True})
-    for prop in InfoKeys.partInfo_Invisible:
+    for prop in partInfo_Invisible:
         partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': False})
     try:
         os.mkdir(ConfUserDir)
