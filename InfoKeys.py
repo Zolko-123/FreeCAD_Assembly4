@@ -9,60 +9,64 @@ import FreeCAD as App
 import infoPartCmd
 
 partInfo = [
-    'Label_Doc',
-    'Label_Part',
+    'Doc_Label',
+    'Part_Label',
     'Pad_Length',
     'Shape_Length',
-    'Shape_Volume',
+    'Shape_Volume']
+
+infoToolTip = {
+    'Doc_Label':    'Document or Group label',
+    'Part_Label':   'Part label',
+    'Pad_Length':   'Pad length',
+    'Shape_Length': 'Shape length',
+    'Shape_Volume': 'Object dimensions (x, y, z)'}
+
+partInfo_Invisible = [
     'Fastener_Diameter',
     'Fastener_Lenght',
     'Fastener_Type']
 
-infoToolTip = {
-    'Label_Doc':        'Document filename',
-    'Label_Part':       'Part label',
-    'Pad_Length':       'Pad lenght',
-    'Shape_Length':     'Shape lenght',
-    'Shape_Volume':     'Object dimensions (x, y, z)',
+infoToolTip_Invisible = {
     'Fastener_Diameter': 'Fastener diameter',
     'Fastener_Lenght':   'Fastener length',
     'Fastener_Type':     'Fastener type'}
 
-# protection against update of user configuration
-### to have the dir of external configuration file
 ConfUserDir = os.path.join(App.getUserAppDataDir(),'Templates')
 ConfUserFilename = "Asm4_infoPartConf.json"
 ConfUserFilejson = os.path.join(ConfUserDir, ConfUserFilename)
 
-
-try :
+# Check if the configuration file exists
+try:
     file = open(ConfUserFilejson, 'r')
     file.close()
-except :
+except:
     partInfoDef = dict()
     for prop in partInfo:
-        partInfoDef.setdefault(prop,{'userData':prop, 'active':True})
+        partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': True})
+    for prop in partInfo_Invisible:
+        partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': False})
     try:
         os.mkdir(ConfUserDir)
     except:
         pass
     file = open(ConfUserFilejson, 'x')
-    json.dump(partInfoDef,file)
+    json.dump(partInfoDef, file)
     file.close()
 
-
+# Load user's config file
 file = open(ConfUserFilejson, 'r')
 infoKeysUser = json.load(file).copy()
 file.close()
 
 
-def infoDefault(self, level):
+def infoDefault(self):
 
     file = open(ConfUserFilejson, 'r')
     infoKeysUser = json.load(file).copy()
     file.close()
 
-    try :
+    try:
         self.TypeId
         part = self
     except AttributeError:
@@ -70,59 +74,42 @@ def infoDefault(self, level):
 
     doc = part.Document
 
-    if part.TypeId == 'App::Part':
+    for i in range(len(part.Group)):
+        if part.Group[i].TypeId == 'PartDesign::Body':
+            body = part.Group[i]
+            for i in range(len(body.Group)):
+                if body.Group[i].TypeId == 'PartDesign::Pad':
+                    pad = body.Group[i]
+                    try:
+                        sketch = pad.Profile[0]
+                    except NameError :
+                        print('There is no Sketch on a Pad of the Part', part.FullName)
 
-        for i in range(len(part.Group)):
-            if part.Group[i].TypeId == 'PartDesign::Body':
-                body = part.Group[i]
-                for i in range(len(body.Group)):
-                    if body.Group[i].TypeId == 'PartDesign::Pad':
-                        pad = body.Group[i]
-                        try :
-                            sketch = pad.Profile[0]
-                        except NameError :
-                            print('There is no Sketch on a Pad of the Part', part.FullName)
+        try:
+            LabelDoc(self, part, doc)
+        except NameError:
+            print('LabelDoc: there is no Document on the Part ', part.FullName)
 
-            try:
-                LabelDoc(self, part, doc)
-            except NameError:
-                print('LabelDoc: there is no Document on the Part ', part.FullName)
+        try:
+            LabelPart(self, part)
+        except NameError:
+            print('LabelPart: Part does not exist')
 
-            try:
-                LabelPart(self, part)
-            except NameError:
-                print('LabelPart: Part does not exist')
+        try:
+            PadLength(self, part, pad)
+        except NameError:
+            print('PadLenght: there is no Pad in the Part ', part.FullName)
 
-            try:
-                PadLength(self, part, pad)
-            except NameError:
-                print('PadLenght: there is no Pad on the Part ', part.FullName)
+        try:
+            ShapeLength(self, part, sketch)
+        except NameError:
+            print('ShapeLength: there is no Sketch in the Part ', part.FullName)
 
-            try:
-                ShapeLength(self, part, sketch)
-            except NameError:
-                print('ShapeLength: there is no Sketch on the Part ', part.FullName)
+        try:
+            ShapeVolume(self, part, body)
+        except:
+            print('ShapeVolume: there is no Shape in the Part ', part.FullName)
 
-            try:
-                ShapeVolume(self, part, body)
-            except:
-                print('ShapeVolume: there is no Shape on the Part ', part.FullName)
-
-
-    elif part.TypeId == 'Part::FeaturePython' and part.Content.find("FastenersCmd") > -1: # fastners
-
-        a  = Fastener_LabelDoc(self, doc, part, level)
-        b  = Fastener_LabelPart(self, part)
-        c  = Fastener_Diameter(self, part)
-        d  = Fastener_Lenght(self, part)
-        e  = Fastener_Type(self, part)
-
-        print("\nObject", part.FullName)
-        print("Fastener_LabelDoc", a)
-        print("Fastener_LabelPart", b)
-        print("Fastener_Diameter", c)
-        print("Fastener_Lenght", d)
-        print("Fastener_Type", e)
 
 
 """
@@ -142,11 +129,11 @@ How to create a NEW_AUTOINFO_FIELD:
                 self.TypeId
                 setattr(part, auto_info_field, str(auto_info_fill))
             except AttributeError:
-                # If the command comes from infoPartUI, write info on autofilling field on UI
-                try :
+                # If the command comes from infoPartUI, write info on auto-filling field on UI
+                try:
                     # If the field is active
                     for i in range(len(self.infoTable)):
-                        if self.infoTable[i][0]== auto_info_field :
+                        if self.infoTable[i][0] == auto_info_field:
                             self.infos[i].setText(str(auto_info_fill))
                 except AttributeError:
                     # If the field is not active
@@ -154,38 +141,38 @@ How to create a NEW_AUTOINFO_FIELD:
 """
 
 def LabelDoc(self, part, doc):
-    auto_info_field = infoKeysUser.get('Label_Doc').get('userData')
+    auto_info_field = infoKeysUser.get('Doc_Label').get('userData')
     auto_info_fill = doc.Label
     try:
         self.TypeId
         setattr(part, auto_info_field, auto_info_fill)
     except AttributeError:
-        try :
+        try:
             for i in range(len(self.infoTable)):
                 if self.infoTable[i][0] == auto_info_field:
                     self.infos[i].setText(auto_info_fill)
         except AttributeError:
-            pass
+            self.infos[i].setText("-")
 
 
 def LabelPart(self, part):
-    auto_info_field = infoKeysUser.get('Label_Part').get('userData')
+    auto_info_field = infoKeysUser.get('Part_Label').get('userData')
     auto_info_fill = part.Label
     try:
         self.TypeId
         setattr(part, auto_info_field, auto_info_fill)
     except AttributeError:
-        try :
+        try:
             for i in range(len(self.infoTable)):
                 if self.infoTable[i][0] == auto_info_field:
                     self.infos[i].setText(auto_info_fill)
         except AttributeError:
-            pass
+            self.infos[i].setText("-")
 
 
 def PadLength(self, part, pad):
     auto_info_field = infoKeysUser.get('Pad_Length').get('userData')
-    try :
+    try:
         auto_info_fill = str(pad.Length).replace('mm','')
     except AttributeError:
         return
@@ -194,17 +181,17 @@ def PadLength(self, part, pad):
         self.TypeId
         setattr(part, auto_info_field, auto_info_fill)
     except AttributeError:
-        try :
+        try:
             for i in range(len(self.infoTable)):
                 if self.infoTable[i][0] == auto_info_field:
                     self.infos[i].setText(auto_info_fill)
         except AttributeError:
-            pass
+            self.infos[i].setText("-")
 
 
 def ShapeLength(self, part, sketch):
     auto_info_field = infoKeysUser.get('Shape_Length').get('userData')
-    try :
+    try:
         auto_info_fill = str(sketch.Shape.Length)
     except AttributeError:
         return
@@ -213,27 +200,26 @@ def ShapeLength(self, part, sketch):
         self.TypeId
         setattr(part, auto_info_field, auto_info_fill)
     except AttributeError:
-        try :
+        try:
             for i in range(len(self.infoTable)):
                 if self.infoTable[i][0] == auto_info_field:
                     self.infos[i].setText(auto_info_fill)
         except AttributeError:
-            pass
+            self.infos[i].setText("-")
 
 
 def ShapeVolume(self, part, body):
     auto_info_field = infoKeysUser.get('Shape_Volume').get('userData')
     bbc = body.Shape.BoundBox
-    auto_info_fill = str(str(round(bbc.ZLength,3)) + str(' mm x ') + str(round(bbc.YLength,3)) + str(' mm x ') + str(round(bbc.XLength,3)) + str(' mm'))
+    auto_info_fill = str(str(round(bbc.ZLength, 3)) + str(' mm x ') + str(round(bbc.YLength, 3)) + str(' mm x ') + str(round(bbc.XLength, 3)) + str(' mm'))
 
     try:
         self.TypeId
         setattr(part, auto_info_field, auto_info_fill)
     except AttributeError:
-        try :
+        try:
             for i in range(len(self.infoTable)):
                 if self.infoTable[i][0] == auto_info_field:
                     self.infos[i].setText(auto_info_fill)
         except AttributeError:
-            pass
-
+            self.infos[i].setText("-")
