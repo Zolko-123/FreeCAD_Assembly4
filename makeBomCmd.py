@@ -72,7 +72,7 @@ class makeBOM:
         self.modelDoc = App.ActiveDocument
         try:
             self.model = self.modelDoc.Assembly
-            print("BOM of Assembly 4 Model")
+            print("BOM of the Assembly 4 Model")
         except:
             try:
                 self.model = self.modelDoc.Model
