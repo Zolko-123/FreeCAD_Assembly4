@@ -83,32 +83,38 @@ def infoDefault(self):
                     try:
                         sketch = pad.Profile[0]
                     except NameError :
-                        print('There is no Sketch on a Pad of the Part', part.FullName)
+                        # print('There is no Sketch on a Pad of the Part', part.FullName)
+                        pass
 
         try:
             LabelDoc(self, part, doc)
         except NameError:
-            print('LabelDoc: there is no Document on the Part ', part.FullName)
+            # print('LabelDoc: there is no Document on the Part ', part.FullName)
+            pass
 
         try:
             LabelPart(self, part)
         except NameError:
-            print('LabelPart: Part does not exist')
+            # print('LabelPart: Part does not exist')
+            pass
 
         try:
             PadLength(self, part, pad)
         except NameError:
-            print('PadLenght: there is no Pad in the Part ', part.FullName)
+            # print('PadLenght: there is no Pad in the Part ', part.FullName)
+            pass
 
         try:
             ShapeLength(self, part, sketch)
         except NameError:
-            print('ShapeLength: there is no Sketch in the Part ', part.FullName)
+            # print('ShapeLength: there is no Sketch in the Part ', part.FullName)
+            pass
 
         try:
             ShapeVolume(self, part, body)
-        except:
-            print('ShapeVolume: there is no Shape in the Part ', part.FullName)
+        except NameError:
+            # print('ShapeVolume: there is no Shape in the Part ', part.FullName)
+            pass
 
 
 
