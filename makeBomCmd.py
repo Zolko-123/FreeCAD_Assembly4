@@ -72,7 +72,7 @@ class makeBOM:
         self.modelDoc = App.ActiveDocument
         try:
             self.model = self.modelDoc.Assembly
-            print("BOM for Assembly 4 Model")
+            print("BOM of Assembly 4 Model")
         except:
             try:
                 self.model = self.modelDoc.Model
@@ -88,7 +88,11 @@ class makeBOM:
         self.inSpreadsheet()
         self.BOM.setPlainText(self.Verbose)
 
-    def listParts(self, obj, level=0):
+    def indent(self, level, tag="|"):
+        spaces = (level + 1) * "  "
+        return "[{level}]{spaces}{tag} ".format(level=str(level), tag=tag, spaces=spaces)
+
+    def listParts(self, obj, level=0, parent=None, grandparent=None, asm4_obj=False):
 
         file = open(ConfUserFilejson, 'r')
         self.infoKeysUser = json.load(file).copy()
@@ -102,67 +106,119 @@ class makeBOM:
 
         if obj.TypeId == 'App::Link':
 
-            #self.Verbose += "> LINK: " + obj.Label + " (" + obj.FullName + ")\n\n"
-            self.listParts(obj.LinkedObject, level + 1)
+            print("ASM4> {level}{obj_typeid} | {obj_name} | {obj_label}".format(level=self.indent(level), obj_label=obj.Label, obj_name=obj.FullName, obj_typeid=obj.TypeId))
+
+            self.Verbose += "> {level} | {type}: {label}, {fullname}".format(level=obj.Label, type="LINK", label=obj.Label, fullname=obj.FullName)
+            self.Verbose += "- linked: {linked_obj}\n".format(linked_obj=obj.LinkedObject.Name)
+            self.Verbose += '- not included in the BOM\n\n'
+
+            self.listParts(obj.LinkedObject, level + 1, parent=obj, grandparent=parent, asm4_obj=True)
 
         elif obj.TypeId == 'App::Part':
 
-            if level > 0:
+            # if level > 0 and parent.TypeId == "App:Link":
+            if level > 0 and grandparent.TypeId == "App::Link" and obj.Visibility == True and obj.Label != "Model":
 
-                if obj.Label != "Model": # Exclude the Model object
+                if obj.Label in self.PartsList:
 
-                    self.Verbose += "> PART: " + obj.Label + " (" + obj.FullName + ")\n"
+                    qtd = self.PartsList[obj.Label]['Qty.'] + 1
 
-                    if obj.Label in self.PartsList: # if the Part was already listed
+                    print("ASM4> {level}({qtd}) {obj_typeid} | {obj_name} | {obj_label}".format(level=self.indent(level, tag=" "), obj_label=obj.Label, obj_name=obj.FullName, obj_typeid=obj.TypeId, qtd=qtd))
 
-                            self.Verbose += "- object already added\n\n"
-                            self.PartsList[obj.Label]['Qty.'] = self.PartsList[obj.Label]['Qty.'] + 1
+                    self.Verbose += "> {level} | {type}: {label}, {fullname}\n".format(level=obj.Label, type="PART", label=obj.Label, fullname=obj.FullName)
+                    self.Verbose += "- object already added\n\n"
+                    self.PartsList[obj.Label]['Qty.'] = qtd
 
-                    else: # if the part is a was not added already
+                else: # if the part is a was not added already
 
-                        self.PartsList[obj.Label] = dict()
-                        for prop in self.infoKeysUser:
+                    print("ASM4> {level}(1) {obj_typeid} | {obj_name} | {obj_label}".format(level=self.indent(level, tag=" "), obj_label=obj.Label, obj_name=obj.FullName, obj_typeid=obj.TypeId))
 
-                            self.Verbose +=  "- " + prop + ': '
+                    self.Verbose += "> {level} | {type}: {label}, {fullname}\n".format(level=obj.Label, type="PART", label=obj.Label, fullname=obj.FullName)
 
-                            if self.infoKeysUser.get(prop).get('active'):
-                                try: # to get partInfo
-                                    getattr(obj, self.infoKeysUser.get(prop).get('userData'))
-                                except AttributeError:
-                                    crea(self,obj)
-                                    fill(obj)
+                    self.PartsList[obj.Label] = dict()
+                    for prop in self.infoKeysUser:
 
-                                if self.infoKeysUser.get(prop).get('visible'):
-                                    data = getattr(obj, self.infoKeysUser.get(prop).get('userData'))
-                                else:
-                                    data = "-"
+                        self.Verbose +=  "- " + prop + ': '
 
-                                if data == "":
-                                    data = "-"
+                        if self.infoKeysUser.get(prop).get('active'):
+                            try: # to get partInfo
+                                getattr(obj, self.infoKeysUser.get(prop).get('userData'))
+                            except AttributeError:
+                                crea(self,obj)
+                                fill(obj)
 
-                                self.Verbose +=  data + '\n'
-                                self.PartsList[obj.Label][self.infoKeysUser.get(prop).get('userData')] = data
+                            if self.infoKeysUser.get(prop).get('visible'):
+                                data = getattr(obj, self.infoKeysUser.get(prop).get('userData'))
+                            else:
+                                data = "-"
 
-                        self.PartsList[obj.Label]['Qty.'] = 1
-                        self.Verbose += '\n'
+                            if data == "":
+                                data = "-"
+
+                            self.Verbose +=  data + '\n'
+                            self.PartsList[obj.Label][self.infoKeysUser.get(prop).get('userData')] = data
+
+                    self.PartsList[obj.Label]['Qty.'] = 1
+                    self.Verbose += '\n'
 
             # Walk through nested objects
             for objname in obj.getSubObjects():
                 subobj = obj.Document.getObject(objname[0:-1])
-                self.listParts(subobj, level + 1)
+                self.listParts(subobj, level + 1, parent=obj, grandparent=parent, asm4_obj=False)
 
-        elif obj.TypeId == 'Part::FeaturePython' and obj.Content.find("FastenersCmd") > -1: # Fasteners
+        elif obj.TypeId == 'PartDesign::Body':
 
             if level > 0:
 
-                self.Verbose += "> FASTENER: " + obj.Label + " (" + obj.FullName + ")\n"
+                print("ASM4> {level}(1) {obj_typeid} | {obj_name} | {obj_label}".format(level=self.indent(level, tag=" "), obj_label=obj.Label, obj_name=obj.FullName, obj_typeid=obj.TypeId))
 
-                if obj.Label in self.PartsList: # if the Part was already listed
+                self.Verbose += "> {level} | {type}: {label}, {fullname}\n".format(level=obj.Label, type="PARTDESIGN", label=obj.Label, fullname=obj.FullName)
 
+                if obj.Name[0:4] == "Body":
+                    # obj_label = obj.Parents[0][0].Label
+                    obj_label = parent.Label
+                else:
+                    obj_label = obj.Label
+
+                self.PartsList[obj_label] = dict()
+                for prop in self.infoKeysUser:
+
+                    self.Verbose +=  "- " + prop + ': '
+
+                    if prop == 'Doc_Label':
+                        data = obj.Document.Label
+                    elif prop == 'Part_Label':
+                        data = obj_label
+                    else:
+                        data = "-"
+
+                    if data != "-":
+                        self.Verbose += data + '\n'
+
+                    self.PartsList[obj_label][self.infoKeysUser.get(prop).get('userData')] = data
+
+                self.PartsList[obj_label]['Qty.'] = 1
+                self.Verbose += '\n'
+
+        elif obj.TypeId == 'Part::Feature':
+
+            if level > 0 and grandparent.TypeId == "App::Link" and obj.Visibility == True:
+
+                if obj.Label in self.PartsList:
+
+                    qtd = self.PartsList[obj.Label]['Qty.'] + 1
+
+                    print("ASM4> {level}({qtd}) {obj_typeid} | {obj_name} | {obj_label}".format(level=self.indent(level, tag=" "), obj_label=obj.Label, obj_name=obj.FullName, obj_typeid=obj.TypeId, qtd=qtd))
+
+                    self.Verbose += "> {level} | {type}: {label}, {fullname}\n".format(level=obj.Label, type="PART", label=obj.Label, fullname=obj.FullName)
                     self.Verbose += "- object already added\n\n"
-                    self.PartsList[obj.Label]['Qty.'] = self.PartsList[obj.Label]['Qty.'] + 1
+                    self.PartsList[obj.Label]['Qty.'] = qtd
 
-                else: # if the part is a was not added already
+                else:
+
+                    print("ASM4> {level}(1) {obj_typeid} | {obj_name} | {obj_label}".format(level=self.indent(level, tag=" "), obj_label=obj.Label, obj_name=obj.FullName, obj_typeid=obj.TypeId))
+
+                    self.Verbose += "> {level} | {type}: {label}, {fullname}\n".format(level=obj.Label, type="PARTFEATURE", label=obj.Label, fullname=obj.FullName)
 
                     self.PartsList[obj.Label] = dict()
                     for prop in self.infoKeysUser:
@@ -170,12 +226,47 @@ class makeBOM:
                         self.Verbose +=  "- " + prop + ': '
 
                         if prop == 'Doc_Label':
-                            if level == 1:
-                                # data = App.ActiveDocument.Name
-                                data = obj.Document.Name
-                            else:
-                                data = obj.FullName.split("#")[0]
-                                data = data.replace("_", "-") # Why FreeCad converts hyphens to underlines?
+                            data = obj.Document.Label
+                        elif prop == 'Part_Label':
+                            data = obj.Label
+                        else:
+                            data = "-"
+
+                        if data != "-":
+                            self.Verbose += data + '\n'
+
+                        self.PartsList[obj.Label][self.infoKeysUser.get(prop).get('userData')] = data
+
+                    self.PartsList[obj.Label]['Qty.'] = 1
+                    self.Verbose += '\n'
+
+        elif obj.TypeId == 'Part::FeaturePython' and obj.Content.find("FastenersCmd") > -1:
+
+            if level > 0 and obj.Visibility:
+
+                if obj.Label in self.PartsList:
+
+                    qtd = self.PartsList[obj.Label]['Qty.'] + 1
+
+                    print("ASM4> {level}({qtd}) {obj_typeid} | {obj_name} | {obj_label}".format(level=self.indent(level, tag=" "), obj_label=obj.Label, obj_name=obj.FullName, obj_typeid=obj.TypeId, qtd=qtd))
+
+                    self.Verbose += "> {level} | {type}: {label}, {fullname}\n".format(level=obj.Label, type="FASTENER", label=obj.Label, fullname=obj.FullName)
+                    self.Verbose += "- object already added\n\n"
+                    self.PartsList[obj.Label]['Qty.'] = qtd
+
+                else: # if the part is a was not added already
+
+                    print("ASM4> {level}(1) {obj_typeid} | {obj_name} | {obj_label}".format(level=self.indent(level, tag=" "), obj_label=obj.Label, obj_name=obj.FullName, obj_typeid=obj.TypeId))
+
+                    self.Verbose += "> {level} | {type}: {label}, {fullname}\n".format(level=obj.Label, type="FASTENER", label=obj.Label, fullname=obj.FullName)
+
+                    self.PartsList[obj.Label] = dict()
+                    for prop in self.infoKeysUser:
+
+                        self.Verbose +=  "- " + prop + ': '
+
+                        if prop == 'Doc_Label':
+                            data = obj.Document.Label
                         elif prop == 'Part_Label':
                             data = obj.Label
                         elif prop == "Fastener_Diameter":
@@ -190,43 +281,9 @@ class makeBOM:
                         else:
                             data = "-"
 
-                        self.Verbose +=  data + '\n'
-                        self.PartsList[obj.Label][self.infoKeysUser.get(prop).get('userData')] = data
+                        if data != "-":
+                            self.Verbose += data + '\n'
 
-                    self.PartsList[obj.Label]['Qty.'] = 1
-                    self.Verbose += '\n'
-
-        elif obj.TypeId == 'PartDesign::Body':
-
-            if level > 0:
-
-                self.Verbose += "> PARTDESIGN: " + obj.Label + " (" + obj.FullName + ")\n"
-
-                if obj.Label in self.PartsList: # if the Part was already listed
-
-                    self.Verbose += "- object already added\n\n"
-                    self.PartsList[obj.Label]['Qty.'] = self.PartsList[obj.Label]['Qty.'] + 1
-
-                else: # if the part is a was not added already
-
-                    self.PartsList[obj.Label] = dict()
-                    for prop in self.infoKeysUser:
-
-                        self.Verbose +=  "- " + prop + ': '
-
-                        if prop == 'Doc_Label':
-                            if level == 1:
-                                # data = App.ActiveDocument.Name
-                                data = obj.Document.Name
-                            else:
-                                data = obj.FullName.split("#")[0]
-                                data = data.replace("_", "-") # Why FreeCad converts hyphens to underlines?
-                        elif prop == 'Part_Label':
-                            data = obj.Label
-                        else:
-                            data = "-"
-
-                        self.Verbose +=  data + '\n'
                         self.PartsList[obj.Label][self.infoKeysUser.get(prop).get('userData')] = data
 
                     self.PartsList[obj.Label]['Qty.'] = 1
@@ -265,6 +322,9 @@ class makeBOM:
                     spreadsheet.set(str(chr(ord('a') + i)).upper() + str(row + 1), str(d))
 
         data = list(plist.values())
+        data = sorted(data, key=lambda d: d['Doc_Label'])
+        # data = sorted(data, key=itemgetter('Doc_Label', 'Part_Label'))
+
         wrow(data[0].keys(), 0)
         for i, _ in enumerate(data):
             wrow(data[i].values(), i + 1)
