@@ -387,6 +387,11 @@ class placePartUI():
         self.XtranslSpinBox.setValue( self.selectedObj.AttachmentOffset.Base.x )
         self.YtranslSpinBox.setValue( self.selectedObj.AttachmentOffset.Base.y )
         self.ZtranslSpinBox.setValue( self.selectedObj.AttachmentOffset.Base.z )
+        # connect the actions (must be done after init)
+        self.XtranslSpinBox.valueChanged.connect(self.movePart)
+        self.YtranslSpinBox.valueChanged.connect(self.movePart)
+        self.ZtranslSpinBox.valueChanged.connect(self.movePart)
+
 
 
     # defines the UI, only static elements
@@ -475,7 +480,7 @@ class placePartUI():
         self.RotXButton.clicked.connect( self.onRotX )
         self.RotYButton.clicked.connect( self.onRotY )
         self.RotZButton.clicked.connect( self.onRotZ)
-        self.XtranslSpinBox.valueChanged.connect(self.movePart)
-        self.YtranslSpinBox.valueChanged.connect(self.movePart)
-        self.ZtranslSpinBox.valueChanged.connect(self.movePart)
+        #self.XtranslSpinBox.valueChanged.connect(self.movePart)
+        #self.YtranslSpinBox.valueChanged.connect(self.movePart)
+        #self.ZtranslSpinBox.valueChanged.connect(self.movePart)
 
