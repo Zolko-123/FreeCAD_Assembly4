@@ -59,11 +59,11 @@ class makeBOM:
     def GetResources(self):
 
         if self.follow_subassemblies:
-            menutext = "Create Part List"
-            tooltip  = "Create the Bill of Materials of the Assembly with the sub-assemblies"
+            menutext = "Bill of Materials"
+            tooltip  = "Create the Bill of Materials of the Assembly including sub-assemblies"
             iconFile = os.path.join( Asm4.iconPath, 'Asm4_PartsList_Subassemblies.svg' )
         else:
-            menutext = "Create Local Part List"
+            menutext = "Local Bill of Materials"
             tooltip  = "Create the Bill of Materials of the Assembly"
             iconFile = os.path.join( Asm4.iconPath, 'Asm4_PartsList.svg' )
 
@@ -110,9 +110,9 @@ class makeBOM:
         self.infoKeysUser = json.load(file).copy()
         file.close()
 
-        max_level = 10
+        max_level = 100
         if self.follow_subassemblies:
-            max_level = 1;
+            max_level = 2;
 
         if obj == None:
             return
@@ -136,6 +136,8 @@ class makeBOM:
         elif obj.TypeId == 'App::Part':
 
             if level > 0 and grandparent.TypeId == "App::Link" and obj.Visibility == True and obj.Label != "Model" and level <= max_level:
+            # if level > 0 and Asm4.isAsm4Model(obj) and obj.Visibility == True and obj.Label != "Model" and level <= max_level:
+
 
                 if obj.Label in self.PartsList:
 
@@ -181,7 +183,7 @@ class makeBOM:
 
         elif obj.TypeId == 'PartDesign::Body':
 
-            if level > 0 and level <= max_level:
+            if level > 0 and obj.Visibility == True and level <= max_level:
 
                 if obj.Name[0:4] == "Body":
                     obj_label = parent.Label
@@ -226,7 +228,8 @@ class makeBOM:
 
         elif obj.TypeId == 'Part::Feature':
 
-            if level > 0 and grandparent.TypeId == "App::Link" and obj.Visibility == True and level <= max_level:
+            # if level > 0 and grandparent.TypeId == "App::Link" and obj.Visibility == True and level <= max_level:
+            if level > 0 and Asm4.isAsm4Model(obj) and obj.Visibility == True and level <= max_level:
 
                 if obj.Label in self.PartsList:
 
@@ -315,8 +318,6 @@ class makeBOM:
 
         # Continue walking inside the groups
         if obj.TypeId == 'App::Part' or obj.TypeId == 'App::DocumentObjectGroup' and level <= max_level:
-
-            # Walk through nested objects
             for objname in obj.getSubObjects():
                 subobj = obj.Document.getObject(objname[0:-1])
                 self.listParts(subobj, level, parent=obj, grandparent=parent)
@@ -342,11 +343,11 @@ class makeBOM:
                 spreadsheet = document.BOM
             spreadsheet.Label = "BOM"
         else:
-            if not hasattr(document, 'Local_BOM'):
-                spreadsheet = document.addObject('Spreadsheet::Sheet', 'Local_BOM')
+            if not hasattr(document, 'BOM_Local'):
+                spreadsheet = document.addObject('Spreadsheet::Sheet', 'BOM_Local')
             else:
-                spreadsheet = document.Local_BOM
-            spreadsheet.Label = "Local_BOM"
+                spreadsheet = document.BOM_Local
+            spreadsheet.Label = "BOM_Local"
 
         spreadsheet.clearAll()
 
@@ -378,7 +379,7 @@ class makeBOM:
         if self.follow_subassemblies:
             Gui.Selection.addSelection(document.Name, 'BOM')
         else:
-            Gui.Selection.addSelection(document.Name, 'Local_BOM')
+            Gui.Selection.addSelection(document.Name, 'BOM_Local')
         self.UI.close()
 
     def drawUI(self):
