@@ -145,11 +145,11 @@ class makeBOM:
                 # self.Verbose += '- not included\n\n'
 
                 # Navigate on objects inside a App:Links (Groups of Fastners)
-                if obj.ElementCount == 0:
-                    self.listParts(obj.LinkedObject, level + 1, parent=obj)
-                else:
+                if obj.ElementCount > 0:
                     for i in range(obj.ElementCount):
                         self.listParts(obj.LinkedObject, level, parent=obj)
+                else:
+                    self.listParts(obj.LinkedObject, level + 1, parent=obj)
 
         #==================================
         # MODEL_PART aka ASM4 SUB-ASSEMBLY
@@ -372,7 +372,7 @@ class makeBOM:
         # FATENERS
         #============================
 
-        elif (obj.TypeId == 'Part::FeaturePython') and (obj.Content.find("FastenersCmd") or obj.Content.find("PCBStandoff")) > -1:
+        elif obj.TypeId == 'Part::FeaturePython' and (obj.Content.find("FastenersCmd") or (obj.Content.find("PCBStandoff")) > -1):
 
             if level > 0 and level <= max_level:
 
@@ -442,8 +442,8 @@ class makeBOM:
         if obj.TypeId == 'App::Part':
             for objname in obj.getSubObjects():
                 subobj = obj.Document.getObject(objname[0:-1])
-                if subobj.TypeId == 'App::Link' or subobj.TypeId == 'App::DocumentObjectGroup':
-                    self.listParts(subobj, level+1, parent=obj)
+                # if subobj.TypeId == 'App::Link' or subobj.TypeId == 'App::DocumentObjectGroup':
+                self.listParts(subobj, level+1, parent=obj)
 
         return
 
