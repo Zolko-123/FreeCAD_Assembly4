@@ -306,7 +306,7 @@ class makeBOM:
 
         elif obj.TypeId == 'PartDesign::Body':
 
-            if level > 0 and level <= max_level:  #if level > 0 and parent.TypeId == "App:Link":
+            if level > 0 and level <= max_level and parent.TypeId == "App:Link":
 
                 # Recover the record, if any
                 try:
