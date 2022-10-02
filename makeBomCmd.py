@@ -111,7 +111,7 @@ class makeBOM:
         spaces = (level + 1) * "  "
         return "[{level}]{spaces}{tag} ".format(level=str(level), tag=tag, spaces=spaces)
 
-    def listParts(self, obj, level=0, parent=None, grandparent=None):
+    def listParts(self, obj, level=0, parent=None):
 
         file = open(ConfUserFilejson, 'r')
         self.infoKeysUser = json.load(file).copy()
@@ -144,7 +144,7 @@ class makeBOM:
                     self.Verbose += "- linked: {linked_obj}\n".format(linked_obj=obj.Name)
                 self.Verbose += '- not included in the BOM\n\n'
 
-                self.listParts(obj.LinkedObject, level + 1, parent=obj, grandparent=parent)
+                self.listParts(obj.LinkedObject, level + 1, parent=obj)
 
 
         #==================================
@@ -301,7 +301,7 @@ class makeBOM:
                     self.Verbose += '\n'
 
         #============================
-        # STANDALONE MODEL_PART
+        # STANDALONE MODEL_PARTDESIGN
         #============================
 
         elif obj.TypeId == 'PartDesign::Body':
@@ -361,7 +361,7 @@ class makeBOM:
         # FATENERS
         #============================
 
-        elif (obj.TypeId == 'Part::FeaturePython' or obj.TypeId == "Part::FeaturePython") and (obj.Content.find("FastenersCmd") or obj.Content.find("PCBStandoff")) > -1:
+        elif (obj.TypeId == 'Part::FeaturePython') and (obj.Content.find("FastenersCmd") or obj.Content.find("PCBStandoff")) > -1:
 
             if level > 0 and level <= max_level:
 
@@ -413,20 +413,23 @@ class makeBOM:
                     self.Verbose += '\n'
 
 
-        else:
-            print("@", obj.TypeId)
-            # @ Part::FeaturePython
+        # else:
+            # print("@", obj.TypeId)
 
 
-
-        #============================
+        #===================================
         # Continue walking inside the groups
-        #============================
+        #===================================
 
-        if obj.TypeId == 'App::Part' or obj.TypeId == 'App::DocumentObjectGroup':
+        if obj.TypeId == 'App::DocumentObjectGroup':
             for objname in obj.getSubObjects():
                 subobj = obj.Document.getObject(objname[0:-1])
-                self.listParts(subobj, level+1, parent=obj, grandparent=parent)
+                self.listParts(subobj, level, parent=obj)
+
+        if obj.TypeId == 'App::Part':
+            for objname in obj.getSubObjects():
+                subobj = obj.Document.getObject(objname[0:-1])
+                self.listParts(subobj, level+1, parent=obj)
 
         return
 
