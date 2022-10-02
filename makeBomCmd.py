@@ -137,15 +137,19 @@ class makeBOM:
 
                 print("ASM4> {level}{obj_typeid} | {obj_name} | {obj_label}".format(level=self.indent(level), obj_label=obj.Label, obj_name=obj.FullName, obj_typeid=obj.TypeId))
 
-                self.Verbose += "> {level} | {type}: {label}, {fullname}".format(level=obj.Label, type="APP_LINK", label=obj.Label, fullname=obj.FullName)
-                try:
-                    self.Verbose += "- linked: {linked_obj}\n".format(linked_obj=obj.LinkedObject.Name)
-                except:
-                    self.Verbose += "- linked: {linked_obj}\n".format(linked_obj=obj.Name)
-                self.Verbose += '- not included\n\n'
+                # self.Verbose += "> {level} | {type}: {label}, {fullname}".format(level=obj.Label, type="APP_LINK", label=obj.Label, fullname=obj.FullName)
+                # try:
+                #     self.Verbose += "- linked: {linked_obj}\n".format(linked_obj=obj.LinkedObject.Name)
+                # except:
+                #     self.Verbose += "- linked: {linked_obj}\n".format(linked_obj=obj.Name)
+                # self.Verbose += '- not included\n\n'
 
-                self.listParts(obj.LinkedObject, level + 1, parent=obj)
-
+                # Navigate on objects inside a App:Links (Groups of Fastners)
+                if obj.ElementCount == 0:
+                    self.listParts(obj.LinkedObject, level + 1, parent=obj)
+                else:
+                    for i in range(obj.ElementCount):
+                        self.listParts(obj.LinkedObject, level, parent=obj)
 
         #==================================
         # MODEL_PART aka ASM4 SUB-ASSEMBLY
@@ -372,7 +376,7 @@ class makeBOM:
 
             if level > 0 and level <= max_level:
 
-                doc_name = obj.Document.Name #obj.Document.Label
+                doc_name = obj.Document.Name
 
                 if obj.Label in self.PartsList:
 
@@ -424,12 +428,11 @@ class makeBOM:
         # else:
             # print("@", obj.TypeId)
 
-
         #===================================
         # Continue walking inside the groups
         #===================================
 
-        # Navigate on objects inide a folder
+        # Navigate on objects inide a folders
         if obj.TypeId == 'App::DocumentObjectGroup':
             for objname in obj.getSubObjects():
                 subobj = obj.Document.getObject(objname[0:-1])
