@@ -142,7 +142,7 @@ class makeBOM:
                     self.Verbose += "- linked: {linked_obj}\n".format(linked_obj=obj.LinkedObject.Name)
                 except:
                     self.Verbose += "- linked: {linked_obj}\n".format(linked_obj=obj.Name)
-                self.Verbose += '- not included in the BOM\n\n'
+                self.Verbose += '- not included\n\n'
 
                 self.listParts(obj.LinkedObject, level + 1, parent=obj)
 
@@ -185,7 +185,7 @@ class makeBOM:
                         print("ASM4> {level}| {qtd}x | {obj_typeid} | {obj_name} | {obj_label}".format(level=self.indent(level, tag=" "), obj_label=obj_label, obj_name=obj.FullName, obj_typeid=obj.TypeId, qtd=qtd))
 
                         self.Verbose += "> {level} | {type}: {label}, {fullname}\n".format(level=obj_label, type="ASM4_PART", label=obj_label, fullname=obj.FullName)
-                        self.Verbose += "- object already added\n\n"
+                        self.Verbose += "- object already added (" + str(qtd) + ")\n\n"
                         self.PartsList[obj_label]['Qty.'] = qtd
 
                 else:
@@ -193,6 +193,7 @@ class makeBOM:
                     print("ASM4> {level}| 1x | {obj_typeid} | {obj_name} | {obj_label}".format(level=self.indent(level, tag=" "), obj_label=obj_label, obj_name=obj.FullName, obj_typeid=obj.TypeId))
 
                     self.Verbose += "> {level} | {type}: {label}, {fullname}\n".format(level=obj_label, type="ASM4_PART", label=obj_label, fullname=obj.FullName)
+                    self.Verbose += "- adding object (1)\n"
 
                     self.PartsList[obj_label] = dict()
                     for prop in self.infoKeysUser:
@@ -200,9 +201,11 @@ class makeBOM:
                         if self.infoKeysUser.get(prop).get('active'):
                             try: # to get partInfo
                                 getattr(obj, self.infoKeysUser.get(prop).get('userData'))
+                                info = "(predefined)"
                             except AttributeError:
                                 crea(self,obj)
                                 fill(obj)
+                                info = "(extracted)"
 
                             if self.infoKeysUser.get(prop).get('visible'):
                                 data = getattr(obj, self.infoKeysUser.get(prop).get('userData'))
@@ -216,7 +219,7 @@ class makeBOM:
                                 data = obj_label
 
                             if data != "-":
-                                self.Verbose += "- " + prop + ': ' + data + '\n'
+                                self.Verbose += "- " + prop + ": " + data + " " + info + "\n"
 
                             self.PartsList[obj_label][self.infoKeysUser.get(prop).get('userData')] = data
 
@@ -262,7 +265,7 @@ class makeBOM:
                         print("ASM4> {level}| {qtd}x | {obj_typeid} | {obj_name} | {obj_label}".format(level=self.indent(level, tag=" "), obj_label=obj_label, obj_name=obj.FullName, obj_typeid=obj.TypeId, qtd=qtd))
 
                         self.Verbose += "> {level} | {type}: {label}, {fullname}\n".format(level=obj_label, type="PART", label=obj_label, fullname=obj.FullName)
-                        self.Verbose += "- object already added\n\n"
+                        self.Verbose += "- object already added (" + str(qtd) + ")\n\n"
                         self.PartsList[obj_label]['Qty.'] = qtd
 
                 else:
@@ -270,6 +273,7 @@ class makeBOM:
                     print("ASM4> {level}| 1x | {obj_typeid} | {obj_name} | {obj_label}".format(level=self.indent(level, tag=" "), obj_label=obj_label, obj_name=obj.FullName, obj_typeid=obj.TypeId))
 
                     self.Verbose += "> {level} | {type}: {label}, {fullname}\n".format(level=obj_label, type="PART", label=obj_label, fullname=obj.FullName)
+                    self.Verbose += "- adding object (1)\n"
 
                     self.PartsList[obj_label] = dict()
                     for prop in self.infoKeysUser:
@@ -277,9 +281,11 @@ class makeBOM:
                         if self.infoKeysUser.get(prop).get('active'):
                             try: # to get partInfo
                                 getattr(obj, self.infoKeysUser.get(prop).get('userData'))
+                                info = "(predefined)"
                             except AttributeError:
                                 crea(self,obj)
                                 fill(obj)
+                                info = "(extracted)"
 
                             if self.infoKeysUser.get(prop).get('visible'):
                                 data = getattr(obj, self.infoKeysUser.get(prop).get('userData'))
@@ -293,7 +299,7 @@ class makeBOM:
                                 data = obj_label
 
                             if data != "-":
-                                self.Verbose += "- " + prop + ': ' + data + '\n'
+                                self.Verbose += "- " + prop + ": " + data + " " + info + "\n"
 
                             self.PartsList[obj_label][self.infoKeysUser.get(prop).get('userData')] = data
 
@@ -306,7 +312,7 @@ class makeBOM:
 
         elif obj.TypeId == 'PartDesign::Body':
 
-            if level > 0 and level <= max_level and parent.TypeId == "App:Link":
+            if level > 0 and level <= max_level and Asm4.isAsm4Model(parent):
 
                 # Recover the record, if any
                 try:
@@ -327,7 +333,7 @@ class makeBOM:
                         print("ASM4> {level}{qtd}x | {obj_typeid} | {obj_name} | {obj_label}".format(level=self.indent(level, tag=" "), obj_label=obj.Label, obj_name=obj.FullName, obj_typeid=obj.TypeId, qtd=qtd))
 
                         self.Verbose += "> {level} | {type}: {label}, {fullname}\n".format(level=obj.Label, type="PART", label=obj.Label, fullname=obj.FullName)
-                        self.Verbose += "- object already added\n\n"
+                        self.Verbose += "- object already added (" + str(qtd) + ")\n\n"
                         self.PartsList[obj.Label]['Qty.'] = qtd
 
                 else:
@@ -335,6 +341,7 @@ class makeBOM:
                     print("ASM4> {level}1x | {obj_typeid} | {obj_name} | {obj_label}".format(level=self.indent(level, tag=" "), obj_label=obj.Label, obj_name=obj.FullName, obj_typeid=obj.TypeId))
 
                     self.Verbose += "> {level} | {type}: {label}, {fullname}\n".format(level=obj.Label, type="PARTDESIGN", label=obj.Label, fullname=obj.FullName)
+                    self.Verbose += "- adding object (1)\n"
 
                     self.PartsList[obj.Label] = dict()
                     for prop in self.infoKeysUser:
@@ -376,7 +383,7 @@ class makeBOM:
                         print("ASM4> {level}| {qtd}x | {obj_typeid} | {obj_name} | {obj_label}".format(level=self.indent(level, tag=" "), obj_label=obj.Label, obj_name=obj.FullName, obj_typeid=obj.TypeId, qtd=qtd))
 
                         self.Verbose += "> {level} | {type}: {label}, {fullname}\n".format(level=obj.Label, type="FASTENER", label=obj.Label, fullname=obj.FullName)
-                        self.Verbose += "- object already added\n\n"
+                        self.Verbose += "- object already added (" + str(qtd) + ")\n\n"
                         self.PartsList[obj.Label]['Qty.'] = qtd
 
                 else: # if the part is a was not added already
@@ -384,6 +391,7 @@ class makeBOM:
                     print("ASM4> {level}| 1x | {obj_typeid} | {obj_name} | {obj_label}".format(level=self.indent(level, tag=" "), obj_label=obj.Label, obj_name=obj.FullName, obj_typeid=obj.TypeId))
 
                     self.Verbose += "> {level} | {type}: {label}, {fullname}\n".format(level=obj.Label, type="FASTENER", label=obj.Label, fullname=obj.FullName)
+                    self.Verbose += "- adding object (1)\n"
 
                     self.PartsList[obj.Label] = dict()
                     for prop in self.infoKeysUser:
@@ -421,15 +429,18 @@ class makeBOM:
         # Continue walking inside the groups
         #===================================
 
+        # Navigate on objects inide a folder
         if obj.TypeId == 'App::DocumentObjectGroup':
             for objname in obj.getSubObjects():
                 subobj = obj.Document.getObject(objname[0:-1])
                 self.listParts(subobj, level, parent=obj)
 
+        # Navigate on objects inide a ASM4 Part (Links and Folders)
         if obj.TypeId == 'App::Part':
             for objname in obj.getSubObjects():
                 subobj = obj.Document.getObject(objname[0:-1])
-                self.listParts(subobj, level+1, parent=obj)
+                if subobj.TypeId == 'App::Link' or subobj.TypeId == 'App::DocumentObjectGroup':
+                    self.listParts(subobj, level+1, parent=obj)
 
         return
 
@@ -470,9 +481,7 @@ class makeBOM:
                 else:
                     spreadsheet.set(str(chr(ord('a') + i)).upper() + str(row + 1), str(d))
 
-        data = list(plist.values())
-        # data = sorted(data, key=lambda d: d['Doc_Label'])
-        # data = sorted(data, key=itemgetter('Doc_Label', 'Part_Label'))
+        data = list(plist.values()) # present data in the order it is in the Object tree
 
         wrow(data[0].keys(), 0)
         for i, _ in enumerate(data):
