@@ -7,6 +7,7 @@
 
 import os
 import json
+import re
 
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
@@ -378,32 +379,34 @@ class makeBOM:
 
                 doc_name = obj.Document.Name
 
-                if obj.Label in self.PartsList:
+                obj_label = re.sub(r'[0-9]+$', '', obj.Label)
 
-                    if self.PartsList[obj.Label]['Doc_Label'] == doc_name:
+                if obj_label in self.PartsList:
 
-                        qtd = self.PartsList[obj.Label]['Qty.'] + 1
+                    if self.PartsList[obj_label]['Doc_Label'] == doc_name:
 
-                        print("ASM4> {level}| {qtd}x | {obj_typeid} | {obj_name} | {obj_label}".format(level=self.indent(level, tag=" "), obj_label=obj.Label, obj_name=obj.FullName, obj_typeid=obj.TypeId, qtd=qtd))
+                        qtd = self.PartsList[obj_label]['Qty.'] + 1
 
-                        self.Verbose += "> {level} | {type}: {label}, {fullname}\n".format(level=obj.Label, type="FASTENER", label=obj.Label, fullname=obj.FullName)
+                        print("ASM4> {level}| {qtd}x | {obj_typeid} | {obj_name} | {obj_label}".format(level=self.indent(level, tag=" "), obj_label=obj_label, obj_name=obj.FullName, obj_typeid=obj.TypeId, qtd=qtd))
+
+                        self.Verbose += "> {level} | {type}: {label}, {fullname}\n".format(level=obj_label, type="FASTENER", label=obj_label, fullname=obj.FullName)
                         self.Verbose += "- object already added (" + str(qtd) + ")\n\n"
-                        self.PartsList[obj.Label]['Qty.'] = qtd
+                        self.PartsList[obj_label]['Qty.'] = qtd
 
                 else: # if the part is a was not added already
 
-                    print("ASM4> {level}| 1x | {obj_typeid} | {obj_name} | {obj_label}".format(level=self.indent(level, tag=" "), obj_label=obj.Label, obj_name=obj.FullName, obj_typeid=obj.TypeId))
+                    print("ASM4> {level}| 1x | {obj_typeid} | {obj_name} | {obj_label}".format(level=self.indent(level, tag=" "), obj_label=obj_label, obj_name=obj.FullName, obj_typeid=obj.TypeId))
 
-                    self.Verbose += "> {level} | {type}: {label}, {fullname}\n".format(level=obj.Label, type="FASTENER", label=obj.Label, fullname=obj.FullName)
+                    self.Verbose += "> {level} | {type}: {label}, {fullname}\n".format(level=obj_label, type="FASTENER", label=obj_label, fullname=obj.FullName)
                     self.Verbose += "- adding object (1)\n"
 
-                    self.PartsList[obj.Label] = dict()
+                    self.PartsList[obj_label] = dict()
                     for prop in self.infoKeysUser:
 
                         if prop == 'Doc_Label':
                             data = doc_name
                         elif prop == 'Part_Label':
-                            data = obj.Label
+                            data = obj_label
                         elif prop == "Fastener_Diameter":
                             data = obj.diameter
                         elif prop == "Fastener_Type":
@@ -419,7 +422,7 @@ class makeBOM:
                         if data != "-":
                             self.Verbose += "- " + prop + ': ' + data + '\n'
 
-                        self.PartsList[obj.Label][self.infoKeysUser.get(prop).get('userData')] = data
+                        self.PartsList[obj_label][self.infoKeysUser.get(prop).get('userData')] = data
 
                     self.PartsList[obj.Label]['Qty.'] = 1
                     self.Verbose += '\n'
