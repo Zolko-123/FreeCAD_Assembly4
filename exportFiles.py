@@ -22,9 +22,9 @@ class listLinkedFiles:
     def __init__(self, show_tree=False):
         super(listLinkedFiles, self).__init__()
         self.show_tree = show_tree
-        self.relative_path = False
-        if show_tree:
-            self.relative_path = True
+        self.relative_path = True
+        # if show_tree:
+            # self.relative_path = True
 
     def GetResources(self):
         if self.show_tree:
@@ -162,14 +162,20 @@ class exportFiles:
         filepath = App.ActiveDocument.FileName
         root_dirpath = os.path.dirname(filepath)
 
+        # Save the current path
+        current_path = os.getcwd()
+
+        # Change dir to the Asembly file path
+        os.chdir(root_dirpath)
+
         # Create the Zip file
-        # zippath = os.path.join("/tmp", filename + ".zip")
         zippath = os.path.join("./", filename + "_asm4.zip")
         zip_obj = ZipFile(zippath, 'w')
 
         # Add multiple files to the zip
+        remove_zip = False
         for filepath in self.linked_files:
-            filepath = os.path.relpath(filepath, root_dirpath)
+            # filepath = os.path.relpath(filepath, root_dirpath)
             print("ASM4> [ZIP] Adding file:", filepath)
             try:
                 zip_obj.write(filepath)
@@ -185,6 +191,8 @@ class exportFiles:
         else:
             print("ASM4> Zip Package", zippath, "was created.")
 
+        # Revert current path
+        os.chdir(current_path)
 
 # Add the command in the workbench
 Gui.addCommand('Asm4_listLinkedFiles', listLinkedFiles(show_tree=False))
