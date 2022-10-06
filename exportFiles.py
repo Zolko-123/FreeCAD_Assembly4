@@ -9,7 +9,7 @@ import json
 import re
 
 from anytree import Node, RenderTree
-from zipfile import ZipFile
+import zipfile
 
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
@@ -113,12 +113,14 @@ class listLinkedFiles:
 
         linked_files, file_tree = find_linked_files(relative_path=relative_path)
 
+        linked_files = set(linked_files) # uniq files
+
         if verbose:
             if show_tree:
                 for pre, fill, node in RenderTree(file_tree):
                     print("%s%s" % (pre, node.name))
             else:
-                for i, filepath in enumerate(sorted(set(linked_files))):
+                for i, filepath in enumerate(sorted(linked_files)):
                     print("{:3d} - {}".format(i+1, filepath))
 
         return linked_files
@@ -152,6 +154,11 @@ class exportFiles:
         self.modelDoc = App.ActiveDocument
         print("ASM4> Exporting files to a .zip package")
 
+
+        # Ask for a place and file name to save the exported file...
+        # Open the file browser in the curretn file path
+        # self.zip_filepath =
+
         self.linked_files = listLinkedFiles(show_tree=False).get_linked_files()
         self.export_zip_package()
 
@@ -173,17 +180,19 @@ class exportFiles:
 
         # Create the Zip file
         zippath = os.path.join(root_dirpath, filename + "_asm4.zip")
-        zip_obj = ZipFile(zippath, 'w')
+        zip_obj = zipfile.ZipFile(zippath, 'w', zipfile.ZIP_DEFLATED)
 
         # Add files to the package
         remove_zip = False
-        for filepath in self.linked_files:
+        for i, filepath in enumerate(self.linked_files):
             # filepath = os.path.relpath(filepath, root_dirpath)
-            print("ASM4> [ZIP] Adding file:", filepath)
+            print("ASM4> [ZIP] {}, adding file {}".format(i+1, filepath))
+            absfilepath = os.path.join(root_dirpath, filepath)
+            arcname = os.path.basename(filepath)
             try:
-                zip_obj.write(filepath)
+                zip_obj.write(filepath, filepath)
             except:
-                print("ASM4> [ZIP] Error: Cannot add files from outside of the folder")
+                print("ASM4> [ZIP] Error: Cannot create the zip package")
                 remove_zip = True
                 break
 
@@ -193,12 +202,12 @@ class exportFiles:
             os.remove(zippath)
             print("ASM4> Zip could not be created.")
         else:
-            print("ASM4> Zip Package", zippath, "was created.")
+            print("ASM4> Zip package {} was created.".format(zippath))
 
         # Revert current path
         os.chdir(current_path)
 
 # Add the command in the workbench
-Gui.addCommand('Asm4_listLinkedFiles', listLinkedFiles(show_tree=False))
 Gui.addCommand('Asm4_listLinkedFilesTree', listLinkedFiles(show_tree=True))
+Gui.addCommand('Asm4_listLinkedFiles', listLinkedFiles(show_tree=False))
 Gui.addCommand('Asm4_exportFiles', exportFiles())
