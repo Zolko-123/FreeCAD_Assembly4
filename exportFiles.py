@@ -158,21 +158,24 @@ class exportFiles:
     def export_zip_package(self):
         print("ASM4, Creating a zip package with linked files")
 
-        filename = App.ActiveDocument.Name
-        filepath = App.ActiveDocument.FileName
-        root_dirpath = os.path.dirname(filepath)
-
-        # Save the current path
         current_path = os.getcwd()
 
-        # Change dir to the Asembly file path
+        filename = App.ActiveDocument.Name
+        relfilepath = App.ActiveDocument.FileName # GUI uses absolute path, CLI the path given byt the user
+
+        root_dirpath = os.path.dirname(relfilepath)
+
+        # Chdir dor not like empty path (when Freecad was opened in the same path of the FCStd file)
+        if root_dirpath == "":
+            root_dirpath = "./"
+
         os.chdir(root_dirpath)
 
         # Create the Zip file
-        zippath = os.path.join("./", filename + "_asm4.zip")
+        zippath = os.path.join(root_dirpath, filename + "_asm4.zip")
         zip_obj = ZipFile(zippath, 'w')
 
-        # Add multiple files to the zip
+        # Add files to the package
         remove_zip = False
         for filepath in self.linked_files:
             # filepath = os.path.relpath(filepath, root_dirpath)
@@ -188,6 +191,7 @@ class exportFiles:
 
         if remove_zip:
             os.remove(zippath)
+            print("ASM4> Zip could not be created.")
         else:
             print("ASM4> Zip Package", zippath, "was created.")
 
