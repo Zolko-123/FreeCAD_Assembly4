@@ -377,8 +377,7 @@ class makeBOM:
 
             if level > 0 and level <= max_level:
 
-                doc_name = obj.Document.Name
-
+                doc_name = os.path.splitext(os.path.basename(obj.Document.FileName))[0]
                 obj_label = re.sub(r'[0-9]+$', '', obj.Label)
 
                 if obj_label in self.PartsList:
