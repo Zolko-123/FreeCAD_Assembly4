@@ -70,11 +70,11 @@ class listLinkedFiles:
                 if obj == None:
                     return
 
-                filepath = obj.getLinkedObject().Document.FileName
-                if relative_path:
-                    filepath = os.path.relpath(filepath, root_dirpath)
-
                 if obj.TypeId == "App::Link":
+
+                    filepath = obj.LinkedObject.Document.FileName #obj.getLinkedObject().Document.FileName
+                    if relative_path:
+                        filepath = os.path.relpath(filepath, root_dirpath)
 
                     indexes_of_current_level = [idx for idx, s in enumerate(linked_files_level) if str(level) in str(s)]
                     linked_files_at_current_level = [linked_files[idx] for idx in indexes_of_current_level]
@@ -91,7 +91,7 @@ class listLinkedFiles:
                 if obj.TypeId == 'App::DocumentObjectGroup' or obj.TypeId == 'App::Part':
                     for objname in obj.getSubObjects():
                         subobj = obj.Document.getObject(objname[0:-1])
-                        find_files(subobj, root_dirpath, level, relative_path=relative_path, parent_node=parent_node, parent_filepath=filepath)
+                        find_files(subobj, root_dirpath, level, relative_path=relative_path, parent_node=parent_node, parent_filepath=parent_filepath)
 
             linked_files = []
             linked_files_level = []
@@ -122,6 +122,7 @@ class listLinkedFiles:
             else:
                 for i, filepath in enumerate(sorted(linked_files)):
                     print("{:3d} - {}".format(i+1, filepath))
+            print("ASM4> Listing ended")
 
         return linked_files
 
