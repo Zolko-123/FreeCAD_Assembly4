@@ -187,24 +187,31 @@ class exportFiles:
         # TODO: Check if this doc_root_dirpath is always right
         zippath = os.path.join(doc_root_dirpath, filename + "_asm4.zip")
         zip_obj = zipfile.ZipFile(zippath, 'w', zipfile.ZIP_DEFLATED)
-
-        # TODO: Create a symlink of the file in the root folder to add in the zip,
-        # if the assembly is not in the root folderw
-        # os.symlink(src, dst)
+        zip_obj.create_system = 3 # symlink support
 
         # Add files to the package
         remove_zip = False
         for i, filepath in enumerate(self.linked_files):
             relfilepath = os.path.relpath(filepath, root_dirpath)
             print("ASM4> [ZIP] {}, adding file {}".format(i+1, relfilepath))
-            # absfilepath = os.path.join(root_dirpath, filepath)
-            # arcname = os.path.basename(filepath)
             try:
                 zip_obj.write(filepath, relfilepath)
             except:
                 print("ASM4> Error: Cannot create the zip package")
                 remove_zip = True
                 break
+
+            if os.path.splitext(os.path.basename(filepath))[0] == filename:
+                assembly_symlink_path = filename + ".FCStd"
+                if not os.path.isfile(assembly_symlink_path):
+                    relfilepath = os.path.relpath(filepath, root_dirpath)
+                    print("ASM4> [ZIP] {}, creating symlink {} to {}".format("_", assembly_symlink_path, relfilepath))
+                    os.symlink(relfilepath, assembly_symlink_path)
+                    print("ASM4> [ZIP] {}, adding symlink {}".format("_", assembly_symlink_path))
+                    zip_info = zipfile.ZipInfo(assembly_symlink_path)
+                    zip_info.external_attr |= 0xA0000000
+                    zip_obj.writestr(zip_info, os.readlink(assembly_symlink_path))
+                    os.remove(assembly_symlink_path) # remove symlink created
 
         zip_obj.close()
 
