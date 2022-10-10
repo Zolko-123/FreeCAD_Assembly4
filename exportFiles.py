@@ -29,12 +29,18 @@ class listLinkedFiles:
 
     def GetResources(self):
         if self.show_tree:
-            menutext = "List Linked Files (Tree)"
-            tooltip  = "List linked files in a tree, (currently in the console)"
+            menutext = "Tree of Linked Files"
+            tooltip = """
+                Show the tree of linked files.
+                Currently is displyed in the Console View.
+            """
             iconFile = os.path.join(Asm4.iconPath, 'Asm4_List_Liked_Files_Tree.svg')
         else:
-            menutext = "List Linked Files"
-            tooltip  = "List linked files, (currently in the console)"
+            menutext = "List of Linked Files"
+            tooltip = """
+                List unique linked files.
+                Currently it displyed in the Console View.
+            """
             iconFile = os.path.join(Asm4.iconPath, 'Asm4_List_Liked_Files.svg')
 
         return {
@@ -135,8 +141,10 @@ class exportFiles:
 
     def GetResources(self):
 
-        menutext = "Export Files"
-        tooltip  = "Create a .zip file with files following the while hierarchy"
+        menutext = "Export Linked Files"
+        tooltip = """
+            Creates a .zip file with linked files.
+        """
         iconFile = os.path.join(Asm4.iconPath, 'Asm4_Export_PartsList.svg')
 
         return {
