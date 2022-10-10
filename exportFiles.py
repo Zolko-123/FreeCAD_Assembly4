@@ -19,10 +19,11 @@ import Asm4_libs as Asm4
 
 class listLinkedFiles:
 
-    def __init__(self, show_tree=False):
+    def __init__(self, show_tree=False, relative_path=True):
         super(listLinkedFiles, self).__init__()
         self.show_tree = show_tree
-        self.relative_path = True
+        self.relative_path = relative_path
+        # self.relative_path = True
         # if show_tree:
             # self.relative_path = True
 
@@ -160,7 +161,7 @@ class exportFiles:
         # Open the file browser in the curretn file path
         # self.zip_filepath =
 
-        self.linked_files = listLinkedFiles(show_tree=False).get_linked_files()
+        self.linked_files = listLinkedFiles(show_tree=False, relative_path=False).get_linked_files()
         self.export_zip_package()
 
     def export_zip_package(self):
@@ -170,8 +171,11 @@ class exportFiles:
 
         filename = App.ActiveDocument.Name
         relfilepath = App.ActiveDocument.FileName # GUI uses absolute path, CLI the path given byt the user
+        doc_root_dirpath = os.path.dirname(relfilepath)
 
-        root_dirpath = os.path.dirname(relfilepath)
+        common_path = os.path.commonpath(self.linked_files)
+        print("ASM4> Common path: \"{}\"".format(common_path))
+        root_dirpath = common_path
 
         # Chdir dor not like empty path (when Freecad was opened in the same path of the FCStd file)
         if root_dirpath == "":
@@ -180,20 +184,25 @@ class exportFiles:
         os.chdir(root_dirpath)
 
         # Create the Zip file
-        zippath = os.path.join(root_dirpath, filename + "_asm4.zip")
+        # TODO: Check if this doc_root_dirpath is always right
+        zippath = os.path.join(doc_root_dirpath, filename + "_asm4.zip")
         zip_obj = zipfile.ZipFile(zippath, 'w', zipfile.ZIP_DEFLATED)
+
+        # TODO: Create a symlink of the file in the root folder to add in the zip,
+        # if the assembly is not in the root folderw
+        # os.symlink(src, dst)
 
         # Add files to the package
         remove_zip = False
         for i, filepath in enumerate(self.linked_files):
-            # filepath = os.path.relpath(filepath, root_dirpath)
-            print("ASM4> [ZIP] {}, adding file {}".format(i+1, filepath))
-            absfilepath = os.path.join(root_dirpath, filepath)
-            arcname = os.path.basename(filepath)
+            relfilepath = os.path.relpath(filepath, root_dirpath)
+            print("ASM4> [ZIP] {}, adding file {}".format(i+1, relfilepath))
+            # absfilepath = os.path.join(root_dirpath, filepath)
+            # arcname = os.path.basename(filepath)
             try:
-                zip_obj.write(filepath, filepath)
+                zip_obj.write(filepath, relfilepath)
             except:
-                print("ASM4> [ZIP] Error: Cannot create the zip package")
+                print("ASM4> Error: Cannot create the zip package")
                 remove_zip = True
                 break
 
