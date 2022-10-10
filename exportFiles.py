@@ -17,6 +17,7 @@ import FreeCAD as App
 
 import Asm4_libs as Asm4
 
+
 class listLinkedFiles:
 
     def __init__(self, show_tree=False, relative_path=True):
@@ -164,10 +165,13 @@ class exportFiles:
         self.modelDoc = App.ActiveDocument
         print("ASM4> Exporting files to a .zip package")
 
-
-        # Ask for a place and file name to save the exported file...
-        # Open the file browser in the curretn file path
-        # self.zip_filepath =
+        filename = App.ActiveDocument.Name
+        relfilepath = App.ActiveDocument.FileName # GUI uses absolute path, CLI the path given byt the user
+        doc_root_dirpath = os.path.dirname(relfilepath)
+        suggested_zip_file = os.path.join(doc_root_dirpath, filename + "_asm4.zip")
+        self.zip_filepath = QtGui.QFileDialog.getSaveFileName(None, "Export Linked Files (as .zip)", suggested_zip_file, "All files (*)", "")[0]
+        if self.zip_filepath == "":
+            return
 
         self.linked_files = listLinkedFiles(show_tree=False, relative_path=False).get_linked_files()
         self.export_zip_package()
@@ -185,7 +189,7 @@ class exportFiles:
         print("ASM4> Common path: \"{}\"".format(common_path))
         root_dirpath = common_path
 
-        # Chdir dor not like empty path (when Freecad was opened in the same path of the FCStd file)
+        # Chdir does not like empty path (when Freecad was opened in the same path of the FCStd file)
         if root_dirpath == "":
             root_dirpath = "./"
 
@@ -193,8 +197,7 @@ class exportFiles:
 
         # Create the Zip file
         # TODO: Check if this doc_root_dirpath is always right
-        zippath = os.path.join(doc_root_dirpath, filename + "_asm4.zip")
-        zip_obj = zipfile.ZipFile(zippath, 'w', zipfile.ZIP_DEFLATED)
+        zip_obj = zipfile.ZipFile(self.zip_filepath, 'w', zipfile.ZIP_DEFLATED)
         zip_obj.create_system = 3 # symlink support
 
         # Add files to the package
@@ -224,10 +227,10 @@ class exportFiles:
         zip_obj.close()
 
         if remove_zip:
-            os.remove(zippath)
+            os.remove(self.zip_filepath)
             print("ASM4> Zip could not be created.")
         else:
-            print("ASM4> Zip package {} was created.".format(zippath))
+            print("ASM4> Zip package {} was created.".format(self.zip_filepath))
 
         # Revert current path
         os.chdir(current_path)
