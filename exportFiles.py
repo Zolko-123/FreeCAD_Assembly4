@@ -33,14 +33,14 @@ class listLinkedFiles:
             menutext = "Tree of Linked Files"
             tooltip = """
                 Show the tree of linked files.
-                Currently is displyed in the Console View.
+                Currently is displyed in the Report View.
             """
             iconFile = os.path.join(Asm4.iconPath, 'Asm4_List_Liked_Files_Tree.svg')
         else:
             menutext = "List of Linked Files"
             tooltip = """
                 List unique linked files.
-                Currently it displyed in the Console View.
+                Currently it displyed in the Report View.
             """
             iconFile = os.path.join(Asm4.iconPath, 'Asm4_List_Liked_Files.svg')
 
