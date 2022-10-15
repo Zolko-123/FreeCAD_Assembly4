@@ -14,7 +14,7 @@ from FreeCAD import Console as FCC
 import Asm4_libs as Asm4
 
 
-'''
+"""
     +-----------------------------------------------+
     |              a variant link class             |
     +-----------------------------------------------+
@@ -39,7 +39,7 @@ from Asm4_objects import VariantLink
 var = App.ActiveDocument.addObject('Part::FeaturePython', 'varLink', VariantLink(),None,True)
 tmpDoc = App.newDocument( 'TmpDoc', hidden=True, temp=True )
 tmpDoc.addObject('App::Part
-'''
+"""
 
 
 class VariantLink(object):
@@ -197,7 +197,7 @@ class VariantLink(object):
             # this changes the available variant parameters
             if prop == 'SourceObject':
                 pass
-                '''
+                """
                 if obj.LinkedObject is None:
                     FCC.PrintMessage('Creating new variant ...\n')
                     self.makeVarLink(obj)
@@ -208,7 +208,7 @@ class VariantLink(object):
                 # setting the LinkedObject to the SourceObject temporarily
                 # obj.LinkedObject = obj.SourceObject
                 # self.makeVariant(obj)
-                '''
+                """
 
     # this is never actually called
     def onLostLinkToObject(self, obj):
@@ -222,7 +222,7 @@ class VariantLink(object):
         obj.LinkedObject = obj.SourceObject
 
 
-'''
+"""
     +-----------------------------------------------+
     |           a general link array class          |
     +-----------------------------------------------+
@@ -231,7 +231,7 @@ class VariantLink(object):
 
 from Asm4_objects import LinkArray
 la = App.ActiveDocument.addObject('Part::FeaturePython', 'linkArray', LinkArray(),None,True)
-'''
+"""
 
 
 class LinkArray(object):
@@ -304,11 +304,11 @@ class LinkArray(object):
                 obj.ElementCount = 1
 
 
-'''
+"""
     +-----------------------------------------------+
     |                   ViewProvider                |
     +-----------------------------------------------+
-'''
+"""
 
 
 class ViewProviderArray(object):
@@ -348,15 +348,15 @@ class ViewProviderArray(object):
         return None
 
 
-'''
+"""
     +-----------------------------------------------+
     |          a circular link array class          |
     +-----------------------------------------------+
-'''
+"""
 
 
 class CircularArray(LinkArray):
-    '''This class is only for backwards compability'''
+    """This class is only for backwards compability"""
 
     # do the calculation of the elements' Placements
     def execute(self, obj):
@@ -410,18 +410,18 @@ class CircularArray(LinkArray):
         return False  # to call LinkExtension::execute()   <= is this rally needed ?
 
 
-'''
+"""
     +-----------------------------------------------+
     |        an expression link array class         |
     +-----------------------------------------------+
     array.setExpression('ElementPlacement', 'create(<<placement>>; create(<<Vector>>; 1; 0; 0); create(<<rotation>>; 360 / ElementCount * ElementIndex; 0; 0); LCS_0.Placement.Base) * SourceObject.Placement')
     create(<<placement>>; create(<<Vector>>; 1; 0; 0); create(<<rotation>>; 360 / ElementCount * ElementIndex; 0; 0); DirBase) * .SourceObject.Placement
-'''
+"""
 
 
 def checkArraySelection():
-    '''Check axis and returns an Expression that calculates the axis placement.
-       Fails if it contains more than two objects.'''
+    """Check axis and returns an Expression that calculates the axis placement.
+       Fails if it contains more than two objects."""
     obj = None
     objParent = None
     axisExpr = None
@@ -515,10 +515,10 @@ class ExpressionArray(LinkArray):
 
     # do the calculation of the elements Placements
     def execute(self, obj):
-        ''' The placement is calculated to follow the axis placement
+        """ The placement is calculated to follow the axis placement
         This can be disabled by user by clearing the AxisPlacement property
         or create the array without an axis selected
-        Without AxisPlacement the Array will follow the SourceObject origin Z axis.'''
+        Without AxisPlacement the Array will follow the SourceObject origin Z axis."""
 
         # Source Object
         if not obj.SourceObject:
