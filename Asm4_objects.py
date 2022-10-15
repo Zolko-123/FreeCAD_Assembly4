@@ -552,7 +552,6 @@ class PolarArray(ExpressionArray):
         super().attach(obj)
         obj.setPropertyStatus('ElementPlacement', 'Hidden')
         obj.setPropertyStatus('LinearStep',       'Hidden')
-        obj.setPropertyStatus('ElementOffset',    'Hidden')
         obj.LinearStep = 0
 
     # # not yet ready code for upgrading ols circular arrays
