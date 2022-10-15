@@ -194,7 +194,7 @@ class VariantLink(object):
             # this changes the available variant parameters
             if prop == 'SourceObject':
                 pass
-                """
+                '''
                 if obj.LinkedObject is None:
                     FCC.PrintMessage('Creating new variant ...\n')
                     self.makeVarLink(obj)
@@ -205,7 +205,7 @@ class VariantLink(object):
                 # setting the LinkedObject to the SourceObject temporarily
                 # obj.LinkedObject = obj.SourceObject
                 # self.makeVariant(obj)
-                """
+                '''
 
     # this is never actually called
     def onLostLinkToObject(self, obj):

@@ -57,7 +57,6 @@ class Assembly4Workbench(Workbench):
         # FreeCAD.Console.PrintMessage(_atr("Asm4", "Activating Assembly4 WorkBench") + '\n')
         # make buttons of the selection toolbar checkable
         from PySide import QtGui
-
         mainwin = Gui.getMainWindow()
         sf_tb = None
         for tb in mainwin.findChildren(QtGui.QToolBar):
@@ -84,11 +83,10 @@ class Assembly4Workbench(Workbench):
     |        This is where all is defined           |
     +-----------------------------------------------+
         """
-
     def Initialize(self):
         # Assembly4 version info
         # with file VERSION
-        versionPath = os.path.join(Asm4_path, "VERSION")
+        versionPath = os.path.join(Asm4_path, 'VERSION')
         versionFile = open(versionPath, "r")
         version = versionFile.readlines()[1]
         Asm4_version = version[:-1]
@@ -104,60 +102,60 @@ class Assembly4Workbench(Workbench):
         FreeCADGui.updateGui()
         # import all stuff
         # import newAssemblyCmd    # created an App::Part container called 'Assembly'
-        import newModelCmd  # creates a new App::Part container called 'Model'
+        import newModelCmd         # creates a new App::Part container called 'Model'
         self.dot()
-        import newDatumCmd  # creates a new LCS in 'Model'
+        import newDatumCmd         # creates a new LCS in 'Model'
         self.dot()
-        import newPartCmd  # creates a new App::Part container called 'Model'
+        import newPartCmd          # creates a new App::Part container called 'Model'
         self.dot()
-        import mirrorPartCmd  # creates a new App::Part container with the mirrored part of the selection
+        import mirrorPartCmd       # creates a new App::Part container with the mirrored part of the selection
         self.dot()
-        import infoPartCmd  # edits part information for BoM
+        import infoPartCmd         # edits part information for BoM
         self.dot()
-        import insertLinkCmd  # inserts an App::Link to a 'Model' in another file
+        import insertLinkCmd       # inserts an App::Link to a 'Model' in another file
         self.dot()
-        import placeLinkCmd  # places a linked part by snapping LCS (in the Part and in the Assembly)
+        import placeLinkCmd        # places a linked part by snapping LCS (in the Part and in the Assembly)
         self.dot()
         # import placeDatumCmd       # places an LCS relative to an external file (creates a local attached copy)
         # self.dot()
-        import importDatumCmd  # creates an LCS in assembly and attaches it to an LCS relative to an external file
+        import importDatumCmd      # creates an LCS in assembly and attaches it to an LCS relative to an external file
         self.dot()
-        import releaseAttachmentCmd  # creates an LCS in assembly and attaches it to an LCS relative to an external file
+        import releaseAttachmentCmd# creates an LCS in assembly and attaches it to an LCS relative to an external file
         self.dot()
-        import makeBinderCmd  # creates an LCS in assembly and attaches it to an LCS relative to an external file
+        import makeBinderCmd       # creates an LCS in assembly and attaches it to an LCS relative to an external file
         self.dot()
-        import VariablesLib  # creates an LCS in assembly and attaches it to an LCS relative to an external file
+        import VariablesLib        # creates an LCS in assembly and attaches it to an LCS relative to an external file
         self.dot()
-        import AnimationLib  # creates an LCS in assembly and attaches it to an LCS relative to an external file
+        import AnimationLib        # creates an LCS in assembly and attaches it to an LCS relative to an external file
         self.dot()
-        import updateAssemblyCmd  # updates all parts and constraints in the assembly
+        import updateAssemblyCmd   # updates all parts and constraints in the assembly
         self.dot()
-        import makeArrayCmd  # creates a new array of App::Link
+        import makeArrayCmd        # creates a new array of App::Link
         self.dot()
-        import variantLinkCmd  # creates a variant link
+        import variantLinkCmd      # creates a variant link
         self.dot()
-        import gotoDocumentCmd  # opens the documentof the selected App::Link
+        import gotoDocumentCmd     # opens the documentof the selected App::Link
         self.dot()
-        import Asm4_Measure  # Measure tool in the Task panel
+        import Asm4_Measure        # Measure tool in the Task panel
         self.dot()
-        import makeBomCmd  # creates the parts list
+        import makeBomCmd          # creates the parts list
         self.dot()
-        import HelpCmd  # shows a basic help window
+        import HelpCmd             # shows a basic help window
         self.dot()
-        import showHideLcsCmd  # shows/hides all the LCSs
+        import showHideLcsCmd      # shows/hides all the LCSs
         self.dot()
-        import configurationEngine  # save/restore configuration
+        import configurationEngine # save/restore configuration
         self.dot()
 
         # Fasteners
-        if self.checkWorkbench("FastenersWorkbench"):
+        if self.checkWorkbench('FastenersWorkbench'):
             # a library to handle fasteners from the FastenersWorkbench
             import FastenersLib
-            self.FastenersCmd = "Asm4_Fasteners"
+            self.FastenersCmd = 'Asm4_Fasteners'
         else:
             # a dummy library if the FastenersWorkbench is not installed
             import FastenersDummy
-            self.FastenersCmd = "Asm4_insertScrew"
+            self.FastenersCmd = 'Asm4_insertScrew'
         self.dot()
 
         # Define Menus
@@ -193,12 +191,13 @@ class Assembly4Workbench(Workbench):
     +-----------------------------------------------+
         """
 
+
+
     """
     +-----------------------------------------------+
     |            Assembly Menu & Toolbar            |
     +-----------------------------------------------+
     """
-
     def assemblyMenuItems(self):
         commandList = [ "Asm4_newModel",
                         "Asm4_newPart", 
@@ -274,12 +273,12 @@ class Assembly4Workbench(Workbench):
                         ]
         return commandList
 
+
     """
     +-----------------------------------------------+
     |                 Selection Toolbar             |
     +-----------------------------------------------+
     """
-
     def selectionToolbarItems(self):
         # commands to appear in the Selection toolbar
         commandList =  ["Asm4_SelectionFilterVertexCmd",
@@ -289,19 +288,18 @@ class Assembly4Workbench(Workbench):
                         "Asm4_SelectionFilterClearCmd"]
         return commandList
 
+
     """
     +-----------------------------------------------+
     |                Contextual Menus               |
     +-----------------------------------------------+
     """
-
     def ContextMenu(self, recipient):
         # This is executed whenever the user right-clicks on screen"
         # "recipient" will be either "view" or "tree"
         contextMenu  = ['Asm4_gotoDocument'  ,
                         'Asm4_showLcs'       ,
                         'Asm4_hideLcs'       ]
-
         # commands to appear in the 'Assembly' sub-menu in the contextual menu (right-click)
         assemblySubMenu =[ "Asm4_insertLink" , 
                         "Asm4_placeLink"     , 
@@ -328,6 +326,8 @@ class Assembly4Workbench(Workbench):
         self.appendContextMenu(_atr("Asm4", "Assembly"), assemblySubMenu)  # add commands to the context menu
         self.appendContextMenu(_atr("Asm4", "Create"), createSubMenu)  # add commands to the context menu
         self.appendContextMenu("", "Separator")
+
+
 
     """
     +-----------------------------------------------+
@@ -358,3 +358,6 @@ class Assembly4Workbench(Workbench):
 """
 wb = Assembly4Workbench()
 Gui.addWorkbench(wb)
+
+
+
