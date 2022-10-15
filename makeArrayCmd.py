@@ -21,17 +21,17 @@ from Asm4_objects import (
 )
 
 
-'''
+"""
     +-----------------------------------------------+
     |    an expression link array class and command    |
     +-----------------------------------------------+
-'''
+"""
 
 class makeExpressionArray:
-    '''Create a array of the selected object where the placement of each element
+    """Create a array of the selected object where the placement of each element
        is calculated using expressions and an ElementIndex property'
        Select an object to array and optionally an Axis that transformation will be related to.
-       Without axis the transformations relates to the objects origin Z axis'''
+       Without axis the transformations relates to the objects origin Z axis"""
     def __init__(self):
         pass
 
@@ -64,17 +64,17 @@ class makeExpressionArray:
         self._Activated(ExpressionArray)
 
 
-'''
+"""
     +-----------------------------------------------+
     |    a circular link array class and command    |
     +-----------------------------------------------+
-'''
+"""
 
 class makeCircularArray(makeExpressionArray):
-    '''Create a circular (polar) array of the selected object
+    """Create a circular (polar) array of the selected object
        Select first an object and then the axis
        The axis can be either a datum Axis, an Origin axis or the axis of an LCS
-       but it must be in the same container as the selected object'''
+       but it must be in the same container as the selected object"""
     def __init__(self):
         pass
 
@@ -94,17 +94,17 @@ class makeCircularArray(makeExpressionArray):
         self._Activated(PolarArray)
 
 
-'''
+"""
     +-----------------------------------------------+
     |    a linear link array class and command    |
     +-----------------------------------------------+
-'''
+"""
 
 class makeLinearArray(makeExpressionArray):
-    '''Create a linear array of the selected object
+    """Create a linear array of the selected object
         Select first an object and then an axis for the direction
         The axis can be either a datum Axis, an Origin axis or the axis of an LCS
-        but it must be in the same container as the selected object'''
+        but it must be in the same container as the selected object"""
     def __init__(self):
         pass
 
@@ -124,7 +124,7 @@ class makeLinearArray(makeExpressionArray):
         self._Activated(LinearArray)
 
 
-'''
+"""
     +-----------------------------------------------+
     |                 test functions                |
     +-----------------------------------------------+
@@ -145,7 +145,7 @@ array.PlacementList = pls
 import makeArrayCmd
 array = makeArrayCmd.makeCircularArray(obj,20)
 
-'''
+"""
 
 
 def makeMyLink(obj):

@@ -161,14 +161,11 @@ class VariantLink(object):
     def attach(self, obj):
         FCC.PrintMessage('Attaching VariantLink ...\n')
         # the source object for the variant object
-        obj.addProperty(
-            'App::PropertyXLink',
-            'SourceObject',
-            ' Link',
-            'Original object from which this variant is derived',
-        )
+        obj.addProperty('App::PropertyXLink', 'SourceObject', ' Link',
+                        'Original object from which this variant is derived')
         # the actual linked object property with a customized name
-        obj.addProperty('App::PropertyXLink', 'LinkedObject', ' Link', 'Link to the modified object')
+        obj.addProperty('App::PropertyXLink', 'LinkedObject', ' Link',
+                        'Link to the modified object')
         # install the actual extension
         obj.addExtension('App::LinkExtensionPython')
         # initiate the extension
@@ -257,14 +254,11 @@ class LinkArray(object):
         # the actual link property with a customized name
         obj.addProperty('App::PropertyLink', 'SourceObject', ' Link', '')
         # the following two properties are required to support link array
-        obj.addProperty(
-            'App::PropertyBool', 'ShowElement', 'Array', 'Shows each individual element'
+        obj.addProperty('App::PropertyBool', 'ShowElement', 'Array',
+                        'Shows each individual element'
         )
-        obj.addProperty(
-            'App::PropertyInteger',
-            'ElementCount',
-            'Array',
-            'Number of elements in the array (including the original)',
+        obj.addProperty('App::PropertyInteger', 'ElementCount', 'Array',
+                        'Number of elements in the array (including the original)',
         )
         obj.ElementCount = 1
         # install the actual extension
@@ -279,9 +273,7 @@ class LinkArray(object):
         # Tell LinkExtension which additional properties are available.
         # This information is not persistent, so the following function must
         # be called by at both attach(), and restore()
-        obj.configLinkProperty(
-            'ShowElement', 'ElementCount', 'Placement', LinkedObject='SourceObject'
-        )
+        obj.configLinkProperty('ShowElement', 'ElementCount', 'Placement', LinkedObject='SourceObject')
         # hide the scale properties
         if hasattr(obj, 'Scale'):
             obj.setPropertyStatus('Scale', 'Hidden')
@@ -498,19 +490,19 @@ class ExpressionArray(LinkArray):
         obj.addProperty('App::PropertyPlacement', 'ElementPlacement', 'Array', '')
         obj.addProperty('App::PropertyInteger',   'Index',            'Array', '')
         obj.addProperty('App::PropertyPlacement', 'AxisPlacement',    'Array',
-            'Serves as Axis or Direction for the element placement')
+                        'Serves as Axis or Direction for the element placement')
         obj.addProperty('App::PropertyDistance',  'LinearStep',       'Array',
-            'Distance between elements along Axis')
+                        'Distance between elements along Axis')
         obj.addProperty('App::PropertyAngle',     'IntervalAngle',    'Array',
-            'Default is an expression to spread elements equal over the full angle')
-        obj.setExpression('IntervalAngle', '360 / ElementCount')
-        obj.setExpression('.ElementPlacement.Base.z', 'LinearStep * Index')
+                        'Default is an expression to spread elements equal over the full angle')
+        obj.setExpression('IntervalAngle',                    '360 / ElementCount')
+        obj.setExpression('.ElementPlacement.Base.z',         'LinearStep * Index')
         obj.setExpression('.ElementPlacement.Rotation.Angle', 'IntervalAngle * Index')
         obj.ArrayType = self.arrayType
         obj.Index = 1
         obj.LinearStep = 100
         obj.setPropertyStatus('ArrayType', 'ReadOnly')
-        obj.setPropertyStatus('Index', 'Hidden')
+        obj.setPropertyStatus('Index',     'Hidden')
         super().attach(obj)
 
     # do the calculation of the elements Placements
@@ -560,7 +552,7 @@ class PolarArray(ExpressionArray):
         super().attach(obj)
         obj.setPropertyStatus('ElementPlacement', 'Hidden')
         obj.setPropertyStatus('LinearStep',       'Hidden')
-        obj.setPropertyStatus('ElementOffset', 'Hidden')
+        obj.setPropertyStatus('ElementOffset',    'Hidden')
         obj.LinearStep = 0
 
     # # not yet ready code for upgrading ols circular arrays
@@ -593,7 +585,7 @@ class LinearArray(ExpressionArray):
     def attach(self, obj):
         super().attach(obj)
         obj.setPropertyStatus('ElementPlacement', 'Hidden')
-        obj.setPropertyStatus('IntervalAngle', 'Hidden')
+        obj.setPropertyStatus('IntervalAngle',    'Hidden')
         obj.setExpression('.ElementPlacement.Rotation.Angle', None)
         obj.ElementPlacement.Rotation.Angle = 0
 
