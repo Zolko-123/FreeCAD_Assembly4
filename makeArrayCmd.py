@@ -12,9 +12,56 @@ import FreeCAD as App
 from FreeCAD import Console as FCC
 
 import Asm4_libs as Asm4
-from Asm4_objects import CircularArray, ViewProviderArray, ExpressionArray
+from Asm4_objects import (
+    PolarArray,
+    ViewProviderArray,
+    ExpressionArray,
+    LinearArray,
+    checkArraySelection,
+)
 
 
+"""
+    +-----------------------------------------------+
+    |    an expression link array class and command    |
+    +-----------------------------------------------+
+"""
+
+class makeExpressionArray:
+    """Create a array of the selected object where the placement of each element
+       is calculated using expressions and an ElementIndex property"
+       Select an object to array and optionally an Axis that transformation will be related to.
+       Without axis the transformations relates to the objects origin Z axis"""
+    def __init__(self):
+        pass
+
+    def GetResources(self):
+        iconFile = os.path.join(Asm4.iconPath, "Asm4_ExpressionArray.svg")
+        return {
+            "MenuText": "Create a expression Array",
+            "ToolTip": self.__doc__,
+            "Pixmap": iconFile,
+        }
+
+    def IsActive(self):
+        self.precheck = checkArraySelection()
+        return self.precheck[0] is not None
+
+    def _Activated(self, arrayClass):
+        array = arrayClass.createFromSelection(*self.precheck)
+        if array:
+            objParent = self.precheck[1]
+            array.recompute()
+            objParent.recompute()
+            App.ActiveDocument.recompute()
+
+            Gui.Selection.clearSelection()
+            Gui.Selection.addSelection(
+                objParent.Document.Name, objParent.Name, array.Name + "."
+            )
+
+    def Activated(self):
+        self._Activated(ExpressionArray)
 
 
 """
@@ -22,161 +69,59 @@ from Asm4_objects import CircularArray, ViewProviderArray, ExpressionArray
     |    a circular link array class and command    |
     +-----------------------------------------------+
 """
-class makeCircularArray():
+
+class makeCircularArray(makeExpressionArray):
+    """Create a circular (polar) array of the selected object
+       Select first an object and then the axis
+       The axis can be either a datum Axis, an Origin axis or the axis of an LCS
+       but it must be in the same container as the selected object"""
     def __init__(self):
         pass
 
     def GetResources(self):
-        tooltip  = "Create a circular (polar) array of the selected object\n"
-        tooltip += "Select first an object and then the axis\n"
-        tooltip += "The axis can be either a datum Axis or the axis of an LCS\n"
-        tooltip += "but it must be in the same container as the selected object"
-        iconFile = os.path.join( Asm4.iconPath, 'Asm4_PolarArray.svg' )
-        return {"MenuText": "Create a circular Array", "ToolTip":  tooltip, "Pixmap": iconFile }
+        iconFile = os.path.join(Asm4.iconPath, "Asm4_PolarArray.svg")
+        return {
+            "MenuText": "Create a circular Array",
+            "ToolTip": self.__doc__,
+            "Pixmap": iconFile,
+        }
 
     def IsActive(self):
-        if App.ActiveDocument:
-            # check correct selections
-            selObj,selAxis = self.checkObjAndAxis()
-            if selAxis:
-                return (True)
-        else:
-            return (False)
+        self.precheck = checkArraySelection()
+        return self.precheck[2] is not None
 
     def Activated(self):
-        # get the selected object
-        selObj,selAxis = self.checkObjAndAxis()
-        #FCC.PrintMessage('Selected '+selObj.Name+' of '+selObj.TypeId+' TypeId' )
-        # check that object and axis belong to the same parent
-        objParent  =  selObj.getParentGeoFeatureGroup()
-        if not objParent and not objParent.getObject(selAxis):
-            msg = 'Please select an object and an axis belonging to the same assembly'
-            Asm4.warningBox( msg)
-        # if something valid has been returned:
-        else:
-            # create the array            
-            array = selObj.Document.addObject(  "Part::FeaturePython",
-                                                'Array_'+selObj.Name,
-                                                CircularArray(),None,True)
-            # move array into common parent (if any)
-            if objParent:
-                objParent.addObject(array)
-            # set array parameters
-            array.setLink(selObj)
-            array.Label = 'Array_'+selObj.Label
-            array.Axis = selAxis
-            array.ArraySteps = "Full Circle"
-            # hide original object
-            #array.SourceObject.ViewObject.hide()
-            selObj.Visibility = False
-            # set the viewprovider
-            ViewProviderArray( array.ViewObject )
-            # update
-            array.recompute()
-            array.ElementCount = 7
-            objParent.recompute()
-            App.ActiveDocument.recompute()
-            Gui.Selection.clearSelection()
-            Gui.Selection.addSelection(objParent.Document.Name,objParent.Name,array.Name+'.')
-
-
-    # check that 1 object (any) and 1 datum axis are selected
-    def checkObjAndAxis(self):
-        selObj  = None
-        selAxis = None
-        # check that it's an Assembly4 'Model'
-        if len(Gui.Selection.getSelection())==2:
-            obj1 = Gui.Selection.getSelection()[0]
-            obj2 = Gui.Selection.getSelection()[1]
-            # both objects need to be in the same container or 
-            # the Placements will get screwed
-            if obj1.getParentGeoFeatureGroup() == obj2.getParentGeoFeatureGroup():
-                # Only create arrays with a datum axis ...
-                if obj2.TypeId == 'PartDesign::Line':
-                    selObj  = obj1
-                    selAxis = obj2.Name
-                # ... or LCS axis
-                elif obj2.TypeId == 'PartDesign::CoordinateSystem':
-                    # this should give 'LCS.Z' or similar
-                    selEx = Gui.Selection.getSelectionEx('', 0)[0].SubElementNames[1]
-                    (tree,lcs,axis) = selEx.partition(obj2.Name)
-                    # if indeed obj2.Name is in the selection tree
-                    if lcs and axis[1] in ('X','Y','Z'):
-                        if obj1.getParentGeoFeatureGroup().getObject(lcs) == obj2:
-                            selObj  = obj1
-                            selAxis = lcs+'.'+axis[1]
-        # return what we have found
-        return selObj,selAxis
+        self._Activated(PolarArray)
 
 
 """
     +-----------------------------------------------+
-    |    a expression link array class and command    |
+    |    a linear link array class and command    |
     +-----------------------------------------------+
 """
-class makeExpressionArray():
+
+class makeLinearArray(makeExpressionArray):
+    """Create a linear array of the selected object
+        Select first an object and then an axis for the direction
+        The axis can be either a datum Axis, an Origin axis or the axis of an LCS
+        but it must be in the same container as the selected object"""
     def __init__(self):
         pass
 
     def GetResources(self):
-        tooltip  = "Create a array of the selected object where placement is calculated using expression and element index\n"
-        tooltip += "Select object to make array of\n"
-        iconFile = os.path.join( Asm4.iconPath, 'Asm4_ExpressionArray.svg' )
-        return {"MenuText": "Create a expression Array", "ToolTip":  tooltip, "Pixmap": iconFile }
+        iconFile = os.path.join(Asm4.iconPath, "Asm4_LinkArray.svg")
+        return {
+            "MenuText": "Create a linear Array",
+            "ToolTip": self.__doc__,
+            "Pixmap": iconFile,
+        }
 
     def IsActive(self):
-        if App.ActiveDocument:
-            # check correct selections
-            selObj = self.checkObj()
-            if selObj:
-                return (True)
-        else:
-            return (False)
+        self.precheck = checkArraySelection()
+        return self.precheck[2] is not None
 
     def Activated(self):
-        # get the selected object
-        selObj = self.checkObj()
-        #FCC.PrintMessage('Selected '+selObj.Name+' of '+selObj.TypeId+' TypeId' )
-        # check that object and axis belong to the same parent
-        objParent  =  selObj.getParentGeoFeatureGroup()
-        # create the array            
-        array = selObj.Document.addObject(  "Part::FeaturePython",
-                                            'XArray_'+selObj.Name,
-                                            ExpressionArray(),None,True)
-        # move array into common parent (if any)
-        if objParent:
-            objParent.addObject(array)
-        # set array parameters
-        array.setLink(selObj)
-        array.Label = 'Array_'+selObj.Label
-        # hide original object
-        #array.SourceObject.ViewObject.hide()
-        selObj.Visibility = False
-        # set the viewprovider
-        ViewProviderArray( array.ViewObject )
-        # update
-        array.recompute()
-        array.ElementCount = 7
-        objParent.recompute()
-        App.ActiveDocument.recompute()
-        Gui.Selection.clearSelection()
-        Gui.Selection.addSelection(objParent.Document.Name,objParent.Name,array.Name+'.')
-
-
-    # check that 1 object (any) and 1 datum axis are selected
-    def checkObj(self):
-        selObj  = None
-        # check that it's an Assembly4 'Model'
-        if len(Gui.Selection.getSelection())==1:
-            selObj = Gui.Selection.getSelection()[0]
-        # return what we have found
-        return selObj
-
-
-
-
-
-
+        self._Activated(LinearArray)
 
 
 """
@@ -202,24 +147,29 @@ array = makeArrayCmd.makeCircularArray(obj,20)
 
 """
 
+
 def makeMyLink(obj):
-    # addObject() API is extended to accept extra parameters in order to 
+    # addObject() API is extended to accept extra parameters in order to
     # let the python object override the type of C++ view provider
-    link = obj.Document.addObject("App::FeaturePython",'LinkArray',LinkArray(),None,True)
-    #ViewProviderArray(link.ViewObject)
+    link = obj.Document.addObject(
+        "App::FeaturePython", "LinkArray", LinkArray(), None, True
+    )
+    # ViewProviderArray(link.ViewObject)
     link.setLink(obj)
     return link
 
 
-def makeArray(obj,count):
-    array = obj.Document.addObject("App::FeaturePython",'LinkArray',LinkArray(),None,True)
+def makeArray(obj, count):
+    array = obj.Document.addObject(
+        "App::FeaturePython", "LinkArray", LinkArray(), None, True
+    )
     ViewProviderArray(array.ViewObject)
     array.setLink(obj)
     array.ElementCount = count
     return array
 
 
-
 # add the command to the workbench
-Gui.addCommand('Asm4_circularArray', makeCircularArray())
-Gui.addCommand('Asm4_expressionArray', makeExpressionArray())
+Gui.addCommand("Asm4_linearArray", makeLinearArray())
+Gui.addCommand("Asm4_circularArray", makeCircularArray())
+Gui.addCommand("Asm4_expressionArray", makeExpressionArray())
