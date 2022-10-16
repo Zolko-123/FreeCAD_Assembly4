@@ -77,6 +77,7 @@ class newPart:
         if ok and text:
             # create Part
             newPart = App.ActiveDocument.addObject(self.partType,text)
+            newPart.Label = text 
             # add stuff if appropriate (not for groups)
             if self.partType in Asm4.containerTypes:
                 # add an LCS at the root of the Part, and attach it to the 'Origin'

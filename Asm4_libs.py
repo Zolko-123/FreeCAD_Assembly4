@@ -234,14 +234,6 @@ def checkModel():
                     retval = model
     return retval
 
-# checks whether an App::Link is to an App::Part
-def isLinkToPart(obj):
-    if not obj:
-        return False
-    if obj.TypeId == 'App::Link' and hasattr(obj.LinkedObject,'isDerivedFrom'):
-        if  obj.LinkedObject.isDerivedFrom('App::Part') or obj.LinkedObject.isDerivedFrom('PartDesign::Body'):
-            return True
-    return False
 
 # returns the selected object and its selection hierarchy
 # the first element in the tree is the uppermost container name
@@ -457,6 +449,15 @@ def isAppLink(obj):
     return False
 
 
+def isLinkToPart(obj):
+    if not obj:
+        return False
+    if obj.TypeId == 'App::Link' and hasattr(obj.LinkedObject,'isDerivedFrom'):
+        if  obj.LinkedObject.isDerivedFrom('App::Part') or obj.LinkedObject.isDerivedFrom('PartDesign::Body'):
+            return True
+    return False
+
+
 def isPartLinkAssembly(obj):
     if not obj:
         return False
@@ -479,6 +480,16 @@ def isAsm4EE(obj):
             FCC.PrintMessage('Found legacy AssemblyType property, adding new empty SolverId property\n')
             # add the new property to convert legacy object
             obj.addProperty( 'App::PropertyString', 'SolverId', 'Assembly' )
+            return True
+    return False
+
+
+def isAsm4Model(obj):
+    if not obj:
+        return False
+    # we only check for Asm4 Model
+    if obj.TypeId=='App::Part' and obj.Name=='Model':
+        if hasattr(obj,'Type') and obj.Type=='Assembly':
             return True
     return False
 

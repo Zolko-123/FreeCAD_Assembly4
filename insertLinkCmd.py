@@ -6,7 +6,7 @@
 
 
 
-import os
+import os, re
 
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
@@ -274,12 +274,9 @@ class insertLink():
                 # create the App::Link with the user-provided name
                 #createdLink = self.activeDoc.getObject('Model').newObject( 'App::Link', linkName )
                 createdLink = self.rootAssembly.newObject( 'App::Link', linkName )
+                createdLink.Label = linkName
                 # assign the user-selected selectedPart to it
                 createdLink.LinkedObject = selectedPart
-                # If the name was already chosen, and a UID was generated:
-                if createdLink.Name != linkName:
-                    # we try to set the label to the chosen name
-                    createdLink.Label = linkName
                 # add the Asm4 properties
                 Asm4.makeAsmProperties(createdLink)
                 createdLink.AssemblyType = "Part::Link"
@@ -324,12 +321,10 @@ class insertLink():
 
         for x in range(self.partList.count()):
             item = self.partList.item(x)
-            # check it items's text match the filter
-            if filterStr:
-                if filterStr in item.text():
-                    item.setHidden(False)
-                else:
-                    item.setHidden(True)
+            # check the items's text match the filter ignoring the case
+            matchStr =  re.search(filterStr, item.text(), flags=re.IGNORECASE)
+            if filterStr and not matchStr:
+                item.setHidden(True)
             else:
                 item.setHidden(False)
 
