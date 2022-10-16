@@ -2,7 +2,7 @@
 ###################################################################################
 #
 #  InitGui.py
-#
+#  
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
 #  the Free Software Foundation; either version 2 of the License, or
@@ -27,8 +27,8 @@ from Asm4_Translate import _atr, QT_TRANSLATE_NOOP
 
 import Asm4_locator
 global Asm4_icon, Asm4_path
-Asm4_path = os.path.dirname(Asm4_locator.__file__)
-Asm4_icon = os.path.join(Asm4_path, 'Resources/icons/Assembly4.svg')
+Asm4_path = os.path.dirname( Asm4_locator.__file__ )
+Asm4_icon = os.path.join( Asm4_path , 'Resources/icons/Assembly4.svg' )
 
 # I don't like this being here
 import selectionFilter
@@ -60,7 +60,7 @@ class Assembly4Workbench(Workbench):
         mainwin = Gui.getMainWindow()
         sf_tb = None
         for tb in mainwin.findChildren(QtGui.QToolBar):
-            if tb.objectName() == 'Selection Filter':
+            if tb.objectName()=='Selection Filter':
                 sf_tb = tb
         # make all buttons except last one (clear selection filter) checkable
         if sf_tb is not None:
@@ -86,8 +86,8 @@ class Assembly4Workbench(Workbench):
     def Initialize(self):
         # Assembly4 version info
         # with file VERSION
-        versionPath = os.path.join(Asm4_path, 'VERSION')
-        versionFile = open(versionPath, "r")
+        versionPath = os.path.join( Asm4_path, 'VERSION' )
+        versionFile = open(versionPath,"r")
         version = versionFile.readlines()[1]
         Asm4_version = version[:-1]
         versionFile.close()
@@ -116,8 +116,8 @@ class Assembly4Workbench(Workbench):
         self.dot()
         import placeLinkCmd        # places a linked part by snapping LCS (in the Part and in the Assembly)
         self.dot()
-        # import placeDatumCmd       # places an LCS relative to an external file (creates a local attached copy)
-        # self.dot()
+        #import placeDatumCmd       # places an LCS relative to an external file (creates a local attached copy)
+        #self.dot()
         import importDatumCmd      # creates an LCS in assembly and attaches it to an LCS relative to an external file
         self.dot()
         import releaseAttachmentCmd# creates an LCS in assembly and attaches it to an LCS relative to an external file
@@ -157,6 +157,7 @@ class Assembly4Workbench(Workbench):
             import FastenersDummy
             self.FastenersCmd = 'Asm4_insertScrew'
         self.dot()
+
 
         # Define Menus
         # commands to appear in the Assembly4 menu 'Assembly'
@@ -209,7 +210,7 @@ class Assembly4Workbench(Workbench):
                         "Separator",
                         "Asm4_insertLink", 
                         "Asm4_mirrorPart", 
-                        "Asm4_linearArray",
+                        "Asm4_linearArray", 
                         "Asm4_circularArray", 
                         "Asm4_expressionArray", 
                         "Asm4_variantLink", 
@@ -219,6 +220,7 @@ class Assembly4Workbench(Workbench):
                         "Asm4_shapeBinder", 
                         "Separator",
                         "Asm4_infoPart", 
+                        "Asm4_makeLocalBOM", 
                         "Asm4_makeBOM", 
                         "Asm4_Measure", 
                         'Asm4_showLcs',
@@ -258,13 +260,14 @@ class Assembly4Workbench(Workbench):
                         "Asm4_updateAssembly",
                         "Separator",
                         "Asm4_mirrorPart", 
-                        "Asm4_linearArray",
+                        "Asm4_linearArray", 
                         "Asm4_circularArray", 
                         "Asm4_expressionArray", 
                         "Asm4_variantLink", 
                         "Separator",
                         'Asm4_showLcs',
                         'Asm4_hideLcs',
+                        "Asm4_makeLocalBOM", 
                         "Asm4_makeBOM", 
                         "Asm4_Measure", 
                         "Asm4_variablesCmd",
@@ -334,8 +337,7 @@ class Assembly4Workbench(Workbench):
     |               helper functions                |
     +-----------------------------------------------+
     """
-
-    def checkWorkbench(self, workbench):
+    def checkWorkbench( self, workbench ):
         # checks whether the specified workbench (a 'string') is installed
         listWB = Gui.listWorkbenches()
         hasWB = False
@@ -350,7 +352,7 @@ class Assembly4Workbench(Workbench):
         FreeCADGui.updateGui()
 
 
-
+    
 """
     +-----------------------------------------------+
     |          actually make the workbench          |
@@ -358,6 +360,5 @@ class Assembly4Workbench(Workbench):
 """
 wb = Assembly4Workbench()
 Gui.addWorkbench(wb)
-
 
 
