@@ -32,13 +32,18 @@ class makeExpressionArray:
        is calculated using expressions and an ElementIndex property'
        Select an object to array and optionally an Axis that transformation will be related to.
        Without axis the transformations relates to the objects origin Z axis"""
+
+    arrayClass = ExpressionArray # The class of the object to create on activate
+    iconFileName = 'Asm4_ExpressionArray.svg'
+    menuText = 'Create a expression Array'
+
     def __init__(self):
         pass
 
     def GetResources(self):
-        iconFile = os.path.join(Asm4.iconPath, 'Asm4_ExpressionArray.svg')
+        iconFile = os.path.join(Asm4.iconPath, self.iconFileName)
         return {
-            'MenuText': 'Create a expression Array',
+            'MenuText': self.menuText,
             'ToolTip': self.__doc__,
             'Pixmap': iconFile,
         }
@@ -47,8 +52,8 @@ class makeExpressionArray:
         self.precheck = checkArraySelection()
         return self.precheck[0] is not None
 
-    def _Activated(self, arrayClass):
-        array = arrayClass.createFromSelection(*self.precheck)
+    def Activated(self):
+        array = self.arrayClass.createFromSelection(*self.precheck)
         if array:
             objParent = self.precheck[1]
             array.recompute()
@@ -60,8 +65,6 @@ class makeExpressionArray:
                 objParent.Document.Name, objParent.Name, array.Name + '.'
             )
 
-    def Activated(self):
-        self._Activated(ExpressionArray)
 
 
 """
@@ -75,23 +78,15 @@ class makeCircularArray(makeExpressionArray):
        Select first an object and then the axis
        The axis can be either a datum Axis, an Origin axis or the axis of an LCS
        but it must be in the same container as the selected object"""
-    def __init__(self):
-        pass
 
-    def GetResources(self):
-        iconFile = os.path.join(Asm4.iconPath, 'Asm4_PolarArray.svg')
-        return {
-            'MenuText': 'Create a circular Array',
-            'ToolTip': self.__doc__,
-            'Pixmap': iconFile,
-        }
+    arrayClass = PolarArray # The class of the object to create on activate
+    iconFileName = 'Asm4_ExpressionArray.svg'
+    menuText = 'Create a expression Array'
 
     def IsActive(self):
         self.precheck = checkArraySelection()
         return self.precheck[2] is not None
 
-    def Activated(self):
-        self._Activated(PolarArray)
 
 
 """
@@ -102,26 +97,18 @@ class makeCircularArray(makeExpressionArray):
 
 class makeLinearArray(makeExpressionArray):
     """Create a linear array of the selected object
-        Select first an object and then an axis for the direction
-        The axis can be either a datum Axis, an Origin axis or the axis of an LCS
-        but it must be in the same container as the selected object"""
-    def __init__(self):
-        pass
+       Select first an object and then an axis for the direction
+       The axis can be either a datum Axis, an Origin axis or the axis of an LCS
+       but it must be in the same container as the selected object"""
 
-    def GetResources(self):
-        iconFile = os.path.join(Asm4.iconPath, 'Asm4_LinkArray.svg')
-        return {
-            'MenuText': 'Create a linear Array',
-            'ToolTip': self.__doc__,
-            'Pixmap': iconFile,
-        }
+    arrayClass = PolarArray # The class of the object to create on activate
+    iconFileName = 'Asm4_ExpressionArray.svg'
+    menuText = 'Create a expression Array'
 
     def IsActive(self):
         self.precheck = checkArraySelection()
         return self.precheck[2] is not None
 
-    def Activated(self):
-        self._Activated(LinearArray)
 
 
 """

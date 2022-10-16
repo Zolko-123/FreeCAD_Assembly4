@@ -560,6 +560,7 @@ class ExpressionArray(LinkArray):
         return False  # to call LinkExtension::execute()   <= is this really needed ?
 
 
+
 class PolarArray(ExpressionArray):
 
     arrayType = 'Circular Array'
@@ -606,3 +607,34 @@ class LinearArray(ExpressionArray):
         obj.setExpression('.ElementPlacement.Rotation.Angle', None)
         obj.ElementPlacement.Rotation.Angle = 0
 
+
+"""
+    +-----------------------------------------------+
+    |                 test functions                |
+    +-----------------------------------------------+
+    
+import makeArrayCmd
+array = makeArrayCmd.makeMyLink(obj)
+pls = []
+for i in range(10):
+    rot_i = App.Rotation(App.Vector(0,0,1), i*20)
+    pla_i = App.Placement(App.Vector(0,0,0), rot_i)
+    plaElmt = axePla * pla_i * axePla.inverse() * ballPla
+    pls.append(plaElmt)
+array.setPropertyStatus('PlacementList', '-Immutable')
+array.PlacementList = pls
+import makeArrayCmd
+array = makeArrayCmd.makeCircularArray(obj,20)
+def makeMyLink(obj):
+    # addObject() API is extended to accept extra parameters in order to 
+    # let the python object override the type of C++ view provider
+    link = obj.Document.addObject("App::FeaturePython",'LinkArray',LinkArray(),None,True)
+    link.setLink(obj)
+    return link
+def makeArray(obj,count):
+    array = obj.Document.addObject("App::FeaturePython",'LinkArray',LinkArray(),None,True)
+    ViewProviderArray(array.ViewObject)
+    array.setLink(obj)
+    array.ElementCount = count
+    return array
+"""
