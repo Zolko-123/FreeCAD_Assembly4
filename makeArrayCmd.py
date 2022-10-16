@@ -59,7 +59,6 @@ class makeExpressionArray:
             array.recompute()
             objParent.recompute()
             App.ActiveDocument.recompute()
-
             Gui.Selection.clearSelection()
             Gui.Selection.addSelection(
                 objParent.Document.Name, objParent.Name, array.Name + '.'
@@ -134,22 +133,22 @@ array = makeArrayCmd.makeCircularArray(obj,20)
 
 """
 
-
 def makeMyLink(obj):
     # addObject() API is extended to accept extra parameters in order to 
     # let the python object override the type of C++ view provider
-    link = obj.Document.addObject('App::FeaturePython', 'LinkArray', LinkArray(), None, True)
+    link = obj.Document.addObject("App::FeaturePython",'LinkArray',LinkArray(),None,True)
     # ViewProviderArray(link.ViewObject)
     link.setLink(obj)
     return link
 
 
 def makeArray(obj, count):
-    array = obj.Document.addObject('App::FeaturePython', 'LinkArray', LinkArray(), None, True)
+    array = obj.Document.addObject("App::FeaturePython",'LinkArray',LinkArray(),None,True)
     ViewProviderArray(array.ViewObject)
     array.setLink(obj)
     array.ElementCount = count
     return array
+
 
 
 # add the command to the workbench

@@ -557,7 +557,7 @@ class ExpressionArray(LinkArray):
             obj.setPropertyStatus('PlacementList', '-Immutable')
             obj.PlacementList = plaList
             obj.setPropertyStatus('PlacementList', 'Immutable')
-        return False  # to call LinkExtension::execute()   <= is this really needed ?
+        return False     # to call LinkExtension::execute()   <= is this really needed ?
 
 
 
@@ -621,20 +621,28 @@ for i in range(10):
     pla_i = App.Placement(App.Vector(0,0,0), rot_i)
     plaElmt = axePla * pla_i * axePla.inverse() * ballPla
     pls.append(plaElmt)
+
 array.setPropertyStatus('PlacementList', '-Immutable')
 array.PlacementList = pls
+
+
 import makeArrayCmd
 array = makeArrayCmd.makeCircularArray(obj,20)
+
+
 def makeMyLink(obj):
     # addObject() API is extended to accept extra parameters in order to 
     # let the python object override the type of C++ view provider
     link = obj.Document.addObject("App::FeaturePython",'LinkArray',LinkArray(),None,True)
     link.setLink(obj)
     return link
+
+
 def makeArray(obj,count):
     array = obj.Document.addObject("App::FeaturePython",'LinkArray',LinkArray(),None,True)
     ViewProviderArray(array.ViewObject)
     array.setLink(obj)
     array.ElementCount = count
     return array
+
 """
