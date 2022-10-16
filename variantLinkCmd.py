@@ -145,7 +145,7 @@ class makeVariantLink():
                 lastChar = origName[-1]
                 if lastChar.isnumeric():
                     (rootName,sep,num) = origName.rpartition('_')
-                    proposedLinkName = Asm4.nextInstance(rootName,startAtOne=True)
+                    proposedLinkName = Asm4.nextInstance(rootName)
                 # else we take the next instance
                 else:
                     proposedLinkName = Asm4.nextInstance(origName)

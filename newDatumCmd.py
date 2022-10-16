@@ -107,7 +107,7 @@ class newDatum:
         # check that we have somewhere to put our stuff
         selectedObj = self.checkSelection()
         # default name increments the datum type's end numeral
-        proposedName = Asm4.nextInstance( self.datumName, startAtOne=True )
+        proposedName = Asm4.nextInstance( self.datumName )
 
         # check whether we have selected a container
         if selectedObj.TypeId in self.containers:

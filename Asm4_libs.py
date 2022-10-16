@@ -344,20 +344,32 @@ def getDependenciesList( CompleteSelection ):
     |           get the next instance's name        |
     +-----------------------------------------------+
 """
-def nextInstance( name, startAtOne=False ):
-    # if there is no such name, return the original
-    if not App.ActiveDocument.getObject(name) and not startAtOne:
-        return name
-    # there is already one, we increment
-    else:
-        if startAtOne:
-            instanceNum = 1
-        else:
-            instanceNum = 2
-        while App.ActiveDocument.getObject( name+'_'+str(instanceNum) ):
-            instanceNum += 1
-        return name+'_'+str(instanceNum)
+def nextInstance( name ):
+    autoNum = 1
 
+    # Find the auto-numbering if exist
+    name,num = getNameWithoutAutoNumbering(name)
+
+    if num > -1:
+        autoNum = num
+
+    # Finding available proposed name
+    while App.ActiveDocument.getObject(name + '_' + '{:03}'.format(autoNum)):
+            autoNum += 1
+
+    return name + '/' + '{:03}'.format(autoNum)
+
+def getNameWithoutAutoNumbering( name ):
+    num = -1
+
+    pos = name.rfind('/')
+    if pos > -1:
+        num = name[pos+1:]
+        if num.isnumeric():
+            name = name[:pos]
+            num = int(num)
+
+    return name,num
 
 
 """

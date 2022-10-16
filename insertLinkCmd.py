@@ -147,20 +147,8 @@ class insertLink():
             partFound = self.partList.findItems( origPartText, QtCore.Qt.MatchExactly )
             if partFound:
                 self.partList.setCurrentItem(partFound[0])
-                # self.onItemClicked(partFound[0])
-                # if the last character is a number, we increment this number
-                origName = self.origLink.Label
-                lastChar = origName[-1]
-                if lastChar.isnumeric():
-                    (rootName,sep,num) = origName.rpartition('_')
-                    if rootName=="":
-                        rootName = origName[:-3]
-                    proposedLinkName = Asm4.nextInstance(rootName,startAtOne=False)
-                # else we take the next instance
-                else:
-                    proposedLinkName = Asm4.nextInstance(origName,startAtOne=False)
-                # set the proposed name in the entry field
-                self.linkNameInput.setText( proposedLinkName )
+                name,num = Asm4.getNameWithoutAutoNumbering(self.origLink.Label)
+                self.linkNameInput.setText(name)
 
         # show the UI
         self.UI.show()
@@ -247,14 +235,15 @@ class insertLink():
     +-----------------------------------------------+
     """
     def onCreateLink(self):
-        # parse the selected items 
+        # parse the selected items
         selectedPart = []
         for selected in self.partList.selectedIndexes():
             # get the selected part
             selectedPart = self.allParts[ selected.row() ]
 
         # get the name of the link (as it should appear in the tree)
-        linkName = self.linkNameInput.text()
+        linkName = Asm4.nextInstance(self.linkNameInput.text())
+
         # repair broken link
         if self.brokenLink and selectedPart:
             self.origLink.LinkedObject = selectedPart
@@ -372,6 +361,9 @@ class insertLink():
         self.mainLayout.addWidget(self.partList)
         self.mainLayout.addWidget(QtGui.QLabel("Name for the link :"))
         self.mainLayout.addWidget(self.linkNameInput)
+        label = QtGui.QLabel('Auto-numbering (/001, /002 etc.) will be added to the end of the name')
+        label.setStyleSheet('font: 10px;')
+        self.mainLayout.addWidget(label)
         self.mainLayout.addWidget(QtGui.QLabel(' '))
         self.buttonsLayout = QtGui.QHBoxLayout()
         self.buttonsLayout.addWidget(self.cancelButton)
