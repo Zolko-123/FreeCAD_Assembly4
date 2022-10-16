@@ -137,12 +137,12 @@ def makeMyLink(obj):
     # addObject() API is extended to accept extra parameters in order to 
     # let the python object override the type of C++ view provider
     link = obj.Document.addObject("App::FeaturePython",'LinkArray',LinkArray(),None,True)
-    # ViewProviderArray(link.ViewObject)
+    #ViewProviderArray(link.ViewObject)
     link.setLink(obj)
     return link
 
 
-def makeArray(obj, count):
+def makeArray(obj,count):
     array = obj.Document.addObject("App::FeaturePython",'LinkArray',LinkArray(),None,True)
     ViewProviderArray(array.ViewObject)
     array.setLink(obj)
