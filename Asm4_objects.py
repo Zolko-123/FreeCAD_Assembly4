@@ -548,7 +548,7 @@ class ExpressionArray(LinkArray):
             ap = obj.AxisPlacement
             plaElmt = ap * obj.ElementPlacement * ap.inverse() * sObj.Placement
             plaList.append(plaElmt)
-        # Resetting ElementIndex to 1 because we get more useful preview results 
+        # Resetting Index to 1 because we get more useful preview results 
         # in the expression editor
         obj.Index = 1
         obj.recompute()
