@@ -443,6 +443,7 @@ class placeLinkUI():
         # selected object
         selObj = Gui.Selection.getSelection()[0]
         selPath = Asm4.getSelectionPath(doc, obj, sub)
+
         # check that a datum object is selected
         if selObj.TypeId in Asm4.datumTypes and len(selPath) > 2:
             selLink = self.activeDoc.getObject(selPath[2])
@@ -489,6 +490,15 @@ class placeLinkUI():
                         pass
                     # preview the part's placement
                     self.Apply()
+        # Click on a part was done, not on an LCS
+        # Fill only the parent list selection, the user could select the needed LCS from the list
+        elif selObj.TypeId == 'Part::Feature' and len(selPath) > 2:
+            selLink = self.activeDoc.getObject(selPath[2])
+            if selLink in self.parentTable:
+                # find the parent
+                idx = self.parentList.findText(Asm4.labelName(selLink), QtCore.Qt.MatchExactly)
+                if idx >= 0:
+                    self.parentList.setCurrentIndex(idx)
 
 
     # Reorientation
