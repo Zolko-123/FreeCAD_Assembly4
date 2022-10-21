@@ -155,7 +155,7 @@ class insertLink():
                     (rootName,sep,num) = origName.rpartition('_')
                     if rootName=="":
                         rootName = origName[:-3]
-                    proposedLinkName = Asm4.nextInstance(rootName,startAtOne=False)
+                    proposedLinkName = Asm4.nextInstance(rootName,startAtOne=True)
                 # else we take the next instance
                 else:
                     proposedLinkName = Asm4.nextInstance(origName,startAtOne=False)
