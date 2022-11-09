@@ -490,9 +490,9 @@ class placeLinkUI():
                         pass
                     # preview the part's placement
                     self.Apply()
-        # Click on a part was done, not on an LCS
-        # Fill only the parent list selection, the user could select the needed LCS from the list
-        elif selObj.TypeId == 'Part::Feature' and len(selPath) > 2:
+        # if it's a part and not on an LCS
+        # Fill only the parent list selection, and show all its LCS
+        elif selObj.isDerivedFrom('Part::Feature') and len(selPath) > 2:
             selLink = self.activeDoc.getObject(selPath[2])
             if selLink in self.parentTable:
                 # find the parent
