@@ -203,6 +203,12 @@ class VariantLink( object ):
                 # self.makeVariant(obj)
                 '''
 
+    # see https://forum.freecadweb.org/viewtopic.php?f=10&t=72728&p=634441#p634361
+    def onSettingDocument(self, obj):
+        FCC.PrintMessage('Triggered onSettingDocument() in VariantLink\n')
+        obj.LinkedObject = obj.SourceObject
+        return
+
     # this is never actually called
     def onLostLinkToObject(self, obj):
         FCC.PrintMessage('Triggered onLostLinkToObject() in VariantLink\n')

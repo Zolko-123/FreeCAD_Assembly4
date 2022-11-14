@@ -160,8 +160,6 @@ class makeExpressionArray():
 
 
 
-
-
 """
     +-----------------------------------------------+
     |                 test functions                |
@@ -183,7 +181,6 @@ array.PlacementList = pls
 import makeArrayCmd
 array = makeArrayCmd.makeCircularArray(obj,20)
 
-"""
 
 def makeMyLink(obj):
     # addObject() API is extended to accept extra parameters in order to 
@@ -200,7 +197,8 @@ def makeArray(obj,count):
     array.setLink(obj)
     array.ElementCount = count
     return array
-
+    
+"""
 
 
 # add the command to the workbench
