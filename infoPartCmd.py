@@ -96,16 +96,19 @@ class infoPartUI():
         # has been checked before
         self.part = Asm4.getSelectedContainer()
 
-        # Check if the configuration file exists
+        # Check and load if the configuration file exists
         try:
             file = open(ConfUserFilejson, 'r')
+            self.infoKeysUser = json.load(file).copy()
             file.close()
         except:
-            partInfoDef = dict()
+            self.infoKeysUser = dict()
             for prop in InfoKeys.partInfo:
-                partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': True})
+                self.infoKeysUser.setdefault(prop, {'userData': prop, 'active': True, 'visible': True})
             for prop in InfoKeys.partInfo_Invisible:
-                partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': False})
+                self.infoKeysUser.setdefault(prop, {'userData': prop, 'active': True, 'visible': False})
+            
+        '''
             try:
                 os.mkdir(ConfUserDir)
             except:
@@ -113,15 +116,16 @@ class infoPartUI():
             file = open(ConfUserFilejson, 'x')
             json.dump(partInfoDef, file)
             file.close()
-        
+
         # should be safe now
         file = open(ConfUserFilejson, 'r')
         self.infoKeysUser = json.load(file).copy()
         file.close()
+        '''
+
         self.makePartInfo(self, self.part)
         self.infoTable = []
         self.getPartInfo()
-
         self.drawUI()
 
     def getPartInfo(self):
@@ -248,6 +252,7 @@ class infoPartUI():
         self.reinit.clicked.connect(self.reInit)
         self.autoFill.clicked.connect(self.infoDefault)
 
+        '''
         test = False
         try:
             if self.infoTable[0][1] == '':
@@ -257,7 +262,7 @@ class infoPartUI():
         if test:
             self.infoDefault()
             self.addNew()
-
+        '''
 
 class infoPartConfUI():
 
