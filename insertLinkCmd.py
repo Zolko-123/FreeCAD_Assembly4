@@ -38,7 +38,7 @@ class insertLink():
         tooltip += "that is open in the current session</p>"
         tooltip += "<p>This command also enables to repair broken/missing links</p>"
         iconFile = 'Link_Part.svg'
-        return {"MenuText" : "Import Part", 
+        return {"MenuText" : "Insert Part", 
                 "ToolTip"  : tooltip, 
                 "Pixmap"   : os.path.join( Asm4.iconPath , iconFile )
                 }
