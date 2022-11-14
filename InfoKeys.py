@@ -6,36 +6,39 @@
 import os, json
 
 import FreeCAD as App
-import infoPartCmd
+# import infoPartCmd
 
 partInfo = [
-    'Doc_Label',
-    'Part_Label',
-    'Pad_Length',
-    'Shape_Length',
-    'Shape_Volume']
+    'Document',
+    'PartName',
+    'Reference',
+    'PartLength',
+    'PartWidth',
+    'PartVolume']
 
 infoToolTip = {
-    'Doc_Label':    'Document or Group label',
-    'Part_Label':   'Part label',
-    'Pad_Length':   'Pad length',
-    'Shape_Length': 'Shape length',
-    'Shape_Volume': 'Object dimensions (x, y, z)'}
+    'Document':     'Document or File name',
+    'PartName':     'Part Name',
+    'Reference':    'Part Reference',
+    'PartLength':   'Cut length of the raw material',
+    'PartWidth':    'Width of the raw material',
+    'PartVolume':   'Object dimensions (x, y, z)'}
 
 partInfo_Invisible = [
-    'Fastener_Diameter',
-    'Fastener_Lenght',
-    'Fastener_Type']
+    'FastenerDiameter',
+    'FastenerLenght',
+    'FastenerType']
 
 infoToolTip_Invisible = {
-    'Fastener_Diameter': 'Fastener diameter',
-    'Fastener_Lenght':   'Fastener length',
-    'Fastener_Type':     'Fastener type'}
+    'FastenerDiameter': 'Fastener diameter',
+    'FastenerLenght':   'Fastener length',
+    'FastenerType':     'Fastener type'}
 
 ConfUserDir = os.path.join(App.getUserAppDataDir(),'Templates')
 ConfUserFilename = "Asm4_infoPartConf.json"
 ConfUserFilejson = os.path.join(ConfUserDir, ConfUserFilename)
 
+'''
 # Check if the configuration file exists
 try:
     file = open(ConfUserFilejson, 'r')
@@ -58,7 +61,7 @@ except:
 file = open(ConfUserFilejson, 'r')
 infoKeysUser = json.load(file).copy()
 file.close()
-
+'''
 
 def infoDefault(self):
 

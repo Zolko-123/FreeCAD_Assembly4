@@ -20,6 +20,7 @@ ConfUserDir = os.path.join(App.getUserAppDataDir(),'Templates')
 ConfUserFilename = "Asm4_infoPartConf.json"
 ConfUserFilejson = os.path.join(ConfUserDir, ConfUserFilename)
 
+'''
 # Check if the configuration file exists
 try:
     file = open(ConfUserFilejson, 'r')
@@ -37,11 +38,13 @@ except:
     file = open(ConfUserFilejson, 'x')
     json.dump(partInfoDef, file)
     file.close()
+'''
 
-# +-----------------------------------------------+
-# |                Helper Tools                   |
-# +-----------------------------------------------+
-
+"""
+    +-----------------------------------------------+
+    |                  Helper Tools                 |
+    +-----------------------------------------------+
+"""
 def writeXml(text):
     text = text.encode('unicode_escape').decode().replace('\\', '_x_m_l_')
     return text
@@ -50,19 +53,20 @@ def decodeXml(text):
     text = text.replace('_x_m_l_', '\\').encode().decode('unicode_escape')
     return text
 
-# +-----------------------------------------------+
-# |             Info Part Command                 |
-# +-----------------------------------------------+
 
+"""
+    +-----------------------------------------------+
+    |                Info Part Command              |
+    +-----------------------------------------------+
+"""
 class infoPartCmd():
 
     def __init__(self):
         super(infoPartCmd, self).__init__()
 
     def GetResources(self):
-        tooltip  = "Edit Part information."
-        tooltip += "The Part properties can be edited"
-        tooltip += "using the Configure button"
+        tooltip  = "<p>Edit Part information</p>"
+        tooltip += "<p>User-supplied information can be added to a part</p>"
         iconFile = os.path.join(Asm4.iconPath, 'Asm4_PartInfo.svg')
         return {"MenuText": "Edit Part Information", "ToolTip": tooltip, "Pixmap": iconFile}
 
@@ -74,10 +78,12 @@ class infoPartCmd():
     def Activated(self):
         Gui.Control.showDialog(infoPartUI())
 
-# +-----------------------------------------------+
-# |      UI and functions in the Task panel       |
-# +-----------------------------------------------+
 
+"""
+    +-----------------------------------------------+
+    |       UI and functions in the Task panel      |
+    +-----------------------------------------------+
+"""
 class infoPartUI():
 
     def __init__(self):
@@ -87,7 +93,28 @@ class infoPartUI():
         self.form.setWindowIcon(QtGui.QIcon(iconFile))
         self.form.setWindowTitle("Edit Part Information")
 
+        # has been checked before
         self.part = Asm4.getSelectedContainer()
+
+        # Check if the configuration file exists
+        try:
+            file = open(ConfUserFilejson, 'r')
+            file.close()
+        except:
+            partInfoDef = dict()
+            for prop in InfoKeys.partInfo:
+                partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': True})
+            for prop in InfoKeys.partInfo_Invisible:
+                partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': False})
+            try:
+                os.mkdir(ConfUserDir)
+            except:
+                pass
+            file = open(ConfUserFilejson, 'x')
+            json.dump(partInfoDef, file)
+            file.close()
+        
+        # should be safe now
         file = open(ConfUserFilejson, 'r')
         self.infoKeysUser = json.load(file).copy()
         file.close()
@@ -108,10 +135,8 @@ class infoPartUI():
                                 value = self.part.getPropertyByName(prop)
                                 self.infoTable.append([prop, value])
 
+    # Add the default part information
     def makePartInfo(self, object, reset=False):
-        """
-        Add the default part information
-        """
         for propuser in self.infoKeysUser:
             if self.infoKeysUser.get(propuser).get('active') and self.infoKeysUser.get(propuser).get('visible'):
                 try:
@@ -138,10 +163,8 @@ class infoPartUI():
         Gui.Control.closeDialog()
         Gui.Control.showDialog(infoPartConfUI())
 
+    # Reset the list of properties
     def reInit(self):
-        """
-        Reset the list of properties
-        """
         List = self.part.PropertiesList
         listpi = []
         for prop in List:
@@ -186,11 +209,8 @@ class infoPartUI():
         self.addNew()
         self.finish()
 
+    # Define the UI (static elements, only)
     def drawUI(self):
-        """
-        Define the UI (static elements, only)
-        """
-
         # Place the widgets with layouts
         self.mainLayout = QtGui.QVBoxLayout(self.form)
         self.formLayout = QtGui.QFormLayout()
@@ -404,11 +424,9 @@ class infoPartConfUI():
         self.upCombo.removeItem(self.upCombo.currentIndex())
         self.addNewField(upField, upField)
 
+    # Define the UI
+    # TODO : make it static
     def drawConfUI(self):
-        """
-        Define the UI
-        """
-
         self.label = []
         self.infos = []
         self.checker = []
@@ -511,6 +529,7 @@ class infoPartConfUI():
 
             # Insert layout in mainlayout
             self.mainLayout.addLayout(self.gridLayoutUpdate)
+
 
 # Add the command in the workbench
 Gui.addCommand('Asm4_infoPart', infoPartCmd())
