@@ -13,11 +13,9 @@ from FreeCAD import Console as FCC
 
 import Asm4_libs as Asm4
 from Asm4_objects import (
-    PolarArray,
     ViewProviderArray,
     ExpressionArray,
-    LinearArray,
-    checkArraySelection,
+    CircularArray,
 )
 
 
@@ -27,42 +25,109 @@ from Asm4_objects import (
     +-----------------------------------------------+
 """
 
+
 class makeExpressionArray:
-    """Create a array of the selected object where the placement of each element
-       is calculated using expressions and an ElementIndex property'
-       Select an object to array and optionally an Axis that transformation will be related to.
-       Without axis the transformations relates to the objects origin Z axis"""
 
-    arrayClass = ExpressionArray # The class of the object to create on activate
     iconFileName = 'Asm4_ExpressionArray.svg'
-    menuText = 'Create a expression Array'
-
-    def __init__(self):
-        pass
+    menuText = 'Create an expression driven Array'
+    arrayType = 'Expression Array'
+    namePrefix = 'XArray_'
+    tooltip = """Create an array of the selected object where the placement of each element is calculated using expressions and an Index property.<br>
+        Select a source object to array and optionally an Axis that transformation will be related to.<br>
+        Without axis the transformations relates to the source objects origin.<br>
+        <br>
+        <b>Index</b> : Hidden but useful to reference in expressions on Element Placement. Increments for each element from <code>0</code> to <code>Count-1</code> during recompute. <br>
+        <br>
+        <b>Element Placement :</b> Set an expression for the entire placement or its sub-properties.<br>
+           By opening Element Placement property in Tasks panel it is possible to set expressions for euler angles too.<br>
+        <br>
+        <b>Expressions examples</b><br>
+        on Angle: <code>Index%2==0?30:-30</code><br>
+        on Position.X: <code>Index*30</code>"""
 
     def GetResources(self):
+        # print('self.iconFileName',self.iconFileName)
         iconFile = os.path.join(Asm4.iconPath, self.iconFileName)
         return {
             'MenuText': self.menuText,
-            'ToolTip': self.__doc__,
+            'ToolTip': self.tooltip,
             'Pixmap': iconFile,
         }
 
+    def _getSelectionInfo(self):
+        """Check axis and returns an Expression that calculates the axis placement.
+           Fails if it contains more than two objects."""
+        sourceObj = None
+        objParent = None
+        axisObj = None
+        # Use the Z axis of Axis Object as default
+        # Works well with datum axis and more
+        xyz = 'Z'
+        selection = Gui.Selection.getSelectionEx()
+        # check that it's an Assembly4 'Model'
+        if len(selection) in (1, 2):
+            sourceObj = selection[0].Object
+            objParent = sourceObj.getParentGeoFeatureGroup()
+            if objParent.TypeId == 'PartDesign::Body':
+                # Don't go there
+                objParent = sourceObj = None
+            elif len(selection) == 2:
+                axisSel = selection[1]
+                # both objects need to be in the same container or
+                # the Placements will get screwed
+                if objParent == axisSel.Object.getParentGeoFeatureGroup():
+                    axisObj = axisSel.Object
+                    # Origin axis goes along its placements X-axis ...
+                    if axisSel.TypeName == 'App::Line':
+                        xyz = 'X'
+                    # Check if a sub element of a LCS is selected
+                    elif axisSel.TypeName == 'PartDesign::CoordinateSystem':
+                        if len(axisSel.SubElementNames) == 1:
+                            xyz = axisSel.SubElementNames[0]
+        # return what we have found
+        self.selectionInfo = sourceObj, objParent, axisObj, xyz
+
     def IsActive(self):
-        self.precheck = checkArraySelection()
-        return self.precheck[0] is not None
+        self._getSelectionInfo()
+        return self.selectionInfo[0] is not None
+
+    # Special property setup for this array type.
+    def _setupProperties(self, obj):
+        pass
 
     def Activated(self):
-        array = self.arrayClass.createFromSelection(*self.precheck)
-        if array:
-            objParent = self.precheck[1]
-            array.recompute()
+        srcObj, objParent, axisObj, xyz = self.selectionInfo
+        if srcObj and objParent:
+            obj = srcObj.Document.addObject(
+                'Part::FeaturePython',
+                self.namePrefix + srcObj.Name,
+                ExpressionArray(),
+                None,
+                True,
+            )
+            obj.ArrayType = self.arrayType
+            obj.setPropertyStatus('ArrayType', 'ReadOnly')
+            obj.Label = self.namePrefix + srcObj.Label
+            obj.Axis = axisObj
+            obj.AxisXYZ = xyz
+            # set the viewprovider
+            ViewProviderArray(obj.ViewObject)
+            # move array into common parent (if any)
+            objParent.addObject(obj)
+            # hide original object
+            srcObj.Visibility = False
+            # set array parameters
+            obj.setLink(srcObj)
+            # setup class specific properties
+            self._setupProperties(obj)
+
+            obj.recompute()
+            objParent = self.selectionInfo[1]
             objParent.recompute()
             App.ActiveDocument.recompute()
+            # select the new array
             Gui.Selection.clearSelection()
-            Gui.Selection.addSelection(
-                objParent.Document.Name, objParent.Name, array.Name + '.'
-            )
+            Gui.Selection.addSelection(obj)
 
 
 
@@ -73,19 +138,33 @@ class makeExpressionArray:
 """
 
 class makeCircularArray(makeExpressionArray):
-    """Create a circular (polar) array of the selected object
-       Select first an object and then the axis
-       The axis can be either a datum Axis, an Origin axis or the axis of an LCS
-       but it must be in the same container as the selected object"""
 
-    arrayClass = PolarArray # The class of the object to create on activate
-    iconFileName = 'Asm4_ExpressionArray.svg'
-    menuText = 'Create a expression Array'
+    iconFileName = 'Asm4_PolarArray.svg'
+    menuText = 'Create a circular array'
+    arrayType = 'Circular Array'
+    namePrefix = 'Circular_'
+    tooltip = """Create a circular (polar) array of the selected object.<br>
+       Select first an object and then the axis.<br>
+       The axis can be any object with a Placement in the same container as the selected object.<br>
+       It's alo possible to select a sub axis of a LCS.<br>
+       <br>
+       <b>Iterval Angle</b> : The angle between two subsequent elements.<br>
+       To place the last element at for example 180°, set the expression to <code>180/(Count-1)</code>"""
 
     def IsActive(self):
-        self.precheck = checkArraySelection()
-        return self.precheck[2] is not None
+        # print('IsActive XC')
+        self._getSelectionInfo()
+        return self.selectionInfo[2] is not None
 
+
+    # Special property setup for this array type.
+    def _setupProperties(self, obj):
+        obj.Count = 6
+        obj.addProperty('App::PropertyAngle',     'IntervalAngle',    'Array',
+                        'Default is an expression to spread elements equal over the full angle')
+        obj.setExpression('IntervalAngle',                    '360/Count')
+        obj.setExpression('.ElementPlacement.Rotation.Angle', 'IntervalAngle * Index')
+        obj.setPropertyStatus('ElementPlacement', 'Hidden')
 
 
 """
@@ -95,18 +174,34 @@ class makeCircularArray(makeExpressionArray):
 """
 
 class makeLinearArray(makeExpressionArray):
-    """Create a linear array of the selected object
-       Select first an object and then an axis for the direction
-       The axis can be either a datum Axis, an Origin axis or the axis of an LCS
-       but it must be in the same container as the selected object"""
 
-    arrayClass = PolarArray # The class of the object to create on activate
-    iconFileName = 'Asm4_ExpressionArray.svg'
-    menuText = 'Create a expression Array'
+    iconFileName = 'Asm4_LinearArray.svg'
+    menuText = 'Create a linear array'
+    arrayType = 'Linear Array'
+    namePrefix = 'Linear_'
+    tooltip = """Create a linear array of the selected object<br>
+       Select first an object and then an axis for the direction<br>
+       The axis can be any object with a Placement in the same container as the selected object<br>
+       It's alo possible to select a sub axis of a LCS<br>
+       <br>
+       <b>Linear Step</b> : The angle between two subsequent elements.<br>
+       To place the last element 100 mm from first element, set the expression to <code>100mm/(Count-1)</code>"""
+
 
     def IsActive(self):
-        self.precheck = checkArraySelection()
-        return self.precheck[2] is not None
+        # print('IsActive XL')
+        self._getSelectionInfo()
+        return self.selectionInfo[2] is not None
+
+
+    # Special property setup for this array type.
+    def _setupProperties(self, obj):
+        obj.Count = 10
+        obj.addProperty('App::PropertyDistance',  'LinearStep',       'Array',
+                        'Distance between elements along Axis')
+        obj.LinearStep = 10.0
+        obj.setExpression('.ElementPlacement.Base.z',         'LinearStep * Index')
+        obj.setPropertyStatus('ElementPlacement', 'Hidden')
 
 
 
@@ -146,7 +241,7 @@ def makeArray(obj,count):
     array = obj.Document.addObject("App::FeaturePython",'LinkArray',LinkArray(),None,True)
     ViewProviderArray(array.ViewObject)
     array.setLink(obj)
-    array.ElementCount = count
+    array.Count = count
     return array
 
 

@@ -251,11 +251,10 @@ class LinkArray( object ):
         # the actual link property with a customized name
         obj.addProperty("App::PropertyLink", "SourceObject", " Link",'')
         # the following two properties are required to support link array
-        obj.addProperty("App::PropertyBool", "ShowElement", "Array",
-                        'Shows each individual element')
-        obj.addProperty("App::PropertyInteger","ElementCount","Array",
+        obj.addProperty("App::PropertyBool", "ShowElement", "Array",'')
+        obj.addProperty("App::PropertyInteger","Count","Array",
                         'Number of elements in the array (including the original)')
-        obj.ElementCount=1
+        obj.Count=1
         # install the actual extension
         obj.addExtension('App::LinkExtensionPython')
         # initiate the extension
@@ -268,28 +267,27 @@ class LinkArray( object ):
         # Tell LinkExtension which additional properties are available.
         # This information is not persistent, so the following function must 
         # be called by at both attach(), and restore()
-        obj.configLinkProperty('ShowElement','ElementCount','Placement', LinkedObject='SourceObject')
+        obj.configLinkProperty("ShowElement", 'Placement', ElementCount='Count', LinkedObject='SourceObject')
         # hide the scale properties
         if hasattr( obj, 'Scale' ):
             obj.setPropertyStatus('Scale', 'Hidden')
         if hasattr( obj, 'ScaleList' ):
             obj.setPropertyStatus('ScaleList', 'Hidden')
 
+
     # Execute when a property changes.
     def onChanged(self, obj, prop):
         # this allows to move individual elements by the user
-        if prop == 'ShowElement':
-            # set the PlacementList for user to change
+        if prop == 'ShowElement': # set the PlacementList for user to change
             if hasattr(obj, 'PlacementList'):
                 if obj.ShowElement:
                     obj.setPropertyStatus('PlacementList','-Immutable')
                 else:
                     obj.setPropertyStatus('PlacementList', 'Immutable')
         # you cannot have less than 1 elements in an array
-        elif prop == 'ElementCount':
-            if obj.ElementCount < 1:
-                obj.ElementCount=1
-
+        elif prop == 'Count':
+            if obj.Count < 1:
+                obj.Count=1
 
 
 
@@ -343,21 +341,15 @@ class ViewProviderArray(object):
 """
 class CircularArray(LinkArray):
 
-    #Set up the properties when the object is attached.
-    def attach(self, obj):
-        obj.addProperty("App::PropertyEnumeration", "ArraySteps",   "Array", '')
-        obj.ArraySteps=['Full Circle','Interval']
-        obj.addProperty("App::PropertyString",      "ArrayType",    "Array", '')
-        obj.ArrayType = 'Circular Array'
-        obj.setPropertyStatus('ArrayType', 'ReadOnly')
-        obj.addProperty("App::PropertyString" ,     "Axis",         "Array", '')
-        obj.addProperty("App::PropertyAngle",       "FullAngle",    "Array", '')
-        # obj.FullAngle.setRange(-3600, 3600)
-        obj.addProperty("App::PropertyAngle",       "IntervalAngle","Array", '')
-        tooltip = 'Steps perpendicular to the array plane to form a spiral'
-        obj.addProperty("App::PropertyFloat",       "LinearSteps",  "Array", tooltip)
-        # do the attach of the LinkArray class
-        super().attach(obj)
+    def onDocumentRestored(self, obj):
+        # for backwards compability
+        if not hasattr(obj, "Count"):
+            obj.addProperty("App::PropertyInteger","Count","Array","")
+            obj.Count = obj.ElementCount
+        if hasattr(obj, "ElementCount"):
+            obj.setPropertyStatus('ElementCount', 'Hidden')
+        super().onDocumentRestored(obj)
+
 
     # do the calculation of the elements' Placements
     def execute(self, obj):
@@ -390,35 +382,26 @@ class CircularArray(LinkArray):
                 return    
         # calculate the number of instances
         if obj.ArraySteps=='Interval':
-            fullAngle = (obj.ElementCount-1) * obj.IntervalAngle
-            obj.setExpression("FullAngle","ElementCount * IntervalAngle")
+            fullAngle = (obj.Count-1) * obj.IntervalAngle
+            obj.setExpression("FullAngle","Count * IntervalAngle")
         elif  obj.ArraySteps=='Full Circle':
             obj.setExpression("FullAngle",None)
             obj.FullAngle = 360
-            obj.IntervalAngle = obj.FullAngle/obj.ElementCount
+            obj.IntervalAngle = obj.FullAngle/obj.Count
         plaList = []
-        for i in range(obj.ElementCount):
+        for i in range(obj.Count):
             # calculate placement of element i
             rot_i = App.Rotation( App.Vector(0,0,1), i*obj.IntervalAngle)
             lin_i = App.Vector(0,0,i*obj.LinearSteps)
             pla_i = App.Placement( lin_i, rot_i )
             plaElmt = axisPlacement * pla_i * axisPlacement.inverse() * sObj.Placement
             plaList.append(plaElmt)
-        if not getattr(obj, 'ShowElement', True) or obj.ElementCount != len(plaList):
+        if not getattr(obj, 'ShowElement', True) or obj.Count != len(plaList):
             obj.setPropertyStatus('PlacementList', '-Immutable')
             obj.PlacementList = plaList
             obj.setPropertyStatus('PlacementList', 'Immutable')
         return False     # to call LinkExtension::execute()   <= is this rally needed ?
 
-    '''
-    #Execute when a property is changed.
-    def onChanged(self, obj, prop):
-        super().onChanged(obj, prop)
-        # you cannot have less than 1 elements in an array
-        if prop == 'ElementCount':
-            if obj.ElementCount < 1:
-                obj.ElementCount=1
-    '''
 
 """
     +-----------------------------------------------+
@@ -428,107 +411,36 @@ class CircularArray(LinkArray):
     create(<<placement>>; create(<<Vector>>; 1; 0; 0); create(<<rotation>>; 360 / ElementCount * ElementIndex; 0; 0); DirBase) * .SourceObject.Placement
 """
 
-
-def checkArraySelection():
-    """Check axis and returns an Expression that calculates the axis placement.
-       Fails if it contains more than two objects."""
-    obj = None
-    objParent = None
-    axisExpr = None
-
-    selection = Gui.Selection.getSelectionEx()
-    # check that it's an Assembly4 'Model'
-    if len(selection) in (1, 2):
-        obj = selection[0].Object
-        objParent = obj.getParentGeoFeatureGroup()
-        if objParent.TypeId == 'PartDesign::Body':
-            # Don't go there
-            objParent = obj = None
-        elif len(selection) == 2:
-            axisSel = selection[1]
-            # both objects need to be in the same container or
-            # the Placements will get screwed
-            if objParent == axisSel.Object.getParentGeoFeatureGroup():
-                # print('axisSel.TypeName', axisSel.TypeName)
-                axisName = axisSel.ObjectName
-                # Only create arrays with a datum axis...
-                if axisSel.TypeName == 'PartDesign::Line':
-                    axisExpr = axisName + '.Placement'
-                # or origin axis ...
-                elif axisSel.TypeName == 'App::Line':
-                    axisExpr = axisName + '.Placement * create(<<rotation>>; 0; 90; 0)'
-                # ... or LCS axis
-                elif axisSel.TypeName == 'PartDesign::CoordinateSystem':
-                    # check selected subelement
-                    subNames = axisSel.SubElementNames
-                    if len(subNames) == 1:
-                        if subNames[0] == 'X':
-                            axisExpr = (axisName + '.Placement * create(<<rotation>>; 0; 90; 0)')
-                        elif subNames[0] == 'Y':   
-                            axisExpr = (axisName + '.Placement * create(<<rotation>>; 0; 0; -90)')
-                        elif subNames[0] == 'Z':
-                            axisExpr = axisName + '.Placement'
-    # return what we have found
-    return obj, objParent, axisExpr
-
-
 class ExpressionArray(LinkArray):
 
-    arrayType = 'Expression Array'
-    namePrefix = 'XArray_'
-
-    @classmethod
-    def createFromSelection(cls, srcObj, objParent, axisExpr):
-        if srcObj and objParent:
-            # FCC.PrintMessage('Selected '+selObj.Name+' of '+selObj.TypeId+' TypeId' )
-            array = srcObj.Document.addObject(
-                'Part::FeaturePython',
-                cls.namePrefix + srcObj.Name,
-                cls(),
-                None,
-                True,
-            )
-            array.Label = cls.namePrefix + srcObj.Label
-            array.setExpression('AxisPlacement', axisExpr)
-            # set the viewprovider
-            ViewProviderArray(array.ViewObject)
-            # move array into common parent (if any)
-            objParent.addObject(array)
-            # hide original object
-            srcObj.Visibility = False
-            # set array parameters
-            array.setLink(srcObj)
-            array.ElementCount = 7
-            return array
+    def hasChildElement(self,obj):
+        # ugly workaroun to hide that stubborn 'ShowElement' property
+        obj.setEditorMode('ShowElement',3)
+        return False
 
     # Set up the properties when the object is attached.
-
     def attach(self, obj):
-        obj.addProperty('App::PropertyString',    'ArrayType',        'Array', '')
-        obj.addProperty('App::PropertyPlacement', 'ElementPlacement', 'Array', '')
-        obj.addProperty('App::PropertyInteger',   'Index',            'Array', '')
-        obj.addProperty('App::PropertyPlacement', 'AxisPlacement',    'Array',
-                        'Serves as Axis or Direction for the element placement')
-        obj.addProperty('App::PropertyDistance',  'LinearStep',       'Array',
-                        'Distance between elements along Axis')
-        obj.addProperty('App::PropertyAngle',     'IntervalAngle',    'Array',
-                        'Default is an expression to spread elements equal over the full angle')
-        obj.setExpression('IntervalAngle',                    '360 / ElementCount')
-        obj.setExpression('.ElementPlacement.Base.z',         'LinearStep * Index')
-        obj.setExpression('.ElementPlacement.Rotation.Angle', 'IntervalAngle * Index')
-        obj.ArrayType = self.arrayType
-        obj.Index = 1
-        obj.LinearStep = 100
-        obj.setPropertyStatus('ArrayType', 'ReadOnly')
-        obj.setPropertyStatus('Index',     'Hidden')
         super().attach(obj)
+        obj.addProperty('App::PropertyString',      'ArrayType',        'Array', '')
+        obj.addProperty('App::PropertyPlacement',   'ElementPlacement', 'Array', 
+                        'Copied to array elements in order while the Index property is incremented')
+        obj.addProperty('App::PropertyInteger',     'Index',            'Array', '')
+        obj.addProperty('App::PropertyLink',        'Axis',        'Array',
+                        'Serves as Axis or Direction for the element placement')
+        obj.addProperty("App::PropertyEnumeration", 'AxisXYZ', 'Array', '')
+        obj.AxisXYZ = ['X','Y','Z']
+        obj.Index = 1
+        obj.setPropertyStatus('Index', 'Hidden')
+        obj.ShowElement = False
+        obj.setEditorMode('ShowElement',3)
+
 
     # do the calculation of the elements Placements
     def execute(self, obj):
         """ The placement is calculated to follow the axis placement
-        This can be disabled by user by clearing the AxisPlacement property
+        This can be disabled by user by clearing the Direction property
         or create the array without an axis selected
-        Without AxisPlacement the Array will follow the SourceObject origin Z axis."""
+        Without Direction the Array will follow the Z axis of the SourceObject."""
 
         # Source Object
         if not obj.SourceObject:
@@ -538,74 +450,30 @@ class ExpressionArray(LinkArray):
         parent = sObj.getParentGeoFeatureGroup()
         if not parent:
             return
+        # calculate
+        p0 = obj.Axis.Placement if obj.Axis else sObj.Placement
+        if obj.AxisXYZ == 'X':
+            p0 *= Asm4.rotY
+        elif obj.AxisXYZ == 'Y':
+            p0 *= Asm4.rotX.inverse()
+        p1 = p0.inverse() * sObj.Placement
         # calculate placement of each element
         plaList = []
-
         obj.setPropertyStatus('Index', '-Immutable')
-        for i in range(obj.ElementCount):
+        for i in range(obj.Count):
             obj.Index = i
             obj.recompute()
-            ap = obj.AxisPlacement
-            plaElmt = ap * obj.ElementPlacement * ap.inverse() * sObj.Placement
+            plaElmt = p0 * obj.ElementPlacement * p1
             plaList.append(plaElmt)
         # Resetting Index to 1 because we get more useful preview results 
         # in the expression editor
         obj.Index = 1
-        obj.recompute()
         obj.setPropertyStatus('Index', 'Immutable')
-        if not getattr(obj, 'ShowElement', True) or obj.ElementCount != len(plaList):
-            obj.setPropertyStatus('PlacementList', '-Immutable')
-            obj.PlacementList = plaList
-            obj.setPropertyStatus('PlacementList', 'Immutable')
-        return False     # to call LinkExtension::execute()   <= is this really needed ?
-
-
-
-class PolarArray(ExpressionArray):
-
-    arrayType = 'Circular Array'
-    namePrefix = 'Circular_'
-
-    # Just hide some of the properties.
-    def attach(self, obj):
-        super().attach(obj)
-        obj.setPropertyStatus('ElementPlacement', 'Hidden')
-        obj.setPropertyStatus('LinearStep',       'Hidden')
-        obj.LinearStep = 0
-
-    # # not yet ready code for upgrading ols circular arrays
-    # def execute(self, obj):
-    #     if hasattr(obj, 'ArraySteps'):
-    #         oldObj = obj
-    #         objParent = oldObj.getParentGeoFeatureGroup()
-    #         doc = oldObj.Document
-    #         doc.removeObject(oldObj.Name)
-    #         sel = oldObj.SourceObject, objParent.getObject(oldObj.Axis)
-    #         precheck = checkSelection(sel)
-    #         obj = CircularArray.createFromSelection(*precheck)
-    #         obj.ElementCount = oldObj.ElementCount
-    #         if oldObj.ArraySteps == 'Interval':
-    #             obj.setExpression('IntervalAngle', None)
-    #             obj.IntervalAngle = oldObj.IntervalAngle
-    #         obj.FullAngle = oldObj.FullAngle
-    #         obj.LinearSteps = oldObj.LinearSteps
-    #         obj.recompute()
-    #         return
-    #     super().execute(obj)
-
-
-class LinearArray(ExpressionArray):
-
-    arrayType = 'Linear Array'
-    namePrefix = 'Linear_'
-
-    # Just hide some of the properties.
-    def attach(self, obj):
-        super().attach(obj)
-        obj.setPropertyStatus('ElementPlacement', 'Hidden')
-        obj.setPropertyStatus('IntervalAngle',    'Hidden')
-        obj.setExpression('.ElementPlacement.Rotation.Angle', None)
-        obj.ElementPlacement.Rotation.Angle = 0
+        obj.recompute()
+        obj.setPropertyStatus('PlacementList', '-Immutable')
+        obj.PlacementList = plaList
+        obj.setPropertyStatus('PlacementList', 'Immutable')
+        return
 
 
 """
