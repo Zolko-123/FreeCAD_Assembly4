@@ -2,6 +2,11 @@
 
 ## Release notes
 
+* 2022.12.15 (**0.12.5**) :  
+Added ExpressionArray, and circular and linear-arrays based on it (thanx Jolbas)  
+BOM and PartInfo are (still) broken  
+Fixed Issue #382 (number of decimals in variables)  
+
 * 2022.09.08 (**0.12.4**) :  
 Moved the Changelog into a separate file  
 Fixed an error with new version of fasteners WB  

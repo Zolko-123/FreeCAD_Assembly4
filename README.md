@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.12.4
+Current version 0.12.5
 
 
 ## Overview
@@ -61,3 +61,4 @@ Release notes can be found in the [CHANGELOG.md](CHANGELOG.md) file.
 
 ## License
 LGPLv2.1 (see [LICENSE](LICENSE))
+
