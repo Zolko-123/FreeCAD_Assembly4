@@ -21,7 +21,7 @@ from Asm4_objects import (
 
 """
     +-----------------------------------------------+
-    |    an expression link array class and command    |
+    |   an expression link array class and command  |
     +-----------------------------------------------+
 """
 
@@ -196,7 +196,7 @@ class makeLinearArray(makeExpressionArray):
 
     # Special property setup for this array type.
     def _setupProperties(self, obj):
-        obj.Count = 10
+        obj.Count = 6
         obj.addProperty('App::PropertyDistance',  'LinearStep',       'Array',
                         'Distance between elements along Axis')
         obj.LinearStep = 10.0

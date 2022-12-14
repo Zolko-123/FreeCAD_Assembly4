@@ -326,7 +326,7 @@ class ViewProviderArray(object):
             if tp=='Circular Array':
                 iconFile = os.path.join( Asm4.iconPath, 'Asm4_PolarArray.svg')
             elif tp=='Linear Array':
-                iconFile = os.path.join( Asm4.iconPath, 'Asm4_LinkArray.svg')
+                iconFile = os.path.join( Asm4.iconPath, 'Asm4_LinearArray.svg')
             elif tp=='Expression Array':
                 iconFile = os.path.join( Asm4.iconPath, 'Asm4_ExpressionArray.svg')
         if iconFile:
