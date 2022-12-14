@@ -203,6 +203,12 @@ class VariantLink( object ):
                 # self.makeVariant(obj)
                 '''
 
+    # see https://forum.freecadweb.org/viewtopic.php?f=10&t=72728&p=634441#p634361
+    def onSettingDocument(self, obj):
+        FCC.PrintMessage('Triggered onSettingDocument() in VariantLink\n')
+        obj.LinkedObject = obj.SourceObject
+        return
+
     # this is never actually called
     def onLostLinkToObject(self, obj):
         FCC.PrintMessage('Triggered onLostLinkToObject() in VariantLink\n')
@@ -251,11 +257,10 @@ class LinkArray( object ):
         # the actual link property with a customized name
         obj.addProperty("App::PropertyLink", "SourceObject", " Link",'')
         # the following two properties are required to support link array
-        obj.addProperty("App::PropertyBool", "ShowElement", "Array",
-                        'Shows each individual element')
-        obj.addProperty("App::PropertyInteger","ElementCount","Array",
+        obj.addProperty("App::PropertyBool", "ShowElement", "Array",'')
+        obj.addProperty("App::PropertyInteger","Count","Array",
                         'Number of elements in the array (including the original)')
-        obj.ElementCount=1
+        obj.Count=1
         # install the actual extension
         obj.addExtension('App::LinkExtensionPython')
         # initiate the extension
@@ -268,28 +273,27 @@ class LinkArray( object ):
         # Tell LinkExtension which additional properties are available.
         # This information is not persistent, so the following function must 
         # be called by at both attach(), and restore()
-        obj.configLinkProperty('ShowElement','ElementCount','Placement', LinkedObject='SourceObject')
+        obj.configLinkProperty("ShowElement", 'Placement', ElementCount='Count', LinkedObject='SourceObject')
         # hide the scale properties
         if hasattr( obj, 'Scale' ):
             obj.setPropertyStatus('Scale', 'Hidden')
         if hasattr( obj, 'ScaleList' ):
             obj.setPropertyStatus('ScaleList', 'Hidden')
 
+
     # Execute when a property changes.
     def onChanged(self, obj, prop):
         # this allows to move individual elements by the user
-        if prop == 'ShowElement':
-            # set the PlacementList for user to change
+        if prop == 'ShowElement': # set the PlacementList for user to change
             if hasattr(obj, 'PlacementList'):
                 if obj.ShowElement:
                     obj.setPropertyStatus('PlacementList','-Immutable')
                 else:
                     obj.setPropertyStatus('PlacementList', 'Immutable')
         # you cannot have less than 1 elements in an array
-        elif prop == 'ElementCount':
-            if obj.ElementCount < 1:
-                obj.ElementCount=1
-
+        elif prop == 'Count':
+            if obj.Count < 1:
+                obj.Count=1
 
 
 
@@ -321,8 +325,10 @@ class ViewProviderArray(object):
             tp = self.Object.ArrayType
             if tp=='Circular Array':
                 iconFile = os.path.join( Asm4.iconPath, 'Asm4_PolarArray.svg')
-            if tp=='Linear Array':
-                iconFile = os.path.join( Asm4.iconPath, 'Asm4_LinkArray.svg')
+            elif tp=='Linear Array':
+                iconFile = os.path.join( Asm4.iconPath, 'Asm4_LinearArray.svg')
+            elif tp=='Expression Array':
+                iconFile = os.path.join( Asm4.iconPath, 'Asm4_ExpressionArray.svg')
         if iconFile:
             return iconFile
                 
@@ -341,21 +347,15 @@ class ViewProviderArray(object):
 """
 class CircularArray(LinkArray):
 
-    #Set up the properties when the object is attached.
-    def attach(self, obj):
-        obj.addProperty("App::PropertyEnumeration", "ArraySteps",   "Array", '')
-        obj.ArraySteps=['Full Circle','Interval']
-        obj.addProperty("App::PropertyString",      "ArrayType",    "Array", '')
-        obj.ArrayType = 'Circular Array'
-        obj.setPropertyStatus('ArrayType', 'ReadOnly')
-        obj.addProperty("App::PropertyString" ,     "Axis",         "Array", '')
-        obj.addProperty("App::PropertyAngle",       "FullAngle",    "Array", '')
-        # obj.FullAngle.setRange(-3600, 3600)
-        obj.addProperty("App::PropertyAngle",       "IntervalAngle","Array", '')
-        tooltip = 'Steps perpendicular to the array plane to form a spiral'
-        obj.addProperty("App::PropertyFloat",       "LinearSteps",  "Array", tooltip)
-        # do the attach of the LinkArray class
-        super().attach(obj)
+    def onDocumentRestored(self, obj):
+        # for backwards compability
+        if not hasattr(obj, "Count"):
+            obj.addProperty("App::PropertyInteger","Count","Array","")
+            obj.Count = obj.ElementCount
+        if hasattr(obj, "ElementCount"):
+            obj.setPropertyStatus('ElementCount', 'Hidden')
+        super().onDocumentRestored(obj)
+
 
     # do the calculation of the elements' Placements
     def execute(self, obj):
@@ -388,36 +388,98 @@ class CircularArray(LinkArray):
                 return    
         # calculate the number of instances
         if obj.ArraySteps=='Interval':
-            fullAngle = (obj.ElementCount-1) * obj.IntervalAngle
-            obj.setExpression("FullAngle","ElementCount * IntervalAngle")
+            fullAngle = (obj.Count-1) * obj.IntervalAngle
+            obj.setExpression("FullAngle","Count * IntervalAngle")
         elif  obj.ArraySteps=='Full Circle':
             obj.setExpression("FullAngle",None)
             obj.FullAngle = 360
-            obj.IntervalAngle = obj.FullAngle/obj.ElementCount
+            obj.IntervalAngle = obj.FullAngle/obj.Count
         plaList = []
-        for i in range(obj.ElementCount):
+        for i in range(obj.Count):
             # calculate placement of element i
             rot_i = App.Rotation( App.Vector(0,0,1), i*obj.IntervalAngle)
             lin_i = App.Vector(0,0,i*obj.LinearSteps)
             pla_i = App.Placement( lin_i, rot_i )
             plaElmt = axisPlacement * pla_i * axisPlacement.inverse() * sObj.Placement
             plaList.append(plaElmt)
-        if not getattr(obj, 'ShowElement', True) or obj.ElementCount != len(plaList):
+        if not getattr(obj, 'ShowElement', True) or obj.Count != len(plaList):
             obj.setPropertyStatus('PlacementList', '-Immutable')
             obj.PlacementList = plaList
             obj.setPropertyStatus('PlacementList', 'Immutable')
         return False     # to call LinkExtension::execute()   <= is this rally needed ?
 
-    '''
-    #Execute when a property is changed.
-    def onChanged(self, obj, prop):
-        super().onChanged(obj, prop)
-        # you cannot have less than 1 elements in an array
-        if prop == 'ElementCount':
-            if obj.ElementCount < 1:
-                obj.ElementCount=1
-    '''
 
+"""
+    +-----------------------------------------------+
+    |        an expression link array class         |
+    +-----------------------------------------------+
+    array.setExpression('ElementPlacement', 'create(<<placement>>; create(<<Vector>>; 1; 0; 0); create(<<rotation>>; 360 / ElementCount * ElementIndex; 0; 0); LCS_0.Placement.Base) * SourceObject.Placement')
+    create(<<placement>>; create(<<Vector>>; 1; 0; 0); create(<<rotation>>; 360 / ElementCount * ElementIndex; 0; 0); DirBase) * .SourceObject.Placement
+"""
+
+class ExpressionArray(LinkArray):
+
+    def hasChildElement(self,obj):
+        # ugly workaroun to hide that stubborn 'ShowElement' property
+        obj.setEditorMode('ShowElement',3)
+        return False
+
+    # Set up the properties when the object is attached.
+    def attach(self, obj):
+        super().attach(obj)
+        obj.addProperty('App::PropertyString',      'ArrayType',        'Array', '')
+        obj.addProperty('App::PropertyPlacement',   'ElementPlacement', 'Array', 
+                        'Copied to array elements in order while the Index property is incremented')
+        obj.addProperty('App::PropertyInteger',     'Index',            'Array', '')
+        obj.addProperty('App::PropertyLink',        'Axis',        'Array',
+                        'Serves as Axis or Direction for the element placement')
+        obj.addProperty("App::PropertyEnumeration", 'AxisXYZ', 'Array', '')
+        obj.AxisXYZ = ['X','Y','Z']
+        obj.Index = 1
+        obj.setPropertyStatus('Index', 'Hidden')
+        obj.ShowElement = False
+        obj.setEditorMode('ShowElement',3)
+
+
+    # do the calculation of the elements Placements
+    def execute(self, obj):
+        """ The placement is calculated to follow the axis placement
+        This can be disabled by user by clearing the Direction property
+        or create the array without an axis selected
+        Without Direction the Array will follow the Z axis of the SourceObject."""
+
+        # Source Object
+        if not obj.SourceObject:
+            return
+        sObj = obj.SourceObject
+        # we only deal with objects that are in a parent container because we'll put the array there
+        parent = sObj.getParentGeoFeatureGroup()
+        if not parent:
+            return
+        # calculate
+        p0 = obj.Axis.Placement if obj.Axis else sObj.Placement
+        if obj.AxisXYZ == 'X':
+            p0 *= Asm4.rotY
+        elif obj.AxisXYZ == 'Y':
+            p0 *= Asm4.rotX.inverse()
+        p1 = p0.inverse() * sObj.Placement
+        # calculate placement of each element
+        plaList = []
+        obj.setPropertyStatus('Index', '-Immutable')
+        for i in range(obj.Count):
+            obj.Index = i
+            obj.recompute()
+            plaElmt = p0 * obj.ElementPlacement * p1
+            plaList.append(plaElmt)
+        # Resetting Index to 1 because we get more useful preview results 
+        # in the expression editor
+        obj.Index = 1
+        obj.setPropertyStatus('Index', 'Immutable')
+        obj.recompute()
+        obj.setPropertyStatus('PlacementList', '-Immutable')
+        obj.PlacementList = plaList
+        obj.setPropertyStatus('PlacementList', 'Immutable')
+        return
 
 
 """
@@ -458,4 +520,3 @@ def makeArray(obj,count):
     return array
 
 """
-

@@ -35,8 +35,10 @@ def makeAssembly():
 
     """
     def GetResources(self):
-        tooltip = "Create a new empty Model"
-        tooltip += "\nParts to be added must be open in this session"
+        tooltip = "<p>Create a new assembly Model</p>"
+        tooltip += "<p>Use the command \"Insert Part\" to import a part into the assembly. "
+        tooltip += "Parts can be in this document in the \"Parts\" folder, "
+        tooltip += "or in another document which must be open in this session</p>"
         iconFile = os.path.join( Asm4.iconPath , 'Asm4_Model.svg')
         return {"MenuText": "New Model", "ToolTip": tooltip, "Pixmap" : iconFile }
 
@@ -48,27 +50,11 @@ def makeAssembly():
             return(False)
 
 
-    # checks whether there already is an Asm4 Model in the document
-    '''
-    DEPRECATED : don't use this, use that of Asm4_libs
-    def checkModel(self):
-        if self.activeDoc.getObject('Model'):
-            if self.activeDoc.Model.TypeId=='App::Part' and self.activeDoc.Model.Type=='Assembly4 Model':
-                Asm4.warningBox("This document already contains an Assembly4 Model.")
-            else:
-                Asm4.warningBox("This document already contains another FreeCAD object called \"Model\". I cannot create an Assembly4 Model.")
-            return(True)
-        else:
-            return(False)
-    '''
-
-
     # the real stuff
     def Activated(self):
         # get the current active document to avoid errors if user changes tab
         self.activeDoc = App.activeDocument()
         # check whether there is already Model in the document
-        # if not self.checkModel():
         if Asm4.checkModel():
             Asm4.warningBox("This document already contains a valid Model, please use it")
             return
@@ -105,7 +91,7 @@ def makeAssembly():
                 if obj.TypeId in Asm4.containerTypes and obj.Name!='Model' and obj.getParentGeoFeatureGroup() is None:
                     partsGroup.addObject(obj)
         else:
-            Asm4.warningBox(   'There seems to already be a Parts object, you might get unexpected behaviour' )
+            Asm4.warningBox( 'There seems to already be a \"Parts\" object, you might get unexpected behaviour' )
 
         # recompute to get rid of the small overlays
         model.recompute()

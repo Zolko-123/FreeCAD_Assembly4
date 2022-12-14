@@ -188,6 +188,7 @@ class addVariable():
         # Variable Value
         self.varValue = QtGui.QDoubleSpinBox()
         self.varValue.setRange( -1000000.0, 1000000.0 )
+        self.varValue.setDecimals( 6 )
         self.formLayout.addRow(QtGui.QLabel('Value'),self.varValue)
         # Documentation
         self.description = QtGui.QTextEdit()
