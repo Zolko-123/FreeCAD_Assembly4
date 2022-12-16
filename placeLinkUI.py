@@ -574,7 +574,7 @@ class placeLinkUI():
                 # expr = LCS_in_the_assembly.Placement * AttachmentOffset * LCS_linkedPart.Placement ^ -1
                 ( attLCS,     separator, rest1 ) = expr.partition('.Placement * AttachmentOffset * ')
                 ( linkLCS,    separator, rest2 ) = rest1.partition('.Placement ^ ')
-                restFinal = rest2[0:2]
+                restFinal = rest2
                 attLink = parent
                 attPart = 'None'
             else:
@@ -583,7 +583,7 @@ class placeLinkUI():
                 ( attLink,    separator, rest1 ) = expr.partition('.Placement * ')
                 ( attLCS,     separator, rest2 ) = rest1.partition('.Placement * AttachmentOffset * ')
                 ( linkLCS,    separator, rest3 ) = rest2.partition('.Placement ^ ')
-                restFinal = rest3[0:2]
+                restFinal = rest3
         elif nbHash==1:
             # an external part is linked to the assembly
             if parent == 'Parent Assembly':
@@ -592,7 +592,7 @@ class placeLinkUI():
                 ( attLCS,     separator, rest1 ) = expr.partition('.Placement * AttachmentOffset * ')
                 ( linkedDoc,  separator, rest2 ) = rest1.partition('#')
                 ( linkLCS,    separator, rest3 ) = rest2.partition('.Placement ^ ')
-                restFinal = rest3[0:2]
+                restFinal = rest3
                 attLink = parent
                 attPart = 'None'
             else:
@@ -605,7 +605,7 @@ class placeLinkUI():
                     ( linkedDoc,  separator, rest2 ) = rest1.partition('#')
                     ( attLCS,     separator, rest3 ) = rest2.partition('.Placement * AttachmentOffset * ')
                     ( linkLCS,    separator, rest4 ) = rest3.partition('.Placement ^ ')
-                    restFinal = rest4[0:2]
+                    restFinal = rest4
                 # parent is in this document and link is a part in another document
                 else:
                     # expr = Part001.Placement * LCS_0.Placement * AttachmentOffset * varTmpDoc_4#LCS_1.Placement ^ -1
@@ -613,7 +613,7 @@ class placeLinkUI():
                     ( attLCS,     separator, rest2 ) = rest1.partition('.Placement * AttachmentOffset * ')
                     ( linkedDoc,  separator, rest3 ) = rest2.partition('#')
                     ( linkLCS,    separator, rest4 ) = rest3.partition('.Placement ^ ')
-                    restFinal = rest4[0:2]                    
+                    restFinal = rest4                    
         elif nbHash==2:
             # linked part and sister part in external documents to the parent assembly:
             # expr = ParentLink.Placement * ParentPart#LCS.Placement * AttachmentOffset * LinkedPart#LCS.Placement ^ -1
@@ -622,10 +622,14 @@ class placeLinkUI():
             ( attLCS,     separator, rest3 ) = rest2.partition('.Placement * AttachmentOffset * ')
             ( linkedDoc,  separator, rest4 ) = rest3.partition('#')
             ( linkLCS,    separator, rest5 ) = rest4.partition('.Placement ^ ')
-            restFinal = rest5[0:2]
+            restFinal = rest5
         else:
             # complicated stuff, we'll do it later
             pass
+        
+        if restFinal != '':
+            restFinal = restFinal[1:3] if restFinal.startswith('(') else restFinal[0:2]
+        
         # final check, all options should give the correct data
         if restFinal=='-1' and attLink==parent :
             # wow, everything went according to plan
