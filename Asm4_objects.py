@@ -530,7 +530,6 @@ class ExpressionArray(LinkArray):
         for i in range(obj.Count):
             obj.Index = i
             for pn in evalList:
-                tida.sensist()
                 ps = 'obj.'+pn.lstrip('.')
                 nv = type(eval(ps))(obj.evalExpression(expDict[pn]))
                 o,a = ps.rsplit('.',1)
@@ -548,7 +547,7 @@ class ExpressionArray(LinkArray):
         obj.ScaleList = scaleList
         return
 
-
+VEC_Z = App.Vector(0,0,1)
 def findAxisPlacement(axisObj, subnameList):
     if subnameList:
         if len(subnameList) != 1:
