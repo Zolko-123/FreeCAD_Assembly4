@@ -417,7 +417,13 @@ class CircularArray(LinkArray):
     +-----------------------------------------------+
     |        an expression link array class         |
     +-----------------------------------------------+
-    array.setExpression('Placer', 'create(<<placement>>; create(<<Vector>>; 1; 0; 0); create(<<rotation>>; 360 / Count * Index; 0; 0))
+# Axial spiral
+array.setExpression('.Placer.Base.z', 'Index * 10')
+array.setExpression('.Placer.Rotation.Angle', 'Index * 40')
+# Mirrored flat spiral
+array.setExpression('.Placer.Base', '.Placer.Rotation * (minvert(.AxisPlacement) * .SourceObject.Placement.Base * -2 * (Index % 2) + create(<<vector>>; floor(Index / 2) * 15; 0; 0) * (Index % 2 * -2 + 1))')
+array.setExpression('.Placer.Rotation.Angle', '180 * (Index % 2) + floor(Index / 2) * 40')
+array.setExpression('Scaler', '1 - 2 * (Index % 2)')'
 """
 
 class ExpressionArray(LinkArray):
@@ -628,19 +634,18 @@ def _evalOrder(exDict):
     resolved = []
     def dep_resolve(node, resolved, unresolved):
         unresolved.append(node)
+        nodes = _expandEdge(node)
         for edge in exDict.keys():
-            if edge == node: continue
-            if _findParam(node, exDict[edge]):
-                for e in _expandEdge(edge):
-                    if e not in resolved:
-                        if e in unresolved:
-                            raise RuntimeError('Circular reference detected: {} -> {}'.format(node, e))
-                        dep_resolve(e, resolved, unresolved)
+            for n in nodes:
+                if edge == n: continue
+                if _findParam(n, exDict[edge]):
+                    if edge not in resolved:
+                        if edge in unresolved:
+                            raise RuntimeError('Circular reference detected: {} -> {}'.format(n, edge))
+                        dep_resolve(edge, resolved, unresolved)
         resolved.append(node)
         unresolved.remove(node)
     dep_resolve('Index', resolved, unresolved)
-    return [pn for pn in reversed(resolved) if pn in exDict]
+    resolved.pop()
+    return list(reversed(resolved))
 
-# td = dict([('.Placer.Base', '.Placer.Rotation * create(<<vector>>; 2 * Index; 0; 2 * Index)'), ('.Placer.Rotation.Angle', '7 * Index'), ('.Placer.Rotation.Axis.x', 't1'), ('t1', 't2'), ('t2', 'Index / Count')])
-# _evalOrder(td)
-# ['t2', 't1', '.Placer.Rotation.Axis.x', '.Placer.Rotation.Angle', '.Placer.Base']
