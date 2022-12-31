@@ -541,6 +541,13 @@ class ExpressionArray(LinkArray):
                 o,a = ps.rsplit('.',1)
                 if a == 'Angle' and type(eval(o)) == App.Rotation:
                     nv = radians(nv)
+                # must set entire rotation axis at once.
+                # Related discussion: https://forum.freecad.org/viewtopic.php?t=73898
+                if o.endswith('.Axis') and a in 'xyz':
+                    axv = eval(o.replace('.Axis','.RawAxis'))
+                    setattr(axv, a, nv)
+                    exec(o + ' = axv')
+                    continue
                 exec(ps + ' = nv')
             placementList.append(obj.AxisPlacement * obj.Placer * pmt1)
             s = obj.Scaler
