@@ -587,7 +587,7 @@ def findAxisPlacement(axisObj, subnameList):
         return None
     # on origin axes we want the X axis
     if axisObj.TypeId == 'App::Line' and hasattr(axisObj,'Role'):
-        return axisObj.Placement * Asm4.rotY
+        return axisObj.Placement * App.Rotation(App.Vector(1, 1, 1), 120)
     if axisObj.TypeId == 'App::Plane' and hasattr(axisObj,'Role'):
         return axisObj.Placement
     if axisObj.TypeId == 'PartDesign::CoordinateSystem':
