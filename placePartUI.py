@@ -42,7 +42,11 @@ class placePartUI():
             Asm4.warningBox('Please select ab object with a Placement property')
 
         # check where the fastener was attached to
-        (self.old_Parent, separator, self.old_parentLCS) = self.selectedObj.AttachedTo.partition('#')
+        if hasattr(self.selectedObj,'AttachedTo'):
+            self.old_AttachedTo = self.selectedObj.AttachedTo
+        else:
+            self.old_AttachedTo = None
+        (self.old_Parent, separator, self.old_parentLCS) = self.old_AttachedTo.partition('#')
         # get and store the Placement's current ExpressionEngine:
         self.old_EE = Asm4.placementEE( self.selectedObj.ExpressionEngine )
         if hasattr(self.selectedObj,'AttachmentOffset'):
@@ -102,7 +106,7 @@ class placePartUI():
         if lcs_found:
             # ... and select it
             self.attLCSlist.setCurrentItem( lcs_found[0] )
-
+        # launch the selection observer
         Gui.Selection.addObserver(self, 0)
 
 
@@ -124,7 +128,11 @@ class placePartUI():
 
     # Cancel
     def reject(self):
+        # remove the  observer
+        Gui.Selection.removeObserver(self)
         # restore previous values if they existed
+        if hasattr(self.selectedObj,'AttachedTo'):
+            self.selectedObj.AttachedTo = self.old_AttachedTo
         if self.old_AO is not None:
             self.selectedObj.AttachmentOffset = self.old_AO
         if self.old_EE is not None:
@@ -133,7 +141,9 @@ class placePartUI():
         # highlight the selected LCS in its new position
         Gui.Selection.clearSelection()
         Gui.Selection.addSelection( self.activeDoc.Name, self.rootAssembly.Name, self.selectedObj.Name +'.')
-        self.finish()
+        # close the Task dialog
+        #self.finish()
+        Gui.Control.closeDialog()
 
 
 
@@ -322,7 +332,8 @@ class placePartUI():
     def addSelection(self, doc, obj, sub, pnt):
         selPath = Asm4.getSelectionPath(doc, obj, sub)
         selObj = Gui.Selection.getSelection()[0]
-        if selObj and len(selPath) > 2:
+        # don't trigger if it's the selected object itself
+        if selObj  and  selObj!=self.selectedObj  and  len(selPath)>2:
             selLinkName = selPath[2]
             selLink = App.ActiveDocument.getObject(selLinkName)
             idx = self.parentList.findText(Asm4.labelName(selLink), QtCore.Qt.MatchExactly)
