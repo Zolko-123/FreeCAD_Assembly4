@@ -552,12 +552,25 @@ class dropDownCmd:
 
 """
     +-----------------------------------------------+
+    |         vector constants                      |
+    +-----------------------------------------------+
+"""
+VEC_0 = App.Vector(0, 0, 0)
+VEC_X = App.Vector(1, 0, 0)
+VEC_Y = App.Vector(0, 1, 0)
+VEC_Z = App.Vector(0, 0, 1)
+VEC_T = App.Vector(1, 1, 1)
+
+
+
+"""
+    +-----------------------------------------------+
     |         the 3 base rotation Placements        |
     +-----------------------------------------------+
 """
-rotX = App.Placement( App.Vector(0,0,0), App.Rotation( App.Vector(1,0,0), 90. ) )
-rotY = App.Placement( App.Vector(0,0,0), App.Rotation( App.Vector(0,1,0), 90. ) )
-rotZ = App.Placement( App.Vector(0,0,0), App.Rotation( App.Vector(0,0,1), 90. ) )
+rotX = App.Placement( VEC_0, App.Rotation( VEC_X, 90) )
+rotY = App.Placement( VEC_0, App.Rotation( VEC_Y, 90) )
+rotZ = App.Placement( VEC_0, App.Rotation( VEC_Z, 90) )
 
 
 

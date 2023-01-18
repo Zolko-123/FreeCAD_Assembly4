@@ -401,7 +401,7 @@ class CircularArray(LinkArray):
         plaList = []
         for i in range(obj.Count):
             # calculate placement of element i
-            rot_i = App.Rotation( App.Vector(0,0,1), i*obj.IntervalAngle)
+            rot_i = App.Rotation(Asm4.VEC_Z, i*obj.IntervalAngle)
             lin_i = App.Vector(0,0,i*obj.LinearSteps)
             pla_i = App.Placement( lin_i, rot_i )
             plaElmt = axisPlacement * pla_i * axisPlacement.inverse() * sObj.Placement
@@ -560,7 +560,6 @@ class ExpressionArray(LinkArray):
         obj.ScaleList = scaleList
         return
 
-VEC_Z = App.Vector(0,0,1)
 def findAxisPlacement(axisObj, subnameList):
     if subnameList:
         if len(subnameList) != 1:
@@ -571,23 +570,21 @@ def findAxisPlacement(axisObj, subnameList):
             if Asm4.isSegment(sub):
                 b = sub.Vertexes[0].Point
                 d = sub.Vertexes[1].Point - b
-                return App.Placement(b, App.Rotation(VEC_Z, d))
+                return App.Placement(b, App.Rotation(Asm4.VEC_Z, d))
             # for a Circle it's the circle's center and axis
             if Asm4.isCircle(sub):
-                return App.Placement(sub.Curve.Center, App.Rotation(VEC_Z, sub.Curve.Axis))
-            # for LCS get the axis direction
-            if axisObj.TypeId == 'PartDesign::CoordinateSystem':
-                return App.Placement(sub.valueAt(0,0), App.Rotation(VEC_Z, sub.normalAt(0,0)))
+                return App.Placement(sub.Curve.Center, App.Rotation(Asm4.VEC_Z, sub.Curve.Axis))
+        # This is for LCS and works for other objects too
         if subname == 'X':
-            return axisObj.Placement * Asm4.rotY
+            return axisObj.Placement * App.Rotation(Asm4.VEC_T, 120)
         if subname == 'Y':
-            return axisObj.Placement * Asm4.rotX.inverse()
+            return axisObj.Placement * App.Rotation(Asm4.VEC_T, 240)
         if subname == 'Z':
             return axisObj.Placement
         return None
     # on origin axes we want the X axis
     if axisObj.TypeId == 'App::Line' and hasattr(axisObj,'Role'):
-        return axisObj.Placement * App.Rotation(App.Vector(1, 1, 1), 120)
+        return axisObj.Placement * App.Rotation(VEC_T, 120)
     if axisObj.TypeId == 'App::Plane' and hasattr(axisObj,'Role'):
         return axisObj.Placement
     if axisObj.TypeId == 'PartDesign::CoordinateSystem':
