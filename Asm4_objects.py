@@ -555,7 +555,6 @@ class ExpressionArray(LinkArray):
         # Resetting Index to 1 because we get more useful preview results 
         # in the expression editor
         obj.Index = 1
-        # obj.recompute()
         obj.PlacementList = placementList
         obj.ScaleList = scaleList
         return
@@ -584,7 +583,7 @@ def findAxisPlacement(axisObj, subnameList):
         return None
     # on origin axes we want the X axis
     if axisObj.TypeId == 'App::Line' and hasattr(axisObj,'Role'):
-        return axisObj.Placement * App.Rotation(VEC_T, 120)
+        return axisObj.Placement * App.Rotation(Asm4.VEC_T, 120)
     if axisObj.TypeId == 'App::Plane' and hasattr(axisObj,'Role'):
         return axisObj.Placement
     if axisObj.TypeId == 'PartDesign::CoordinateSystem':
