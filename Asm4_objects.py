@@ -259,7 +259,7 @@ class LinkArray( object ):
         # the actual link property with a customized name
         obj.addProperty("App::PropertyLink",   "SourceObject", "Array", 'The object to array')
         # the following two properties are required to support link array
-        obj.addProperty("App::PropertyBool",   "ShowElement",  " Link", '')
+        obj.addProperty("App::PropertyBool",   "ShowElement",  "Array", '')
         obj.addProperty("App::PropertyInteger","Count",        "Array",
                         'Total number of elements in the array')
         obj.Count=1
@@ -472,12 +472,6 @@ class ExpressionArray(LinkArray):
 
         super().onDocumentRestored(obj)
 
-    def hasChildElement(self,obj):
-        # ugly workaround to hide that stubborn 'ShowElement' property
-        # we want it hidden because ExpressionArray can't handle it yet
-        obj.setEditorMode('ShowElement', 3)
-        return False
-
     # Set up the properties when the object is attached.
     def attach(self, obj):
         super().attach(obj)
@@ -555,8 +549,19 @@ class ExpressionArray(LinkArray):
         # Resetting Index to 1 because we get more useful preview results 
         # in the expression editor
         obj.Index = 1
-        obj.PlacementList = placementList
-        obj.ScaleList = scaleList
+        if obj.ShowElement:
+            for i in range(obj.Count):
+                el = obj.ElementList[i]
+                el.NoTouch = True
+                el.Placement = placementList[i]
+                el.ScaleVector = scaleList[i]
+                el.setPropertyStatus('Placement',   'ReadOnly')
+                el.setPropertyStatus('ScaleVector', 'ReadOnly')
+                el.setPropertyStatus('Scale',       'ReadOnly')
+                el.NoTouch = False
+        else:
+            obj.PlacementList = placementList
+            obj.ScaleList = scaleList
         return
 
 def findAxisPlacement(axisObj, subnameList):
