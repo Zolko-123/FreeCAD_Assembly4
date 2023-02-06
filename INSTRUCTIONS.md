@@ -62,7 +62,7 @@ Commands are activated with relevant selection. If a command is inactive (grayed
 
 * ![](Resources/icons/Asm4_Part.svg) : **New Part** : creates FreeCAD `App::Part` in the current document and allows to give it a name. A document can contain many parts.
 
-* ![](Resources/icons/Link_Part.svg) : **Link to a Part** : creates a FreeCAD `App::Link` to an `App::Part`. Only parts from documents already open in the session and saved to disk can be used. If there are multiple parts in a document, they can be selected individually. A part can be inserted (linked) many times, but each instance must have a unique name in the assembly tree. If a name already attribuated is given again, FreeCAD will automatically give it a unique (and probably un-user-friendly) name.
+* ![](Resources/icons/Link_Part.svg) : **Link to a Part** : creates a FreeCAD `App::Link` to an `App::Part`. Only parts from documents already open in the session and saved to disk can be used. If there are multiple parts in a document, they can be selected individually. A part can be inserted (linked) many times, but each instance must have a unique name in the assembly tree. If a name already attributed is given again, FreeCAD will automatically give it a unique (and probably un-user-friendly) name.
 
 * ![](Resources/icons/Place_Link.svg) : **Place Link** : this positions the child instance of a linked part in the current host assembly. This attaches an LCS in the linked part to a target LCS in the assembly. This target LCS can be either in the assembly itself (in the *Model*) or in a sister part already linked. In this case, it is important to note that only LCS at the root of the linked part can be used.
 
@@ -192,7 +192,7 @@ All Assembly4 children have these 4 properties; these are the first places to ch
 
 ## Tutorials and Examples
 
-You can use the [example assemblies](https://github.com/Zolko-123/FreeCAD_Examples) to experiment with this workbench's features. Open one _asm_something.fcstd_ file and try out the functions. There are `ReadMe.txt` files in each directory with some explanations. There are tutorials available to lear tu use Assembly4:
+You can use the [example assemblies](https://github.com/Zolko-123/FreeCAD_Examples) to experiment with this workbench's features. Open one _asm_something.fcstd_ file and try out the functions. There are `ReadMe.txt` files in each directory with some explanations. There are tutorials available to learn to use Assembly4:
 
 * [a quick assembly from scratch](https://github.com/Zolko-123/FreeCAD_Examples/blob/master/Asm4_Tutorial1/README.md)
 * [a cinematic assembly in one file, using a master sketch](https://github.com/Zolko-123/FreeCAD_Examples/blob/master/Asm4_Tutorial2/README.md)
