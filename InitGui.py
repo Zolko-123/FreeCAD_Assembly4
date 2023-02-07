@@ -114,8 +114,8 @@ class Assembly4Workbench(Workbench):
         self.dot()
         import insertLinkCmd       # inserts an App::Link to a 'Model' in another file
         self.dot()
-        # import placeLinkCmd        # places a linked part by snapping LCS (in the Part and in the Assembly)
-        # self.dot()
+        import placeLinkCmd        # places a linked part by snapping LCS (in the Part and in the Assembly)
+        self.dot()
         #import placeDatumCmd       # places an LCS relative to an external file (creates a local attached copy)
         #self.dot()
         import importDatumCmd      # creates an LCS in assembly and attaches it to an LCS relative to an external file
