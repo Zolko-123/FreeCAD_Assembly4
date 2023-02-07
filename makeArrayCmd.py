@@ -110,8 +110,6 @@ class makeExpressionArray:
             obj.setLink(srcObj)
             # setup class specific properties
             self._setupProperties(obj)
-            # Hide stubborn property
-            obj.setEditorMode('ShowElement',3)
             # recompute
             obj.enforceRecompute()
             App.ActiveDocument.recompute()
