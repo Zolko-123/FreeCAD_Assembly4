@@ -56,77 +56,50 @@ Commands are activated with relevant selection. If a command is inactive (grayed
 
 ### Assembly4 commands
 
-* ![](Resources/icons/Asm4_Model.svg) : **New Model** : creates an Assembly4 *Model*, which is a FreeCAD `App::Part` called *Model* and with some extra additions. This can be used to design a stand-alone part or be the container for an assembly. One document can only contain one Assembly4 Model.
+. Icon .|Tool|Description 
+:---|:---|:---
+![](Resources/icons/Asm4_Model.svg)|**New Model**|creates an Assembly4 *Model*, which is a FreeCAD `App::Part` called *Model* and with some extra additions. This can be used to design a stand-alone part or be the container for an assembly. One document can only contain one Assembly4 Model.
+![](Resources/icons/Asm4_Body.svg)|**New Body**|creates FreeCAD `PartDesign::Body` in the selected `App::Part`. This Body can then be used with FreeCAD's PartDesign workbench. If you create such a `PartDesign::Body` with the PartDesign workbench, it will be placed at the root of the document, outside any `App::Part`.
+![](Resources/icons/Asm4_Part.svg)|**New Part**|creates FreeCAD `App::Part` in the current document and allows to give it a name. A document can contain many parts.
+![](Resources/icons/Asm4_Group.svg)|**New Group**|creates FreeCAD `App::DocumentObjectGroup` in the current document and allows to give it a name. A group has no other function than as an organizer in the Tree view.
+![](Resources/icons/Asm4_PartInfo.svg)|**Edit Part Information**|Add information to selected Part to be used in for example BOM.
+![](Resources/icons/Link_Part.svg)|**Insert Part**|creates a FreeCAD `App::Link` to an `App::Part`. Only parts from documents already open in the session and saved to disk can be used. If there are multiple parts in a document, they can be selected individually. A part can be inserted (linked) many times, but each instance must have a unique name in the assembly tree. If a name already attributed is given again, FreeCAD will automatically give it a unique (and probably un-user-friendly) name.
+![](Resources/icons/Asm4_Screw.svg)|**Fasteners dropdown**|Allows to insert industry standard screws, nuts and washers from the **Fasteners Workbench** library, and allows to attach them to Assembly4 datum objects, primarily coordinate systems (LCS). These features are only available if the Fasteners Workbench is installed. The Fasteners Workbench can be installed like Assembly4 through FreeCAD's addon manager: menu **Tools > Addon Manager > fasteners**
+![](Resources/icons/Asm4_Screw.svg)|*Insert Screw*|creates a normed screw from the Fasteners Workbench. The type of screw, diameter and length can be changed in the properties window of the screw after creation.
+![](Resources/icons/Asm4_Nut.svg)|*Insert Nut*|creates a normed nut from the Fasteners Workbench. The type of nut, diameter and length can be changed in the properties window of the nut after creation.
+![](Resources/icons/Asm4_Washer.svg)|*Insert Washer*|creates a normed washer from the Fasteners Workbench. The type of washer and its diameter can be changed in the properties window of the washer after creation.
+![](Resources/icons/Asm4_mvFastener.svg)|*Edit attachment of Fastener*|allows to attach an object from the Fasteners Workbench — screw, nut or washer — to a datum object in the assembly or a sister part, in the regular Assembly4 manner.
+![](Resources/icons/Asm4_Sketch.svg)|**New Sketch**|creates FreeCAD Sketch in an `App::Part` (and thus also in Assembly4 Models). After creation the attachment dialog opens and allows to attach this Sketch.
+![](Resources/icons/Asm4_AxisCross.svg)|**New Datum**|this is a drop-down combined menu grouping the creation of all Datum objects:
+![](Resources/icons/Asm4_AxisCross.svg)|*New LCS*|creates `PartDesign::CoordinateSystem` in an `App::Part` (and thus also in Assembly4 Models). This LCS is unattached, to attach it to an object edit its MapMode in its Placement Property
+![](Resources/icons/Asm4_Plane.svg)|*New Datum Plane*|creates a datum `PartDesign::Plane`
+![](Resources/icons/Asm4_Axis.svg)|*New Datum Axis*|creates a datum `PartDesign::Line`
+![](Resources/icons/Asm4_Point.svg)|*New Datum Point*|creates a datum `PartDesign::Point`
+![](Resources/icons/Asm4_Hole.svg)|*New Hole LCS*|creates datum `PartDesign::CoordinateSystem` in an `App::Part` (and thus also in Assembly4 Models) at the center of the selected circular edge. This is therefore only active when a (single) circular edge is selected. This `PartDesign::CoordinateSystem` is attached to the center of the circle, and is intended to serve as attachment LCS for fasteners.  This is the combined function of creating an LCS and attaching it (via MapMode) to a circular edge, and is provided to streamline the workflow.
+![](Resources/icons/Import_Datum.svg)|**Import Datum**|this imports an existing Datum object from a linked part into the assembly. Precisely, it creates a Datum in the assembly and attaches it to a datum in a sister part of the same type. By default, the same name is given to the imported Datum object. 
+![](Resources/icons/Asm4_shapeBinder.svg)|**Create a shape binder**|Create a reference to an external shape. This creates a SubShapeBinder of the selected shapes (face, edge, point) in the root assembly. Only shapes belonging to the same part can be imported in a single step 
+![](Resources/icons/Place_Link.svg)|**Place Link**|this positions the child instance of a linked part in the current host assembly. This attaches an LCS in the linked part to a target LCS in the assembly. This target LCS can be either in the assembly itself (in the *Model*) or in a sister part already linked. In this case, it is important to note that only LCS at the root of the linked part can be used.
+![](Resources/icons/Asm4_releaseAttachment.svg)|**Release from Attachment**|Release an object from all attachments to any geometry.
+![](Resources/icons/Asm4_Solver.svg)|**Solve constraints and update assembly**|this recomputes all the links and all the placements in the assembly
+![](Resources/icons/Asm4_Mirror.svg)|**Mirror**|Create a mirror of selected object. Select a source object and then a mirror plane or a normal to a plane before activating the tool. 
+![](Resources/icons/Asm4_LinearArray.svg)|**Linear Array**|Create a linear array. Select first an object and then a direction object. The property Linear Step is the distance between elements. Example expression on Linear Step property to place the last element 100 mm from start position `100mm*Index/(Count + 1)`
+![](Resources/icons/Asm4_PolarArray.svg)|**Circular Array**|Create a circular (polar) array of the selected object and axis. Default expression for Angle Step property is `360/Count` to distribute the elements around a full circle. 
+![](Resources/icons/Asm4_ExpressionArray.svg)|**Expression Array**|A base for arrays and mirror. Creates an array of the selected object where the placement of each element is calculated using expressions and an Index property. Select a source object to array and optionally an Axis that transformation will be related to. Without axis the transformations relates to the source object internal Z axis. Supported axis objects are axis or plane from an origin, datum line, LCS axes, straight line segments, arcs and circles. The Count property is the amount of elements in the array. The Placer property is recomputed and copied to each of the arrayed link while the Index property is incremented. Use Index in expressions on the entire Placer or its sub-properties. By opening Placer property in Tasks panel it is possible to set expressions for euler angles too. The Scaler propertie works in a similar way and sets the scale of the links.
+![](Resources/icons/Variant_Link.svg)|**Variant Link**|This is a link to a part but with varying parameters, meaning that you can isert the same part several times, but adjusting the parameters of each instance of the part. Objects that can be used as source for a variant link are standard App::Part (Std_Part) that contain a PropertyContainer called "Variables". All variables of the source object can be set individually for each variant. Such variant links and their individual variables are persistent, meaning that they will be restored when the document is restored.
+![](Resources/icons/Asm4_showLCS.svg)<br/>![](Resources/icons/Asm4_hideLCS.svg)|**Show/Hide LCS**|Shows or hides LCSs of selected part and its children. 
+![](Resources/icons/Asm4_PartsList_Subassemblies.svg)<br/>![](Resources/icons/Asm4_PartsList.svg)|**Bill of Materials**|[BOM Example](https://github.com/Zolko-123/FreeCAD_Assembly4/blob/master/Examples/ConfigBOM/README.md)
+![](Resources/icons/Part_Measure.svg)|**Measure**|Measure tool.
+![](Resources/icons/Asm4_addVariable.svg)<br/>![](Resources/icons/Asm4_delVariable.svg)|**Add/Delete Variable**|this adds a variable to the `Variables` object in the Model. These variables can be used in any parameter of the document by entering `Variables.Height` or `Variables.Length` (for example). This is especially useful for assemblies built in a single file, where several parts can be built using the same dimensions. Modifying a variable is done in the `Properties` window of the `Variables` object.
+![](Resources/icons/Asm4_Configurations.svg)|**Configurations**|Exploded assemblies can be done with configurations: first, make a default configuration with all parts in their correct location. Then, move and/or hide parts as wished by adjusting the AttachmentOffset property of each part. You can then create a new configuration based on this state. As opposed to an exploded assembly, you can create as many states as you wish, showing/hiding parts, and/or offsetting parts from their assembled position.
+![](Resources/icons/Asm4_GearsAnimate.svg)|**Animate Assembly**|allows to select one of the variables from the `Variables` object and sweep it between two values. All parameters of the assembly that are set by this variable will be updated.
 
-* ![](Resources/icons/Asm4_Body.svg) : **New Body** : creates FreeCAD `PartDesign::Body` in the selected `App::Part`. This Body can then be used with FreeCAD's PartDesign workbench. If you create such a `PartDesign::Body` with the PartDesign workbench, it will be placed at the root of the document, outside any `App::Part`.
+There is also a toolbar for selection filters
 
-* ![](Resources/icons/Asm4_Part.svg) : **New Part** : creates FreeCAD `App::Part` in the current document and allows to give it a name. A document can contain many parts.
-
-* ![](Resources/icons/Asm4_Group.svg) : **New Group** : creates FreeCAD `App::DocumentObjectGroup` in the current document and allows to give it a name. A group has no other function than as an organizer in the Tree view.
-
-* ![](Resources/icons/Asm4_PartInfo.svg) : **Edit Part Information** : Add information to selected Part to be used in for example BOM.
-
-* ![](Resources/icons/Link_Part.svg) : **Insert Part** : creates a FreeCAD `App::Link` to an `App::Part`. Only parts from documents already open in the session and saved to disk can be used. If there are multiple parts in a document, they can be selected individually. A part can be inserted (linked) many times, but each instance must have a unique name in the assembly tree. If a name already attributed is given again, FreeCAD will automatically give it a unique (and probably un-user-friendly) name.
-
-* ![](Resources/icons/Asm4_Screw.svg) : **Fasteners dropdown** : Allows to insert industry standard screws, nuts and washers from the **Fasteners Workbench** library, and allows to attach them to Assembly4 datum objects, primarily coordinate systems (LCS). These features are only available if the Fasteners Workbench is installed. The Fasteners Workbench can be installed like Assembly4 through FreeCAD's addon manager: menu **Tools > Addon Manager > fasteners**
-
-    * ![](Resources/icons/Asm4_Screw.svg) : **Insert Screw** : creates a normed screw from the Fasteners Workbench. The type of screw, diameter and length can be changed in the properties window of the screw after creation.
-
-    * ![](Resources/icons/Asm4_Nut.svg) : **Insert Nut** : creates a normed nut from the Fasteners Workbench. The type of nut, diameter and length can be changed in the properties window of the nut after creation.
-
-    * ![](Resources/icons/Asm4_Washer.svg) : **Insert Washer** : creates a normed washer from the Fasteners Workbench. The type of washer and its diameter can be changed in the properties window of the washer after creation.
-
-    * ![](Resources/icons/Asm4_mvFastener.svg) : **Edit attachment of Fastener** : allows to attach an object from the Fasteners Workbench — screw, nut or washer — to a datum object in the assembly or a sister part, in the regular Assembly4 manner.
-
-* ![](Resources/icons/Asm4_Sketch.svg) : **New Sketch** : creates FreeCAD Sketch in an `App::Part` (and thus also in Assembly4 Models). After creation the attachment dialog opens and allows to attach this Sketch.
-
-* ![](Resources/icons/Asm4_AxisCross.svg) : **New Datum** : this is a drop-down combined menu grouping the creation of all Datum objects:
-
-	* ![](Resources/icons/Asm4_AxisCross.svg) : **New LCS** : creates `PartDesign::CoordinateSystem` in an `App::Part` (and thus also in Assembly4 Models). This LCS is unattached, to attach it to an object edit its MapMode in its Placement Property
-
-	* ![](Resources/icons/Asm4_Plane.svg) : **New Datum Plane** : creates a datum `PartDesign::Plane`
-
-	* ![](Resources/icons/Asm4_Axis.svg) : **New Datum Axis** : creates a datum `PartDesign::Line`
-
-	* ![](Resources/icons/Asm4_Point.svg) : **New Datum Point** : creates a datum `PartDesign::Point`
-
-	* ![](Resources/icons/Asm4_Hole.svg) : **New Hole LCS** : creates datum `PartDesign::CoordinateSystem` in an `App::Part` (and thus also in Assembly4 Models) at the center of the selected circular edge. This is therefore only active when a (single) circular edge is selected. This `PartDesign::CoordinateSystem` is attached to the center of the circle, and is intended to serve as attachment LCS for fasteners.  This is the combined function of creating an LCS and attaching it (via MapMode) to a circular edge, and is provided to streamline the workflow.
-
-* ![](Resources/icons/Import_Datum.svg) : **Import Datum** : this imports an existing Datum object from a linked part into the assembly. Precisely, it creates a Datum in the assembly and attaches it to a datum in a sister part of the same type. By default, the same name is given to the imported Datum object. 
-
-* ![](Resources/icons/Asm4_shapeBinder.svg) : **Create a shape binder** : Create a reference to an external shape. This creates a SubShapeBinder of the selected shapes (face, edge, point) in the root assembly. Only shapes belonging to the same part can be imported in a single step 
-
-* ![](Resources/icons/Place_Link.svg) : **Place Link** : this positions the child instance of a linked part in the current host assembly. This attaches an LCS in the linked part to a target LCS in the assembly. This target LCS can be either in the assembly itself (in the *Model*) or in a sister part already linked. In this case, it is important to note that only LCS at the root of the linked part can be used.
-
-* ![](Resources/icons/Asm4_releaseAttachment.svg) : **Release from Attachment** : Release an object from all attachments to any geometry.
-
-* ![](Resources/icons/Asm4_Solver.svg) : **Solve constraints and update assembly** : this recomputes all the links and all the placements in the assembly
-
-
-* ![](Resources/icons/Asm4_Mirror.svg) : **Mirror** : Create a mirror of selected object. Select a source object and then a mirror plane or a normal to a plane before activating the tool. 
-
-* ![](Resources/icons/Asm4_LinearArray.svg) : **Linear Array** : Create a linear array. Select first an object and then a direction object. The property Linear Step is the distance between elements. Example expression on Linear Step property to place the last element 100 mm from start position `100mm*Index/(Count + 1)`
-
-* ![](Resources/icons/Asm4_PolarArray.svg) : **Circular Array** : Create a circular (polar) array of the selected object and axis. Default expression for Angle Step property is `360/Count` to distribute the elements around a full circle. 
-
-* ![](Resources/icons/Asm4_ExpressionArray.svg) : **Expression Array** : A base for arrays and mirror. Creates an array of the selected object where the placement of each element is calculated using expressions and an Index property. Select a source object to array and optionally an Axis that transformation will be related to. Without axis the transformations relates to the source object internal Z axis. Supported axis objects are axis or plane from an origin, datum line, LCS axes, straight line segments, arcs and circles. The Count property is the amount of elements in the array. The Placer property is recomputed and copied to each of the arrayed link while the Index property is incremented. Use Index in expressions on the entire Placer or its sub-properties. By opening Placer property in Tasks panel it is possible to set expressions for euler angles too. The Scaler propertie works in a similar way and sets the scale of the links.
-
-* ![](Resources/icons/Variant_Link.svg) : **Variant Link** : This is a link to a part but with varying parameters, meaning that you can isert the same part several times, but adjusting the parameters of each instance of the part. Objects that can be used as source for a variant link are standard App::Part (Std_Part) that contain a PropertyContainer called "Variables". All variables of the source object can be set individually for each variant. Such variant links and their individual variables are persistent, meaning that they will be restored when the document is restored.
-
-* ![](Resources/icons/Asm4_showLCS.svg) ![](Resources/icons/Asm4_hideLCS.svg) : **Show/Hide LCS** : Shows or hides LCSs of selected part and its children. 
-
-
-* ![](Resources/icons/Asm4_PartsList_Subassemblies.svg) ![](Resources/icons/Asm4_PartsList.svg) : **Bill of Materials** : [example assemblies](https://github.com/Zolko-123/FreeCAD_Assembly4/blob/master/Examples/ConfigBOM/README.md)
-
-
-* ![](Resources/icons/Part_Measure.svg) : **Measure** : Measure tool.
-
-* ![](Resources/icons/Asm4_addVariable.svg) ![](Resources/icons/Asm4_delVariable.svg) : **Add/Delete Variable** : this adds a variable to the `Variables` object in the Model. These variables can be used in any parameter of the document by entering `Variables.Height` or `Variables.Length` (for example). This is especially useful for assemblies built in a single file, where several parts can be built using the same dimensions. Modifying a variable is done in the `Properties` window of the `Variables` object.
-
-* ![](Resources/icons/Asm4_Configurations.svg) : **Configurations** : Exploded assemblies can be done with configurations: first, make a default configuration with all parts in their correct location. Then, move and/or hide parts as wished by adjusting the AttachmentOffset property of each part. You can then create a new configuration based on this state. As opposed to an exploded assembly, you can create as many states as you wish, showing/hiding parts, and/or offsetting parts from their assembled position.
-
-* ![](Resources/icons/Asm4_GearsAnimate.svg) : **Animate Assembly** : allows to select one of the variables from the `Variables` object and sweep it between two values. All parameters of the assembly that are set by this variable will be updated.
-
+. Icon .|Tool|Description 
+:---|:---|:---
+![](Resources/icons/Snap_Vertex.svg)<br/>![](Resources/icons/Snap_Edge.svg)<br/>![](Resources/icons/Snap_Face.svg)|**Selection filters**|filter selections so that only vertices, edges or faces can be selected.
+![](Resources/icons/Asm4_enableLinkSelection.svg)|**3D View selection mode**|Toggle 3D View selection mode which allows to select a Link object in the 3D view window instead of the Model tree.
+![](Resources/icons/Asm4_SelectionAll.svg)|**Clear selection filters**|removes all filters and get back to normal selection
 
 
 
@@ -134,7 +107,7 @@ Commands are activated with relevant selection. If a command is inactive (grayed
 
 Some general purpose 3D CAD systems propose a workflow based on finished parts that are assembled into an assembly, and their position in that assembly is determined by constraints imposed on geometrical features present in the parts: holes, edges, faces... While this is quite easy to understand for beginners, it poses some limits on advanced users who need to modify the parts that are already inserted into an assembly. For example, if a part is placed using some geometrical feature, and that feature is later modified during the design process, the assembly solver might not be able to find the original constraint because the geometrical feature on which it was based has disappeared, and will throw an error. This can be a very difficult problem to solve, and is due to the dreaded *topological naming* issue. 
 
-Therefore, this is not the workflow used in Assembly 4, and instead Assembly 4 uses the principle of a **master sketch** : at the root of the assembly, *i.e.* in the Assembly 4 *Model*, one — or more — sketches are drawn that represent the "skeleton" of the assembly. This skeleton matches the functionalities of the assembly, and holds elements such as points and lines at characteristical positions of the assembly: rotational axes, fixation points, translation axes, beam directions... Furthermore, local coordinate systems — technically these are `PartDesign::CoordinateSystem` type objects and are called **LCS** in Assembly 4 — are placed on these characteristical points. The same principle — local coordinate systems at characteristical locations — is also applied in the design process of parts. Thus, the local coordinate systems in the parts can be matched to local coordinate systems in the assembly, guaranteeing that the part is positioned in the assembly at its intended position.
+Therefore, this is not the workflow used in Assembly 4, and instead Assembly 4 uses the principle of a **master sketch**|at the root of the assembly, *i.e.* in the Assembly 4 *Model*, one — or more — sketches are drawn that represent the "skeleton" of the assembly. This skeleton matches the functionalities of the assembly, and holds elements such as points and lines at characteristical positions of the assembly: rotational axes, fixation points, translation axes, beam directions... Furthermore, local coordinate systems — technically these are `PartDesign::CoordinateSystem` type objects and are called **LCS** in Assembly 4 — are placed on these characteristical points. The same principle — local coordinate systems at characteristical locations — is also applied in the design process of parts. Thus, the local coordinate systems in the parts can be matched to local coordinate systems in the assembly, guaranteeing that the part is positioned in the assembly at its intended position.
 
 
 
