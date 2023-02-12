@@ -152,7 +152,7 @@ Therefore, in order to re-use a coordinate system of a part in an assembly, a co
 
 ## Principle
 
-We present here a short summary of the inner workings of FreeCAD's Assembly4 workbench. For those interested in more technical details please read the [technical manual](TECHMANUAL.md).
+We present here a short summary of the inner workings of FreeCAD's Assembly4 workbench.
 
 ### Data structure
 
