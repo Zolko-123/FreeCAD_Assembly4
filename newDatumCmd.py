@@ -12,7 +12,7 @@ import os
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
-import Part
+from FreeCAD import Console as FCC
 
 import Asm4_libs as Asm4
 
@@ -109,6 +109,7 @@ class newDatum:
         # default name increments the datum type's end numeral
         proposedName = Asm4.nextInstance( self.datumName, startAtOne=True )
 
+        parentContainer = None
         # check whether we have selected a container
         if selectedObj.TypeId in self.containers:
             parentContainer = selectedObj
@@ -212,23 +213,28 @@ class newHole:
             edgeObj    = edges[i][0]
             edgeName   = edges[i][1]
             parentPart = selectedObj.getParentGeoFeatureGroup()
-            parentDoc  = parentPart.Document
-            # if the solid having the edge is indeed in an App::Part
-            if parentPart and (parentPart.TypeId=='App::Part' or parentPart.TypeId=='PartDesign::Body'):
-                # check whether there is already a similar datum, and increment the instance number 
-                instanceNum = 1
-                while parentDoc.getObject( 'HoleAxis_'+str(instanceNum) ):
-                    instanceNum += 1
-                axis             = parentPart.newObject('PartDesign::Line','HoleAxis_'+str(instanceNum))
-                axis.Support     = [( selectedObj, (edgeName,) )]
-                axis.MapMode     = 'AxisOfCurvature'
-                axis.MapReversed = False
-                axis.ResizeMode  = 'Manual'
-                axis.Length      = edgeObj.BoundBox.DiagonalLength
-                axis.ViewObject.ShapeColor = (0.0,0.0,1.0)
-                axis.ViewObject.Transparency = 50
-                axis.recompute()
-                parentPart.recompute()
+            # we can create a datum only in a container
+            if parentPart:
+                parentDoc  = parentPart.Document
+                # if the solid having the edge is indeed in an App::Part
+                if parentPart and (parentPart.TypeId=='App::Part' or parentPart.TypeId=='PartDesign::Body'):
+                    # check whether there is already a similar datum, and increment the instance number 
+                    instanceNum = 1
+                    while parentDoc.getObject( 'HoleAxis_'+str(instanceNum) ):
+                        instanceNum += 1
+                    axis             = parentPart.newObject('PartDesign::Line','HoleAxis_'+str(instanceNum))
+                    axis.Support     = [( selectedObj, (edgeName,) )]
+                    axis.MapMode     = 'AxisOfCurvature'
+                    axis.MapReversed = False
+                    axis.ResizeMode  = 'Manual'
+                    axis.Length      = edgeObj.BoundBox.DiagonalLength
+                    axis.ViewObject.ShapeColor = (0.0,0.0,1.0)
+                    axis.ViewObject.Transparency = 50
+                    axis.recompute()
+                    parentPart.recompute()
+            # 
+            else:
+                FCC.PrintMessage('Datum objects can only be created inside Part or Body containers')
 
 
 
