@@ -250,11 +250,15 @@ class makeBOM:
                     doc_name = obj.Document.Name
 
                 # Recover the record, if any
-                if self.infoKeysUser.get("Part_Label").get('active'):
-                    try:
-                        obj_label = getattr(obj, self.infoKeysUser.get("Part_Label").get('userData'))
-                    except AttributeError:
-                        obj_label = obj.Label
+
+                try:
+                    if self.infoKeysUser.get("Part_Label").get('active'):
+                        try:
+                            obj_label = getattr(obj, self.infoKeysUser.get("Part_Label").get('userData'))
+                        except AttributeError:
+                            obj_label = obj.Label
+                except:
+                    doc_name = obj.Label
 
                 # The name cannot be model othewise it will sum all other 'Model' names togueter
                 if obj_label == "Model":
@@ -307,7 +311,10 @@ class makeBOM:
         #============================
 
         elif obj.TypeId == 'PartDesign::Body':
-            if level > 0 and level <= max_level and Asm4.isAsm4Model(parent):
+
+            # if level > 0 and level <= max_level and Asm4.isAsm4Model(parent):
+            if level > 0 and level <= max_level :
+
                 # Recover the record, if any
                 try:
                     if self.infoKeysUser.get("Doc_Label").get('active'):
@@ -396,7 +403,7 @@ class makeBOM:
 
                         self.PartsList[obj_label][self.infoKeysUser.get(prop).get('userData')] = data
 
-                    self.PartsList[obj.Label]['Qty.'] = 1
+                    self.PartsList[obj_label]['Qty.'] = 1
                     self.Verbose += '\n'
 
 
