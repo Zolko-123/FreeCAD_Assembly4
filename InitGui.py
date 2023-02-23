@@ -2,23 +2,23 @@
 ###################################################################################
 #
 #  InitGui.py
-#  
+#
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
 #  the Free Software Foundation; either version 2 of the License, or
 #  (at your option) any later version.
-#  
+#
 #  This program is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU General Public License for more details.
-#  
+#
 #  You should have received a copy of the GNU General Public License
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #  MA 02110-1301, USA.
-#  
-#  
+#
+#
 ###################################################################################
 
 
@@ -140,6 +140,8 @@ class Assembly4Workbench(Workbench):
         self.dot()
         import makeBomCmd          # creates the parts list
         self.dot()
+        import exportFiles
+        self.dot()
         import HelpCmd             # shows a basic help window
         self.dot()
         import showHideLcsCmd      # shows/hides all the LCSs
@@ -201,40 +203,43 @@ class Assembly4Workbench(Workbench):
     """
     def assemblyMenuItems(self):
         commandList = [ "Asm4_newModel",
-                        "Asm4_newPart", 
-                        "Asm4_newBody", 
-                        "Asm4_newGroup", 
-                        "Asm4_newSketch", 
+                        "Asm4_newPart",
+                        "Asm4_newBody",
+                        "Asm4_newGroup",
+                        "Asm4_newSketch",
                         'Asm4_createDatum',
-                        self.FastenersCmd, 
+                        self.FastenersCmd,
                         "Separator",
-                        "Asm4_insertLink", 
-                        "Asm4_mirrorArray", 
-                        "Asm4_linearArray", 
-                        "Asm4_circularArray", 
-                        "Asm4_expressionArray", 
-                        "Asm4_variantLink", 
+                        "Asm4_insertLink",
+                        "Asm4_mirrorArray",
+                        "Asm4_linearArray",
+                        "Asm4_circularArray",
+                        "Asm4_expressionArray",
+                        "Asm4_variantLink",
                         "Separator",
-                        "Asm4_cloneFastenersToAxes", 
-                        "Asm4_importDatum", 
-                        "Asm4_shapeBinder", 
+                        "Asm4_cloneFastenersToAxes",
+                        "Asm4_importDatum",
+                        "Asm4_shapeBinder",
                         "Separator",
-                        "Asm4_infoPart", 
-                        "Asm4_makeLocalBOM", 
-                        "Asm4_makeBOM", 
-                        "Asm4_Measure", 
+                        "Asm4_infoPart",
+                        "Asm4_makeLocalBOM",
+                        "Asm4_makeBOM",
+                        "Asm4_listLinkedFilesTree",
+                        "Asm4_listLinkedFiles",
+                        "Asm4_exportFiles",
+                        "Asm4_Measure",
                         'Asm4_showLcs',
                         'Asm4_hideLcs',
-                        "Asm4_addVariable", 
-                        "Asm4_delVariable", 
-                        "Asm4_openConfigurations", 
-                        "Asm4_Animate", 
+                        "Asm4_addVariable",
+                        "Asm4_delVariable",
+                        "Asm4_openConfigurations",
+                        "Asm4_Animate",
                         ]
         return commandList
 
     def constraintsMenuItems(self):
         commandList = [ "Asm4_placeLink",
-                        "Asm4_releaseAttachment", 
+                        "Asm4_releaseAttachment",
                         "Separator",
                         "Asm4_updateAssembly",
                         "Separator",
@@ -243,35 +248,38 @@ class Assembly4Workbench(Workbench):
 
     def assemblyToolbarItems(self):
         commandList = [ "Asm4_newModel",
-                        "Asm4_newPart", 
-                        "Asm4_newBody", 
-                        "Asm4_newGroup", 
-                        "Asm4_infoPart", 
-                        "Asm4_insertLink", 
-                        self.FastenersCmd, 
+                        "Asm4_newPart",
+                        "Asm4_newBody",
+                        "Asm4_newGroup",
+                        "Asm4_infoPart",
+                        "Asm4_insertLink",
+                        self.FastenersCmd,
                         "Separator",
-                        "Asm4_newSketch", 
+                        "Asm4_newSketch",
                         'Asm4_createDatum',
-                        "Asm4_importDatum", 
+                        "Asm4_importDatum",
                         "Asm4_shapeBinder",
                         "Separator",
-                        "Asm4_placeLink", 
-                        "Asm4_releaseAttachment", 
+                        "Asm4_placeLink",
+                        "Asm4_releaseAttachment",
                         "Asm4_updateAssembly",
                         "Separator",
-                        "Asm4_mirrorArray", 
-                        "Asm4_linearArray", 
-                        "Asm4_circularArray", 
-                        "Asm4_expressionArray", 
-                        "Asm4_variantLink", 
+                        "Asm4_mirrorArray",
+                        "Asm4_linearArray",
+                        "Asm4_circularArray",
+                        "Asm4_expressionArray",
+                        "Asm4_variantLink",
                         "Separator",
                         'Asm4_showLcs',
                         'Asm4_hideLcs',
-                        "Asm4_makeLocalBOM", 
-                        "Asm4_makeBOM", 
-                        "Asm4_Measure", 
+                        "Asm4_makeLocalBOM",
+                        "Asm4_makeBOM",
+                        "Asm4_listLinkedFilesTree",
+                        "Asm4_listLinkedFiles",
+                        "Asm4_exportFiles",
+                        "Asm4_Measure",
                         "Asm4_variablesCmd",
-                        "Asm4_openConfigurations", 
+                        "Asm4_openConfigurations",
                         "Asm4_Animate",
                         ]
         return commandList
@@ -304,22 +312,22 @@ class Assembly4Workbench(Workbench):
                         'Asm4_showLcs'       ,
                         'Asm4_hideLcs'       ]
         # commands to appear in the 'Assembly' sub-menu in the contextual menu (right-click)
-        assemblySubMenu =[ "Asm4_insertLink" , 
-                        "Asm4_placeLink"     , 
+        assemblySubMenu =[ "Asm4_insertLink" ,
+                        "Asm4_placeLink"     ,
                         "Asm4_importDatum"   ,
                         'Asm4_FSparameters'  ,
                         'Separator'          ,
                         'Asm4_applyConfiguration']
         # commands to appear in the 'Create' sub-menu in the contextual menu (right-click)
-        createSubMenu =["Asm4_newSketch",  
-                        "Asm4_newBody", 
-                        "Asm4_newLCS", 
-                        "Asm4_newAxis", 
-                        "Asm4_newPlane", 
-                        "Asm4_newPoint", 
-                        "Asm4_newHole", 
-                        "Asm4_insertScrew", 
-                        "Asm4_insertNut", 
+        createSubMenu =["Asm4_newSketch",
+                        "Asm4_newBody",
+                        "Asm4_newLCS",
+                        "Asm4_newAxis",
+                        "Asm4_newPlane",
+                        "Asm4_newPoint",
+                        "Asm4_newHole",
+                        "Asm4_insertScrew",
+                        "Asm4_insertNut",
                         "Asm4_insertWasher",
                         'Separator',
                         'Asm4_newConfiguration']
@@ -352,7 +360,6 @@ class Assembly4Workbench(Workbench):
         FreeCADGui.updateGui()
 
 
-    
 """
     +-----------------------------------------------+
     |          actually make the workbench          |
@@ -360,6 +367,3 @@ class Assembly4Workbench(Workbench):
 """
 wb = Assembly4Workbench()
 Gui.addWorkbench(wb)
-
-
-
