@@ -7,13 +7,18 @@
 import os
 import json
 import re
-
-from anytree import Node, RenderTree
 import zipfile
 
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
+from FreeCAD import Console as FCC
+
+try:
+    from anytree import Node, RenderTree
+except ImportError:
+    FCC.PrintWarning("WARNING : Pylib dependency missing = anytree\n")
+    pass
 
 import Asm4_libs as Asm4
 
@@ -71,69 +76,73 @@ class listLinkedFiles:
 
     def list_files(self, show_tree=0, relative_path=True, verbose=True):
 
-        def find_linked_files(relative_path=True):
+        try:
 
-            def find_files(obj, root_dirpath, level=0, relative_path=True, parent_node=None, parent_filepath=None):
+            def find_linked_files(relative_path=True):
 
-                if obj == None:
-                    return
+                def find_files(obj, root_dirpath, level=0, relative_path=True, parent_node=None, parent_filepath=None):
 
-                if obj.TypeId == "App::Link":
+                    if obj == None:
+                        return
 
-                    filepath = obj.LinkedObject.Document.FileName #obj.getLinkedObject().Document.FileName
-                    if relative_path:
-                        filepath = os.path.relpath(filepath, root_dirpath)
+                    if obj.TypeId == "App::Link":
 
-                    indexes_of_current_level = [idx for idx, s in enumerate(linked_files_level) if str(level) in str(s)]
-                    linked_files_at_current_level = [linked_files[idx] for idx in indexes_of_current_level]
+                        filepath = obj.LinkedObject.Document.FileName #obj.getLinkedObject().Document.FileName
+                        if relative_path:
+                            filepath = os.path.relpath(filepath, root_dirpath)
 
-                    if not any(filepath in s for s in linked_files_at_current_level):
+                        indexes_of_current_level = [idx for idx, s in enumerate(linked_files_level) if str(level) in str(s)]
+                        linked_files_at_current_level = [linked_files[idx] for idx in indexes_of_current_level]
 
-                        if filepath != parent_filepath:
-                            linked_files.append(filepath)
-                            linked_files_level.append(level)
-                            node = Node(filepath, parent=parent_node)
-                            find_files(obj.LinkedObject, root_dirpath, level+1, relative_path=relative_path, parent_node=node, parent_filepath=filepath)
+                        if not any(filepath in s for s in linked_files_at_current_level):
 
-                # Navigate on objects inside a folders
-                if obj.TypeId == 'App::DocumentObjectGroup' or obj.TypeId == 'App::Part':
-                    for objname in obj.getSubObjects():
-                        subobj = obj.Document.getObject(objname[0:-1])
-                        find_files(subobj, root_dirpath, level, relative_path=relative_path, parent_node=parent_node, parent_filepath=parent_filepath)
+                            if filepath != parent_filepath:
+                                linked_files.append(filepath)
+                                linked_files_level.append(level)
+                                node = Node(filepath, parent=parent_node)
+                                find_files(obj.LinkedObject, root_dirpath, level+1, relative_path=relative_path, parent_node=node, parent_filepath=filepath)
 
-            linked_files = []
-            linked_files_level = []
-            level=0
+                    # Navigate on objects inside a folders
+                    if obj.TypeId == 'App::DocumentObjectGroup' or obj.TypeId == 'App::Part':
+                        for objname in obj.getSubObjects():
+                            subobj = obj.Document.getObject(objname[0:-1])
+                            find_files(subobj, root_dirpath, level, relative_path=relative_path, parent_node=parent_node, parent_filepath=parent_filepath)
 
-            filepath = App.ActiveDocument.FileName
-            root_dirpath = os.path.dirname(filepath)
-            if relative_path:
-                filepath = os.path.relpath(filepath, root_dirpath)
+                linked_files = []
+                linked_files_level = []
+                level=0
 
-            linked_files.append(filepath)
-            linked_files_level.append(level)
-            file_tree = Node(filepath)
+                filepath = App.ActiveDocument.FileName
+                root_dirpath = os.path.dirname(filepath)
+                if relative_path:
+                    filepath = os.path.relpath(filepath, root_dirpath)
 
-            for obj in (App.ActiveDocument.Objects):
-                find_files(obj, root_dirpath, level=level, relative_path=relative_path, parent_node=file_tree, parent_filepath=filepath)
+                linked_files.append(filepath)
+                linked_files_level.append(level)
+                file_tree = Node(filepath)
 
-            return linked_files, file_tree
+                for obj in (App.ActiveDocument.Objects):
+                    find_files(obj, root_dirpath, level=level, relative_path=relative_path, parent_node=file_tree, parent_filepath=filepath)
 
-        linked_files, file_tree = find_linked_files(relative_path=relative_path)
+                return linked_files, file_tree
 
-        linked_files = set(linked_files) # uniq files
+            linked_files, file_tree = find_linked_files(relative_path=relative_path)
 
-        if verbose:
-            if show_tree:
-                for pre, fill, node in RenderTree(file_tree):
-                    print("%s%s" % (pre, node.name))
-            else:
-                for i, filepath in enumerate(sorted(linked_files)):
-                    print("{:3d} - {}".format(i+1, filepath))
-            print("ASM4> Listing ended")
+            linked_files = set(linked_files) # uniq files
 
-        return linked_files
+            if verbose:
+                if show_tree:
+                    for pre, fill, node in RenderTree(file_tree):
+                        print("%s%s" % (pre, node.name))
+                else:
+                    for i, filepath in enumerate(sorted(linked_files)):
+                        print("{:3d} - {}".format(i+1, filepath))
+                print("ASM4> Listing ended")
 
+            return linked_files
+
+        except:
+            FCC.PrintWarning("WARNING : Pylib dependency missing = anytree\n")
 
 class exportFiles:
 
@@ -187,13 +196,17 @@ class exportFiles:
 
         common_path = os.path.commonpath(self.linked_files)
         print("ASM4> Common path: \"{}\"".format(common_path))
+
+        if os.path.isfile(common_path):
+            os.path.dirname(common_path)
+
         root_dirpath = common_path
 
         # Chdir does not like empty path (when Freecad was opened in the same path of the FCStd file)
         if root_dirpath == "":
             root_dirpath = "./"
 
-        os.chdir(root_dirpath)
+        os.chdir(doc_root_dirpath)
 
         # Create the Zip file
         # TODO: Check if this doc_root_dirpath is always right
@@ -203,6 +216,7 @@ class exportFiles:
         # Add files to the package
         remove_zip = False
         for i, filepath in enumerate(self.linked_files):
+            print(filepath)
             relfilepath = os.path.relpath(filepath, root_dirpath)
             print("ASM4> [ZIP] {}, adding file {}".format(i+1, relfilepath))
             try:
