@@ -20,7 +20,7 @@ try:
     from anytree import Node, RenderTree
     has_anytree = True
 except ImportError:
-    FCC.PrintWarning("WARNING : Pylib dependency missing = anytree, exportFiles is not available\n")
+    FCC.PrintWarning("\nASM4 WARNING: Pylib anytree is missing, exportFiles is not available\n")
 
 
 class listLinkedFiles:
@@ -62,6 +62,11 @@ class listLinkedFiles:
             return True
 
     def Activated(self):
+
+        if not has_anytree:
+            FCC.PrintWarning("To use {} you must install pylib \"anytree\"\n".format(self.__class__.__name__))
+            return
+
         self.UI = QtGui.QDialog()
         self.modelDoc = App.ActiveDocument
         if self.show_tree:
@@ -166,6 +171,11 @@ class exportFiles:
             return True
 
     def Activated(self):
+
+        if not has_anytree:
+            FCC.PrintWarning("To use {} you must install pylib \"anytree\"\n".format(self.__class__.__name__))
+            return
+
         self.UI = QtGui.QDialog()
         self.modelDoc = App.ActiveDocument
         print("ASM4> Exporting files to a .zip package")
@@ -246,7 +256,7 @@ Gui.addCommand('Asm4_listLinkedFiles', listLinkedFiles(show_tree=False))
 Gui.addCommand('Asm4_exportFiles', exportFiles())
 
 # defines the drop-down button for Fasteners:
-ExportCmdList = [   'Asm4_listLinkedFilesTree', 
-                    'Asm4_listLinkedFiles', 
-                    'Asm4_exportFiles'] 
-Gui.addCommand( 'Asm4_ExportList', Asm4.dropDownCmd( ExportCmdList, 'Export Files'))
+ExportCmdList = ['Asm4_listLinkedFilesTree',
+                 'Asm4_listLinkedFiles',
+                 'Asm4_exportFiles']
+Gui.addCommand('Asm4_ExportList', Asm4.dropDownCmd(ExportCmdList, 'Export Files'))
