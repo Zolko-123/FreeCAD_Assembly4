@@ -4,18 +4,23 @@
 # exportFiles.py
 #
 
-import os
-import json
-import re
+import os, json, re, zipfile
 
-from anytree import Node, RenderTree
-import zipfile
 
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
+from FreeCAD import Console as FCC
 
 import Asm4_libs as Asm4
+
+
+has_anytree = False
+try:
+    from anytree import Node, RenderTree
+    has_anytree = True
+except ImportError:
+    FCC.PrintWarning("WARNING : Pylib dependency missing = anytree, exportFiles is not available\n")
 
 
 class listLinkedFiles:
@@ -239,3 +244,9 @@ class exportFiles:
 Gui.addCommand('Asm4_listLinkedFilesTree', listLinkedFiles(show_tree=True))
 Gui.addCommand('Asm4_listLinkedFiles', listLinkedFiles(show_tree=False))
 Gui.addCommand('Asm4_exportFiles', exportFiles())
+
+# defines the drop-down button for Fasteners:
+ExportCmdList = [   'Asm4_listLinkedFilesTree', 
+                    'Asm4_listLinkedFiles', 
+                    'Asm4_exportFiles'] 
+Gui.addCommand( 'Asm4_ExportList', Asm4.dropDownCmd( ExportCmdList, 'Export Files'))
