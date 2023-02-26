@@ -65,6 +65,6 @@ LGPLv2.1 (see [LICENSE](LICENSE))
 ## Donate
 Here some links if you wish to contribute financially :  
 
-[![PayPal Donate](Resources/media/PayPal_Donate.svg)](https://www.paypal.com/donate/?hosted_button_id=P9V4M2SBXX9HQ)
+[![PayPal Donate](Resources/media/PayPal_Donate.png)](https://www.paypal.com/donate/?hosted_button_id=P9V4M2SBXX9HQ)
 
-
+[![Icon](Resources/icons/Asm4_Model.svg)](Resources/icons/Asm4_Model.svg)
