@@ -62,3 +62,9 @@ Release notes can be found in the [CHANGELOG.md](CHANGELOG.md) file.
 ## License
 LGPLv2.1 (see [LICENSE](LICENSE))
 
+## Donate
+Here some links if you wish to contribute financially :  
+
+[![PayPal Donate](Resources/media/PayPal_Donate.svg)](https://www.paypal.com/donate/?hosted_button_id=P9V4M2SBXX9HQ)
+
+
