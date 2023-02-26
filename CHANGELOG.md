@@ -2,6 +2,10 @@
 
 ## Release notes
 
+* 2023.02.26 (**0.12.6**) :  
+Small fixes here and there  
+BOM and PartInfo are now partially working again  
+
 * 2022.12.15 (**0.12.5**) :  
 Added ExpressionArray, and circular and linear-arrays based on it (thanx Jolbas)  
 BOM and PartInfo are (still) broken  

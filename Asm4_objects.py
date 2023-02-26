@@ -5,6 +5,8 @@
 
 
 import os
+from math import radians
+import re
 
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
@@ -255,11 +257,11 @@ class LinkArray( object ):
     # new Python API called when the object is newly created
     def attach(self,obj):
         # the actual link property with a customized name
-        obj.addProperty("App::PropertyLink", "SourceObject", " Link",'')
+        obj.addProperty("App::PropertyLink",   "SourceObject", "Array", 'The object to array')
         # the following two properties are required to support link array
-        obj.addProperty("App::PropertyBool", "ShowElement", "Array",'')
-        obj.addProperty("App::PropertyInteger","Count","Array",
-                        'Number of elements in the array (including the original)')
+        obj.addProperty("App::PropertyBool",   "ShowElement",  "Array", '')
+        obj.addProperty("App::PropertyInteger","Count",        "Array",
+                        'Total number of elements in the array')
         obj.Count=1
         # install the actual extension
         obj.addExtension('App::LinkExtensionPython')
@@ -287,9 +289,9 @@ class LinkArray( object ):
         if prop == 'ShowElement': # set the PlacementList for user to change
             if hasattr(obj, 'PlacementList'):
                 if obj.ShowElement:
-                    obj.setPropertyStatus('PlacementList','-Immutable')
+                    obj.setPropertyStatus('PlacementList','-ReadOnly')
                 else:
-                    obj.setPropertyStatus('PlacementList', 'Immutable')
+                    obj.setPropertyStatus('PlacementList', 'ReadOnly')
         # you cannot have less than 1 elements in an array
         elif prop == 'Count':
             if obj.Count < 1:
@@ -327,6 +329,8 @@ class ViewProviderArray(object):
                 iconFile = os.path.join( Asm4.iconPath, 'Asm4_PolarArray.svg')
             elif tp=='Linear Array':
                 iconFile = os.path.join( Asm4.iconPath, 'Asm4_LinearArray.svg')
+            elif tp=='Mirror Array':
+                iconFile = os.path.join( Asm4.iconPath, 'Asm4_Mirror.svg')
             elif tp=='Expression Array':
                 iconFile = os.path.join( Asm4.iconPath, 'Asm4_ExpressionArray.svg')
         if iconFile:
@@ -397,7 +401,7 @@ class CircularArray(LinkArray):
         plaList = []
         for i in range(obj.Count):
             # calculate placement of element i
-            rot_i = App.Rotation( App.Vector(0,0,1), i*obj.IntervalAngle)
+            rot_i = App.Rotation(Asm4.VEC_Z, i*obj.IntervalAngle)
             lin_i = App.Vector(0,0,i*obj.LinearSteps)
             pla_i = App.Placement( lin_i, rot_i )
             plaElmt = axisPlacement * pla_i * axisPlacement.inverse() * sObj.Placement
@@ -413,110 +417,243 @@ class CircularArray(LinkArray):
     +-----------------------------------------------+
     |        an expression link array class         |
     +-----------------------------------------------+
-    array.setExpression('ElementPlacement', 'create(<<placement>>; create(<<Vector>>; 1; 0; 0); create(<<rotation>>; 360 / ElementCount * ElementIndex; 0; 0); LCS_0.Placement.Base) * SourceObject.Placement')
-    create(<<placement>>; create(<<Vector>>; 1; 0; 0); create(<<rotation>>; 360 / ElementCount * ElementIndex; 0; 0); DirBase) * .SourceObject.Placement
+# Axial spiral
+array.setExpression('.Placer.Base.z', 'Index * 10')
+array.setExpression('.Placer.Rotation.Angle', 'Index * 40')
+# Mirrored flat spiral
+array.setExpression('.Placer.Base', '.Placer.Rotation * (minvert(.AxisPlacement) * .SourceObject.Placement.Base * -2 * (Index % 2) + create(<<vector>>; floor(Index / 2) * 15; 0; 0) * (Index % 2 * -2 + 1))')
+array.setExpression('.Placer.Rotation.Angle', '180 * (Index % 2) + floor(Index / 2) * 40')
+array.setExpression('Scaler', '1 - 2 * (Index % 2)')'
 """
 
 class ExpressionArray(LinkArray):
 
-    def hasChildElement(self,obj):
-        # ugly workaroun to hide that stubborn 'ShowElement' property
-        obj.setEditorMode('ShowElement',3)
-        return False
+    def raiseError(self, obj, message):
+        App.Console.PrintError(f'{type(self).__name__} {obj.Label}: {message}\n')
+        raise RuntimeError
+
+    def onDocumentRestored(self, obj):
+        # for backwards compability
+        if obj.getTypeIdOfProperty('Axis') == 'App::PropertyLink':
+            axisObj = obj.Axis
+            obj.removeProperty('Axis')
+            obj.addProperty("App::PropertyLinkSub","Axis","Array","")
+            if hasattr(obj, "AxisXYZ"):
+                subnameList = [obj.AxisXYZ]
+                obj.removeProperty('AxisXYZ')
+            else:
+                subnameList = []
+            obj.Axis = (axisObj, subnameList)
+        if not hasattr(obj, "Scaler"):
+            obj.addProperty('App::PropertyFloat',     'Scaler',        'Array','')
+            obj.Scaler = 1.0
+        if not hasattr(obj, "AxisPlacement"):
+            obj.addProperty('App::PropertyPlacement', 'AxisPlacement', 'Array','')
+        if not hasattr(obj, "Placer"):
+            obj.addProperty('App::PropertyPlacement', 'Placer',         'Array','')
+            if hasattr(obj, "ElementPlacement"):
+                obj.Placer = obj.ElementPlacement
+                def pnrepl(s): return s.replace('ElementPlacement','Placer')
+                for k, ex in obj.ExpressionEngine:
+                    obj.setExpression(pnrepl(k), pnrepl(ex))
+                    if 'ElementPlacement' in k:
+                        obj.setExpression(k, None)
+                obj.removeProperty('ElementPlacement')
+        if not hasattr(obj, "AngleStep") and hasattr(obj, "IntervalAngle"):
+            obj.addProperty('App::PropertyAngle', 'AngleStep', 'Array','')
+            obj.AngleStep = obj.IntervalAngle
+            for k, ex in obj.ExpressionEngine:
+                obj.setExpression(k, ex.replace('IntervalAngle','AngleStep'))
+            obj.setExpression('IntervalAngle', None)
+            obj.removeProperty('IntervalAngle')
+        obj.setPropertyStatus('Index',         '-Immutable')
+        obj.setPropertyStatus('PlacementList', '-Immutable')
+        obj.setPropertyStatus('ScaleList',     '-Immutable')
+
+        super().onDocumentRestored(obj)
 
     # Set up the properties when the object is attached.
     def attach(self, obj):
         super().attach(obj)
         obj.addProperty('App::PropertyString',      'ArrayType',        'Array', '')
-        obj.addProperty('App::PropertyPlacement',   'ElementPlacement', 'Array', 
-                        'Copied to array elements in order while the Index property is incremented')
+        obj.addProperty('App::PropertyPlacement',   'Placer',           'Array', 
+                        'Calculates element placements in relation to the Axis.\n'
+                        'Each element is assigned an Index starting from 0\n'
+                        'The Index can be used in expressions calculating this Placement or its sub-properties\n'
+                        'Expression examples:\n'
+                        'on Angle: Index%2==0?30:-30\n'
+                        'on Position.X: Index*30')
         obj.addProperty('App::PropertyInteger',     'Index',            'Array', '')
-        obj.addProperty('App::PropertyLink',        'Axis',        'Array',
-                        'Serves as Axis or Direction for the element placement')
-        obj.addProperty("App::PropertyEnumeration", 'AxisXYZ', 'Array', '')
-        obj.AxisXYZ = ['X','Y','Z']
+        obj.addProperty('App::PropertyLinkSub',     'Axis',             'Array',
+                        'The axis, direction or plane the Placer relates to')
+        obj.addProperty('App::PropertyPlacement',   'AxisPlacement',     'Array','')
+        obj.addProperty('App::PropertyFloat',       'Scaler',            'Array','')
+        obj.Scaler = 1.0
         obj.Index = 1
-        obj.setPropertyStatus('Index', 'Hidden')
+        obj.setPropertyStatus('Index',         'Hidden')
+        obj.setPropertyStatus('AxisPlacement', 'Hidden')
+        obj.setPropertyStatus('AxisPlacement', 'ReadOnly')
+        obj.setPropertyStatus('Index',         'ReadOnly')
+        obj.setPropertyStatus('PlacementList', 'ReadOnly')
+        obj.setPropertyStatus('ScaleList',     'ReadOnly')
         obj.ShowElement = False
-        obj.setEditorMode('ShowElement',3)
-
 
     # do the calculation of the elements Placements
     def execute(self, obj):
-        """ The placement is calculated to follow the axis placement
-        This can be disabled by user by clearing the Direction property
-        or create the array without an axis selected
-        Without Direction the Array will follow the Z axis of the SourceObject."""
+        """ The placement is calculated relative to the axis placement
+        Without Axis the Array is relative to the internal Z axis of the SourceObject."""
 
         # Source Object
         if not obj.SourceObject:
-            return
+            self.raiseError(obj, "Missing Source Object")
         sObj = obj.SourceObject
         # we only deal with objects that are in a parent container because we'll put the array there
         parent = sObj.getParentGeoFeatureGroup()
         if not parent:
-            return
-        # calculate
-        p0 = obj.Axis.Placement if obj.Axis else sObj.Placement
-        if obj.AxisXYZ == 'X':
-            p0 *= Asm4.rotY
-        elif obj.AxisXYZ == 'Y':
-            p0 *= Asm4.rotX.inverse()
-        p1 = p0.inverse() * sObj.Placement
+            self.raiseError(obj, "Source Object must reside inside a Part")
+        # find placement of axis
+        if obj.Axis:
+            if parent != obj.Axis[0].getParentGeoFeatureGroup():
+                self.raiseError(obj, 'Source Object and Axis must have the same parent Part')
+            obj.AxisPlacement = findAxisPlacement(*obj.Axis)
+            if obj.AxisPlacement is None:
+                self.raiseError(obj, 'The type of the selected axis is not supported')
+        else:
+            obj.AxisPlacement = obj.SourceObject.Placement
+        # preparing calculations
+        pmt1 = obj.AxisPlacement.inverse() * sObj.Placement
+        placementList = []
+        scaleList = []
+        expDict = dict(obj.ExpressionEngine)
+        evalList = _evalOrder(expDict)
         # calculate placement of each element
-        plaList = []
-        obj.setPropertyStatus('Index', '-Immutable')
         for i in range(obj.Count):
             obj.Index = i
-            obj.recompute()
-            plaElmt = p0 * obj.ElementPlacement * p1
-            plaList.append(plaElmt)
+            for pn in evalList:
+                ps = 'obj.'+pn.lstrip('.')
+                nv = type(eval(ps))(obj.evalExpression(expDict[pn]))
+                o,a = ps.rsplit('.',1)
+                if a == 'Angle' and type(eval(o)) == App.Rotation:
+                    nv = radians(nv)
+                # must set entire rotation axis at once.
+                # Related discussion: https://forum.freecad.org/viewtopic.php?t=73898
+                if o.endswith('.Axis') and a in 'xyz':
+                    axv = eval(o.replace('.Axis','.RawAxis'))
+                    setattr(axv, a, nv)
+                    exec(o + ' = axv')
+                    continue
+                exec(ps + ' = nv')
+            placementList.append(obj.AxisPlacement * obj.Placer * pmt1)
+            s = obj.Scaler
+            scaleList.append(App.Vector(s, s, s))
         # Resetting Index to 1 because we get more useful preview results 
         # in the expression editor
         obj.Index = 1
-        obj.setPropertyStatus('Index', 'Immutable')
-        obj.recompute()
-        obj.setPropertyStatus('PlacementList', '-Immutable')
-        obj.PlacementList = plaList
-        obj.setPropertyStatus('PlacementList', 'Immutable')
+        if obj.ShowElement:
+            for i in range(obj.Count):
+                el = obj.ElementList[i]
+                el.NoTouch = True
+                el.Placement = placementList[i]
+                el.ScaleVector = scaleList[i]
+                el.setPropertyStatus('Placement',   'ReadOnly')
+                el.setPropertyStatus('ScaleVector', 'ReadOnly')
+                el.setPropertyStatus('Scale',       'ReadOnly')
+                el.NoTouch = False
+        else:
+            obj.PlacementList = placementList
+            obj.ScaleList = scaleList
         return
 
+def findAxisPlacement(axisObj, subnameList):
+    if subnameList:
+        if len(subnameList) != 1:
+            return None
+        subname = subnameList[0]
+        sub = axisObj.getSubObject(subname)
+        if sub:
+            if Asm4.isSegment(sub):
+                b = sub.Vertexes[0].Point
+                d = sub.Vertexes[1].Point - b
+                return App.Placement(b, App.Rotation(Asm4.VEC_Z, d))
+            # for a Circle it's the circle's center and axis
+            if Asm4.isCircle(sub):
+                return App.Placement(sub.Curve.Center, App.Rotation(Asm4.VEC_Z, sub.Curve.Axis))
+        # This is for LCS and works for other objects too
+        if subname == 'X':
+            return axisObj.Placement * App.Rotation(Asm4.VEC_T, 120)
+        if subname == 'Y':
+            return axisObj.Placement * App.Rotation(Asm4.VEC_T, 240)
+        if subname == 'Z':
+            return axisObj.Placement
+        return None
+    # on origin axes we want the X axis
+    if axisObj.TypeId == 'App::Line' and hasattr(axisObj,'Role'):
+        return axisObj.Placement * App.Rotation(Asm4.VEC_T, 120)
+    if axisObj.TypeId == 'App::Plane' and hasattr(axisObj,'Role'):
+        return axisObj.Placement
+    if axisObj.TypeId == 'PartDesign::CoordinateSystem':
+        return axisObj.Placement        
+    # Arbitary object as axis is rejected for now
+    return None
 
-"""
-    +-----------------------------------------------+
-    |                 test functions                |
-    +-----------------------------------------------+
-    
-import makeArrayCmd
-array = makeArrayCmd.makeMyLink(obj)
-pls = []
-for i in range(10):
-    rot_i = App.Rotation(App.Vector(0,0,1), i*20)
-    pla_i = App.Placement(App.Vector(0,0,0), rot_i)
-    plaElmt = axePla * pla_i * axePla.inverse() * ballPla
-    pls.append(plaElmt)
+# To find evaluation order of expressions. The builtin can't handle a placement internal properties
+def _findParam(p_name, expression):
+    if p_name in expression:
+        if p_name[0] == '.':
+            exp = expression.replace(p_name,'a'+p_name)
+            a = "\\b{}\\b(?![.])".format('a'+p_name.replace('.',r'\.'))
+        else:
+            exp = expression
+            a = "\\b{}\\b(?![.])".format(p_name)
+        return bool(re.search(a, exp))
+    return False
 
-array.setPropertyStatus('PlacementList', '-Immutable')
-array.PlacementList = pls
+_placerProps = [
+    '.Placer.Rotation',
+    '.Placer.Rotation.Axis',
+    '.Placer.Rotation.Axis.x',
+    '.Placer.Rotation.Axis.y',
+    '.Placer.Rotation.Axis.z',
+    '.Placer.Rotation.Angle',
+    '.Placer.Rotation.Yaw',
+    '.Placer.Rotation.Pitch',
+    '.Placer.Rotation.Roll',
+    '.Placer.Base',
+    '.Placer.Base.x',
+    '.Placer.Base.y',
+    '.Placer.Base.z',
+]
+def _expandEdge(edge):
+    if edge.startswith('.Placer.'):
+        ie = []
+        for s in _placerProps:
+            if s.startswith(edge):
+                ie.append(s)
+        while True:
+            edge = edge.rsplit('.',1)[0]
+            if edge == '.Placer':
+                break
+            ie.append(edge)
+        return ie
+    return [edge]
 
+def _evalOrder(exDict):
+    unresolved = []
+    resolved = []
+    def dep_resolve(node, resolved, unresolved):
+        unresolved.append(node)
+        nodes = _expandEdge(node)
+        for edge in exDict.keys():
+            for n in nodes:
+                if edge == n: continue
+                if _findParam(n, exDict[edge]):
+                    if edge not in resolved:
+                        if edge in unresolved:
+                            raise RuntimeError('Circular reference detected: {} -> {}'.format(n, edge))
+                        dep_resolve(edge, resolved, unresolved)
+        resolved.append(node)
+        unresolved.remove(node)
+    dep_resolve('Index', resolved, unresolved)
+    resolved.pop()
+    return list(reversed(resolved))
 
-import makeArrayCmd
-array = makeArrayCmd.makeCircularArray(obj,20)
-
-
-def makeMyLink(obj):
-    # addObject() API is extended to accept extra parameters in order to 
-    # let the python object override the type of C++ view provider
-    link = obj.Document.addObject("App::FeaturePython",'LinkArray',LinkArray(),None,True)
-    link.setLink(obj)
-    return link
-
-
-def makeArray(obj,count):
-    array = obj.Document.addObject("App::FeaturePython",'LinkArray',LinkArray(),None,True)
-    ViewProviderArray(array.ViewObject)
-    array.setLink(obj)
-    array.ElementCount = count
-    return array
-
-"""

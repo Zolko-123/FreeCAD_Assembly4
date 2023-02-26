@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.12.5
+Current version 0.12.6
 
 
 ## Overview
@@ -14,11 +14,11 @@ An Assembly4 _Assembly_ is a standard FreeCAD `App::Part` container, therefore i
 
 ![](Resources/media/Asm4_wb1.png)
 
+**Please Note:** only objects open in the current session can be freshly inserted into an assembly. Documents of previously inserted objects will be opened in the background, no need to open them manually.
+
 **Please Note:** only _Part_ and _Body_ containers at the root of a document can be inserted. Objects nested inside containers cannot be used directly by Assembly4.
 
 **Please Note:** objects in the same document as the linked part but outside the `App::Part` container will **not** be inserted.
-
-**Please Note:** objects need to be opened in the current session in order to be inserted into an assembly.
 
 **Important Note:** version v0.11.5 had a hidden nasty bug that also corrupted the parts that were *created* with it. Unfortunately, these parts cannot be automatically fixed, they must be re-created. Only parts *created* with v0.11.5 are affected, not those that where merely *used* with it.
 
