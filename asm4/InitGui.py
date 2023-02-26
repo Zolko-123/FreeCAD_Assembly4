@@ -28,7 +28,7 @@ from Asm4_Translate import _atr, QT_TRANSLATE_NOOP
 import Asm4_locator
 global Asm4_icon, Asm4_path
 Asm4_path = os.path.dirname( Asm4_locator.__file__ )
-Asm4_icon = os.path.join( Asm4_path , 'Resources/icons/Assembly4.svg' )
+Asm4_icon = os.path.join( Asm4_path , '../Resources/icons/Assembly4.svg' )
 
 # I don't like this being here
 import selectionFilter
@@ -86,7 +86,7 @@ class Assembly4Workbench(Workbench):
     def Initialize(self):
         # Assembly4 version info
         # with file VERSION
-        versionPath = os.path.join( Asm4_path, 'VERSION' )
+        versionPath = os.path.join( Asm4_path, '../VERSION' )
         versionFile = open(versionPath,"r")
         version = versionFile.readlines()[1]
         Asm4_version = version[:-1]

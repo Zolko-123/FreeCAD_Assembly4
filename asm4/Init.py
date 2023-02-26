@@ -30,7 +30,7 @@ Asm4_path = os.path.dirname( Asm4_locator.__file__ )
 # Assembly4 version info
 
 # with file VERSION
-versionPath = os.path.join( Asm4_path, 'VERSION' )
+versionPath = os.path.join( Asm4_path, '../VERSION' )
 versionFile = open(versionPath,"r")
 # read second line
 version = versionFile.readlines()[1]
