@@ -20,25 +20,32 @@ ConfUserDir = os.path.join(App.getUserAppDataDir(),'Templates')
 ConfUserFilename = "Asm4_infoPartConf.json"
 ConfUserFilejson = os.path.join(ConfUserDir, ConfUserFilename)
 
-'''
-# Check if the configuration file exists
-try:
-    file = open(ConfUserFilejson, 'r')
-    file.close()
-except:
+if not os.path.exists(ConfUserDir):
+    os.makedirs(ConfUserDir)
+    App.Console.PrintLog("\nThe Templates directory has been created!\n")
+if not os.path.exists(ConfUserFilejson):
     partInfoDef = dict()
     for prop in InfoKeys.partInfo:
         partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': True})
     for prop in InfoKeys.partInfo_Invisible:
         partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': False})
-    try:
-        os.mkdir(ConfUserDir)
-    except:
-        pass
     file = open(ConfUserFilejson, 'x')
     json.dump(partInfoDef, file)
     file.close()
-'''
+    App.Console.PrintLog("\nThe json file has been created!\n")
+else:
+    checkjsonFile = open(ConfUserFilejson, 'r')
+    try:
+        infoKeysUser = json.load(checkjsonFile)
+        App.Console.PrintLog('\nThis JSON file appears to be valid\n')
+    except:
+        App.Console.PrintError('\nASM4 - JSON file ' + ConfUserFilejson + ' appears to be corrupted, if required, create a new one\n')
+        mb = QtGui.QMessageBox()
+        mb.setIcon(QtGui.QMessageBox.Critical)
+        mb.setWindowTitle('ASM4 - Possible corrupted JSON file')
+        mb.setText(ConfUserFilejson + ' appears to be corrupted, if required, create a new one')
+        mb.exec_()
+    checkjsonFile.close()
 
 """
     +-----------------------------------------------+
