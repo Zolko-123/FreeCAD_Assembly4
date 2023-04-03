@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.12.6
+Current version 0.12.7
 
 
 ## Overview
@@ -22,6 +22,7 @@ An Assembly4 _Assembly_ is a standard FreeCAD `App::Part` container, therefore i
 
 **Important Note:** version v0.11.5 had a hidden nasty bug that also corrupted the parts that were *created* with it. Unfortunately, these parts cannot be automatically fixed, they must be re-created. Only parts *created* with v0.11.5 are affected, not those that where merely *used* with it.
 
+To work around this issue, wrap the affected part in an `App::Part` container. Copy any local coordinate systems to the container Part.
 
 ## Installation
 

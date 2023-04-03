@@ -2,6 +2,9 @@
 # coding: utf-8
 #
 # placePartUI.py
+#
+# LGPL
+# Copyright HUBERT Zoltán
 
 
 import os

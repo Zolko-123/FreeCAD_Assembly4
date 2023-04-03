@@ -20,7 +20,7 @@ try:
     from anytree import Node, RenderTree
     has_anytree = True
 except ImportError:
-    FCC.PrintWarning("\nASM4 WARNING: Pylib anytree is missing, exportFiles is not available\n")
+    FCC.PrintMessage("\nINFO : Pylib anytree is missing, exportFiles is not available\n")
 
 
 class listLinkedFiles:

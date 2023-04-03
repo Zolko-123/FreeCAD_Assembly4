@@ -2,6 +2,9 @@
 # coding: utf-8
 #
 # variantLinkCmd.py
+#
+# LGPL
+# Copyright HUBERT Zoltán
 
 
 import os

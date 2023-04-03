@@ -2,6 +2,10 @@
 # coding: utf-8
 #
 # Asm4_objects.py
+# 
+# LGPL
+# Copyright HUBERT Zoltán
+
 
 
 import os

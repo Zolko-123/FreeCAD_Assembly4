@@ -2,6 +2,9 @@
 # coding: utf-8
 # 
 # newModelCmd.py 
+#
+# LGPL
+# Copyright HUBERT Zoltán
 
 
 

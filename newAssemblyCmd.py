@@ -2,6 +2,9 @@
 # coding: utf-8
 # 
 # newAssemblyCmd.py 
+#
+# LGPL
+# Copyright HUBERT Zoltán
 
 
 
