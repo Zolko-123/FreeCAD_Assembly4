@@ -2,6 +2,11 @@
 
 ## Release notes
 
+* 2023.04.03 (**0.12.7**) :  
+Added PayPal Donate button  
+Added copyright notice  
+Changed exportFiles warning to plain message  
+
 * 2023.02.26 (**0.12.6**) :  
 Small fixes here and there  
 BOM and PartInfo are now partially working again  
