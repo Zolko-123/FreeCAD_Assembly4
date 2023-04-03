@@ -3,6 +3,9 @@
 #
 # makeBinderCmd.py
 # creates a SubShapeBinder at the root of the assembly
+#
+# LGPL
+# Copyright HUBERT Zoltán
 
 
 import os

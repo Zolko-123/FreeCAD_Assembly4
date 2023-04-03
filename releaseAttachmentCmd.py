@@ -2,6 +2,10 @@
 # coding: utf-8
 #
 # releaseAttachmentCmd.py
+#
+# LGPL
+# Copyright HUBERT Zoltán
+
 
 import math, re, os
 

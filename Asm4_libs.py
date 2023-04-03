@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # coding: utf-8
 #
+# libraries for FreeCAD's Assembly 4 workbench
+#
 # LGPL
 # Copyright HUBERT Zoltán
-#
-# libraries for FreeCAD's Assembly 4 workbench
 
 
 

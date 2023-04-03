@@ -2,6 +2,11 @@
 # coding: utf-8
 #
 # gotoDocumentCmd.py
+#
+# LGPL
+# Copyright HUBERT Zoltán
+
+
 
 import math, re, os
 

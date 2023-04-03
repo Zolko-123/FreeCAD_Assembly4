@@ -2,6 +2,9 @@
 # coding: utf-8
 # 
 # insertLinkCmd.py
+#
+# LGPL
+# Copyright HUBERT Zoltán
 
 
 
