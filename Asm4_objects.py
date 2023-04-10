@@ -595,7 +595,7 @@ def findAxisPlacement(axisObj, subnameList):
         return axisObj.Placement * App.Rotation(Asm4.VEC_T, 120)
     if axisObj.TypeId == 'App::Plane' and hasattr(axisObj,'Role'):
         return axisObj.Placement
-    if axisObj.TypeId == 'PartDesign::CoordinateSystem':
+    if axisObj.TypeId in ('PartDesign::CoordinateSystem', 'PartDesign::Plane'):
         return axisObj.Placement        
     # Arbitary object as axis is rejected for now
     return None
