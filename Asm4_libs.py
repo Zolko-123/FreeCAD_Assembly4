@@ -93,9 +93,10 @@ def cloneObject(obj):
 
 def placeObjectToLCS( attObj, attLink, attDoc, attLCS ):
     expr = makeExpressionDatum( attLink, attDoc, attLCS )
+    FCC.PrintMessage('expression = '+expr)
     # indicate the this fastener has been placed with the Assembly4 workbench
     if not hasattr(attObj,'AssemblyType'):
-        Asm4.makeAsmProperties(attObj)
+        makeAsmProperties(attObj)
     attObj.AssemblyType = 'Part::Link'
     # the fastener is attached by its Origin, no extra LCS
     attObj.AttachedBy = 'Origin'
@@ -624,14 +625,15 @@ def makeExpressionPart( attLink, attDoc, attLCS, linkedDoc, linkLCS ):
 
 
 def makeExpressionDatum( attLink, attPart, attLCS ):
+    FCC.PrintMessage('*'+attLink+'*'+attPart+'*'+attLCS+'*')
     # check that everything is defined
-    if attLink and attLCS:
+    if attLCS:
         # expr = Link.Placement * LinkedPart#LCS.Placement
         expr = attLCS +'.Placement * AttachmentOffset'
-        if attPart:
+        if attLink and attPart:
             expr = attLink+'.Placement * '+attPart+'#'+expr
     else:
-        expr = False
+        expr = None
     return expr
 
 

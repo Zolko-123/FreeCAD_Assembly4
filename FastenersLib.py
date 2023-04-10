@@ -98,11 +98,16 @@ class insertFastener:
             Gui.activateWorkbench('Assembly4Workbench')
         # if something is selected
         container = None
+        attLink   = ''
+        attDoc    = ''
+        attLcs    = ''
         fsClass   = self.FSclass
         fsType    = None
         selObj    = None
+
         if len(Gui.Selection.getSelection())==1:
             selObj = Gui.Selection.getSelection()[0]
+            selEx  = Gui.Selection.getSelectionEx('', 0)[0]
             # if it's a container, we'll put it there
             if selObj.TypeId == 'App::Part':
                 container = selObj
@@ -116,6 +121,25 @@ class insertFastener:
                         container = selObj.getParentGeoFeatureGroup()
                 except:
                     FCC.PrintMessage("Selected object doesn't seem to be a valid fastener, ignoring\n")
+            # if it's a datum we place the fasteners on it
+            elif selObj.TypeId in Asm4.datumTypes:
+                # the datum is in the same document
+                if len(selEx.SubElementNames[0].split('.'))==2:
+                    # double check
+                    if selEx.SubElementNames[0].split('.')[0]==selObj.Name:
+                        attLcs  = selObj.Name
+                        container = selObj.getParentGeoFeatureGroup()
+                # the datum is in a linked child
+                elif len(selEx.SubElementNames[0].split('.'))==3:
+                    # double check
+                    if selEx.SubElementNames[0].split('.')[1]==selObj.Name:
+                        # we treat links only for assemblies
+                        if Asm4.getAssembly():
+                            attLink = selEx.SubElementNames[0].split('.')[0]
+                            attDoc  = selObj.getParentGeoFeatureGroup().Document.Name
+                            attLcs  = selObj.Name
+                            container = Asm4.getAssembly()
+                # placeObjectToLCS( fastener, attLink, attDoc, attLCS ):
         elif Asm4.getAssembly() and not Gui.Selection.hasSelection() :
             container = Asm4.getAssembly()
         # create the fastener
@@ -155,6 +179,9 @@ class insertFastener:
         # add AttachmentEngine
         # oooops, no, creates problems because it creates an AttachmentOffset property that collides with Asm4
         # newFastener.addExtension("Part::AttachExtensionPython")
+        # if a datum was selected, attach the fastener to it
+        if attLcs:
+            Asm4.placeObjectToLCS( newFastener, attLink, attDoc, attLcs )
         # ... and select it
         newFastener.recompute()
         Gui.Selection.clearSelection()
