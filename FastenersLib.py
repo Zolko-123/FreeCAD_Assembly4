@@ -61,17 +61,26 @@ class insertFastener:
         # Screw
         if  self.FSclass      == 'Screw':
             self.menutext     = "Insert Screw"
-            self.tooltip      = "Insert a Screw in the Assembly"
+            self.tooltip      = "<p>Insert a Screw into the Assembly</p>"
+            self.tooltip     += "<p>If another fastener is selected, a new fastener of the same type is created in the same assembly."
+            self.tooltip     += "If an axis or LCS is selected, the new fastener will be attached to it."
+            self.tooltip     += "If an assembly is selected, the new fastener will be inside that assembly.</p>"
             self.icon         = os.path.join( Asm4.iconPath , 'Asm4_Screw.svg')
         # Nut
         elif self.FSclass     == 'Nut':
             self.menutext     = "Insert Nut"
-            self.tooltip      = "Insert a Nut in the Assembly"
+            self.tooltip      = "<p>Insert a Nut into the Assembly</p>"
+            self.tooltip     += "<p>If another fastener is selected, a new fastener of the same type is created in the same assembly."
+            self.tooltip     += "If an axis or LCS is selected, the new fastener will be attached to it."
+            self.tooltip     += "If an assembly is selected, the new fastener will be inside that assembly.</p>"
             self.icon         = os.path.join( Asm4.iconPath , 'Asm4_Nut.svg')
         # Washer
         elif self.FSclass     == 'Washer':
             self.menutext     = "Insert Washer"
-            self.tooltip      = "Insert a Washer in the Assembly"
+            self.tooltip      = "<p>Insert a Washer into the Assembly</p>"
+            self.tooltip     += "<p>If another fastener is selected, a new fastener of the same type is created in the same assembly."
+            self.tooltip     += "If an axis or LCS is selected, the new fastener will be attached to it."
+            self.tooltip     += "If an assembly is selected, the new fastener will be inside that assembly.</p>"
             self.icon         = os.path.join( Asm4.iconPath , 'Asm4_Washer.svg')
         # Threaded Rod (makes errors)
         elif self.FSclass     == 'ThreadedRod':
@@ -101,6 +110,7 @@ class insertFastener:
         attLink   = ''
         attDoc    = ''
         attLcs    = ''
+        lcsAxis   = ''
         fsClass   = self.FSclass
         fsType    = None
         selObj    = None
@@ -129,6 +139,7 @@ class insertFastener:
                     if selEx.SubElementNames[0].split('.')[0]==selObj.Name:
                         attLcs  = selObj.Name
                         container = selObj.getParentGeoFeatureGroup()
+                        lcsAxis = selEx.SubElementNames[0].split('.')[1]
                 # the datum is in a linked child
                 elif len(selEx.SubElementNames[0].split('.'))==3:
                     # double check
@@ -139,6 +150,7 @@ class insertFastener:
                             attDoc  = selObj.getParentGeoFeatureGroup().Document.Name
                             attLcs  = selObj.Name
                             container = Asm4.getAssembly()
+                            lcsAxis = selEx.SubElementNames[0].split('.')[2]
                 # placeObjectToLCS( fastener, attLink, attDoc, attLCS ):
         elif Asm4.getAssembly() and not Gui.Selection.hasSelection() :
             container = Asm4.getAssembly()
@@ -182,6 +194,13 @@ class insertFastener:
         # if a datum was selected, attach the fastener to it
         if attLcs:
             Asm4.placeObjectToLCS( newFastener, attLink, attDoc, attLcs )
+            # rotate to X-Y-Z axis if appropriate
+            if lcsAxis=='X':
+                newFastener.AttachmentOffset = newFastener.AttachmentOffset * Asm4.rotY
+            elif lcsAxis=='Y':
+                newFastener.AttachmentOffset = newFastener.AttachmentOffset * Asm4.rotX.inverse()
+            else:
+                pass
         # ... and select it
         newFastener.recompute()
         Gui.Selection.clearSelection()

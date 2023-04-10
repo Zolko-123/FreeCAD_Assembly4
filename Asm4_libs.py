@@ -42,6 +42,17 @@ partInfo =[     'PartID',                       \
 containerTypes = [  'App::Part', 'PartDesign::Body' ]
 
 
+VEC_0 = App.Vector(0, 0, 0)
+VEC_X = App.Vector(1, 0, 0)
+VEC_Y = App.Vector(0, 1, 0)
+VEC_Z = App.Vector(0, 0, 1)
+VEC_T = App.Vector(1, 1, 1)
+
+
+rotX = App.Placement( VEC_0, App.Rotation( VEC_X, 90) )
+rotY = App.Placement( VEC_0, App.Rotation( VEC_Y, 90) )
+rotZ = App.Placement( VEC_0, App.Rotation( VEC_Z, 90) )
+
 
 
 def findObjectLink(obj, doc = App.ActiveDocument):
@@ -93,7 +104,7 @@ def cloneObject(obj):
 
 def placeObjectToLCS( attObj, attLink, attDoc, attLCS ):
     expr = makeExpressionDatum( attLink, attDoc, attLCS )
-    FCC.PrintMessage('expression = '+expr)
+    # FCC.PrintMessage('expression = '+expr)
     # indicate the this fastener has been placed with the Assembly4 workbench
     if not hasattr(attObj,'AssemblyType'):
         makeAsmProperties(attObj)
@@ -548,30 +559,6 @@ class dropDownCmd:
 
     def GetResources(self):
         return { 'MenuText': self.menu, 'ToolTip': self.tooltip }
-
-
-
-"""
-    +-----------------------------------------------+
-    |         vector constants                      |
-    +-----------------------------------------------+
-"""
-VEC_0 = App.Vector(0, 0, 0)
-VEC_X = App.Vector(1, 0, 0)
-VEC_Y = App.Vector(0, 1, 0)
-VEC_Z = App.Vector(0, 0, 1)
-VEC_T = App.Vector(1, 1, 1)
-
-
-
-"""
-    +-----------------------------------------------+
-    |         the 3 base rotation Placements        |
-    +-----------------------------------------------+
-"""
-rotX = App.Placement( VEC_0, App.Rotation( VEC_X, 90) )
-rotY = App.Placement( VEC_0, App.Rotation( VEC_Y, 90) )
-rotZ = App.Placement( VEC_0, App.Rotation( VEC_Z, 90) )
 
 
 
