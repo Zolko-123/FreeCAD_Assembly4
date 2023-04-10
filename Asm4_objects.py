@@ -352,7 +352,6 @@ class ViewProviderArray(object):
     +-----------------------------------------------+
     |          a circular link array class          |
     +-----------------------------------------------+
-"""
 class CircularArray(LinkArray):
 
     def onDocumentRestored(self, obj):
@@ -415,6 +414,7 @@ class CircularArray(LinkArray):
             obj.PlacementList = plaList
             obj.setPropertyStatus('PlacementList', 'Immutable')
         return False     # to call LinkExtension::execute()   <= is this rally needed ?
+"""
 
 
 """
