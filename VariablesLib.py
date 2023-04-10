@@ -66,9 +66,9 @@ class addVariable():
 
 
     def GetResources(self):
-        tooltip  = "Adds a variable into the \"Variables\" placeholder in the document.\n"
-        tooltip += "This variable can then be used in any formula using the ExpressionEngine\n"
-        tooltip += "of any compatible input field. These are marked with a \"f(x)\" symbol."
+        tooltip  = "<p>Adds a variable into the <i>Variables</i> placeholder in the document. "
+        tooltip += "This variable can then be used in any formula using the <i>ExpressionEngine</i> "
+        tooltip += "of any compatible input field. These are marked with a \"f(x)\" symbol</p>"
         iconFile = os.path.join( Asm4.iconPath , 'Asm4_addVariable.svg')
         return {"MenuText": "Add Variable",
                 "ToolTip": tooltip,
