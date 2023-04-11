@@ -218,12 +218,38 @@ def checkWorkbench( workbench ):
             hasWB = True
     return hasWB
 
-# DEPRECATED since Asm4 v0.12, reverted back to naming this Model again
+# since Asm4 v0.90 an assembly is called "Assembly" again
 def getAssembly():
-    return checkModel()
+    # return checkModel()
+    retval = None
+    if App.ActiveDocument:
+        # the current (as per v0.90) assembly container
+        assy = App.ActiveDocument.getObject('Assembly')
+        if assy and assy.TypeId == 'App::Part'  \
+                and assy.Type   == 'Assembly'   \
+                and assy.getParentGeoFeatureGroup() is None:
+            retval = assy
+        else:
+            # former Asm4 Model compatibility check:
+            model = App.ActiveDocument.getObject('Model')
+            if model and model.TypeId == 'App::Part'  \
+                    and model.Type    == 'Assembly'   \
+                    and model.getParentGeoFeatureGroup() is None:
+                retval = model
+            else:
+                # last chance, very old Asm4 Model
+                if model and model.TypeId=='App::Part'  \
+                        and model.getParentGeoFeatureGroup() is None:
+                    FCC.PrintMessage("Deprecated Asm4 Model detected, this could lead to uncompatibilities\n")
+                    retval = model
+    return retval
+
 
 # checks and returns whether there is an Asm4 Assembly Model in the active document
+# DEPRECATED : it's called Assembly again
 def checkModel():
+    return getAssembly()
+    '''
     retval = None
     if App.ActiveDocument:
         model = App.ActiveDocument.getObject('Model')
@@ -245,6 +271,7 @@ def checkModel():
                             and model.getParentGeoFeatureGroup() is None:
                     retval = model
     return retval
+    '''
 
 
 # returns the selected object and its selection hierarchy

@@ -8,19 +8,18 @@
 
 
 
-import math, re, os
+import os
 
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
-import Part
 
 import Asm4_libs as Asm4
 
 
 
 
-class makeAssembly:
+class newAssemblyCmd:
     """
     +-----------------------------------------------+
     |          creates the Assembly4 Model          |
@@ -38,8 +37,7 @@ def makeAssembly():
 
     """
     def GetResources(self):
-        tooltip  = "Create a new Assembly container\n"
-        tooltip += "Parts to be added must be open in this session"
+        tooltip  = "<p>Create a new Assembly container</p>"
         iconFile = os.path.join( Asm4.iconPath , 'Asm4_Model.svg')
         return {"MenuText": "New Assembly", "ToolTip": tooltip, "Pixmap" : iconFile }
 
@@ -85,10 +83,10 @@ def makeAssembly():
         lcs0.Support = [(assembly.Origin.OriginFeatures[0],'')]
         lcs0.MapMode = 'ObjectXY'
         lcs0.MapReversed = False
-        # create an object Variables to hold variables to be used in this document
-        assembly.addObject(Asm4.createVariables())
         # create a group Constraints to store future solver constraints there
         assembly.newObject('App::DocumentObjectGroup','Constraints')
+        # create an object Variables to hold variables to be used in this document
+        assembly.addObject(Asm4.createVariables())
         # create a group Configurations to store future solver constraints there
         assembly.newObject('App::DocumentObjectGroup','Configurations')
         
@@ -108,7 +106,7 @@ def makeAssembly():
 
 
 # add the command to the workbench
-Gui.addCommand( 'Asm4_makeAssembly', makeAssembly() )
+Gui.addCommand( 'Asm4_newAssembly', newAssemblyCmd() )
 
 
 
