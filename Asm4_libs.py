@@ -341,6 +341,7 @@ def getPartsGroup():
         retval = partsGroup
     return retval
 
+
 # Get almost all Objects within the passed Selection.
 # A Selection is one or more marked Object(s) anywhere
 # in the opened Document. The idea is to get a similar
@@ -348,10 +349,9 @@ def getPartsGroup():
 # The Window that pops up and shows are affected Objects, calls it
 # The Dependencies
 # Objects within Compounds and Bodys and also Linked Objects are left out.
-
-# Note: Theoretically we could use the App.ActiveDocument.DependencyGraph function,
+# 
+# NOTE: Theoretically we could use the App.ActiveDocument.DependencyGraph function,
 # to get really every Object behind a selection.
-
 def getDependenciesList( CompleteSelection ):
     deDendenciesList = [ ]
     for Selection in CompleteSelection:
@@ -482,9 +482,8 @@ def isPart(obj):
 def isAppLink(obj):
     if not obj:
         return False
-    if hasattr(obj, 'TypeId'):
-        if obj.TypeId == 'App::Link':
-            return True
+    if hasattr(obj, 'TypeId') and obj.TypeId == 'App::Link':
+        return True
     return False
 
 
@@ -497,6 +496,7 @@ def isLinkToPart(obj):
     return False
 
 
+'''
 def isPartLinkAssembly(obj):
     if not obj:
         return False
@@ -504,6 +504,7 @@ def isPartLinkAssembly(obj):
         if obj.AssemblyType == 'Part::Link' or obj.AssemblyType == '' :
             return True
     return False
+'''
 
 
 def isAsm4EE(obj):
@@ -523,14 +524,17 @@ def isAsm4EE(obj):
     return False
 
 
-def isAsm4Model(obj):
+def isAssembly(obj):
     if not obj:
         return False
-    # we only check for Asm4 Model
-    if obj.TypeId=='App::Part' and obj.Name=='Model':
+    if obj.TypeId=='App::Part' and obj.Name=='Assembly':
         if hasattr(obj,'Type') and obj.Type=='Assembly':
             return True
     return False
+
+
+def isAsm4Model(obj):
+    return isAssembly(obj)
 
 
 """
@@ -683,11 +687,9 @@ def getSelectedContainer():
             retval = selObj
     return retval
 
+
 # returns the selected App::Link
 def getSelectedLink():
-    # check that there is an App::Part called 'Model'
-    #if App.ActiveDocument.getObject('Model') and App.ActiveDocument.Model.TypeId == 'App::Part':
-    #if checkModel():
     retval = None
     selection = Gui.Selection.getSelection()
     if len(selection)==1:
@@ -696,6 +698,7 @@ def getSelectedLink():
         if selObj.isDerivedFrom('App::Link') and selObj.LinkedObject is not None and selObj.LinkedObject.TypeId in containerTypes:
             retval = selObj
     return retval
+
 
 # returns the selected Asm4 variant link
 def getSelectedVarLink():
@@ -708,6 +711,7 @@ def getSelectedVarLink():
             if hasattr(selObj,'Type') and selObj.Type=='Asm4::VariantLink':
                 retval = selObj
     return retval
+
 
 def getSelectedDatum():
     selectedObj = None
