@@ -2,6 +2,9 @@
 
 ## Release notes
 
+* 2023.mm.dd (**0.20.0**) :  
+Switched back to the assembly being called "Assembly"  
+
 * 2023.04.03 (**0.12.7**) :  
 Added PayPal Donate button  
 Added copyright notice  
