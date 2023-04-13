@@ -53,9 +53,10 @@ def makeAssembly():
     def Activated(self):
         # check whether there is already Model in the document
         assy = App.ActiveDocument.getObject('Assembly')
-        if assy:
+        if assy is not None:
             if assy.TypeId=='App::Part':
-                Asm4.warningBox("This document already contains a valid Assembly, please use it")
+                message = "This document already contains a valid Assembly, please use it"
+                Asm4.warningBox(message)
                 # set the Type to Assembly
                 assy.Type = 'Assembly'
             else:
@@ -71,7 +72,6 @@ def makeAssembly():
         partsGroup = App.ActiveDocument.getObject('Parts')
         if partsGroup is None:
             partsGroup = App.ActiveDocument.addObject( 'App::DocumentObjectGroup', 'Parts' )
-
         # create a new App::Part called 'Assembly'
         assembly = App.ActiveDocument.addObject('App::Part','Assembly')
         # set the type as a "proof" that it's an Assembly
@@ -85,10 +85,12 @@ def makeAssembly():
         lcs0.MapReversed = False
         # create a group Constraints to store future solver constraints there
         assembly.newObject('App::DocumentObjectGroup','Constraints')
+        App.ActiveDocument.getObject('Constraints').Visibility = False
         # create an object Variables to hold variables to be used in this document
-        assembly.addObject(Asm4.createVariables())
+        assembly.addObject(Asm4.makeVarContainer())
         # create a group Configurations to store future solver constraints there
         assembly.newObject('App::DocumentObjectGroup','Configurations')
+        App.ActiveDocument.getObject('Configurations').Visibility = False
         
         # move existing parts and bodies at the document root to the Parts group
         # not nested inside other parts, to keep hierarchy

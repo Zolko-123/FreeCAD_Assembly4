@@ -106,9 +106,8 @@ def placeObjectToLCS( attObj, attLink, attDoc, attLCS ):
     expr = makeExpressionDatum( attLink, attDoc, attLCS )
     # FCC.PrintMessage('expression = '+expr)
     # indicate the this fastener has been placed with the Assembly4 workbench
-    if not hasattr(attObj,'AssemblyType'):
+    if not hasattr(attObj,'SolverId'):
         makeAsmProperties(attObj)
-    attObj.AssemblyType = 'Part::Link'
     # the fastener is attached by its Origin, no extra LCS
     attObj.AttachedBy = 'Origin'
     # store the part where we're attached to in the constraints object
@@ -135,14 +134,20 @@ def placeObjectToLCS( attObj, attLink, attDoc, attLCS ):
 """
 def makeAsmProperties( obj, reset=False ):
     # property AssemblyType
+    # DEPRECATED
+    '''
     if not hasattr(obj,'AssemblyType'):
         obj.addProperty( 'App::PropertyString', 'AssemblyType', 'Assembly' )
+    obj.setPropertyStatus('AssemblyType','ReadOnly')
+    '''
     # property AttachedBy
     if not hasattr(obj,'AttachedBy'):
         obj.addProperty( 'App::PropertyString', 'AttachedBy', 'Assembly' )
+    obj.setPropertyStatus('AttachedBy'  ,'ReadOnly')
     # property AttachedTo
     if not hasattr(obj,'AttachedTo'):
         obj.addProperty( 'App::PropertyString', 'AttachedTo', 'Assembly' )
+    obj.setPropertyStatus('AttachedTo'  ,'ReadOnly')
     # property AttachmentOffset
     if not hasattr(obj,'AttachmentOffset'):
         obj.addProperty( 'App::PropertyPlacement', 'AttachmentOffset', 'Assembly' )
@@ -150,25 +155,44 @@ def makeAsmProperties( obj, reset=False ):
     if not hasattr(obj,'SolverId'):
         obj.addProperty( 'App::PropertyString', 'SolverId', 'Assembly' )
     if reset:
-        obj.AssemblyType = ''
-        #obj.AttachedBy = ''
-        #obj.AttachedTo = ''
-        #obj.AttachmentOffset = App.Placement()
+        obj.AttachedBy = ''
+        obj.AttachedTo = ''
+        obj.AttachmentOffset = App.Placement()
         obj.SolverId = ''
     return
 
 
+def hasVarContainer():
+    retval = False
+    # check whether there already is a Variables object
+    variables = App.ActiveDocument.getObject('Variables')
+    if variables and variables.TypeId=='App::FeaturePython':
+            # signature of a PropertyContainer
+            if hasattr(variables,'Type') :
+                if variables.Type == 'App::PropertyContainer':
+                    retval = variables
+    
+
+
 # the Variables container
-def createVariables():
+def makeVarContainer():
     retval = None
     # check whether there already is a Variables object
     variables = App.ActiveDocument.getObject('Variables')
-    if variables:
-        # signature or a PropertyContainer
-        if not hasattr(variables,'Type'):
-            variables.addProperty('App::PropertyString', 'Type')
-            variables.Type = 'App::PropertyContainer'            
-        retval = variables
+    if variables :
+        if variables.TypeId=='App::FeaturePython':
+            # signature of a PropertyContainer
+            if hasattr(variables,'Type') :
+                if variables.Type == 'App::PropertyContainer':
+                    retval = variables
+            # for compatibility
+            else: 
+                variables.addProperty('App::PropertyString', 'Type')
+                variables.Type = 'App::PropertyContainer'            
+                retval = variables
+        else:
+            FCC.PrintWarning('This Part contains an incompatible \"Variables\" object, ')
+            FCC.PrintWarning('this could lead to unexpected results\n')
     # there is none, so we create it
     else:
         variables = App.ActiveDocument.addObject('App::FeaturePython','Variables')
@@ -515,6 +539,7 @@ def isAsm4EE(obj):
         if obj.SolverId=='Asm4EE' or obj.SolverId=='Placement::ExpressionEngine' or obj.SolverId=='' :
             return True
     # legacy check
+    # DEPRECATED, to be removed
     elif hasattr(obj,'AssemblyType') :
         if obj.AssemblyType == 'Asm4EE' or obj.AssemblyType == '' :
             FCC.PrintMessage('Found legacy AssemblyType property, adding new empty SolverId property\n')

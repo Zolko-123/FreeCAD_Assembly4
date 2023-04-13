@@ -18,6 +18,7 @@ import Asm4_libs as Asm4
 
 
 # get the Variables feature
+'''
 def getVariables():
     retval = None
     if App.ActiveDocument:
@@ -25,6 +26,8 @@ def getVariables():
         if variables and variables.TypeId=='App::FeaturePython':
             retval = variables
     return retval
+'''
+
 
 # check whether an App::Part is selected
 def checkPart():
@@ -84,10 +87,11 @@ class addVariable():
 
     def Activated(self):
         # retrieve the Variables object
+        # if it's a strange TypeId, doesn't matter
         self.Variables = App.ActiveDocument.getObject('Variables')
         # if it doesn't exist then create it (for older Asm4 documents)
         if not self.Variables:
-            self.Variables = Asm4.createVariables()
+            self.Variables = Asm4.makeVarContainer()
             part = None
             # if an App::Part is selected:
             if checkPart():
@@ -97,12 +101,6 @@ class addVariable():
                 part = Asm4.getAssembly()
             if part:
                 part.addObject(self.Variables)
-                #self.Variables =  part.newObject('App::FeaturePython','Variables')
-                #self.Variables.ViewObject.Proxy = Asm4.setCustomIcon(object,'Asm4_Variables.svg')
-            # create the Variables in the document
-            #else:
-                #self.Variables = App.ActiveDocument.addObject('App::FeaturePython','Variables')
-                #self.Variables.ViewObject.Proxy = Asm4.setCustomIcon(object,'Asm4_Variables.svg')
 
         # (re-)initialise the UI
         self.typeList.clear()
