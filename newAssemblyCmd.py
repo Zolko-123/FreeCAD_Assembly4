@@ -52,7 +52,8 @@ def makeAssembly():
     # the real stuff
     def Activated(self):
         # check whether there is already Model in the document
-        assy = App.ActiveDocument.getObject('Assembly')
+        # assy = App.ActiveDocument.getObject('Assembly')
+        assy = Asm4.getAssembly()
         if assy is not None:
             if assy.TypeId=='App::Part':
                 message = "This document already contains a valid Assembly, please use it"

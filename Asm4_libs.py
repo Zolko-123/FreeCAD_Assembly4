@@ -242,7 +242,7 @@ def checkWorkbench( workbench ):
             hasWB = True
     return hasWB
 
-# since Asm4 v0.90 an assembly is called "Assembly" again
+# since Asm4 v0.20 an assembly is called "Assembly" again
 def getAssembly():
     # return checkModel()
     retval = None
