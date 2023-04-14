@@ -15,7 +15,7 @@ import FreeCAD as App
 
 import Asm4_libs as Asm4
 import infoPartCmd
-import InfoKeys
+import infoKeys
 
 crea = infoPartCmd.infoPartUI.makePartInfo
 fill = infoPartCmd.infoPartUI.infoDefault
