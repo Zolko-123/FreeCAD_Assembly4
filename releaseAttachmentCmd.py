@@ -49,9 +49,7 @@ class releaseAttachment:
 
     def checkSelection(self):
         selectedObj = None
-        # check that there is an App::Part called 'Model'
-        # a standard App::Part would also do, but then more error checks are necessary
-        # if App.ActiveDocument.getObject('Model') and App.ActiveDocument.getObject('Model').TypeId=='App::Part' :
+        # check that there is an Assembly
         if Asm4.getAssembly() and len(Gui.Selection.getSelection())==1:
             # set the (first) selected object as global variable
             selection = Gui.Selection.getSelection()[0]
@@ -83,8 +81,7 @@ class releaseAttachment:
             # don't do anything
             return
 
-        # the root Assembly4 Model
-        # model = App.ActiveDocument.getObject('Model')
+        # the root Assembly
         model = Asm4.getAssembly()
 
         # handle object types differently

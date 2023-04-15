@@ -3,6 +3,22 @@
 #
 # exportFiles.py
 #
+#####################################
+# Copyright (c) openBrain 2020
+# Licensed under LGPL v2
+#
+# This FreeCAD macro prints the Tree of selected object(s) as ASCII art.
+# Several styles are available. Tree branch pattern is customizable.
+# It can export to clipboard, file or embedded text document.
+# This mainly aims at documenting the model.
+#
+# Version history :
+# **** : brought into exportFiles for Assembly4
+# *0.6 : introduce last fork string definition, add new style
+# *0.5 : beta release
+#
+#####################################
+
 
 import os, json, re, zipfile
 
@@ -14,137 +30,180 @@ from FreeCAD import Console as FCC
 
 import Asm4_libs as Asm4
 
-
+'''
 has_anytree = False
 try:
     from anytree import Node, RenderTree
     has_anytree = True
 except ImportError:
     FCC.PrintMessage("\nINFO : Pylib anytree is missing, exportFiles is not available\n")
+'''
 
-
-class listLinkedFiles:
-
-    def __init__(self, show_tree=False, relative_path=True):
-        super(listLinkedFiles, self).__init__()
-        self.show_tree = show_tree
-        self.relative_path = relative_path
-        # self.relative_path = True
-        # if show_tree:
-            # self.relative_path = True
+# lists the parts and linked parts of the selected container
+class listLinkedFiles():
 
     def GetResources(self):
-        if self.show_tree:
-            menutext = "Tree of Linked Files"
-            tooltip = """
-                Show the tree of linked files.
-                Currently is displyed in the Report View.
-            """
-            iconFile = os.path.join(Asm4.iconPath, 'Asm4_List_Liked_Files_Tree.svg')
-        else:
-            menutext = "List of Linked Files"
-            tooltip = """
-                List unique linked files.
-                Currently it displyed in the Report View.
-            """
-            iconFile = os.path.join(Asm4.iconPath, 'Asm4_List_Liked_Files.svg')
-
+        menutext = "Tree of Linked Files"
+        tooltip  = "<p>Show the hierarchical tree structure of parts in the selected container"
+        tooltip += "The tree is displayed with ASCII art</p>"
+        tooltip += "<p><b>Usage</b>: select an entity and click the command</p>"
+        iconFile = os.path.join(Asm4.iconPath, 'Asm4_List_Liked_Files_Tree.svg')
         return {
             "MenuText": menutext,
-            "ToolTip": tooltip,
-            "Pixmap": iconFile
+            "ToolTip" : tooltip,
+            "Pixmap"  : iconFile
         }
 
+
     def IsActive(self):
-        if Asm4.getAssembly() is None:
-            return False
-        else:
+        if App.ActiveDocument and len(Gui.Selection.getSelection())==1:
             return True
+        elif App.ActiveDocument and Asm4.getAssembly():
+            return True
+        else:
+            return False
+
+
+    def __init__(self):
+        super(listLinkedFiles, self).__init__()
+        # types of objects to be included in the listing
+        # links and derivatives are also included
+        self.DEF_TYPES = ['App::Part', 'PartDesign::Body', 'Part::FeaturePython', 'App::DocumentObjectGroup']
+        # visual ASCII art
+        self.TAB    = '    '
+        self.BRANCH = ' │  '
+        self.FORK   = ' ├─ '
+        self.LAST   = ' └─ '
+        # where we write stuff
+        self.ascii_tree = ""
+        self.root_path  = ""
+        # the UI
+        self.UI = QtGui.QDialog()
+        self.drawUI()
+
 
     def Activated(self):
-
-        if not has_anytree:
-            FCC.PrintWarning("To use {} you must install pylib \"anytree\"\n".format(self.__class__.__name__))
-            return
-
-        self.UI = QtGui.QDialog()
-        self.modelDoc = App.ActiveDocument
-        if self.show_tree:
-            print("ASM4> Listing linked files in a tree")
+        # clear stuff
+        self.ascii_tree = ""
+        self.root_path  = ""
+        self.tree_view.clear()
+        #
+        if len(Gui.Selection.getSelection())==1:
+            objects = Gui.Selection.getSelection()
+        elif Asm4.getAssembly():
+            objects = [ Asm4.getAssembly() ]
         else:
-            print("ASM4> Listing uniq linked files")
-        self.linked_files = self.list_files(self.show_tree, self.relative_path, verbose=True)
+            FCC.PrintWarning("Oups, you shouldn't see this message, something went wrong")
+        # get the directory path of the selected object
+        filename = objects[0].Document.Name
+        self.root_path = objects[0].Document.FileName.partition(filename)[0]
+        # FCC.PrintMessage("rel_path = "+self.root_path+"\n")
+        # now build the tree
+        self.printChildren(objects)
+        self.UI.show()
+        self.tree_view.setPlainText(self.ascii_tree)
 
-    def get_linked_files(self):
-        self.linked_files = self.list_files(self.show_tree, self.relative_path, verbose=False)
-        return self.linked_files
 
-    def list_files(self, show_tree=0, relative_path=True, verbose=True):
-
-        def find_linked_files(relative_path=True):
-
-            def find_files(obj, root_dirpath, level=0, relative_path=True, parent_node=None, parent_filepath=None):
-
-                if obj == None:
-                    return
-
-                if obj.TypeId == "App::Link":
-
-                    filepath = obj.LinkedObject.Document.FileName #obj.getLinkedObject().Document.FileName
-                    if relative_path:
-                        filepath = os.path.relpath(filepath, root_dirpath)
-
-                    indexes_of_current_level = [idx for idx, s in enumerate(linked_files_level) if str(level) in str(s)]
-                    linked_files_at_current_level = [linked_files[idx] for idx in indexes_of_current_level]
-
-                    if not any(filepath in s for s in linked_files_at_current_level):
-
-                        if filepath != parent_filepath:
-                            linked_files.append(filepath)
-                            linked_files_level.append(level)
-                            node = Node(filepath, parent=parent_node)
-                            find_files(obj.LinkedObject, root_dirpath, level+1, relative_path=relative_path, parent_node=node, parent_filepath=filepath)
-
-                # Navigate on objects inside a folders
-                if obj.TypeId == 'App::DocumentObjectGroup' or obj.TypeId == 'App::Part':
-                    for objname in obj.getSubObjects():
-                        subobj = obj.Document.getObject(objname[0:-1])
-                        find_files(subobj, root_dirpath, level, relative_path=relative_path, parent_node=parent_node, parent_filepath=parent_filepath)
-
-            linked_files = []
-            linked_files_level = []
-            level=0
-
-            filepath = App.ActiveDocument.FileName
-            root_dirpath = os.path.dirname(filepath)
-            if relative_path:
-                filepath = os.path.relpath(filepath, root_dirpath)
-
-            linked_files.append(filepath)
-            linked_files_level.append(level)
-            file_tree = Node(filepath)
-
-            for obj in (App.ActiveDocument.Objects):
-                find_files(obj, root_dirpath, level=level, relative_path=relative_path, parent_node=file_tree, parent_filepath=filepath)
-
-            return linked_files, file_tree
-
-        linked_files, file_tree = find_linked_files(relative_path=relative_path)
-
-        linked_files = set(linked_files) # uniq files
-
-        if verbose:
-            if show_tree:
-                for pre, fill, node in RenderTree(file_tree):
-                    print("%s%s" % (pre, node.name))
+    # this is where the magic happens. Copied from TreeToAscii macro
+    # Build ASCII tree by recursive call
+    def printChildren(self, objs=None, level=0, baseline=''):
+        for cnt, obj in enumerate(objs,1):
+            # find the filepath
+            filepath = ''
+            if obj.isDerivedFrom('App::Link'):
+                target = obj.LinkedObject
             else:
-                for i, filepath in enumerate(sorted(linked_files)):
-                    print("{:3d} - {}".format(i+1, filepath))
-            print("ASM4> Listing ended")
+                target = obj
+            # try relative filepath ...
+            if self.root_path:
+                filepath = target.Document.FileName.partition(self.root_path)[2]
+            # ... else absolute
+            if filepath =='':
+                filepath = target.Document.FileName
+            # make the data
+            data = {
+                "LBL"  : obj.Label,
+                "NAME" : '('+obj.Name+')' if obj.Label!=obj.Name else '',
+                "DOC"  : filepath,
+                "TARG" : obj.LinkedObject.Name if obj.isDerivedFrom('App::Link') else ''
+            }
+            # print the line
+            if cnt == len(objs):
+                if level>0:
+                    self.ascii_tree += baseline + self.LAST
+            else:
+                self.ascii_tree += baseline + self.FORK
+            # new data print
+            if obj.isDerivedFrom('App::Link'):
+                pattern = '{LBL} => {TARG} @ {DOC}'
+            else:
+                pattern = '{LBL} {NAME}'
+            self.ascii_tree += pattern.format(**data)
+            # we add the filename for the first element
+            if level==0 and target.Document.FileName != '' :
+                self.ascii_tree += ' @ '+target.Document.FileName
+            self.ascii_tree += '\n'
+            # for the next line
+            if cnt == len(objs):
+                if level>0:
+                    baselinenext = baseline + self.TAB
+                else:
+                    baselinenext = ''
+            else:
+                baselinenext = baseline + self.BRANCH
+            # table of children to be listed next
+            children = []
+            for child in obj.ViewObject.claimChildren():
+                if child.TypeId in self.DEF_TYPES or child.isDerivedFrom('App::Link'):
+                    children.append(child)
+            self.printChildren(children, level + 1, baselinenext)
 
-        return linked_files
+
+    def copyToClip(self):
+        """Copies ASCII tree to clipboard"""
+        self.tree_view.selectAll()
+        self.tree_view.copy()
+        self.tree_view.setPlainText("Copied to clipboard")
+        QtCore.QTimer.singleShot(3000, lambda:self.tree_view.setPlainText(self.ascii_tree))
 
 
+    # defines the UI, only static elements
+    def drawUI(self):
+        # Our main window will be a QDialog
+        # make this dialog stay above the others, always visible
+        self.UI.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
+        self.UI.setWindowTitle('Tree structure of the selected object')
+        self.UI.setWindowIcon( QtGui.QIcon( os.path.join( Asm4.iconPath , 'FreeCad.svg' ) ) )
+        self.UI.setMinimumWidth(470)
+        self.UI.resize(470,300)
+        self.UI.setModal(False)
+        # the layout for the main window is vertical (top to down)
+        mainLayout = QtGui.QVBoxLayout(self.UI)
+        # from TreeToAscii macro
+        self.tree_view = QtGui.QPlainTextEdit(self.ascii_tree)
+        self.tree_view.setReadOnly(True)
+        self.tree_view.setMinimumWidth(Gui.getMainWindow().width()/2)
+        self.tree_view.setMinimumHeight(Gui.getMainWindow().height()/2)
+        self.tree_view.setLineWrapMode(QtGui.QPlainTextEdit.NoWrap)
+        f = QtGui.QFont("unexistent");
+        f.setStyleHint(QtGui.QFont.Monospace);
+        self.tree_view.setFont(f);
+        button_box = QtGui.QDialogButtonBox()
+        copy_clip_but = QtGui.QPushButton("Copy to clipboard", button_box)
+        button_box.addButton(copy_clip_but, QtGui.QDialogButtonBox.ActionRole)
+        #button_box.addStretch()
+        close_dlg_but = QtGui.QPushButton("Close", button_box)
+        button_box.addButton(close_dlg_but, QtGui.QDialogButtonBox.RejectRole)
+        #button_box.addButton(QtGui.QDialogButtonBox.Close)
+        #button_box.button(QtGui.QDialogButtonBox.Close).setDefault(True)
+        mainLayout.addWidget(self.tree_view)
+        mainLayout.addWidget(button_box)
+        # actions
+        copy_clip_but.clicked.connect(self.copyToClip)
+        button_box.rejected.connect(self.UI.reject)
+
+
+'''
 class exportFiles:
 
     def __init__(self):
@@ -249,14 +308,8 @@ class exportFiles:
 
         # Revert current path
         os.chdir(current_path)
+'''
 
 # Add the command in the workbench
-Gui.addCommand('Asm4_listLinkedFilesTree', listLinkedFiles(show_tree=True))
-Gui.addCommand('Asm4_listLinkedFiles', listLinkedFiles(show_tree=False))
-Gui.addCommand('Asm4_exportFiles', exportFiles())
+Gui.addCommand('Asm4_listLinkedFiles', listLinkedFiles())
 
-# defines the drop-down button for Fasteners:
-ExportCmdList = ['Asm4_listLinkedFilesTree',
-                 'Asm4_listLinkedFiles',
-                 'Asm4_exportFiles']
-Gui.addCommand('Asm4_ExportList', Asm4.dropDownCmd(ExportCmdList, 'Export Files'))

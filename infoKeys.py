@@ -38,6 +38,7 @@ ConfUserDir = os.path.join(App.getUserAppDataDir(),'Templates')
 ConfUserFilename = "Asm4_infoPartConf.json"
 ConfUserFilejson = os.path.join(ConfUserDir, ConfUserFilename)
 
+
 '''
 # Check if the configuration file exists
 try:
@@ -63,6 +64,8 @@ infoKeysUser = json.load(file).copy()
 file.close()
 '''
 
+# DEPRECATED : moved to infoPartCmd
+'''
 def infoDefault(self):
 
     file = open(ConfUserFilejson, 'r')
@@ -118,7 +121,7 @@ def infoDefault(self):
         except NameError:
             # print('ShapeVolume: there is no Shape in the Part ', part.FullName)
             pass
-
+'''
 
 
 """
@@ -149,6 +152,8 @@ How to create a NEW_AUTOINFO_FIELD:
                     pass
 """
 
+# DEPRECATED : moved to infoPartCmd
+'''
 def LabelDoc(self, part, doc):
     auto_info_field = infoKeysUser.get('Doc_Label').get('userData')
     auto_info_fill = doc.Label
@@ -163,7 +168,7 @@ def LabelDoc(self, part, doc):
         except AttributeError:
             self.infos[i].setText("-")
 
-
+InfoKeys
 def LabelPart(self, part):
     auto_info_field = infoKeysUser.get('Part_Label').get('userData')
     auto_info_fill = part.Label
@@ -185,7 +190,6 @@ def PadLength(self, part, pad):
         auto_info_fill = str(pad.Length).replace('mm','')
     except AttributeError:
         return
-
     try:
         self.TypeId
         setattr(part, auto_info_field, auto_info_fill)
@@ -204,7 +208,6 @@ def ShapeLength(self, part, sketch):
         auto_info_fill = str(sketch.Shape.Length)
     except AttributeError:
         return
-
     try:
         self.TypeId
         setattr(part, auto_info_field, auto_info_fill)
@@ -221,7 +224,6 @@ def ShapeVolume(self, part, body):
     auto_info_field = infoKeysUser.get('Shape_Volume').get('userData')
     bbc = body.Shape.BoundBox
     auto_info_fill = str(str(round(bbc.ZLength, 3)) + str(' mm x ') + str(round(bbc.YLength, 3)) + str(' mm x ') + str(round(bbc.XLength, 3)) + str(' mm'))
-
     try:
         self.TypeId
         setattr(part, auto_info_field, auto_info_fill)
@@ -232,3 +234,5 @@ def ShapeVolume(self, part, body):
                     self.infos[i].setText(auto_info_fill)
         except AttributeError:
             self.infos[i].setText("-")
+'''
+

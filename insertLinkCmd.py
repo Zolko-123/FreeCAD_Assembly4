@@ -39,7 +39,9 @@ class insertLink():
         tooltip += "This will create a dynamic link to the part, "
         tooltip += "which can be in this document or in another document "
         tooltip += "that is open in the current session</p>"
-        tooltip += "<p>This command also enables to repair broken/missing links</p>"
+        tooltip += "<p><b>Usage</b>: the part must be open in the current session</p>"
+        tooltip += "<p>This command also enables to repair broken/missing links. "
+        tooltip += "Select the broken link, launch this command, and select a new target part in the list</p>"
         iconFile = 'Link_Part.svg'
         return {"MenuText" : "Insert Part", 
                 "ToolTip"  : tooltip, 
@@ -113,33 +115,6 @@ class insertLink():
 
         # build the list of available parts
         self.lookForParts()
-
-        '''
-        # Search for all App::Parts and PartDesign::Body in all open documents
-        # Also store the document of the part
-        for doc in App.listDocuments().values():
-            # don't consider temporary documents
-            if not doc.Temporary:
-                for obj in doc.findObjects("App::Part"):
-                    # we don't want to link to itself to the 'Model' object
-                    # other App::Part in the same document are OK 
-                    # but only those at top level (not nested inside other containers)
-                    if obj != self.rootAssembly and obj.getParentGeoFeatureGroup() is None:
-                        self.allParts.append( obj )
-                        self.partsDoc.append( doc )
-                for obj in doc.findObjects("PartDesign::Body"):
-                    # but only those at top level (not nested inside other containers)
-                    if obj.getParentGeoFeatureGroup() is None:
-                        self.allParts.append( obj )
-                        self.partsDoc.append( doc )
-
-        # build the list
-        for part in self.allParts:
-            newItem = QtGui.QListWidgetItem()
-            newItem.setText( part.Document.Name +"#"+ Asm4.labelName(part) )
-            newItem.setIcon(part.ViewObject.Icon)
-            self.partList.addItem(newItem)
-        '''
 
         # if an existing valid App::Link was selected
         if self.origLink and not self.brokenLink:
@@ -263,10 +238,10 @@ class insertLink():
             self.origLink.LinkedObject = selectedPart
             self.origLink.recompute()
             self.UI.close()
-            # ... and launch the placement of the inserted part
+            # highlight the link ...
             Gui.Selection.clearSelection()
             Gui.Selection.addSelection( self.activeDoc.Name, self.rootAssembly.Name, self.origLink.Name+'.' )
-            # ... but only if we're in an Asm4 Model
+            # ... and launch the placement of the inserted part if we're in an Asm4 Assembly
             if self.rootAssembly == Asm4.getAssembly():
                 Gui.runCommand( 'Asm4_placeLink' )
         # only create link if there is a Part object and a name
@@ -275,29 +250,27 @@ class insertLink():
             # or that it's the same document as that of the selected part
             if App.ActiveDocument.FileName!='' or App.ActiveDocument==selectedPart.Document:
                 # create the App::Link with the user-provided name
-                #createdLink = self.activeDoc.getObject('Model').newObject( 'App::Link', linkName )
                 createdLink = self.rootAssembly.newObject( 'App::Link', linkName )
                 createdLink.Label = linkName
-                # assign the user-selected selectedPart to it
+                # assign the user-selected part to it
                 createdLink.LinkedObject = selectedPart
                 # add the Asm4 properties
                 Asm4.makeAsmProperties(createdLink)
-                createdLink.AssemblyType = "Part::Link"
+                # DEPRECATED
+                # createdLink.AssemblyType = "Part::Link"
                 # update the link
                 createdLink.recompute()
                 # close the dialog UI...
                 self.UI.close()
-                # ... and launch the placement of the inserted part
+                # highlight the link 
                 Gui.Selection.clearSelection()
                 Gui.Selection.addSelection( self.activeDoc.Name, self.rootAssembly.Name, createdLink.Name+'.' )
-                # ... but only if we're in an Asm4 Model
+                # ... and launch the placement of the inserted part if we're in an Asm4 Assembly
                 if self.rootAssembly == Asm4.getAssembly():
                     Gui.runCommand( 'Asm4_placeLink' )
             else:
                 Asm4.warningBox('The current document must be saved before inserting an external part')
                 return
-
-
         # if still open, close the dialog UI
         self.UI.close()
 
@@ -321,7 +294,6 @@ class insertLink():
 
     def onFilterChange(self):
         filterStr = self.filterPartList.text().strip()
-
         for x in range(self.partList.count()):
             item = self.partList.item(x)
             # check the items's text match the filter ignoring the case

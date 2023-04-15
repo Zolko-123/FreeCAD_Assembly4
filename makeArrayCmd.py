@@ -130,9 +130,9 @@ class makeCircularArray(makeExpressionArray):
     menuText = 'Create a circular array'
     arrayType = 'Circular Array'
     namePrefix = 'Circular_'
-    tooltip = """Create a circular (polar) array of the selected object and axis.<br>
-                 Select first an object and then the axis.<br>
-                 Supported axis objects are axis or plane from an origin, datum line, LCS axes, straight line segments, arcs and circles"""
+    tooltip = """<p>Create a circular (polar) array around an axis. 
+                Supported axis objects are axis or plane from an origin, datum line, LCS axes, straight line segments, arcs and circles</p>
+                <p><b>Usage</b>: Select an object and the axis (hold CTRL key to select second object)</p>"""
  
     def IsActive(self):
         self._cacheSelectionInfo()
@@ -162,9 +162,9 @@ class makeLinearArray(makeExpressionArray):
     menuText = 'Create a linear array'
     arrayType = 'Linear Array'
     namePrefix = 'Linear_'
-    tooltip = """Create a linear array.<br>
-                 Select first an object and then an axis for the direction<br>
-                 Supported axis objects are axis or plane from an origin, datum line, LCS axes, straight line segments, arcs and circles"""
+    tooltip = """<p>Create a linear array along an axis. 
+                Supported axis objects are axis or plane from an origin, datum line, LCS axes, straight line segments, arcs and circles</p>
+                <p><b>Usage</b>: Select an object and an axis for the direction (hold CTRL key to select second object)</p>"""
 
     def IsActive(self):
         self._cacheSelectionInfo()
@@ -190,12 +190,12 @@ class makeLinearArray(makeExpressionArray):
 class makeMirrorArray(makeExpressionArray):
 
     iconFileName = 'Asm4_Mirror.svg'
-    menuText = 'Create mirrored'
+    menuText = 'Create mirror'
     arrayType = 'Mirror Array'
     namePrefix = 'Mirror_'
-    tooltip = """Create a mirror array<br>
-                 Select a source object and then a mirror plane or a normal to a plane<br>
-                 Supported axis objects are axis or plane from an origin, datum line, LCS axes, straight line segments, arcs and circles"""
+    tooltip = """<p>Create a mirror of a part. 
+                Supported axis objects are axis or plane from an origin, datum line, LCS axes, straight line segments, arcs and circles</p>
+                <p><b>Usage</b>: Select a source object and a mirror plane or a normal to a plane (hold CTRL key to select second object)</p>"""
 
     def IsActive(self):
         self._cacheSelectionInfo()

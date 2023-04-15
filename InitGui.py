@@ -101,15 +101,15 @@ class Assembly4Workbench(Workbench):
         FreeCAD.Console.PrintMessage(_atr("Asm4", "Initializing Assembly4 workbench")+ ' ('+Asm4_version+') .')
         FreeCADGui.updateGui()
         # import all stuff
-        # import newAssemblyCmd    # created an App::Part container called 'Assembly'
-        import newModelCmd         # creates a new App::Part container called 'Model'
+        import newAssemblyCmd    # created an App::Part container called 'Assembly'
+        # import newModelCmd         # creates a new App::Part container called 'Model'
         self.dot()
         import newDatumCmd         # creates a new LCS in 'Model'
         self.dot()
         import newPartCmd          # creates a new App::Part container called 'Model'
         self.dot()
-        import mirrorPartCmd       # creates a new App::Part container with the mirrored part of the selection
-        self.dot()
+        #import mirrorPartCmd       # creates a new App::Part container with the mirrored part of the selection
+        #self.dot()
         import infoPartCmd         # edits part information for BoM
         self.dot()
         import insertLinkCmd       # inserts an App::Link to a 'Model' in another file
@@ -202,7 +202,7 @@ class Assembly4Workbench(Workbench):
     +-----------------------------------------------+
     """
     def assemblyMenuItems(self):
-        commandList = [ "Asm4_newModel",
+        commandList = [ "Asm4_newAssembly",
                         "Asm4_newPart",
                         "Asm4_newBody",
                         "Asm4_newGroup",
@@ -224,7 +224,7 @@ class Assembly4Workbench(Workbench):
                         "Asm4_infoPart",
                         "Asm4_makeLocalBOM",
                         "Asm4_makeBOM",
-                        "Asm4_ExportList",
+                        "Asm4_listLinkedFiles",
                         "Asm4_Measure",
                         'Asm4_showLcs',
                         'Asm4_hideLcs',
@@ -245,7 +245,7 @@ class Assembly4Workbench(Workbench):
         return commandList
 
     def assemblyToolbarItems(self):
-        commandList = [ "Asm4_newModel",
+        commandList = [ "Asm4_newAssembly",
                         "Asm4_newPart",
                         "Asm4_newBody",
                         "Asm4_newGroup",
@@ -268,11 +268,8 @@ class Assembly4Workbench(Workbench):
                         "Asm4_expressionArray",
                         "Asm4_variantLink",
                         "Separator",
-                        'Asm4_showLcs',
-                        'Asm4_hideLcs',
-                        "Asm4_makeLocalBOM",
                         "Asm4_makeBOM",
-                        "Asm4_ExportList",
+                        "Asm4_listLinkedFiles",
                         "Asm4_Measure",
                         "Asm4_variablesCmd",
                         "Asm4_openConfigurations",

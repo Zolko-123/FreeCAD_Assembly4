@@ -8,19 +8,18 @@
 
 
 
-import math, re, os
+import os
 
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
-import Part
 
 import Asm4_libs as Asm4
 
 
 
 
-class makeAssembly:
+class newAssemblyCmd:
     """
     +-----------------------------------------------+
     |          creates the Assembly4 Model          |
@@ -38,8 +37,7 @@ def makeAssembly():
 
     """
     def GetResources(self):
-        tooltip  = "Create a new Assembly container\n"
-        tooltip += "Parts to be added must be open in this session"
+        tooltip  = "<p>Create a new Assembly container</p>"
         iconFile = os.path.join( Asm4.iconPath , 'Asm4_Model.svg')
         return {"MenuText": "New Assembly", "ToolTip": tooltip, "Pixmap" : iconFile }
 
@@ -54,10 +52,12 @@ def makeAssembly():
     # the real stuff
     def Activated(self):
         # check whether there is already Model in the document
-        assy = App.ActiveDocument.getObject('Assembly')
-        if assy:
+        # assy = App.ActiveDocument.getObject('Assembly')
+        assy = Asm4.getAssembly()
+        if assy is not None:
             if assy.TypeId=='App::Part':
-                Asm4.warningBox("This document already contains a valid Assembly, please use it")
+                message = "This document already contains a valid Assembly, please use it"
+                Asm4.warningBox(message)
                 # set the Type to Assembly
                 assy.Type = 'Assembly'
             else:
@@ -73,7 +73,6 @@ def makeAssembly():
         partsGroup = App.ActiveDocument.getObject('Parts')
         if partsGroup is None:
             partsGroup = App.ActiveDocument.addObject( 'App::DocumentObjectGroup', 'Parts' )
-
         # create a new App::Part called 'Assembly'
         assembly = App.ActiveDocument.addObject('App::Part','Assembly')
         # set the type as a "proof" that it's an Assembly
@@ -85,12 +84,14 @@ def makeAssembly():
         lcs0.Support = [(assembly.Origin.OriginFeatures[0],'')]
         lcs0.MapMode = 'ObjectXY'
         lcs0.MapReversed = False
-        # create an object Variables to hold variables to be used in this document
-        assembly.addObject(Asm4.createVariables())
         # create a group Constraints to store future solver constraints there
         assembly.newObject('App::DocumentObjectGroup','Constraints')
+        App.ActiveDocument.getObject('Constraints').Visibility = False
+        # create an object Variables to hold variables to be used in this document
+        assembly.addObject(Asm4.makeVarContainer())
         # create a group Configurations to store future solver constraints there
         assembly.newObject('App::DocumentObjectGroup','Configurations')
+        App.ActiveDocument.getObject('Configurations').Visibility = False
         
         # move existing parts and bodies at the document root to the Parts group
         # not nested inside other parts, to keep hierarchy
@@ -108,7 +109,7 @@ def makeAssembly():
 
 
 # add the command to the workbench
-Gui.addCommand( 'Asm4_makeAssembly', makeAssembly() )
+Gui.addCommand( 'Asm4_newAssembly', newAssemblyCmd() )
 
 
 

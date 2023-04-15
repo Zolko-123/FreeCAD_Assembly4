@@ -2,6 +2,14 @@
 
 ## Release notes
 
+* 2023.04.15 (**0.50.0**) :  
+Jumped version to 0.50 meaning we're half-way there  
+Switched back to the assembly being called "Assembly"  
+Removed dependency in exportFiles  
+Creating fasteners when a datum object is selected places the fastener onto that datum  
+Mirror part improvement  
+Clean-up of Assembly and Variables creation  
+
 * 2023.04.03 (**0.12.7**) :  
 Added PayPal Donate button  
 Added copyright notice  

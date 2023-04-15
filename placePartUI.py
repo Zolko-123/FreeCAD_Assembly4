@@ -62,6 +62,15 @@ class placePartUI():
         self.initUI()
         # now self.parentList and self.parentTable are available
 
+        # decode the old ExpressionEngine
+        # if the decode is unsuccessful, old_Expression is set to False
+        # and old_attPart and old_attLCS are set to 'None'
+        old_Parent = ''
+        old_parentPart = ''
+        old_parentLCS = ''
+        if  self.old_EE and self.old_Parent:
+            ( old_Parent, old_parentPart, old_parentLCS ) = self.splitExpression( self.old_EE, self.old_Parent )
+
         # find all the linked parts in the assembly
         for obj in self.activeDoc.findObjects("App::Link"):
             if self.rootAssembly.getObject(obj.Name) is not None and hasattr(obj.LinkedObject,'isDerivedFrom'):
@@ -73,15 +82,6 @@ class placePartUI():
                     objIcon = linkedObj.ViewObject.Icon
                     objText = Asm4.labelName(obj)
                     self.parentList.addItem( objIcon, objText, obj)
-
-        # decode the old ExpressionEngine
-        # if the decode is unsuccessful, old_Expression is set to False
-        # and old_attPart and old_attLCS are set to 'None'
-        old_Parent = ''
-        old_parentPart = ''
-        old_parentLCS = ''
-        if  self.old_EE and self.old_Parent:
-            ( old_Parent, old_parentPart, old_parentLCS ) = self.splitExpression( self.old_EE, self.old_Parent )
 
         # find the oldPart in the part list...
         parent_index = 1
@@ -183,7 +183,7 @@ class placePartUI():
         # check that all of them have something in
         if a_Link and a_LCS :
             # add Asm4 properties if necessary
-            Asm4.makeAsmProperties( self.selectedObj, reset=True )
+            Asm4.makeAsmProperties( self.selectedObj )
             # hide "offset" and "invert" properties to avoid confusion as they are not used in Asm4
             if hasattr( self.selectedObj, 'offset' ):
                 self.selectedObj.setPropertyStatus('offset', 'Hidden')
@@ -192,12 +192,12 @@ class placePartUI():
 
             # <<LinkName>>.Placement.multiply( <<LinkName>>.<<LCS.>>.Placement )
             # expr = '<<'+ a_Part +'>>.Placement.multiply( <<'+ a_Part +'>>.<<'+ a_LCS +'.>>.Placement )'
-            
+
             Asm4.placeObjectToLCS(self.selectedObj, a_Link, a_Part, a_LCS)
-            
             # highlight the selected fastener in its new position
             Gui.Selection.clearSelection()
             Gui.Selection.addSelection( self.activeDoc.Name, self.rootAssembly.Name, self.selectedObj.Name +'.')
+            self.selectedObj.recompute()
         else:
             FCC.PrintWarning("Problem in selections\n")
         return
@@ -405,6 +405,7 @@ class placePartUI():
         self.XtranslSpinBox.valueChanged.connect(self.movePart)
         self.YtranslSpinBox.valueChanged.connect(self.movePart)
         self.ZtranslSpinBox.valueChanged.connect(self.movePart)
+        self.attLCSlist.itemClicked.connect( self.onApply )
 
 
 
@@ -489,8 +490,8 @@ class placePartUI():
         # Actions
         self.parentList.currentIndexChanged.connect( self.onParentList )
         self.parentList.activated.connect( self.onParentList )
-        ##self.attLCSlist.itemClicked.connect( self.onDatumClicked )
-        self.attLCSlist.itemClicked.connect( self.onApply )
+        #self.attLCSlist.itemClicked.connect( self.onDatumClicked )
+        #self.attLCSlist.itemClicked.connect( self.onApply )
         self.RotXButton.clicked.connect( self.onRotX )
         self.RotYButton.clicked.connect( self.onRotY )
         self.RotZButton.clicked.connect( self.onRotZ)

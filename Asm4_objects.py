@@ -352,7 +352,6 @@ class ViewProviderArray(object):
     +-----------------------------------------------+
     |          a circular link array class          |
     +-----------------------------------------------+
-"""
 class CircularArray(LinkArray):
 
     def onDocumentRestored(self, obj):
@@ -415,6 +414,7 @@ class CircularArray(LinkArray):
             obj.PlacementList = plaList
             obj.setPropertyStatus('PlacementList', 'Immutable')
         return False     # to call LinkExtension::execute()   <= is this rally needed ?
+"""
 
 
 """
@@ -595,7 +595,7 @@ def findAxisPlacement(axisObj, subnameList):
         return axisObj.Placement * App.Rotation(Asm4.VEC_T, 120)
     if axisObj.TypeId == 'App::Plane' and hasattr(axisObj,'Role'):
         return axisObj.Placement
-    if axisObj.TypeId == 'PartDesign::CoordinateSystem':
+    if axisObj.TypeId in ('PartDesign::CoordinateSystem', 'PartDesign::Plane'):
         return axisObj.Placement        
     # Arbitary object as axis is rejected for now
     return None

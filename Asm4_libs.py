@@ -42,6 +42,17 @@ partInfo =[     'PartID',                       \
 containerTypes = [  'App::Part', 'PartDesign::Body' ]
 
 
+VEC_0 = App.Vector(0, 0, 0)
+VEC_X = App.Vector(1, 0, 0)
+VEC_Y = App.Vector(0, 1, 0)
+VEC_Z = App.Vector(0, 0, 1)
+VEC_T = App.Vector(1, 1, 1)
+
+
+rotX = App.Placement( VEC_0, App.Rotation( VEC_X, 90) )
+rotY = App.Placement( VEC_0, App.Rotation( VEC_Y, 90) )
+rotZ = App.Placement( VEC_0, App.Rotation( VEC_Z, 90) )
+
 
 
 def findObjectLink(obj, doc = App.ActiveDocument):
@@ -93,10 +104,10 @@ def cloneObject(obj):
 
 def placeObjectToLCS( attObj, attLink, attDoc, attLCS ):
     expr = makeExpressionDatum( attLink, attDoc, attLCS )
+    # FCC.PrintMessage('expression = '+expr)
     # indicate the this fastener has been placed with the Assembly4 workbench
-    if not hasattr(attObj,'AssemblyType'):
-        Asm4.makeAsmProperties(attObj)
-    attObj.AssemblyType = 'Part::Link'
+    if not hasattr(attObj,'SolverId'):
+        makeAsmProperties(attObj)
     # the fastener is attached by its Origin, no extra LCS
     attObj.AttachedBy = 'Origin'
     # store the part where we're attached to in the constraints object
@@ -123,14 +134,20 @@ def placeObjectToLCS( attObj, attLink, attDoc, attLCS ):
 """
 def makeAsmProperties( obj, reset=False ):
     # property AssemblyType
+    # DEPRECATED
+    '''
     if not hasattr(obj,'AssemblyType'):
         obj.addProperty( 'App::PropertyString', 'AssemblyType', 'Assembly' )
+    obj.setPropertyStatus('AssemblyType','ReadOnly')
+    '''
     # property AttachedBy
     if not hasattr(obj,'AttachedBy'):
         obj.addProperty( 'App::PropertyString', 'AttachedBy', 'Assembly' )
+    obj.setPropertyStatus('AttachedBy'  ,'ReadOnly')
     # property AttachedTo
     if not hasattr(obj,'AttachedTo'):
         obj.addProperty( 'App::PropertyString', 'AttachedTo', 'Assembly' )
+    obj.setPropertyStatus('AttachedTo'  ,'ReadOnly')
     # property AttachmentOffset
     if not hasattr(obj,'AttachmentOffset'):
         obj.addProperty( 'App::PropertyPlacement', 'AttachmentOffset', 'Assembly' )
@@ -138,25 +155,44 @@ def makeAsmProperties( obj, reset=False ):
     if not hasattr(obj,'SolverId'):
         obj.addProperty( 'App::PropertyString', 'SolverId', 'Assembly' )
     if reset:
-        obj.AssemblyType = ''
-        #obj.AttachedBy = ''
-        #obj.AttachedTo = ''
-        #obj.AttachmentOffset = App.Placement()
+        obj.AttachedBy = ''
+        obj.AttachedTo = ''
+        obj.AttachmentOffset = App.Placement()
         obj.SolverId = ''
     return
 
 
+def hasVarContainer():
+    retval = False
+    # check whether there already is a Variables object
+    variables = App.ActiveDocument.getObject('Variables')
+    if variables and variables.TypeId=='App::FeaturePython':
+            # signature of a PropertyContainer
+            if hasattr(variables,'Type') :
+                if variables.Type == 'App::PropertyContainer':
+                    retval = variables
+    
+
+
 # the Variables container
-def createVariables():
+def makeVarContainer():
     retval = None
     # check whether there already is a Variables object
     variables = App.ActiveDocument.getObject('Variables')
-    if variables:
-        # signature or a PropertyContainer
-        if not hasattr(variables,'Type'):
-            variables.addProperty('App::PropertyString', 'Type')
-            variables.Type = 'App::PropertyContainer'            
-        retval = variables
+    if variables :
+        if variables.TypeId=='App::FeaturePython':
+            # signature of a PropertyContainer
+            if hasattr(variables,'Type') :
+                if variables.Type == 'App::PropertyContainer':
+                    retval = variables
+            # for compatibility
+            else: 
+                variables.addProperty('App::PropertyString', 'Type')
+                variables.Type = 'App::PropertyContainer'            
+                retval = variables
+        else:
+            FCC.PrintWarning('This Part contains an incompatible \"Variables\" object, ')
+            FCC.PrintWarning('this could lead to unexpected results\n')
     # there is none, so we create it
     else:
         variables = App.ActiveDocument.addObject('App::FeaturePython','Variables')
@@ -206,12 +242,38 @@ def checkWorkbench( workbench ):
             hasWB = True
     return hasWB
 
-# DEPRECATED since Asm4 v0.12, reverted back to naming this Model again
+# since Asm4 v0.20 an assembly is called "Assembly" again
 def getAssembly():
-    return checkModel()
+    # return checkModel()
+    retval = None
+    if App.ActiveDocument:
+        # the current (as per v0.90) assembly container
+        assy = App.ActiveDocument.getObject('Assembly')
+        if assy and assy.TypeId == 'App::Part'  \
+                and assy.Type   == 'Assembly'   \
+                and assy.getParentGeoFeatureGroup() is None:
+            retval = assy
+        else:
+            # former Asm4 Model compatibility check:
+            model = App.ActiveDocument.getObject('Model')
+            if model and model.TypeId == 'App::Part'  \
+                    and model.Type    == 'Assembly'   \
+                    and model.getParentGeoFeatureGroup() is None:
+                retval = model
+            else:
+                # last chance, very old Asm4 Model
+                if model and model.TypeId=='App::Part'  \
+                        and model.getParentGeoFeatureGroup() is None:
+                    FCC.PrintMessage("Deprecated Asm4 Model detected, this could lead to uncompatibilities\n")
+                    retval = model
+    return retval
+
 
 # checks and returns whether there is an Asm4 Assembly Model in the active document
+# DEPRECATED : it's called Assembly again
 def checkModel():
+    return getAssembly()
+    '''
     retval = None
     if App.ActiveDocument:
         model = App.ActiveDocument.getObject('Model')
@@ -233,6 +295,7 @@ def checkModel():
                             and model.getParentGeoFeatureGroup() is None:
                     retval = model
     return retval
+    '''
 
 
 # returns the selected object and its selection hierarchy
@@ -302,6 +365,7 @@ def getPartsGroup():
         retval = partsGroup
     return retval
 
+
 # Get almost all Objects within the passed Selection.
 # A Selection is one or more marked Object(s) anywhere
 # in the opened Document. The idea is to get a similar
@@ -309,10 +373,9 @@ def getPartsGroup():
 # The Window that pops up and shows are affected Objects, calls it
 # The Dependencies
 # Objects within Compounds and Bodys and also Linked Objects are left out.
-
-# Note: Theoretically we could use the App.ActiveDocument.DependencyGraph function,
+# 
+# NOTE: Theoretically we could use the App.ActiveDocument.DependencyGraph function,
 # to get really every Object behind a selection.
-
 def getDependenciesList( CompleteSelection ):
     deDendenciesList = [ ]
     for Selection in CompleteSelection:
@@ -443,9 +506,8 @@ def isPart(obj):
 def isAppLink(obj):
     if not obj:
         return False
-    if hasattr(obj, 'TypeId'):
-        if obj.TypeId == 'App::Link':
-            return True
+    if hasattr(obj, 'TypeId') and obj.TypeId == 'App::Link':
+        return True
     return False
 
 
@@ -458,6 +520,7 @@ def isLinkToPart(obj):
     return False
 
 
+'''
 def isPartLinkAssembly(obj):
     if not obj:
         return False
@@ -465,6 +528,7 @@ def isPartLinkAssembly(obj):
         if obj.AssemblyType == 'Part::Link' or obj.AssemblyType == '' :
             return True
     return False
+'''
 
 
 def isAsm4EE(obj):
@@ -475,6 +539,7 @@ def isAsm4EE(obj):
         if obj.SolverId=='Asm4EE' or obj.SolverId=='Placement::ExpressionEngine' or obj.SolverId=='' :
             return True
     # legacy check
+    # DEPRECATED, to be removed
     elif hasattr(obj,'AssemblyType') :
         if obj.AssemblyType == 'Asm4EE' or obj.AssemblyType == '' :
             FCC.PrintMessage('Found legacy AssemblyType property, adding new empty SolverId property\n')
@@ -484,14 +549,17 @@ def isAsm4EE(obj):
     return False
 
 
-def isAsm4Model(obj):
+def isAssembly(obj):
     if not obj:
         return False
-    # we only check for Asm4 Model
-    if obj.TypeId=='App::Part' and obj.Name=='Model':
+    if obj.TypeId=='App::Part' and obj.Name=='Assembly':
         if hasattr(obj,'Type') and obj.Type=='Assembly':
             return True
     return False
+
+
+def isAsm4Model(obj):
+    return isAssembly(obj)
 
 
 """
@@ -550,30 +618,6 @@ class dropDownCmd:
 
 
 
-"""
-    +-----------------------------------------------+
-    |         vector constants                      |
-    +-----------------------------------------------+
-"""
-VEC_0 = App.Vector(0, 0, 0)
-VEC_X = App.Vector(1, 0, 0)
-VEC_Y = App.Vector(0, 1, 0)
-VEC_Z = App.Vector(0, 0, 1)
-VEC_T = App.Vector(1, 1, 1)
-
-
-
-"""
-    +-----------------------------------------------+
-    |         the 3 base rotation Placements        |
-    +-----------------------------------------------+
-"""
-rotX = App.Placement( VEC_0, App.Rotation( VEC_X, 90) )
-rotY = App.Placement( VEC_0, App.Rotation( VEC_Y, 90) )
-rotZ = App.Placement( VEC_0, App.Rotation( VEC_Z, 90) )
-
-
-
 
 """
     +-----------------------------------------------+
@@ -625,13 +669,13 @@ def makeExpressionPart( attLink, attDoc, attLCS, linkedDoc, linkLCS ):
 
 def makeExpressionDatum( attLink, attPart, attLCS ):
     # check that everything is defined
-    if attLink and attLCS:
+    if attLCS:
         # expr = Link.Placement * LinkedPart#LCS.Placement
         expr = attLCS +'.Placement * AttachmentOffset'
-        if attPart:
+        if attLink and attPart:
             expr = attLink+'.Placement * '+attPart+'#'+expr
     else:
-        expr = False
+        expr = None
     return expr
 
 
@@ -667,11 +711,9 @@ def getSelectedContainer():
             retval = selObj
     return retval
 
+
 # returns the selected App::Link
 def getSelectedLink():
-    # check that there is an App::Part called 'Model'
-    #if App.ActiveDocument.getObject('Model') and App.ActiveDocument.Model.TypeId == 'App::Part':
-    #if checkModel():
     retval = None
     selection = Gui.Selection.getSelection()
     if len(selection)==1:
@@ -680,6 +722,7 @@ def getSelectedLink():
         if selObj.isDerivedFrom('App::Link') and selObj.LinkedObject is not None and selObj.LinkedObject.TypeId in containerTypes:
             retval = selObj
     return retval
+
 
 # returns the selected Asm4 variant link
 def getSelectedVarLink():
@@ -692,6 +735,7 @@ def getSelectedVarLink():
             if hasattr(selObj,'Type') and selObj.Type=='Asm4::VariantLink':
                 retval = selObj
     return retval
+
 
 def getSelectedDatum():
     selectedObj = None

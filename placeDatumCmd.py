@@ -53,22 +53,10 @@ class placeDatumCmd():
     def Activated(self):
         selectedDatum = Asm4.getSelectedDatum()
         # check if the datum object is already mapped to something
-        if selectedDatum.MapMode == 'Deactivated' and Asm4.checkModel():
+        if selectedDatum.MapMode == 'Deactivated' and Asm4.getAssembly():
             Gui.Control.showDialog( placeDatumUI() )
         else:
             Gui.runCommand('Part_EditAttachment')
-            '''
-            message = 'This datum object \"'+selectedDatum.Label+'\" is mapped to some geometry. Attaching-it with Assembly4 will loose this mapping.'
-            if Asm4.confirmBox(message):
-                # unset MappingMode
-                selectedDatum.Support = None
-                selectedDatum.MapMode = 'Deactivated'
-                Gui.Control.showDialog( placeDatumUI() )
-            else:
-                # don't do anything and ...
-                return
-            '''
-
 
 
 """
@@ -236,13 +224,6 @@ class placeDatumUI():
 
         # check that all of them have something in
         # constrName has been checked at the beginning
-        '''
-        if not a_Part :
-            FCC.PrintWarning("Problem in selections (no a_Part)\n")
-        elif not a_LCS :
-            FCC.PrintWarning("Problem in selections (no a_LCS)\n")
-        else:
-        '''
         retval = False
         if a_Part and a_LCS:
             # don't forget the last '.' !!!

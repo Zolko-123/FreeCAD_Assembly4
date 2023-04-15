@@ -106,7 +106,6 @@ class placeLinkUI():
         self.selectedObj.ViewObject.LineWidth = LineWidth
         self.selectedObj.ViewObject.ShapeMaterial.DiffuseColor = DiffuseColor
         self.selectedObj.ViewObject.ShapeMaterial.Transparency = Transparency
-        
 
         # get the old values
         self.old_EE     = ''
@@ -135,19 +134,6 @@ class placeLinkUI():
         self.initUI()
         # now self.parentList and self.parentTable are available
 
-        # find all the linked parts in the assembly
-        for obj in self.activeDoc.findObjects("App::Link"):
-            if self.rootAssembly.getObject(obj.Name) is not None and hasattr(obj.LinkedObject,'isDerivedFrom'):
-                linkedObj = obj.LinkedObject
-                if linkedObj.isDerivedFrom('App::Part') or linkedObj.isDerivedFrom('PartDesign::Body'):
-                # ... except if it's the selected link itself
-                    if obj != self.selectedObj:
-                        self.parentTable.append( obj )
-                        # add to the drop-down combo box with the assembly tree's parts
-                        objIcon = linkedObj.ViewObject.Icon
-                        objText = Asm4.labelName(obj)
-                        self.parentList.addItem( objIcon, objText, obj)
-
         # find all the LCS in the selected link
         self.partLCStable = Asm4.getPartLCS( self.selectedObj.LinkedObject )
         # build the list
@@ -175,31 +161,45 @@ class placeLinkUI():
                 if firstLCSItem is not None:
                     self.partLCSlist.setCurrentItem(firstLCSItem)
 
+        # find all the linked parts in the assembly
+        for obj in self.activeDoc.findObjects("App::Link"):
+            if self.rootAssembly.getObject(obj.Name) is not None and hasattr(obj.LinkedObject,'isDerivedFrom'):
+                linkedObj = obj.LinkedObject
+                if linkedObj.isDerivedFrom('App::Part') or linkedObj.isDerivedFrom('PartDesign::Body'):
+                # ... except if it's the selected link itself
+                    if obj != self.selectedObj:
+                        self.parentTable.append( obj )
+                        # add to the drop-down combo box with the assembly tree's parts
+                        objIcon = linkedObj.ViewObject.Icon
+                        objText = Asm4.labelName(obj)
+                        self.parentList.addItem( objIcon, objText, obj)
+
         # find the oldPart in the part list...
+        parent_index = 1
         if old_Parent == 'Parent Assembly':
             parent_found = True
-            parent_index = 1
         else:
             parent_found = False
-            parent_index = 1
             for item in self.parentTable[1:]:
                 if item.Name == old_Parent:
                     parent_found = True
                     break
                 else:
-                    parent_index = parent_index +1
+                    parent_index += 1
         if not parent_found:
             parent_index = 0
         self.parentList.setCurrentIndex( parent_index )
-        # this should have triggered self.getPartLCS() to fill the LCS list
+        # this should have triggered Asm4.getPartLCS() to fill the LCS list
 
         # find the old attachment Datum in the list of the Datums in the linked part...
         lcs_found = self.attLCSlist.findItems( old_attLCS, QtCore.Qt.MatchExactly )
+        # may-be it was renamed, see if we can find it as (name)
         if not lcs_found:
             lcs_found = self.attLCSlist.findItems( '('+old_attLCS+')', QtCore.Qt.MatchEndsWith )
         if lcs_found:
             # ... and select it
             self.attLCSlist.setCurrentItem( lcs_found[0] )
+
         # selection observer to detect selection of LCS in the 3D window and tree
         Gui.Selection.addObserver(self, 0)
 

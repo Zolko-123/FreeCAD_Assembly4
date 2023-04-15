@@ -14,7 +14,7 @@ import FreeCAD as App
 from FreeCAD import Console as FCC
 
 import Asm4_libs as Asm4
-import InfoKeys
+import infoKeys
 
 ConfUserDir = os.path.join(App.getUserAppDataDir(),'Templates')
 ConfUserFilename = "Asm4_infoPartConf.json"
@@ -27,9 +27,9 @@ try:
     file.close()
 except:
     partInfoDef = dict()
-    for prop in InfoKeys.partInfo:
+    for prop in infoKeys.partInfo:
         partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': True})
-    for prop in InfoKeys.partInfo_Invisible:
+    for prop in infoKeys.partInfo_Invisible:
         partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': False})
     try:
         os.mkdir(ConfUserDir)
@@ -92,10 +92,8 @@ class infoPartUI():
         iconFile = os.path.join(Asm4.iconPath, 'Asm4_PartInfo.svg')
         self.form.setWindowIcon(QtGui.QIcon(iconFile))
         self.form.setWindowTitle("Edit Part Information")
-
         # has been checked before
         self.part = Asm4.getSelectedContainer()
-
         # Check and load if the configuration file exists
         try:
             file = open(ConfUserFilejson, 'r')
@@ -103,11 +101,10 @@ class infoPartUI():
             file.close()
         except:
             self.infoKeysUser = dict()
-            for prop in InfoKeys.partInfo:
+            for prop in infoKeys.partInfo:
                 self.infoKeysUser.setdefault(prop, {'userData': prop, 'active': True, 'visible': True})
-            for prop in InfoKeys.partInfo_Invisible:
+            for prop in infoKeys.partInfo_Invisible:
                 self.infoKeysUser.setdefault(prop, {'userData': prop, 'active': True, 'visible': False})
-            
         '''
             try:
                 os.mkdir(ConfUserDir)
@@ -122,11 +119,11 @@ class infoPartUI():
         self.infoKeysUser = json.load(file).copy()
         file.close()
         '''
-
         self.makePartInfo(self, self.part)
         self.infoTable = []
         self.getPartInfo()
         self.drawUI()
+
 
     def getPartInfo(self):
         self.infoTable.clear()
@@ -138,6 +135,7 @@ class infoPartUI():
                             if self.infoKeysUser.get(propuser).get('active') and self.infoKeysUser.get(propuser).get('visible'):
                                 value = self.part.getPropertyByName(prop)
                                 self.infoTable.append([prop, value])
+
 
     # Add the default part information
     def makePartInfo(self, object, reset=False):
@@ -153,6 +151,7 @@ class infoPartUI():
                             object.addProperty('App::PropertyString', self.infoKeysUser.get(propuser).get('userData'), 'PartInfo')
         return
 
+
     def addNew(self):
         for i, prop in enumerate(self.infoTable):
             if self.part.getGroupOfProperty(prop[0]) == 'PartInfo':
@@ -163,9 +162,11 @@ class infoPartUI():
                                 text = self.infos[i].text()
                                 setattr(self.part, prop[0], str(text))
 
+
     def editKeys(self):
         Gui.Control.closeDialog()
         Gui.Control.showDialog(infoPartConfUI())
+
 
     # Reset the list of properties
     def reInit(self):
@@ -179,9 +180,9 @@ class infoPartUI():
 
         # Recover initial json file since fateners keys are being lost
         partInfoDef = dict()
-        for prop in InfoKeys.partInfo:
+        for prop in infoKeys.partInfo:
             partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': True})
-        for prop in InfoKeys.partInfo_Invisible:
+        for prop in infoKeys.partInfo_Invisible:
             partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': False})
         try:
             os.mkdir(ConfUserDir)
@@ -191,14 +192,132 @@ class infoPartUI():
         json.dump(partInfoDef, file)
         file.close()
 
+        '''
         mb = QtGui.QMessageBox()
         mb.setWindowTitle("Clear fileds")
         mb.setText("The Part Info field\nhas been cleared")
         mb.exec_()
+        '''
+        Asm4.warningBox("The Part Info field has been cleared")
         self.finish()
 
+
     def infoDefault(self):
-        InfoKeys.infoDefault(self)
+        # infoKeys.infoDefault(self)
+        file = open(ConfUserFilejson, 'r')
+        infoKeysUser = json.load(file).copy()
+        file.close()
+        try:
+            self.TypeId
+            part = self
+        except AttributeError:
+            part = self.part
+        doc = part.Document
+        for i in range(len(part.Group)):
+            if part.Group[i].TypeId == 'PartDesign::Body':
+                body = part.Group[i]
+                for i in range(len(body.Group)):
+                    if body.Group[i].TypeId == 'PartDesign::Pad':
+                        pad = body.Group[i]
+                        try:
+                            sketch = pad.Profile[0]
+                        except NameError :
+                            # print('There is no Sketch on a Pad of the Part', part.FullName)
+                            pass
+            try:
+                self.LabelDoc(self, part, doc)
+            except NameError:
+                # print('LabelDoc: there is no Document on the Part ', part.FullName)
+                pass
+            try:
+                self.LabelPart(self, part)
+            except NameError:
+                # print('LabelPart: Part does not exist')
+                pass
+            try:
+                self.PadLength(self, part, pad)
+            except NameError:
+                # print('PadLenght: there is no Pad in the Part ', part.FullName)
+                pass
+            try:
+                self.ShapeLength(self, part, sketch)
+            except NameError:
+                # print('ShapeLength: there is no Sketch in the Part ', part.FullName)
+                pass
+            try:
+                self.ShapeVolume(self, part, body)
+            except NameError:
+                # print('ShapeVolume: there is no Shape in the Part ', part.FullName)
+                pass
+
+
+    def LabelPart(self, part):
+        auto_info_field = infoKeysUser.get('Part_Label').get('userData')
+        auto_info_fill = part.Label
+        try:
+            self.TypeId
+            setattr(part, auto_info_field, auto_info_fill)
+        except AttributeError:
+            try:
+                for i in range(len(self.infoTable)):
+                    if self.infoTable[i][0] == auto_info_field:
+                        self.infos[i].setText(auto_info_fill)
+            except AttributeError:
+                self.infos[i].setText("-")
+
+
+    def PadLength(self, part, pad):
+        auto_info_field = infoKeysUser.get('Pad_Length').get('userData')
+        try:
+            auto_info_fill = str(pad.Length).replace('mm','')
+        except AttributeError:
+            return
+        try:
+            self.TypeId
+            setattr(part, auto_info_field, auto_info_fill)
+        except AttributeError:
+            try:
+                for i in range(len(self.infoTable)):
+                    if self.infoTable[i][0] == auto_info_field:
+                        self.infos[i].setText(auto_info_fill)
+            except AttributeError:
+                self.infos[i].setText("-")
+
+
+    def ShapeLength(self, part, sketch):
+        auto_info_field = infoKeysUser.get('Shape_Length').get('userData')
+        try:
+            auto_info_fill = str(sketch.Shape.Length)
+        except AttributeError:
+            return
+        try:
+            self.TypeId
+            setattr(part, auto_info_field, auto_info_fill)
+        except AttributeError:
+            try:
+                for i in range(len(self.infoTable)):
+                    if self.infoTable[i][0] == auto_info_field:
+                        self.infos[i].setText(auto_info_fill)
+            except AttributeError:
+                self.infos[i].setText("-")
+
+
+    def ShapeVolume(self, part, body):
+        auto_info_field = infoKeysUser.get('Shape_Volume').get('userData')
+        bbc = body.Shape.BoundBox
+        auto_info_fill = str(str(round(bbc.ZLength, 3)) + str(' mm x ') + str(round(bbc.YLength, 3)) + str(' mm x ') + str(round(bbc.XLength, 3)) + str(' mm'))
+        try:
+            self.TypeId
+            setattr(part, auto_info_field, auto_info_fill)
+        except AttributeError:
+            try:
+                for i in range(len(self.infoTable)):
+                    if self.infoTable[i][0] == auto_info_field:
+                        self.infos[i].setText(auto_info_fill)
+            except AttributeError:
+                self.infos[i].setText("-")
+
+
 
     def finish(self):
         Gui.Control.closeDialog()
@@ -273,8 +392,8 @@ class infoPartConfUI():
         self.form.setWindowIcon(QtGui.QIcon(iconFile))
         self.form.setWindowTitle("Edit Part Information")
 
-        self.infoKeysDefault = InfoKeys.partInfo.copy()
-        self.infoToolTip = InfoKeys.infoToolTip.copy()
+        self.infoKeysDefault = infoKeys.partInfo.copy()
+        self.infoToolTip = infoKeys.infoToolTip.copy()
         file = open(ConfUserFilejson, 'r')
         self.infoKeysUser = json.load(file).copy()
         file.close()
@@ -298,19 +417,21 @@ class infoPartConfUI():
         for prop in self.confTemplate:
             if self.confTemplate.get(prop).get('visible'):
                 if self.infos[i].text() == '':
+                    '''
                     mb = QtGui.QMessageBox()
                     mb.setWindowTitle("BOM Configuration")
                     mb.setText("Fields Name cannot be blank\nYou must disable or delete it")
                     mb.exec_()
+                    '''
+                    Asm4.warningBox("Fields Name cannot be blank. You must disable or delete it")
                     return
                 i += 1
 
-
         # Restore file and appen new config
         partInfoDef = dict()
-        for prop in InfoKeys.partInfo:
+        for prop in infoKeys.partInfo:
             partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': True})
-        for prop in InfoKeys.partInfo_Invisible:
+        for prop in infoKeys.partInfo_Invisible:
             partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': False})
 
         i = 0
@@ -329,10 +450,12 @@ class infoPartConfUI():
         self.infoKeysUser = json.load(file).copy()
         file.close()
 
+        '''
         mb = QtGui.QMessageBox()
         mb.setWindowTitle("BOM Configuration")
         mb.setText("The configuration\nhas been saved")
         mb.exec_()
+        '''
 
         self.finish()
 
