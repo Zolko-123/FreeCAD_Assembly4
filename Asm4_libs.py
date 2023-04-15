@@ -668,7 +668,6 @@ def makeExpressionPart( attLink, attDoc, attLCS, linkedDoc, linkLCS ):
 
 
 def makeExpressionDatum( attLink, attPart, attLCS ):
-    FCC.PrintMessage('*'+attLink+'*'+attPart+'*'+attLCS+'*')
     # check that everything is defined
     if attLCS:
         # expr = Link.Placement * LinkedPart#LCS.Placement

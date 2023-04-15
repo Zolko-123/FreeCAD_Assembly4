@@ -108,8 +108,8 @@ class Assembly4Workbench(Workbench):
         self.dot()
         import newPartCmd          # creates a new App::Part container called 'Model'
         self.dot()
-        import mirrorPartCmd       # creates a new App::Part container with the mirrored part of the selection
-        self.dot()
+        #import mirrorPartCmd       # creates a new App::Part container with the mirrored part of the selection
+        #self.dot()
         import infoPartCmd         # edits part information for BoM
         self.dot()
         import insertLinkCmd       # inserts an App::Link to a 'Model' in another file
