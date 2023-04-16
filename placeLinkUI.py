@@ -80,7 +80,7 @@ class placeLinkUI():
         iconFile = os.path.join( Asm4.iconPath , 'Place_Link.svg')
         self.form.setWindowIcon(QtGui.QIcon( iconFile ))
         self.form.setWindowTitle('Place linked Part')
-        self.drawUI(self.form)
+        self.drawUI()
 
         #save original AttachmentOffset of linked part
         self.old_LinkAttachmentOffset = self.selectedObj.AttachmentOffset
@@ -678,19 +678,19 @@ class placeLinkUI():
 
 
     # defines the UI, only static elements
-    def drawUI(self,Form):
+    def drawUI(self):
         # the layout for the main window is vertical (top to down)
-        self.mainLayout = QtGui.QVBoxLayout(Form)
+        self.mainLayout = QtGui.QVBoxLayout()
         
         # Define the fields for the form ( label + widget )
-        self.formLayout = QtGui.QFormLayout(Form)
+        self.formLayout = QtGui.QFormLayout()
         # Selected Link (the name as seen in the tree of the selected link)
-        self.linkName = QtGui.QLineEdit(Form)
+        self.linkName = QtGui.QLineEdit()
         self.linkName.setReadOnly(True)
         self.formLayout.addRow(QtGui.QLabel('Selected Link :'),self.linkName)
 
         # combobox showing all available App::Link
-        self.parentList = QtGui.QComboBox(Form)
+        self.parentList = QtGui.QComboBox()
         self.parentList.setMaximumWidth(300)
         self.parentList.setToolTip('Choose the part in which the attachment\ncoordinate system is to be found')
         # the parent assembly is hardcoded, and made the first real element
@@ -698,14 +698,14 @@ class placeLinkUI():
         self.mainLayout.addLayout(self.formLayout)
 
         # with 2 columns
-        self.columnsLayout = QtGui.QHBoxLayout(Form)
-        self.leftLayout = QtGui.QVBoxLayout(Form)
-        self.rightLayout = QtGui.QVBoxLayout(Form)
+        self.columnsLayout = QtGui.QHBoxLayout()
+        self.leftLayout = QtGui.QVBoxLayout()
+        self.rightLayout = QtGui.QVBoxLayout()
         # Part, left side
         #
         # the document containing the linked part
         self.leftLayout.addWidget(QtGui.QLabel("Linked Part :"))
-        self.linkedDoc = QtGui.QLineEdit(Form)
+        self.linkedDoc = QtGui.QLineEdit()
         self.linkedDoc.setReadOnly(True)
         self.leftLayout.addWidget(self.linkedDoc)
 
@@ -720,7 +720,7 @@ class placeLinkUI():
         #
         # the document containing the linked object
         self.rightLayout.addWidget(QtGui.QLabel("Parent Part :"))
-        self.parentDoc = QtGui.QLineEdit(Form)
+        self.parentDoc = QtGui.QLineEdit()
         self.parentDoc.setReadOnly(True)
         self.rightLayout.addWidget(self.parentDoc)
         # The list of all attachment LCS in the assembly is a QListWidget
@@ -740,12 +740,11 @@ class placeLinkUI():
         numberOfDecimals = App.ParamGet("User parameter:BaseApp/Preferences/Units").GetInt('Decimals')
 
         # X Translation Value
-        self.XoffsetLayout = QtGui.QHBoxLayout(Form)
+        self.XoffsetLayout = QtGui.QHBoxLayout()
         self.XtranslSpinBoxLabel = self.XoffsetLayout.addWidget(QtGui.QLabel("X Translation :"))
-        self.XtranslSpinBox = Asm4.QUnitSpinBox(Form)
+        self.XtranslSpinBox = Asm4.QUnitSpinBox()
         self.XtranslSpinBox.setRange(-999999.00, 999999.00)
         self.XtranslSpinBox.setDecimals(numberOfDecimals)
-        #self.XtranslSpinBox.setValue(self.Xtranslation)
         self.XtranslSpinBox.setToolTip("Translation along X axis")
         self.RotXButton = QtGui.QPushButton('Rotate X +90°')
         self.RotXButton.setToolTip("Rotate 90 deg around X axis")
@@ -756,12 +755,11 @@ class placeLinkUI():
         self.mainLayout.addLayout(self.XoffsetLayout)
 
         # Y Translation Value
-        self.YoffsetLayout = QtGui.QHBoxLayout(Form)
+        self.YoffsetLayout = QtGui.QHBoxLayout()
         self.YtranslSpinBoxLabel = self.YoffsetLayout.addWidget(QtGui.QLabel("Y Translation :"))
-        self.YtranslSpinBox = Asm4.QUnitSpinBox(Form)
+        self.YtranslSpinBox = Asm4.QUnitSpinBox()
         self.YtranslSpinBox.setRange(-999999.00, 999999.00)
         self.YtranslSpinBox.setDecimals(numberOfDecimals)
-        #self.YtranslSpinBox.setValue(self.Ytranslation)
         self.YtranslSpinBox.setToolTip("Translation along Y")
         self.RotYButton = QtGui.QPushButton('Rotate Y +90°')
         self.RotYButton.setToolTip("Rotate 90 deg around Y axis")
@@ -772,12 +770,11 @@ class placeLinkUI():
         self.mainLayout.addLayout(self.YoffsetLayout)
 
         # Z Translation Value
-        self.ZoffsetLayout = QtGui.QHBoxLayout(Form)
+        self.ZoffsetLayout = QtGui.QHBoxLayout()
         self.ZtranslSpinBoxLabel = self.ZoffsetLayout.addWidget(QtGui.QLabel("Z Translation :"))
-        self.ZtranslSpinBox = Asm4.QUnitSpinBox(Form)
+        self.ZtranslSpinBox = Asm4.QUnitSpinBox()
         self.ZtranslSpinBox.setRange(-999999.00, 999999.00)
         self.ZtranslSpinBox.setDecimals(numberOfDecimals)
-        #self.ZtranslSpinBox.setValue(self.Ztranslation)
         self.ZtranslSpinBox.setToolTip("Translation along Z:")
         self.RotZButton = QtGui.QPushButton('Rotate Z +90°')
         self.RotZButton.setToolTip("Rotate 90 deg around Z axis")
