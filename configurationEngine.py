@@ -91,13 +91,13 @@ class applyConfigurationCmd:
         return False
 
     def Activated(self):
-        config = Gui.Selection.getSelection()[0]        
+        config = Gui.Selection.getSelection()[0]
         restoreConfiguration(config.Name)
         Gui.Selection.clearSelection()
         Gui.Selection.addSelection( Asm4.getAssembly() )
-        
-        
-        
+
+
+
 """
     +-----------------------------------------------+
     |         General configuration Task UI         |
@@ -146,7 +146,7 @@ class openConfigurationsUI():
         if len(self.configList.selectedItems()) == 1:
             self.Restore()
         Gui.Control.closeDialog()
-        
+
     # Apply without closing, so user can cycle through configurations
     def clicked(self, button):
         if button == QtGui.QDialogButtonBox.Apply:
@@ -208,7 +208,7 @@ class openConfigurationsUI():
             #FCC.PrintMessage('confName = '+confName+'\n')
             #FCC.PrintMessage('confText = '+self.configList.currentItem().text()+'\n')
             conf = getConfig(confName)
-            #FCC.PrintMessage('conf.Name = '+conf.Name+'\n')            
+            #FCC.PrintMessage('conf.Name = '+conf.Name+'\n')
             description = getConfigDescription(conf)
             self.configDescription.clear()
             self.configDescription.setPlainText(description)
@@ -290,7 +290,7 @@ class newConfigurationCmd:
         # is there an active document ?
         if Asm4.getAssembly():
             return True
-        return False 
+        return False
 
 
     def Activated(self):
@@ -327,8 +327,8 @@ class newConfigurationCmd:
 
     def onCancel(self):
         self.UI.close()
-        
-        
+
+
     # Verify and handle bad names similar to the spreadsheet workbench
     def onNameEdited(self):
         pattern = re.compile("^[A-Za-z][_A-Za-z0-9]*$")
@@ -365,7 +365,7 @@ class newConfigurationCmd:
         self.configList = QtGui.QListWidget()
         self.configList.setMinimumHeight(100)
         self.mainLayout.addWidget(self.configList)
-        
+
         # Buttons
         self.buttonLayout = QtGui.QHBoxLayout()
         # Cancel button
@@ -416,7 +416,7 @@ def SaveConfiguration(confName, description):
     if link:
         SaveObject(conf, link)
     else:
-        SaveSubObjects(conf, assy)            
+        SaveSubObjects(conf, assy)
     conf.recompute(True)
 
 

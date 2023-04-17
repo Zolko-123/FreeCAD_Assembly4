@@ -87,7 +87,7 @@ def Disable():
         print_disable = True
     else:
         print_disable = False
-    Gui.Selection.removeObserver(observer) 
+    Gui.Selection.removeObserver(observer)
     observer = None
     #print("3D view link selection mode is now disabled")
     if print_disable:

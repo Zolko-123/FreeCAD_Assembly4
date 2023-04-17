@@ -65,7 +65,7 @@ class importDatumCmd():
             # the root parent container is the first in the selection tree
             rootContainer = App.ActiveDocument.getObject(selTree[0])
             selection = self.getSelectedDatums()
-            
+
             # special case where 2 objects are selected in order to update the placement of the second one
             if len(selection)==2 and selection[0].getParentGeoFeatureGroup() == rootContainer:
                 confirm = False

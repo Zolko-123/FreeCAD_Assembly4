@@ -152,7 +152,7 @@ class makeBOM:
                 #     self.Verbose += "- linked: {linked_obj}\n".format(linked_obj=obj.Name)
                 # self.Verbose += '- not included\n\n'
 
-                # Navigate on objects inside a App:Links (Groups of Fastners)
+                # Navigate on objects inside a App:Links (Groups of Fasteners)
                 if obj.ElementCount > 0:
                     for i in range(obj.ElementCount):
                         self.listParts(obj.LinkedObject, level, parent=obj)
@@ -181,7 +181,7 @@ class makeBOM:
                     except AttributeError:
                         obj_label = obj.Label
 
-                # The name cannot be Model othewise it will sum all other 'Model' names togueter
+                # The name cannot be Model otherwise it will sum all other 'Model' names together
                 if obj_label == "Model":
                    obj_label = obj.Document.Name
 
@@ -260,7 +260,7 @@ class makeBOM:
                 except:
                     doc_name = obj.Label
 
-                # The name cannot be model othewise it will sum all other 'Model' names togueter
+                # The name cannot be model otherwise it will sum all other 'Model' names together
                 if obj_label == "Model":
                    obj_label = obj.Document.Name
 

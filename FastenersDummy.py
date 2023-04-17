@@ -85,12 +85,12 @@ class placeFastenerCmd():
 
     def IsActive(self):
         # it's a dummy, always inactive
-        return False 
+        return False
 
     def Activated(self):
         return
-    
-    
+
+
 """
     +-----------------------------------------------+
     |                dummy parameters               |
@@ -108,7 +108,7 @@ class changeFSparametersCmd():
 
     def IsActive(self):
         # it's a dummy, always inactive
-        return False 
+        return False
 
     def Activated(self):
         return
@@ -127,7 +127,7 @@ class cloneFastenersToAxesCmd():
 
     def IsActive(self):
         # it's a dummy, always inactive
-        return False 
+        return False
 
     def Activated(self):
         return

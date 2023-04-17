@@ -28,7 +28,7 @@ Asm4_3DselObserver = None
         bar.objectName()
     for bar in tb:
         if bar.objectName()=='Selection Filter':
-            sfbar = bar 
+            sfbar = bar
     for button in sfbar.actions():
         button.objectName()
         button.setCheckable(True)
@@ -139,7 +139,7 @@ def setButton(i,status):
     if tb is not None:
         if len(tb.actions()[0:-1]) >= i:
             tb.actions()[i].setChecked(status)
-            
+
 
 def applyFilter(button):
     subElement = None
@@ -238,7 +238,7 @@ def observerEnable():
 
 def observerDisable():
     global Asm4_3DselObserver
-    Gui.Selection.removeObserver(Asm4_3DselObserver) 
+    Gui.Selection.removeObserver(Asm4_3DselObserver)
     setButton(3,False)
     # only print to Console if the Asm4_3DselObserver was there
     if Asm4_3DselObserver:

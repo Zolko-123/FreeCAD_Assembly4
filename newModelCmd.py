@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # coding: utf-8
-# 
-# newModelCmd.py 
+#
+# newModelCmd.py
 #
 # LGPL
 # Copyright HUBERT Zoltán
@@ -27,7 +27,7 @@ class newModel:
     |             which is an App::Part             |
     |    with some extra features and properties    |
     +-----------------------------------------------+
-    
+
 def makeAssembly():
     assembly = App.ActiveDocument.addObject('App::Part','Assembly')
     assembly.Type='Assembly'
@@ -86,7 +86,7 @@ def makeAssembly():
         model.addObject(Asm4.createVariables())
         # create a group Configurations to store future solver constraints there
         model.newObject('App::DocumentObjectGroup','Configurations')
-        
+
         # move existing parts and bodies at the document root to the Parts group
         # not nested inside other parts, to keep hierarchy
         if partsGroup.TypeId=='App::DocumentObjectGroup':

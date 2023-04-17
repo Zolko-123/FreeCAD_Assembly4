@@ -44,7 +44,7 @@ class releaseAttachment:
             selObj = self.checkSelection()
             if selObj != None:
                 return True
-        return False 
+        return False
 
 
     def checkSelection(self):
@@ -57,7 +57,7 @@ class releaseAttachment:
                 selectedObj = selection
         # now we should be safe
         return selectedObj
-    
+
 
     """
     +-----------------------------------------------+
@@ -100,7 +100,7 @@ class releaseAttachment:
             selectedObj.setExpression( 'AttachmentOffset', None )
             # if it's a datum object
             if objType=='PartDesign::CoordinateSystem' or objType=='PartDesign::Plane' or objType=='PartDesign::Line' or objType=='PartDesign::Point' :
-                # unset the MapMode; this actually keeps the MapMode parameters intact, 
+                # unset the MapMode; this actually keeps the MapMode parameters intact,
                 # so it's easy for the user to re-enable it
                 selectedObj.MapMode = 'Deactivated'
 

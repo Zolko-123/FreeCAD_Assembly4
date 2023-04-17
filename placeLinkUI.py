@@ -51,7 +51,7 @@ class placeLinkUI():
         # get the current active document to avoid errors if user changes tab
         self.activeDoc = App.ActiveDocument
 
-        # we have checked before that all this is correct 
+        # we have checked before that all this is correct
         selection = Asm4.getSelectedLink()
         if selection is None:
             selection = Asm4.getSelectedVarLink()
@@ -93,7 +93,7 @@ class placeLinkUI():
         self.XrotationAngle = self.old_LinkRotation.toEuler()[0]
         self.YrotationAngle = self.old_LinkRotation.toEuler()[1]
         self.ZrotationAngle = self.old_LinkRotation.toEuler()[2]
-        
+
         # save previous view properties
         self.old_OverrideMaterial = self.selectedObj.ViewObject.OverrideMaterial
         self.old_DrawStyle = self.selectedObj.ViewObject.DrawStyle
@@ -320,7 +320,7 @@ class placeLinkUI():
             l_LCS = self.partLCStable[ self.partLCSlist.currentRow() ].Name
         else:
             l_LCS = None
-            
+
         # check that all of them have something in
         # constrName has been checked at the beginning
         if a_Link and a_LCS and l_Part and l_LCS :
@@ -332,14 +332,14 @@ class placeLinkUI():
             self.selectedObj.SolverId = 'Asm4EE'
             # build the expression for the ExpressionEngine
             # this is where all the magic is, see:
-            # 
+            #
             # https://forum.freecadweb.org/viewtopic.php?p=278124#p278124
             #
             # as of FreeCAD v0.19 the syntax is different:
             # https://forum.freecadweb.org/viewtopic.php?f=17&t=38974&p=337784#p337784
             #
-            # expr = ParentLink.Placement * ParentPart#LCS.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
-            # expr = LCS_in_the_assembly.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
+            # expr = ParentLink.Placement * ParentPart#LCS.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS.Placement ^ -1'
+            # expr = LCS_in_the_assembly.Placement * constr_LinkName.AttachmentOffset * LinkedPart#LCS.Placement ^ -1'
             expr = Asm4.makeExpressionPart( a_Link, a_Part, a_LCS, l_Part, l_LCS )
             # load the expression into the link's Expression Engine
             self.selectedObj.setExpression('Placement', expr )
@@ -473,7 +473,7 @@ class placeLinkUI():
                     self.parentList.setCurrentIndex(idx)
                     # this has triggered to fill in the attachment LCS list
                     parentFound = True
-            # if it's the object itself, then it belongs to the root assembly 
+            # if it's the object itself, then it belongs to the root assembly
             elif selLink == selObj and obj == self.rootAssembly.Name:
                 self.parentList.setCurrentIndex(1)
                 # this has triggered to fill in the attachment LCS list
@@ -517,32 +517,32 @@ class placeLinkUI():
     def onXTranslValChanged(self):
         self.Xtranslation = self.XtranslSpinBox.value()
         self.reorientLink()
-        
+
     def onYTranslValChanged(self):
         self.Ytranslation = self.YtranslSpinBox.value()
         self.reorientLink()
-        
+
     def onZTranslValChanged(self):
         self.Ztranslation = self.ZtranslSpinBox.value()
         self.reorientLink()
-        
+
     # Rotations
     def onRotX(self):
-        if self.XrotationAngle > 270.0: 
+        if self.XrotationAngle > 270.0:
             self.XrotationAngle = self.XrotationAngle - 270.0
         else:
             self.XrotationAngle = self.XrotationAngle + 90.0
         self.reorientLink()
 
     def onRotY(self):
-        if self.YrotationAngle > 270.0: 
+        if self.YrotationAngle > 270.0:
             self.YrotationAngle = self.YrotationAngle - 270.0
         else:
             self.YrotationAngle = self.YrotationAngle + 90.0
         self.reorientLink()
 
     def onRotZ(self):
-        if self.ZrotationAngle > 270.0: 
+        if self.ZrotationAngle > 270.0:
             self.ZrotationAngle = self.ZrotationAngle - 270.0
         else:
             self.ZrotationAngle = self.ZrotationAngle + 90.0
@@ -616,7 +616,7 @@ class placeLinkUI():
                     ( attLCS,     separator, rest2 ) = rest1.partition('.Placement * AttachmentOffset * ')
                     ( linkedDoc,  separator, rest3 ) = rest2.partition('#')
                     ( linkLCS,    separator, rest4 ) = rest3.partition('.Placement ^ ')
-                    restFinal = rest4                    
+                    restFinal = rest4
         elif nbHash==2:
             # linked part and sister part in external documents to the parent assembly:
             # expr = ParentLink.Placement * ParentPart#LCS.Placement * AttachmentOffset * LinkedPart#LCS.Placement ^ -1
@@ -629,10 +629,10 @@ class placeLinkUI():
         else:
             # complicated stuff, we'll do it later
             pass
-        
+
         if restFinal != '':
             restFinal = restFinal[1:3] if restFinal.startswith('(') else restFinal[0:2]
-        
+
         # final check, all options should give the correct data
         if restFinal=='-1' and attLink==parent :
             # wow, everything went according to plan
@@ -652,7 +652,7 @@ class placeLinkUI():
         self.parentDoc.clear()
         self.partLCSlist.clear()
         self.attLCSlist.clear()
-        # the selected link's name 
+        # the selected link's name
         self.linkName.setText( Asm4.labelName(self.selectedObj) )
         # linked part & doc
         dText = ''
@@ -681,7 +681,7 @@ class placeLinkUI():
     def drawUI(self):
         # the layout for the main window is vertical (top to down)
         self.mainLayout = QtGui.QVBoxLayout()
-        
+
         # Define the fields for the form ( label + widget )
         self.formLayout = QtGui.QFormLayout()
         # Selected Link (the name as seen in the tree of the selected link)

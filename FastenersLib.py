@@ -46,7 +46,7 @@ fs.ViewObject.ShapeColor = (0.3, 0.6, 0.7)
 fs.recompute()
 Gui.Selection.addSelection(fs)
 Gui.runCommand('FSChangeParams')
-    
+
 """
 
 class insertFastener:
@@ -249,7 +249,7 @@ class changeFSparametersCmd():
     |               Helper functions                |
     +-----------------------------------------------+
 """
-def getSelectionFS():    
+def getSelectionFS():
     selectedObj = None
     # check that something is selected
     if len(Gui.Selection.getSelection())==1:
@@ -278,21 +278,21 @@ def isFastener(obj):
     +-----------------------------------------------+
     |         clone per App::Link fasteners         |
     +-----------------------------------------------+
-    
+
     Select a fastener and several datum axes and the fastener will
     be cloned (as App::Link) and attached to those axes
 """
 class cloneFastenersToAxesCmd():
-    
+
     def __init__(self):
         super(cloneFastenersToAxesCmd,self).__init__()
-    
+
     def GetResources(self):
         return {"MenuText": "Clone Fastener to Axes",
                 "ToolTip": "Clone Fastener to Axes",
                 "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_cloneFasteners.svg')
                 }
-    
+
     def IsActive(self):
         self.selection = self.getSelectedAxes()
         if Asm4.getAssembly() and self.selection:
@@ -316,7 +316,7 @@ class cloneFastenersToAxesCmd():
                                 if axis and axis.Document:
                                     newFstnr = Asm4.cloneObject(fstnr)
                                     Asm4.placeObjectToLCS(newFstnr, axisData[2], axis.Document.Name, axisData[3])
-                                    
+
             Gui.Selection.clearSelection()
             self.rootAssembly = Asm4.getAssembly()
             if self.rootAssembly:
@@ -327,7 +327,7 @@ class cloneFastenersToAxesCmd():
         holeAxes = []
         fstnr = None
         selection = Gui.Selection.getSelectionEx('', 0)
-        
+
         if selection:
             for s in selection:
                 for seNames in s.SubElementNames:
@@ -372,9 +372,9 @@ Gui.addCommand( 'Asm4_cloneFastenersToAxes',  cloneFastenersToAxesCmd() )
 Gui.addCommand( 'Asm4_FSparameters',   changeFSparametersCmd()  )
 
 # defines the drop-down button for Fasteners:
-FastenersCmdList = [    'Asm4_insertScrew', 
-                        'Asm4_insertNut', 
-                        'Asm4_insertWasher', 
+FastenersCmdList = [    'Asm4_insertScrew',
+                        'Asm4_insertNut',
+                        'Asm4_insertWasher',
                         'Asm4_cloneFastenersToAxes',
-                        'Asm4_FSparameters'] 
+                        'Asm4_FSparameters']
 Gui.addCommand( 'Asm4_Fasteners', Asm4.dropDownCmd( FastenersCmdList, 'Fasteners'))

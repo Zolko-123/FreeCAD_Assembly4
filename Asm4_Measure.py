@@ -358,7 +358,7 @@ class MeasureUI():
         self.mainLayout.addWidget(self.selGroup)
         self.selGrid = QtGui.QGridLayout(self.selGroup)
         # self.mainLayout.addLayout(self.selGrid)
-        
+
         # 0,0 SnapCenter
         pm.loadFromData(base64.b64decode(SnapCenter_b64))
         self.selCenter = QtGui.QPushButton(self.selGroup)
@@ -427,7 +427,7 @@ class MeasureUI():
         self.buttonGroup.addButton(self.selEdge)
         self.buttonGroup.addButton(self.selFace)
         self.buttonGroup.addButton(self.selShape)
-        
+
         # select elements
         self.selectGrid = QtGui.QGridLayout()
         # first element

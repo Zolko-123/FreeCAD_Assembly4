@@ -38,13 +38,13 @@ class makeVariantLink():
         tooltip += "Create a variant link to a part\n"
         tooltip += "Select a part containing a \"Variables\" property container"
         iconFile = 'Variant_Link.svg'
-        return {"MenuText" : "Create a variant Part", 
-                "ToolTip"  :  tooltip, 
-                "Pixmap"   :  os.path.join( Asm4.iconPath, iconFile ) 
+        return {"MenuText" : "Create a variant Part",
+                "ToolTip"  :  tooltip,
+                "Pixmap"   :  os.path.join( Asm4.iconPath, iconFile )
                 }
 
     def IsActive(self):
-        # we only insert variant links into assemblies and root parts 
+        # we only insert variant links into assemblies and root parts
         if Asm4.getAssembly() or Asm4.getSelectedRootPart():
             return True
         # if an existing variant link is selected, we duplicate it
@@ -117,7 +117,7 @@ class makeVariantLink():
             if not doc.Temporary:
                 for obj in doc.findObjects("App::Part"):
                     # we don't want to link to itself to the 'Model' object
-                    # other App::Part in the same document are OK 
+                    # other App::Part in the same document are OK
                     # but only those at top level (not nested inside other containers)
                     if obj != self.rootAssembly and obj.getParentGeoFeatureGroup() is None:
                         # and only those that have a Variables property container
@@ -167,7 +167,7 @@ class makeVariantLink():
     +-----------------------------------------------+
     """
     def onCreateLink(self):
-        # parse the selected items 
+        # parse the selected items
         selectedPart = []
         for selected in self.partList.selectedIndexes():
             # get the selected part
@@ -338,7 +338,7 @@ class makeVariantLink():
     +-----------------------------------------------+
     |                 test functions                |
     +-----------------------------------------------+
-    
+
 see:
     https://forum.freecadweb.org/viewtopic.php?f=10&t=38970&start=50#p343116
     https://forum.freecadweb.org/viewtopic.php?f=22&t=42331

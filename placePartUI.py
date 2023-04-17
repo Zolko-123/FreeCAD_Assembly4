@@ -26,7 +26,7 @@ import Asm4_libs as Asm4
     +-----------------------------------------------+
 """
 class placePartUI():
-    
+
     def __init__(self):
         self.form = QtGui.QWidget()
         iconFile = os.path.join( Asm4.iconPath , 'Place_Link.svg')
@@ -238,7 +238,7 @@ class placePartUI():
                     #self.expression.setText( 'sameDoc ***'+restFinal+'***'+attLink+'***'+attLCS+'***' )
                 else:
                     # we're attached to an LCS in a sister part in an external document
-                    # expr = ParentLink.Placement * ParentPart#LCS.Placement * AttachmentOffset * LinkedPart#LCS.Placement ^ -1'			
+                    # expr = ParentLink.Placement * ParentPart#LCS.Placement * AttachmentOffset * LinkedPart#LCS.Placement ^ -1'
                     ( attLink,    separator, rest1 ) = expr.partition('.Placement * ')
                     ( attPart,    separator, rest2 ) = rest1.partition('#')
                     ( attLCS,     separator, rest3 ) = rest2.partition('.Placement * AttachmentOff')
@@ -266,12 +266,12 @@ class placePartUI():
         # keep the fastener selected
         Gui.Selection.addSelection( self.activeDoc.Name, self.rootAssembly.Name, self.selectedObj.Name+'.')
         # the current text in the combo-box is the link's name...
-        # ... or it's 'Parent Assembly' then the parent is the 'Model' root App::Part		
+        # ... or it's 'Parent Assembly' then the parent is the 'Model' root App::Part
         if self.parentList.currentText() == 'Parent Assembly':
             parentName = 'Parent Assembly'
             # parentPart = self.activeDoc.getObject( 'Model' )
             parentPart = self.rootAssembly
-            # we get the LCS directly in the root App::Part 
+            # we get the LCS directly in the root App::Part
             self.attLCStable = Asm4.getPartLCS( parentPart )
             self.parentDoc.setText( parentPart.Document.Name+'#'+Asm4.labelName(parentPart) )
         # if something is selected
@@ -295,7 +295,7 @@ class placePartUI():
         # something wrong
         else:
             return
-        
+
         # build the list
         self.attLCSlist.clear()
         for lcs in self.attLCStable:
@@ -329,8 +329,8 @@ class placePartUI():
             FCC.PrintMessage("selection: "+ linkDot+a_LCS+'.' +"\n")
         # show the resulting placement
         self.onApply()
-    
-    
+
+
     # selection observer
     def addSelection(self, doc, obj, sub, pnt):
         selPath = Asm4.getSelectionPath(doc, obj, sub)

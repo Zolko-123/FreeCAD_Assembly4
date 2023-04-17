@@ -194,7 +194,7 @@ class infoPartUI():
 
         '''
         mb = QtGui.QMessageBox()
-        mb.setWindowTitle("Clear fileds")
+        mb.setWindowTitle("Clear fields")
         mb.setText("The Part Info field\nhas been cleared")
         mb.exec_()
         '''
@@ -427,7 +427,7 @@ class infoPartConfUI():
                     return
                 i += 1
 
-        # Restore file and appen new config
+        # Restore file and append new config
         partInfoDef = dict()
         for prop in infoKeys.partInfo:
             partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': True})

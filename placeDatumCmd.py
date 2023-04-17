@@ -67,7 +67,7 @@ class placeDatumCmd():
 class placeDatumUI():
     def __init__(self):
         self.base = QtGui.QWidget()
-        self.form = self.base        
+        self.form = self.base
         self.form.setWindowIcon(QtGui.QIcon( iconFile ))
         self.form.setWindowTitle('Place a Datum object in the assembly')
 
@@ -78,7 +78,7 @@ class placeDatumUI():
 
         # check that we have selected a PartDesign::CoordinateSystem
         self.selectedDatum = Asm4.getSelectedDatum()
-  
+
         # Now we can draw the UI
         self.drawUI()
         self.initUI()
@@ -266,7 +266,7 @@ class placeDatumUI():
         # something wrong
         else:
             return
-        
+
         # build the list
         self.attLCSlist.clear()
         for lcs in self.attLCStable:
@@ -296,7 +296,7 @@ class placeDatumUI():
 
     # Rotations
     def rotAxis( self, addRotation ):
-        self.selectedDatum.AttachmentOffset = self.selectedDatum.AttachmentOffset.multiply(addRotation) 
+        self.selectedDatum.AttachmentOffset = self.selectedDatum.AttachmentOffset.multiply(addRotation)
         self.selectedDatum.recompute()
 
     def onRotX(self):
@@ -372,7 +372,7 @@ class placeDatumUI():
     def drawUI(self):
         # the layout for the main window is vertical (top to down)
         self.mainLayout = QtGui.QVBoxLayout(self.form)
-        
+
         # Selected Datum
         self.mainLayout.addWidget(QtGui.QLabel('Selected Datum :'))
         self.lscName = QtGui.QLineEdit()

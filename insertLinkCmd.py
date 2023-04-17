@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # coding: utf-8
-# 
+#
 # insertLinkCmd.py
 #
 # LGPL
@@ -43,8 +43,8 @@ class insertLink():
         tooltip += "<p>This command also enables to repair broken/missing links. "
         tooltip += "Select the broken link, launch this command, and select a new target part in the list</p>"
         iconFile = 'Link_Part.svg'
-        return {"MenuText" : "Insert Part", 
-                "ToolTip"  : tooltip, 
+        return {"MenuText" : "Insert Part",
+                "ToolTip"  : tooltip,
                 "Pixmap"   : os.path.join( Asm4.iconPath , iconFile )
                 }
 
@@ -157,14 +157,14 @@ class insertLink():
             # don't consider temporary documents. Guard against older versions of FreeCad
             # which don't have the Temporary attribute
             try:
-                docTemporary = doc.Temporary 
+                docTemporary = doc.Temporary
             except AttributeError:
                 docTemporary = False
-                
+
             if not docTemporary:
                 for obj in doc.findObjects("App::Part"):
                     # we don't want to link to itself to the 'Model' object
-                    # other App::Part in the same document are OK 
+                    # other App::Part in the same document are OK
                     # but only those at top level (not nested inside other containers)
                     if obj != self.rootAssembly and obj.getParentGeoFeatureGroup() is None:
                         self.allParts.append( obj )
@@ -225,7 +225,7 @@ class insertLink():
     +-----------------------------------------------+
     """
     def onCreateLink(self):
-        # parse the selected items 
+        # parse the selected items
         selectedPart = []
         for selected in self.partList.selectedIndexes():
             # get the selected part
@@ -262,7 +262,7 @@ class insertLink():
                 createdLink.recompute()
                 # close the dialog UI...
                 self.UI.close()
-                # highlight the link 
+                # highlight the link
                 Gui.Selection.clearSelection()
                 Gui.Selection.addSelection( self.activeDoc.Name, self.rootAssembly.Name, createdLink.Name+'.' )
                 # ... and launch the placement of the inserted part if we're in an Asm4 Assembly

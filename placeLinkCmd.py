@@ -116,7 +116,7 @@ class placeLinkCmd():
                             Asm4.warningBox('Please select an object in the assembly Model.')
                             return
 
-    
+
 """
     +-----------------------------------------------+
     |       add the command to the workbench        |

@@ -4,7 +4,7 @@
 # LGPL
 # Copyright HUBERT Zoltán
 #
-# newPartCmd.py 
+# newPartCmd.py
 
 
 
@@ -50,7 +50,7 @@ class newPart:
     def GetResources(self):
         return {"MenuText"   : self.menutext,
                 "ToolTip"    : self.tooltip,
-                "Pixmap"     : self.icon 
+                "Pixmap"     : self.icon
                 }
 
 
@@ -77,7 +77,7 @@ class newPart:
         if ok and text:
             # create Part
             newPart = App.ActiveDocument.addObject(self.partType,text)
-            newPart.Label = text 
+            newPart.Label = text
             # add stuff if appropriate (not for groups)
             if self.partType in Asm4.containerTypes:
                 # add an LCS at the root of the Part, and attach it to the 'Origin'

@@ -44,7 +44,7 @@ class gotoDocumentCmd:
         if App.ActiveDocument and self.checkSelection() is not None:
             return True
         else:
-            return False 
+            return False
 
 
     def checkSelection(self):
@@ -61,7 +61,7 @@ class gotoDocumentCmd:
                         selectedLink = selObj
         # now we should be safe
         return selectedLink
-    
+
 
     """
     +-----------------------------------------------+
@@ -78,7 +78,7 @@ class gotoDocumentCmd:
         # in case linking to a sub-object
         if isinstance(linkedObj, tuple):
             linkedObj = linkedObj[0].getSubObject(linkedObj[1], retType=1)
-        
+
         # the non-magical command
         App.setActiveDocument(linkedObj.Document.Name)
         Gui.activateView('Gui::View3DInventor', True)

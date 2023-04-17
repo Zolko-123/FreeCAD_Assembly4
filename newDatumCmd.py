@@ -4,7 +4,7 @@
 # LGPL
 # Copyright HUBERT Zoltán
 #
-# newDatumCmd.py 
+# newDatumCmd.py
 
 
 import os
@@ -125,8 +125,8 @@ class newDatum:
         # something went wrong
         else:
             Asm4.warningBox("I can't create a "+self.datumType+" with the current selections")
-            
-        # check whether there is already a similar datum, and increment the instance number 
+
+        # check whether there is already a similar datum, and increment the instance number
         # instanceNum = 1
         #while App.ActiveDocument.getObject( self.datumName+'_'+str(instanceNum) ):
         #    instanceNum += 1
@@ -191,13 +191,13 @@ class newHole:
         selection = None
         parent = None
         edges = []
-        # 1 selection means a single parent        
+        # 1 selection means a single parent
         if App.ActiveDocument and len(Gui.Selection.getSelection()) == 1:
             parent = Gui.Selection.getSelection()[0]
             # parse all sub-elemets of the selection
             for i in range(len(Gui.Selection.getSelectionEx()[0].SubObjects)):
                 edgeObj  = Gui.Selection.getSelectionEx()[0].SubObjects[i]
-                edgeName = Gui.Selection.getSelectionEx()[0].SubElementNames[i]                    
+                edgeName = Gui.Selection.getSelectionEx()[0].SubElementNames[i]
                 # if the edge is circular
                 if Asm4.isCircle(edgeObj):
                     edges.append( [edgeObj,edgeName] )
@@ -218,7 +218,7 @@ class newHole:
                 parentDoc  = parentPart.Document
                 # if the solid having the edge is indeed in an App::Part
                 if parentPart and (parentPart.TypeId=='App::Part' or parentPart.TypeId=='PartDesign::Body'):
-                    # check whether there is already a similar datum, and increment the instance number 
+                    # check whether there is already a similar datum, and increment the instance number
                     instanceNum = 1
                     while parentDoc.getObject( 'HoleAxis_'+str(instanceNum) ):
                         instanceNum += 1
@@ -232,7 +232,7 @@ class newHole:
                     axis.ViewObject.Transparency = 50
                     axis.recompute()
                     parentPart.recompute()
-            # 
+            #
             else:
                 FCC.PrintMessage('Datum objects can only be created inside Part or Body containers')
 
@@ -251,9 +251,9 @@ Gui.addCommand( 'Asm4_newSketch',newDatum('Sketch'))
 Gui.addCommand( 'Asm4_newHole',  newHole()         )
 
 # defines the drop-down button for Datum objects
-createDatumList = [     'Asm4_newLCS', 
-                        'Asm4_newPlane', 
-                        'Asm4_newAxis', 
-                        'Asm4_newPoint', 
+createDatumList = [     'Asm4_newLCS',
+                        'Asm4_newPlane',
+                        'Asm4_newAxis',
+                        'Asm4_newPoint',
                         'Asm4_newHole' ]
 Gui.addCommand( 'Asm4_createDatum', Asm4.dropDownCmd( createDatumList, 'Create Datum Object'))

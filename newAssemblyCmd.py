@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # coding: utf-8
-# 
-# newAssemblyCmd.py 
+#
+# newAssemblyCmd.py
 #
 # LGPL
 # Copyright HUBERT Zoltán
@@ -26,7 +26,7 @@ class newAssemblyCmd:
     |             which is an App::Part             |
     |    with some extra features and properties    |
     +-----------------------------------------------+
-    
+
 def makeAssembly():
     assembly = App.ActiveDocument.addObject('App::Part','Assembly')
     assembly.Type='Assembly'
@@ -92,7 +92,7 @@ def makeAssembly():
         # create a group Configurations to store future solver constraints there
         assembly.newObject('App::DocumentObjectGroup','Configurations')
         App.ActiveDocument.getObject('Configurations').Visibility = False
-        
+
         # move existing parts and bodies at the document root to the Parts group
         # not nested inside other parts, to keep hierarchy
         if partsGroup.TypeId=='App::DocumentObjectGroup':

@@ -4,7 +4,7 @@
 # LGPL
 # Copyright HUBERT Zoltán
 #
-# newPartCmd.py 
+# newPartCmd.py
 
 
 
@@ -36,7 +36,7 @@ class mirrorPartCmd:
     def GetResources(self):
         tooltip  = 'Create a mirrored part of a part. Use only on individual parts, not assemblies\n'
         tooltip += 'You must re-create the attachment datums in the resulting part'
-        iconFile = os.path.join( Asm4.iconPath , 'Asm4_Mirror.svg') 
+        iconFile = os.path.join( Asm4.iconPath , 'Asm4_Mirror.svg')
         return {"MenuText" : 'Create symmetric of part', "ToolTip" : tooltip, "Pixmap" : iconFile }
 
     def IsActive(self):
@@ -61,7 +61,7 @@ class mirrorPartCmd:
             self.mirroredPartName.setText(proposedName)
             self.UI.show()
 
-        
+
     def onOK(self):
         if self.mirroredPartName != '':
             # the mirrored object's name
@@ -117,13 +117,13 @@ class mirrorPartCmd:
         self.UI.setModal(False)
         # the layout for the main window is vertical (top to down)
         self.mainLayout = QtGui.QVBoxLayout(self.UI)
-        
+
         # the selected (original) part
         self.mainLayout.addWidget(QtGui.QLabel("Selected Part :"))
         self.selectedPart = QtGui.QLineEdit()
         self.selectedPart.setReadOnly(True)
         self.mainLayout.addWidget(self.selectedPart)
-        
+
         # the symmetry plane
         self.mainLayout.addWidget(QtGui.QLabel("Select the symmetry plane :"))
         self.symPlane = QtGui.QComboBox()

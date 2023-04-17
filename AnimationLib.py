@@ -175,7 +175,7 @@ class animateVariable(animationProvider):
             self.docList.clear()
             self.docList.addItems(docDocs)
             self.knownDocumentList = docDocs
-            
+
         # set current active documents per default
         #if self.AnimatedDocument is None:
         activeDoc = App.ActiveDocument
@@ -549,7 +549,7 @@ class animateVariable(animationProvider):
         self.stepValue.setValue( 1.0 )
         self.stepValue.setKeyboardTracking(False)
         self.formLayout.addRow(QtGui.QLabel('Step Size'), self.stepValue)
-        
+
         # Sleep
         self.sleepValue = QtGui.QDoubleSpinBox()
         self.sleepValue.setRange( 0.0, 10.0 )
@@ -688,7 +688,7 @@ class animateVariable(animationProvider):
 
 """
     +-----------------------------------------------+
-    |     Custom Slider handling inverse ranges     |     
+    |     Custom Slider handling inverse ranges     |
     |               and steps != 1.                 |
     +-----------------------------------------------+
 """
@@ -746,7 +746,7 @@ class animationSlider(QtGui.QSlider):
 
 """
     +-----------------------------------------------+
-    |     Custom Combobox that emits a Signal when  |     
+    |     Custom Combobox that emits a Signal when  |
     |     the user clicks for the popup menu.       |
     |     Needed to update the list of variables    |
     |     on the fly.                               |

@@ -130,10 +130,10 @@ class makeCircularArray(makeExpressionArray):
     menuText = 'Create a circular array'
     arrayType = 'Circular Array'
     namePrefix = 'Circular_'
-    tooltip = """<p>Create a circular (polar) array around an axis. 
+    tooltip = """<p>Create a circular (polar) array around an axis.
                 Supported axis objects are axis or plane from an origin, datum line, LCS axes, straight line segments, arcs and circles</p>
                 <p><b>Usage</b>: Select an object and the axis (hold CTRL key to select second object)</p>"""
- 
+
     def IsActive(self):
         self._cacheSelectionInfo()
         return self._selectionInfo[2] is not None
@@ -162,7 +162,7 @@ class makeLinearArray(makeExpressionArray):
     menuText = 'Create a linear array'
     arrayType = 'Linear Array'
     namePrefix = 'Linear_'
-    tooltip = """<p>Create a linear array along an axis. 
+    tooltip = """<p>Create a linear array along an axis.
                 Supported axis objects are axis or plane from an origin, datum line, LCS axes, straight line segments, arcs and circles</p>
                 <p><b>Usage</b>: Select an object and an axis for the direction (hold CTRL key to select second object)</p>"""
 
@@ -193,7 +193,7 @@ class makeMirrorArray(makeExpressionArray):
     menuText = 'Create mirror'
     arrayType = 'Mirror Array'
     namePrefix = 'Mirror_'
-    tooltip = """<p>Create a mirror of a part. 
+    tooltip = """<p>Create a mirror of a part.
                 Supported axis objects are axis or plane from an origin, datum line, LCS axes, straight line segments, arcs and circles</p>
                 <p><b>Usage</b>: Select a source object and a mirror plane or a normal to a plane (hold CTRL key to select second object)</p>"""
 

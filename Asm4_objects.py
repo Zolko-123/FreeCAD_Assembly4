@@ -2,7 +2,7 @@
 # coding: utf-8
 #
 # Asm4_objects.py
-# 
+#
 # LGPL
 # Copyright HUBERT Zoltán
 
@@ -51,13 +51,13 @@ class VariantLink( object ):
     def __init__(self):
         FCC.PrintMessage('Initialising ...\n')
         self.Object = None
-    
+
     def __getstate__(self):
         return
 
     def __setstate__(self,_state):
         return
-    
+
     # new Python API for overriding C++ view provider of the binding object
     def getViewProviderName(self,_obj):
         return 'Gui::ViewProviderLinkPython'
@@ -142,13 +142,13 @@ class VariantLink( object ):
                 # set the expression
                 obj.setExpression('Placement', expr )
 
-    # find all 'Variables' in the original part, 
+    # find all 'Variables' in the original part,
     # and create corresponding properties in the variant
     def fillVarProperties(self,obj):
         variables = obj.SourceObject.getObject('Variables')
         if variables is None:
             FCC.PrintVarning('No \"Variables\" container in source object\n')
-        else: 
+        else:
             for prop in variables.PropertiesList:
                 # fetch all properties in the Variables group
                 if variables.getGroupOfProperty(prop) == 'Variables':
@@ -178,7 +178,7 @@ class VariantLink( object ):
         assert getattr(obj,'Proxy',None)==self
         self.Object = obj
         # Tell LinkExtension which additional properties are available.
-        # This information is not persistent, so the following function must 
+        # This information is not persistent, so the following function must
         # be called by at both attach(), and restore()
         obj.configLinkProperty( 'Placement', LinkedObject='LinkedObject')
         # hide the scale properties
@@ -234,7 +234,7 @@ class VariantLink( object ):
     +-----------------------------------------------+
     |           a general link array class          |
     +-----------------------------------------------+
-    see: 
+    see:
     https://github.com/realthunder/FreeCAD_assembly3/wiki/Link#app-namespace
 
 from Asm4_objects import LinkArray
@@ -243,13 +243,13 @@ la = App.ActiveDocument.addObject("Part::FeaturePython", 'linkArray', LinkArray(
 class LinkArray( object ):
     def __init__(self):
         self.Object = None
-    
+
     def __getstate__(self):
         return
 
     def __setstate__(self,_state):
         return
-    
+
     # new Python API for overriding C++ view provider of the binding object
     def getViewProviderName(self,_obj):
         return 'Gui::ViewProviderLinkPython'
@@ -277,7 +277,7 @@ class LinkArray( object ):
         assert getattr(obj,'Proxy',None)==self
         self.Object = obj
         # Tell LinkExtension which additional properties are available.
-        # This information is not persistent, so the following function must 
+        # This information is not persistent, so the following function must
         # be called by at both attach(), and restore()
         obj.configLinkProperty("ShowElement", 'Placement', ElementCount='Count', LinkedObject='SourceObject')
         # hide the scale properties
@@ -339,13 +339,13 @@ class ViewProviderArray(object):
                 iconFile = os.path.join( Asm4.iconPath, 'Asm4_ExpressionArray.svg')
         if iconFile:
             return iconFile
-                
+
     def __getstate__(self):
         return None
 
     def __setstate__(self, _state):
         return None
-    
+
 
 
 """
@@ -355,7 +355,7 @@ class ViewProviderArray(object):
 class CircularArray(LinkArray):
 
     def onDocumentRestored(self, obj):
-        # for backwards compability
+        # for backwards compatibility
         if not hasattr(obj, "Count"):
             obj.addProperty("App::PropertyInteger","Count","Array","")
             obj.Count = obj.ElementCount
@@ -374,7 +374,7 @@ class CircularArray(LinkArray):
         parent = sObj.getParentGeoFeatureGroup()
         if not parent:
             return
-        # get the datum axis 
+        # get the datum axis
         axisObj = parent.getObject(obj.Axis)
         if axisObj:
             axisPlacement = axisObj.Placement
@@ -392,7 +392,7 @@ class CircularArray(LinkArray):
                     axisPlacement = lcsObj.Placement
             else:
                 FCC.PrintMessage('Axis not found\n')
-                return    
+                return
         # calculate the number of instances
         if obj.ArraySteps=='Interval':
             fullAngle = (obj.Count-1) * obj.IntervalAngle
@@ -437,7 +437,7 @@ class ExpressionArray(LinkArray):
         raise RuntimeError
 
     def onDocumentRestored(self, obj):
-        # for backwards compability
+        # for backwards compatibility
         if obj.getTypeIdOfProperty('Axis') == 'App::PropertyLink':
             axisObj = obj.Axis
             obj.removeProperty('Axis')
@@ -480,7 +480,7 @@ class ExpressionArray(LinkArray):
     def attach(self, obj):
         super().attach(obj)
         obj.addProperty('App::PropertyString',      'ArrayType',        'Array', '')
-        obj.addProperty('App::PropertyPlacement',   'Placer',           'Array', 
+        obj.addProperty('App::PropertyPlacement',   'Placer',           'Array',
                         'Calculates element placements in relation to the Axis.\n'
                         'Each element is assigned an Index starting from 0\n'
                         'The Index can be used in expressions calculating this Placement or its sub-properties\n'
@@ -550,7 +550,7 @@ class ExpressionArray(LinkArray):
             placementList.append(obj.AxisPlacement * obj.Placer * pmt1)
             s = obj.Scaler
             scaleList.append(App.Vector(s, s, s))
-        # Resetting Index to 1 because we get more useful preview results 
+        # Resetting Index to 1 because we get more useful preview results
         # in the expression editor
         obj.Index = 1
         if obj.ShowElement:
@@ -596,8 +596,8 @@ def findAxisPlacement(axisObj, subnameList):
     if axisObj.TypeId == 'App::Plane' and hasattr(axisObj,'Role'):
         return axisObj.Placement
     if axisObj.TypeId in ('PartDesign::CoordinateSystem', 'PartDesign::Plane'):
-        return axisObj.Placement        
-    # Arbitary object as axis is rejected for now
+        return axisObj.Placement
+    # Arbitrary object as axis is rejected for now
     return None
 
 # To find evaluation order of expressions. The builtin can't handle a placement internal properties

@@ -12,7 +12,7 @@ import os
 class setCustomIcon():
     def __init__( self, obj, iconFile):
         self.customIcon = os.path.join( iconPath, iconFile )
-        
+
     def getIcon(self):
         return self.customIcon
 

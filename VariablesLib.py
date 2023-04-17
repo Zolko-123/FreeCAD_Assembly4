@@ -62,7 +62,7 @@ class addVariable():
                                     #'App::PropertyLink',
                                     'App::PropertyXLink',
                                     'App::PropertyVector',
-                                    'App::PropertyMatrix', 
+                                    'App::PropertyMatrix',
                                     'App::PropertyPlacement',
                                     'App::PropertyColor',
                                     'App::PropertyFile']
@@ -83,7 +83,7 @@ class addVariable():
         if App.ActiveDocument:
             return True
         return False
-   
+
 
     def Activated(self):
         # retrieve the Variables object
@@ -123,7 +123,7 @@ class addVariable():
             self.typeList.setCurrentIndex( 0 )
         else:
             self.typeList.setCurrentIndex( propFloat )
-        
+
         # set focus on the variable name
         self.varName.setFocus()
 
@@ -289,7 +289,7 @@ class delVariable():
         for var in self.Variables.PropertiesList:
             if self.Variables.getGroupOfProperty(var)=='Variables' :
                 self.varList.addItem(var)
-        
+
 
     # defines the UI, only static elements
     def drawUI(self):

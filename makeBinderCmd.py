@@ -67,7 +67,7 @@ class makeShapeBinder():
                 binder.Support = [(obj, shape)]
                 binder.MakeFace = False
                 binder.ViewObject.LineColor = (0.,1.,0.)
-                binder.recompute()                   
+                binder.recompute()
 
 
 

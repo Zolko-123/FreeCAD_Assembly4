@@ -171,7 +171,7 @@ def hasVarContainer():
             if hasattr(variables,'Type') :
                 if variables.Type == 'App::PropertyContainer':
                     retval = variables
-    
+
 
 
 # the Variables container
@@ -186,9 +186,9 @@ def makeVarContainer():
                 if variables.Type == 'App::PropertyContainer':
                     retval = variables
             # for compatibility
-            else: 
+            else:
                 variables.addProperty('App::PropertyString', 'Type')
-                variables.Type = 'App::PropertyContainer'            
+                variables.Type = 'App::PropertyContainer'
                 retval = variables
         else:
             FCC.PrintWarning('This Part contains an incompatible \"Variables\" object, ')
@@ -373,7 +373,7 @@ def getPartsGroup():
 # The Window that pops up and shows are affected Objects, calls it
 # The Dependencies
 # Objects within Compounds and Bodys and also Linked Objects are left out.
-# 
+#
 # NOTE: Theoretically we could use the App.ActiveDocument.DependencyGraph function,
 # to get really every Object behind a selection.
 def getDependenciesList( CompleteSelection ):
@@ -387,11 +387,11 @@ def getDependenciesList( CompleteSelection ):
             # Some Objects return None Objects,
             # even if it has the 'getSubObjects' attribute
             # 'getSubObjects' delivers unique Names with a trailing .
-            for SubObjName in SubObjNames:              
+            for SubObjName in SubObjNames:
                 SubObjects.append(App.ActiveDocument.getObject(SubObjName[0:-1]))
         # If they are more Sub-Objects within that particular selection,
         # go get them. It doesn't matter If it is a Group or Part or Link.
-        if SubObjects is not None:            
+        if SubObjects is not None:
             SubObjects = getDependenciesList(SubObjects)
             # Adding the Sub-Objects in that way, prevents nested Objects in Objects
             for SubObject in SubObjects:
@@ -760,7 +760,7 @@ self.YtranslSpinBox = QtGui.QDoubleSpinBox() → self.YtranslSpinBox = Asm4.QUni
 """
 class QUnitSpinBox(QtGui.QDoubleSpinBox):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)        
+        super().__init__(*args, **kwargs)
         _, self.length_divisor, self.default_unit = (
             App.Units.schemaTranslate(
                 App.Units.Quantity("1 mm"),
@@ -774,8 +774,8 @@ class QUnitSpinBox(QtGui.QDoubleSpinBox):
         return super().value() * self.length_divisor
 
     def setValue(self, distance: float):
-        """sets the value in mm"""        
+        """sets the value in mm"""
         return super().setValue(
             distance / self.length_divisor,
-        ) 
-        
+        )
+
