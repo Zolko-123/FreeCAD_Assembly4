@@ -85,30 +85,42 @@ class Assembly4Workbench(Workbench):
         """
     def Initialize(self):
         # Assembly4 version info
-        # with file VERSION
-        versionPath = os.path.join( Asm4_path, 'VERSION' )
-        versionFile = open(versionPath,"r")
-        version = versionFile.readlines()[1]
-        Asm4_version = version[:-1]
-        versionFile.close()
-        '''
-        # with file package.xml
+        # with file package.xml (FreeCAD ≥0.21)
         packageFile  = os.path.join( Asm4_path, 'package.xml' )
-        metadata     = FreeCAD.Metadata(packageFile)
-        Asm4_date    = metadata.Date
-        Asm4_version = metadata.Version
-        '''
+        try:
+            metadata     = FreeCAD.Metadata(packageFile)
+            Asm4_date    = metadata.Date
+            Asm4_version = metadata.Version
+        # with file VERSION (FreeCAD ≤0.20)
+        except:
+            FCVersion    = App.Version()[0]+'.'+App.Version()[1]
+            if FCVersion=='0.19':
+                FCDate       = " from "+App.Version()[4][0:4]
+            elif FCVersion=='0.20':
+                FCDate       = " from "+App.Version()[5][0:4]
+            else :
+                FCDate       = ""
+            message      = "You seem to be using FreeCAD version "+FCVersion+FCDate+" which is quite old. "
+            message     += "Some functionality of latest versions might be missing\n"
+            FreeCAD.Console.PrintMessage(message)
+            versionPath  = os.path.join( Asm4_path, 'VERSION' )
+            versionFile  = open(versionPath,"r")
+            # read second line
+            version = versionFile.readlines()[1]
+            versionFile.close()
+            # remove trailing newline
+            Asm4_version = version[:-1]    
+        
         FreeCAD.Console.PrintMessage(_atr("Asm4", "Initializing Assembly4 workbench")+ ' ('+Asm4_version+') .')
         FreeCADGui.updateGui()
         # import all stuff
         import newAssemblyCmd    # created an App::Part container called 'Assembly'
-        # import newModelCmd         # creates a new App::Part container called 'Model'
         self.dot()
         import newDatumCmd         # creates a new LCS in 'Model'
         self.dot()
         import newPartCmd          # creates a new App::Part container called 'Model'
         self.dot()
-        #import mirrorPartCmd       # creates a new App::Part container with the mirrored part of the selection
+        #import mirrorPartCmd     # OBSOLETE : creates a new App::Part container with the mirrored part of the selection
         #self.dot()
         import infoPartCmd         # edits part information for BoM
         self.dot()
@@ -116,8 +128,6 @@ class Assembly4Workbench(Workbench):
         self.dot()
         import placeLinkCmd        # places a linked part by snapping LCS (in the Part and in the Assembly)
         self.dot()
-        #import placeDatumCmd       # places an LCS relative to an external file (creates a local attached copy)
-        #self.dot()
         import importDatumCmd      # creates an LCS in assembly and attaches it to an LCS relative to an external file
         self.dot()
         import releaseAttachmentCmd# creates an LCS in assembly and attaches it to an LCS relative to an external file
@@ -140,7 +150,7 @@ class Assembly4Workbench(Workbench):
         self.dot()
         import makeBomCmd          # creates the parts list
         self.dot()
-        import exportFiles
+        import exportFiles         # creates a hierarchical tree listing of files in an assembly
         self.dot()
         import HelpCmd             # shows a basic help window
         self.dot()
@@ -347,7 +357,7 @@ class Assembly4Workbench(Workbench):
                 hasWB = True
         return hasWB
 
-
+    # prints a dot in the consome window to show progress
     def dot(self):
         FreeCAD.Console.PrintMessage(".")
         FreeCADGui.updateGui()

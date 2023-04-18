@@ -2,6 +2,9 @@
 
 ## Release notes
 
+* 2023.mm.dd (**0.50.2**) :  
+Finally managed to read version info from package.xml  
+
 * 2023.04.16 (**0.50.1**) :  
 Fixed some QLayout warnings with latest FreeCAD builds  
 
