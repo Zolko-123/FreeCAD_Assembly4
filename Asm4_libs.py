@@ -307,7 +307,8 @@ def checkModel():
 def getSelectionTree(index=0):
     retval = (None,None)
     # we obviously need something selected
-    if len(Gui.Selection.getSelection()) >= index:
+    # if len(Gui.Selection.getSelection()) >= index:
+    if len(Gui.Selection.getSelection()) > index:
         selObj = Gui.Selection.getSelection()[index]
         retval = ( selObj, None )
         # objects at the document root don't have a selection tree
