@@ -167,7 +167,7 @@ class checkInterference:
             model = doc.Assembly
             model.Visibility = False
 
-        doc.Parts.Visibility = True
+        doc.Parts.Visibility = False
         for obj in doc.Parts.Group:
             try:
                 obj.Visibility = False
@@ -193,7 +193,7 @@ class checkInterference:
         doc.recompute()
 
         i = 0
-        c = 1
+        c = 0
 
         checked_dict = dict()
 
