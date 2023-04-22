@@ -150,6 +150,8 @@ class Assembly4Workbench(Workbench):
         self.dot()
         import makeBomCmd          # creates the parts list
         self.dot()
+        import checkInterference   # check interferences btween parts inside the Assembly
+        self.dot()
         import exportFiles         # creates a hierarchical tree listing of files in an assembly
         self.dot()
         import HelpCmd             # shows a basic help window
@@ -235,6 +237,8 @@ class Assembly4Workbench(Workbench):
                         "Asm4_makeLocalBOM",
                         "Asm4_makeBOM",
                         "Asm4_listLinkedFiles",
+                        "Asm4_checkInterference",
+                        "Asm4_removeInterference",
                         "Asm4_Measure",
                         'Asm4_showLcs',
                         'Asm4_hideLcs',
@@ -280,6 +284,8 @@ class Assembly4Workbench(Workbench):
                         "Separator",
                         "Asm4_makeBOM",
                         "Asm4_listLinkedFiles",
+                        "Asm4_checkInterference",
+                        "Asm4_removeInterference",
                         "Asm4_Measure",
                         "Asm4_variablesCmd",
                         "Asm4_openConfigurations",
