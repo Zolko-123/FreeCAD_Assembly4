@@ -166,9 +166,9 @@ class makeBOM:
             if level > 0 and level <= max_level and self.follow_subassemblies == False:
                 # Recover the record, if any
                 try:
-                    if self.infoKeysUser.get("Doc_Label").get('active'):
+                    if self.infoKeysUser.get("Document").get('active'):
                         try:
-                            doc_name = getattr(obj, self.infoKeysUser.get("Doc_Label").get('userData'))
+                            doc_name = getattr(obj, self.infoKeysUser.get("Document").get('userData'))
                         except AttributeError:
                             doc_name = obj.Document.Name
                 except:
@@ -186,7 +186,7 @@ class makeBOM:
                    obj_label = obj.Document.Name
 
                 if obj_label in self.PartsList:
-                    if self.PartsList[obj_label]['Doc_Label'] == doc_name:
+                    if self.PartsList[obj_label]['Document'] == doc_name:
                         qtd = self.PartsList[obj_label]['Qty.'] + 1
 
                         print("ASM4> {level}| {qtd}x | {obj_typeid} | {obj_name} | {obj_label}".format(level=self.indent(level, tag=" "), obj_label=obj_label, obj_name=obj.FullName, obj_typeid=obj.TypeId, qtd=qtd))
@@ -241,9 +241,9 @@ class makeBOM:
             if level > 0 and level <= max_level:
                 # Recover the record, if any
                 try:
-                    if self.infoKeysUser.get("Doc_Label").get('active'):
+                    if self.infoKeysUser.get("Document").get('active'):
                         try:
-                            doc_name = getattr(obj, self.infoKeysUser.get("Doc_Label").get('userData'))
+                            doc_name = getattr(obj, self.infoKeysUser.get("Document").get('userData'))
                         except AttributeError:
                             doc_name = obj.Document.Name
                 except:
@@ -265,7 +265,7 @@ class makeBOM:
                    obj_label = obj.Document.Name
 
                 if obj_label in self.PartsList:
-                    if self.PartsList[obj_label]['Doc_Label'] == doc_name:
+                    if self.PartsList[obj_label]['Document'] == doc_name:
                         qtd = self.PartsList[obj_label]['Qty.'] + 1
                         print("ASM4> {level}| {qtd}x | {obj_typeid} | {obj_name} | {obj_label}".format(level=self.indent(level, tag=" "), obj_label=obj_label, obj_name=obj.FullName, obj_typeid=obj.TypeId, qtd=qtd))
                         self.Verbose += "> {level} | {type}: {label}, {fullname}\n".format(level=obj_label, type="PART", label=obj_label, fullname=obj.FullName)
@@ -315,18 +315,21 @@ class makeBOM:
             # if level > 0 and level <= max_level and Asm4.isAsm4Model(parent):
             if level > 0 and level <= max_level :
 
-                # Recover the record, if any
-                try:
-                    if self.infoKeysUser.get("Doc_Label").get('active'):
-                        try:
-                            doc_name = getattr(obj, self.infoKeysUser.get("Doc_Label").get('userData'))
-                        except AttributeError:
-                            doc_name = obj.Document.Name
-                except:
-                    doc_name = obj.Document.Name
+                ##### This try/except isn't working right - Document field can't be set, but is active by default.
+                ##### This results in a blank document name and the Quantity never increments on any part.
+                ## Recover the record, if any
+                #try:
+                #    if self.infoKeysUser.get("Document").get('active'):
+                #        try:
+                #            doc_name = getattr(obj, self.infoKeysUser.get("Document").get('userData'))
+                #        except AttributeError:
+                #            doc_name = obj.Document.Name
+                #except:
+                #    doc_name = obj.Document.Name
+                doc_name = obj.Document.Name
 
                 if obj.Label in self.PartsList:
-                    if self.PartsList[obj.Label]['Doc_Label'] == doc_name:
+                    if self.PartsList[obj.Label]['Document'] == doc_name:
                         qtd = self.PartsList[obj.Label]['Qty.'] + 1
                         print("ASM4> {level}{qtd}x | {obj_typeid} | {obj_name} | {obj_label}".format(level=self.indent(level, tag=" "), obj_label=obj.Label, obj_name=obj.FullName, obj_typeid=obj.TypeId, qtd=qtd))
                         self.Verbose += "> {level} | {type}: {label}, {fullname}\n".format(level=obj.Label, type="PART", label=obj.Label, fullname=obj.FullName)
@@ -340,10 +343,16 @@ class makeBOM:
                     self.PartsList[obj.Label] = dict()
                     for prop in self.infoKeysUser:
                         self.Verbose +=  "- " + prop + ': '
-                        if prop == 'Doc_Label':
+                        if prop == 'Document':
                             data = obj.Document.Label
-                        elif prop == 'Part_Label':
-                            data = obj.Label
+                        elif prop == 'PartName':
+                            data = obj.PartName
+                        elif prop == 'PartLength':
+                            data = obj.PartLength
+                        elif prop == 'PartWidth':
+                            data = obj.PartWidth
+                        elif prop == 'PartHeight':
+                            data = obj.PartHeight
                         else:
                             data = "-"
 
@@ -357,16 +366,31 @@ class makeBOM:
 
 
         #============================
-        # FATENERS
+        # FASTENERS AND ARRAYS
         #============================
 
         elif obj.TypeId == 'Part::FeaturePython' and (obj.Content.find("FastenersCmd") or (obj.Content.find("PCBStandoff")) > -1):
+            
             if level > 0 and level <= max_level:
                 doc_name = os.path.splitext(os.path.basename(obj.Document.FileName))[0]
                 obj_label = re.sub(r'[0-9]+$', '', obj.Label)
 
-                if obj_label in self.PartsList:
-                    if self.PartsList[obj_label]['Doc_Label'] == doc_name:
+                # if array
+                if obj.Content.find("Orthogonal array"):
+                  # count up the objects in the array
+                  x_count = obj.NumberX
+                  y_count = obj.NumberY
+                  z_count = obj.NumberZ
+                  total = x_count * y_count * z_count
+                  # identify the linked object
+                  subobj = obj.Base.LinkedObject
+                  # count each instance of linked object
+                  for i in range(0, total):
+                    print("    ", i, "...")
+                    self.listParts(subobj, level, parent=obj)
+
+                elif obj_label in self.PartsList:
+                    if self.PartsList[obj_label]['Document'] == doc_name:
                         qtd = self.PartsList[obj_label]['Qty.'] + 1
                         print("ASM4> {level}| {qtd}x | {obj_typeid} | {obj_name} | {obj_label}".format(level=self.indent(level, tag=" "), obj_label=obj_label, obj_name=obj.FullName, obj_typeid=obj.TypeId, qtd=qtd))
                         self.Verbose += "> {level} | {type}: {label}, {fullname}\n".format(level=obj_label, type="FASTENER", label=obj_label, fullname=obj.FullName)
@@ -374,7 +398,6 @@ class makeBOM:
                         self.PartsList[obj_label]['Qty.'] = qtd
 
                 else: # if the part is a was not added already
-
                     print("ASM4> {level}| 1x | {obj_typeid} | {obj_name} | {obj_label}".format(level=self.indent(level, tag=" "), obj_label=obj_label, obj_name=obj.FullName, obj_typeid=obj.TypeId))
 
                     self.Verbose += "> {level} | {type}: {label}, {fullname}\n".format(level=obj_label, type="FASTENER", label=obj_label, fullname=obj.FullName)
@@ -382,7 +405,7 @@ class makeBOM:
 
                     self.PartsList[obj_label] = dict()
                     for prop in self.infoKeysUser:
-                        if prop == 'Doc_Label':
+                        if prop == 'Document':
                             data = doc_name
                         elif prop == 'Part_Label':
                             data = obj_label
