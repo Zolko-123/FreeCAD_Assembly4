@@ -115,9 +115,10 @@ class VariantLink( object ):
             # update obj
             self.makeVarLink(obj)
             self.fillVarProperties(obj)
+            obj.Type='Asm4::VariantLink'
             self.restorePlacementEE(obj)
             self.execute(obj)
-            obj.Type='Asm4::VariantLink'
+            ViewProviderVariant(obj.ViewObject)
             obj.recompute()
 
     # make the Asm4EE according to the properties stored in the varLink object
@@ -168,6 +169,9 @@ class VariantLink( object ):
         # the actual linked object property with a customized name
         obj.addProperty("App::PropertyXLink","LinkedObject"," Link",
                         'Link to the modified object')
+        # the actual linked object property with a customized name
+        obj.addProperty("App::PropertyString","Type")
+
         # install the actual extension
         obj.addExtension('App::LinkExtensionPython')
         # initiate the extension
@@ -196,19 +200,8 @@ class VariantLink( object ):
             # this changes the available variant parameters
             if prop == 'SourceObject':
                 pass
-                '''
-                if obj.LinkedObject is None:
-                    FCC.PrintMessage('Creating new variant ...\n')
-                    self.makeVarLink(obj)
-                    self.fillVarProperties(obj)
-                elif hasattr(obj.LinkedObject,'Document'):
-                    FCC.PrintMessage('Updating variant ...\n')
-                    oldVarDoc = obj.LinkedObject.Document
-                # setting the LinkedObject to the SourceObject temporarily
-                # obj.LinkedObject = obj.SourceObject
-                # self.makeVariant(obj)
-                '''
 
+    # this is never actually called
     # see https://forum.freecadweb.org/viewtopic.php?f=10&t=72728&p=634441#p634361
     def onSettingDocument(self, obj):
         FCC.PrintMessage('Triggered onSettingDocument() in VariantLink\n')
@@ -227,6 +220,29 @@ class VariantLink( object ):
         obj.LinkedObject = obj.SourceObject
 
 
+# variantLink viewprovider
+class ViewProviderVariant(object):
+    def __init__( self, vobj ):
+        vobj.Proxy = self
+        self.attach(vobj)
+
+    def attach(self,vobj):
+        self.ViewObject = vobj
+        self.Object = vobj.Object
+
+    # return an icon corresponding to the variant link type
+    def getIcon(self):
+        iconPath = os.path.join( Asm4.iconPath, 'Variant_Link.svg' )
+        if hasattr( self.Object.Type, 'Type' ) and self.Object.Type == 'Asm4::VariantLink':
+            iconPath = os.path.join( Asm4.iconPath, 'Variant_Link.svg' )
+        return iconPath
+                
+    def __getstate__(self):
+        return None
+
+    def __setstate__(self, _state):
+        return None
+    
 
 
 
