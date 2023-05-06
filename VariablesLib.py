@@ -238,7 +238,8 @@ class delVariable():
 
     def IsActive(self):
         # if there is an Asm4 Model in the ActiveDocument
-        if getVariables():
+        #if getVariables():
+        if Asm4.getVarContainer():
             return True
         return False
 
