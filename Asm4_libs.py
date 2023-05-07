@@ -749,6 +749,69 @@ def getSelectedDatum():
     return selectedObj
 
 
+def create_assembly():
+    # provision to supply a document in create_assembly call different
+    # from App.ActiveDocument. This sohould however modify each calls
+    # like getAssembly and similar methods.
+    d_doc = App.ActiveDocument
+
+    # check whether there is already Model in the document
+    # assy = App.ActiveDocument.getObject('Assembly')
+
+    assy = getAssembly()
+    if assy is not None:
+        if assy.TypeId=='App::Part':
+            message = "This document already contains a valid Assembly, please use it"
+            warningBox(message)
+            # set the Type to Assembly
+            assy.Type = 'Assembly'
+        else:
+            message  = "This document already contains another FreeCAD object called \"Assembly\", "
+            message += "but it's of type \""+assy.TypeId+"\", unsuitable for an assembly. I can\'t proceed."
+            warningBox(message)
+        # abort
+        return
+
+    # there is no object called "Assembly"
+    # create a group 'Parts' to hold all parts in the assembly document (if any)
+    # must be done before creating the assembly
+    partsGroup = d_doc.getObject('Parts')
+    if partsGroup is None:
+        partsGroup = d_doc.addObject( 'App::DocumentObjectGroup', 'Parts' )
+    # create a new App::Part called 'Assembly'
+    assembly = d_doc.addObject('App::Part','Assembly')
+    # set the type as a "proof" that it's an Assembly
+    assembly.Type='Assembly'
+    assembly.addProperty( 'App::PropertyString', 'AssemblyType', 'Assembly' )
+    assembly.AssemblyType = 'Part::Link'
+    # add an LCS at the root of the Model, and attach it to the 'Origin'
+    lcs0 = assembly.newObject('PartDesign::CoordinateSystem','LCS_Origin')
+    lcs0.Support = [(assembly.Origin.OriginFeatures[0],'')]
+    lcs0.MapMode = 'ObjectXY'
+    lcs0.MapReversed = False
+    # create a group Constraints to store future solver constraints there
+    assembly.newObject('App::DocumentObjectGroup','Constraints')
+    d_doc.getObject('Constraints').Visibility = False
+    # create an object Variables to hold variables to be used in this document
+    assembly.addObject(makeVarContainer())
+    # create a group Configurations to store future solver constraints there
+    assembly.newObject('App::DocumentObjectGroup','Configurations')
+    d_doc.getObject('Configurations').Visibility = False
+
+    # move existing parts and bodies at the document root to the Parts group
+    # not nested inside other parts, to keep hierarchy
+    if partsGroup.TypeId=='App::DocumentObjectGroup':
+        for obj in d_doc.Objects:
+            if obj.TypeId in containerTypes and obj.Name!='Assembly' and obj.getParentGeoFeatureGroup() is None:
+                partsGroup.addObject(obj)
+    else:
+        warningBox( 'There seems to already be a Parts object, you might get unexpected behaviour' )
+
+    # recompute to get rid of the small overlays
+    assembly.recompute()
+    d_doc.recompute()
+
+
 """
     +-----------------------------------------------+
     |                 Unit Spin Box                 |
