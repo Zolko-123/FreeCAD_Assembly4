@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Svg Vector Icons : http://www.onlinewebfonts.com/icon -->
+
+<svg
+   version="1.1"
+   x="0px"
+   y="0px"
+   viewBox="0 0 32 32"
+   enable-background="new 0 0 1000 1000"
+   xml:space="preserve"
+   id="svg24"
+   sodipodi:docname="Asm4_Interference_Check.svg"
+   width="32"
+   height="32"
+   inkscape:version="1.1.2 (0a00cf5339, 2022-02-04)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+   id="defs28" /><sodipodi:namedview
+   id="namedview26"
+   pagecolor="#ffffff"
+   bordercolor="#666666"
+   borderopacity="1.0"
+   inkscape:pageshadow="2"
+   inkscape:pageopacity="0.0"
+   inkscape:pagecheckerboard="0"
+   showgrid="false"
+   inkscape:zoom="10.196272"
+   inkscape:cx="-5.3941283"
+   inkscape:cy="30.746532"
+   inkscape:window-width="1920"
+   inkscape:window-height="1136"
+   inkscape:window-x="0"
+   inkscape:window-y="27"
+   inkscape:window-maximized="1"
+   inkscape:current-layer="g22" />
+<metadata
+   id="metadata2"> Svg Vector Icons : http://www.onlinewebfonts.com/icon </metadata>
+<g
+   id="g22"
+   transform="matrix(0.03265282,0,0,0.03265282,-0.32661882,-0.32657326)"
+   style="stroke-width:30.6252"><g
+     id="g1716"
+     transform="matrix(1.0846626,0,0,1.0846942,-21.187767,-43.126685)"
+     style="stroke:#000000;stroke-width:19.7641;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"><circle
+       style="fill:#cccccc;fill-opacity:1;stroke:#000000;stroke-width:19.7641;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke"
+       id="path1597"
+       cx="597.13208"
+       cy="612.01807"
+       r="271.60852" /><rect
+       style="fill:#cccccc;fill-opacity:1;stroke:#000000;stroke-width:19.7641;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke"
+       id="rect1463"
+       width="471.50348"
+       height="455.88138"
+       x="92.284813"
+       y="117.82006" /><path
+       id="rect1463-3"
+       style="fill:#ff00ff;fill-opacity:1;stroke:#000000;stroke-width:19.7641;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke"
+       d="M 563.78827,342.75613 A 271.60852,271.60852 0 0 0 329.91204,573.70142 h 233.87623 z" /></g></g>
+</svg>
