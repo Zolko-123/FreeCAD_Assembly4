@@ -175,29 +175,36 @@ class importDatumCmd():
         # build the Placement expression
         # the first [0] object is at the document root and its Placement is ignored
         # the second [1] object gets a special treatment, it is always in the current document
-        expression = selTree[1]+'.Placement'
-        obj1 = App.ActiveDocument.getObject(selTree[1])
+        # but Groups don't have Placement properties, so we iterate until finding something.
+        # Some idiot will certainly make 15 levels of Groups
+        first = 1
+        firstObj = App.ActiveDocument.getObject(selTree[first])
+        while not hasattr(firstObj,'Placement'):
+            first += 1
+            firstObj = App.ActiveDocument.getObject(selTree[first])
+        expression = selTree[first]+'.Placement'
         # the document where an object is
-        if obj1.isDerivedFrom('App::Link') and obj1.LinkedObject.Document != App.ActiveDocument:
-            doc = obj1.LinkedObject.Document
+        if firstObj.isDerivedFrom('App::Link') and firstObj.LinkedObject.Document != App.ActiveDocument:
+            doc = firstObj.LinkedObject.Document
         else:
             doc = App.ActiveDocument
-        # parse the tree
-        for objName in selTree[2:]:
-            #FCC.PrintMessage('treating '+objName+'\n')
+        # parse the rest of the tree
+        for objName in selTree[first+1:]:
             obj = doc.getObject(objName)
-            # the *previous* object was a link to doc
-            if doc == App.ActiveDocument:
-                expression += ' * '+objName+'.Placement'
-            else:
-                expression += ' * '+doc.Name+'#'+objName+'.Placement'
+            # Groups don't have Placement properties, ignore
+            if hasattr(obj,'Placement'):
+                # the *previous* object was a link to doc
+                if doc == App.ActiveDocument:
+                    expression += ' * '+objName+'.Placement'
+                else:
+                    expression += ' * '+doc.Name+'#'+objName+'.Placement'
             # check whether *this* object is a link to an *external* doc
             if obj.isDerivedFrom('App::Link') and obj.LinkedObject.Document != App.ActiveDocument:
                 doc = obj.LinkedObject.Document
             # else, keep the same document
             else:
                 pass
-        #FCC.PrintMessage('expression_ = '+expression+'\n')
+        # FCC.PrintMessage('expression = '+expression+'\n')
         return expression
 
 

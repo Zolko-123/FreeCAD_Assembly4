@@ -15,7 +15,7 @@ import FreeCAD as App
 from FreeCAD import Console as FCC
 
 import Asm4_libs as Asm4
-from Asm4_objects import VariantLink
+from Asm4_objects import VariantLink, ViewProviderVariant
 
 
 
@@ -201,21 +201,29 @@ class makeVariantLink():
                 self.rootAssembly.addObject(variantLink)
                 # assign the user-selected selectedPart to it
                 variantLink.SourceObject = selectedPart
+                # add the Asm4 properties
+                Asm4.makeAsmProperties(variantLink)
+                variantLink.Type = 'Asm4::VariantLink'
+                # apply the ViewProvider
+                ViewProviderVariant(variantLink.ViewObject)
                 # update the link to actually make all things inside
                 variantLink.recompute()
                 # If the name was already chosen, and a UID was generated:
                 if variantLink.Name != linkName:
                     # we try to set the label to the chosen name
                     variantLink.Label = linkName
-                # add the Asm4 properties
-                Asm4.makeAsmProperties(variantLink)
-                variantLink.Type = 'Asm4::VariantLink'
+                # update
                 variantLink.recompute()
                 # close the dialog UI...
                 self.UI.close()
-                # ... and launch the placement of the inserted part
+                # select/highlight the newly created link
                 Gui.Selection.clearSelection()
-                Gui.Selection.addSelection( self.activeDoc.Name, self.rootAssembly.Name, variantLink.Name+'.' )
+                doc = self.activeDoc.Name
+                asm = self.rootAssembly.Name
+                lnk = variantLink.Name+'.'
+                # FCC.PrintMessage('*'+doc+'*'+asm+'*'+lnk+'*\n')
+                Gui.Selection.addSelection( doc, asm, lnk )
+                # launch the placement of the inserted part
                 # ... but only if we're in an Asm4 Model
                 if self.rootAssembly == Asm4.getAssembly():
                     Gui.runCommand( 'Asm4_placeLink' )

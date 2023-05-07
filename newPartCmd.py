@@ -88,21 +88,22 @@ class newPart:
                 # add AttachmentEngine
                 # oooops, no, creates problems because it creates an AttachmentOffset property that collides with Asm4
                 # newPart.addExtension("Part::AttachExtensionPython")
-            # If an App::Part container is selected, move the created part/body/group there
-            container = None
-            if len(Gui.Selection.getSelection())==1:
-                obj = Gui.Selection.getSelection()[0]
-                if obj.TypeId == 'App::Part':
-                    container = obj
-            if container :
-                if newPart.Name != 'Assembly':
+            if newPart.Name != 'Assembly':
+                container = None
+                # If an App::Part or a Group container is selected, put the created part/body/group there
+                if len(Gui.Selection.getSelection())==1:
+                    obj = Gui.Selection.getSelection()[0]
+                    if obj.TypeId=='App::Part' or obj.TypeId=='App::DocumentObjectGroup':
+                        container = obj
+                elif Asm4.getAssembly():
+                    # if there is a Parts group:
+                    partsGroup = App.ActiveDocument.getObject('Parts')
+                    if partsGroup and partsGroup.TypeId=='App::DocumentObjectGroup' and newPart.TypeId in Asm4.containerTypes:
+                        container = partsGroup
+                    else:
+                        container = Asm4.getAssembly()
+                if container :
                     container.addObject(newPart)
-            # If the 'Part' group exists, move it there:
-            else:
-                partsGroup = App.ActiveDocument.getObject('Parts')
-                if partsGroup and partsGroup.TypeId=='App::DocumentObjectGroup' and newPart.TypeId in Asm4.containerTypes:
-                    if newPart.Name != 'Assembly':
-                        partsGroup.addObject(newPart)
             # recompute
             newPart.recompute()
             App.ActiveDocument.recompute()

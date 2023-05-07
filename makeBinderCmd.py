@@ -48,26 +48,32 @@ class makeShapeBinder():
         rootAssembly = Asm4.getAssembly()
         # get the selected objects
         selEx = Gui.Selection.getSelectionEx("", 0)[0].SubElementNames
-        (objName,dot,shape) = selEx[0].partition('.')
-        # the first element should be the name of a child in the assembly
-        if objName+'.' in rootAssembly.getSubObjects():
-            # get the object where the selected shapes are
-            obj = App.ActiveDocument.getObject(objName)
-            # this is a double-check, should always be true at this point
-            if obj:
-                shape = (shape,)
-                # we must remove the first name in each selEx element
-                if len(selEx)>1:
-                    # the first one (shape) has already been done
-                    for sel in selEx[1:]:
-                        (objName,dot,shp) = sel.partition('.')
-                        shape += (shp,)
-                # now create the SubShapeBinder
-                binder  = rootAssembly.newObject('PartDesign::SubShapeBinder', 'ShapeBinder')
-                binder.Support = [(obj, shape)]
-                binder.MakeFace = False
-                binder.ViewObject.LineColor = (0.,1.,0.)
-                binder.recompute()                   
+        for sel in selEx:
+            (objName,dot,shape) = sel.partition('.')
+            # the first element should be the name of a child in the assembly
+            if objName+'.' in rootAssembly.getSubObjects():
+                # get the object where the selected shapes are
+                obj = App.ActiveDocument.getObject(objName)
+                # this is a double-check, should always be true at this point
+                if obj:
+                    shape_name = '__'+objName+'__'+shape
+                    '''
+                    shape = (shape,)
+                    # we must remove the first name in each selEx element
+                    if len(selEx)>1:
+                        # the first one (shape) has already been done
+                        for sel in selEx[1:]:
+                            (objName,dot,shp) = sel.partition('.')
+                            shape += (shp,)
+                            shape_name += '__'+objName
+                    '''
+                    # now create the SubShapeBinder
+                    binder  = rootAssembly.newObject('PartDesign::SubShapeBinder', shape_name)
+                    binder.Label = shape_name
+                    binder.Support = [(obj, (shape,))]
+                    binder.MakeFace = False
+                    binder.ViewObject.LineColor = (0.,1.,0.)
+                    binder.recompute()                   
 
 
 
