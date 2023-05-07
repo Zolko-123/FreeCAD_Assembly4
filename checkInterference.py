@@ -46,7 +46,7 @@ class checkInterference:
         self.modelDoc.recompute()
 
 
-
+    # the real stuff happens here
     def check_interferences(self, ilim=0, jlim=0):
         # self.remove_interference_folder()
         doc = App.ActiveDocument
@@ -63,44 +63,32 @@ class checkInterference:
         self.modelDoc.Tip = intersections_folder
         intersections_folder.Label = 'Interferences'
 
-        shapes_copy = self.modelDoc.addObject('App::Part', 'ShapesCopies')
+        shapes_copy = self.modelDoc.addObject('App::Part', 'ShapeCopies')
         self.modelDoc.Tip = shapes_copy
-        shapes_copy.Label = 'ShapesCopies'
+        shapes_copy.Label = 'ShapeCopies'
         intersections_folder.addObject(shapes_copy)
 
         # Create the Common folder inside of the Interferences
         Intersections = self.modelDoc.addObject('App::DocumentObjectGroup', 'Intersections')
         self.modelDoc.Tip = Intersections
-        Intersections.Label = 'Common'
+        Intersections.Label = 'Intersections'
         intersections_folder.addObject(Intersections)
-
-        self.modelDoc.recompute()
 
         i = 0
         c = 0
-
         checked_dict = dict()
 
+        # parse the assembly
         for obj1 in self.model.Group:
-
-            if obj1.Visibility == True and obj1.TypeId == 'App::Link':
-            # if obj1.Visibility == True and
-            #     ((obj1.TypeId == 'Part::FeaturePython' and (obj1.Content.find("FastenersCmd") or (obj1.Content.find("PCBStandoff")) > -1)) or
-            #     (obj1.TypeId == 'App::Link')):
-
+            # we only check for visible objects
+            if obj1.Visibility==True and ( obj1.isDerivedFrom('App::Link') or obj1.isDerivedFrom('Part::Feature') ):
                 print("\n==============================================================")
                 i = i + 1
                 j = 0
-
+                # parse the assembly
                 for obj2 in self.model.Group:
-
                     if obj2 != obj1:
-
-                        if obj2.Visibility == True and obj2.TypeId == 'App::Link':
-                        # if obj2.Visibility == True and
-                        #     ((obj2.TypeId == 'Part::FeaturePython' and (obj2.Content.find("FastenersCmd") or (obj2.Content.find("PCBStandoff")) > -1)) or
-                        #     (obj2.TypeId == 'App::Link')):
-
+                        if obj2.Visibility==True and ( obj2.isDerivedFrom('App::Link') or obj2.isDerivedFrom('Part::Feature') ):
                             j = j + 1
                             if not jlim == 0 and j >= jlim:
                                 break
@@ -109,17 +97,15 @@ class checkInterference:
 
                             if not obj1.Label in checked_dict:
                                     c += 1
-
                                     # print("1st time {} being used, checking intersection (1)...".format(obj1.Label))
-
                                     obj1_list = []
                                     obj1_list.append(obj2.Label)
                                     checked_dict[obj1.Label] = obj1_list
 
-                                    obj1_model_cpy = self.make_simple_part_copy(doc, obj1)
+                                    obj1_model_cpy = self.make_shape_copy(doc, obj1)
                                     shapes_copy.addObject(obj1_model_cpy)
                                     obj1_model_cpy.Visibility = True
-                                    obj1_model_cpy.ViewObject.Transparency = 92
+                                    obj1_model_cpy.ViewObject.Transparency = 88
                                     obj1_model_cpy.ViewObject.ShapeColor = (0.90, 0.90, 0.90)
                                     obj1_model_cpy.ViewObject.DisplayMode = "Shaded"
 
@@ -129,16 +115,16 @@ class checkInterference:
                                         obj2_list.append(obj1.Label)
                                         checked_dict[obj2.Label] = obj2_list
 
-                                        obj2_model_cpy = self.make_simple_part_copy(doc, obj2)
+                                        obj2_model_cpy = self.make_shape_copy(doc, obj2)
                                         shapes_copy.addObject(obj2_model_cpy)
                                         obj2_model_cpy.Visibility = True
-                                        obj2_model_cpy.ViewObject.Transparency = 92
+                                        obj2_model_cpy.ViewObject.Transparency = 88
                                         obj2_model_cpy.ViewObject.ShapeColor = (0.90, 0.90, 0.90)
                                         obj2_model_cpy.ViewObject.DisplayMode = "Shaded"
 
 
-                                    obj1_cpy = self.make_simple_part_copy(doc, obj1)
-                                    obj2_cpy = self.make_simple_part_copy(doc, obj2)
+                                    obj1_cpy = self.make_shape_copy(doc, obj1)
+                                    obj2_cpy = self.make_shape_copy(doc, obj2)
                                     common = self.make_intersection(doc, obj1_cpy, obj2_cpy, c)
                                     Intersections.addObject(common)
 
@@ -157,14 +143,14 @@ class checkInterference:
                                         obj2_list.append(obj1.Label)
                                         checked_dict[obj2.Label] = obj2_list
 
-                                    obj1_cpy = self.make_simple_part_copy(doc, obj1)
-                                    obj2_cpy = self.make_simple_part_copy(doc, obj2)
+                                    obj1_cpy = self.make_shape_copy(doc, obj1)
+                                    obj2_cpy = self.make_shape_copy(doc, obj2)
                                     common = self.make_intersection(doc, obj1_cpy, obj2_cpy, c)
                                     Intersections.addObject(common)
                                 # else:
                                     # print("Intersection already checked!")
-                            Gui.updateGui()
-                Gui.updateGui()
+                            #Gui.updateGui()
+                #Gui.updateGui()
 
             if not ilim == 0 and i >= ilim:
                 break
@@ -180,9 +166,10 @@ class checkInterference:
                     b = rnd.random()
                     obj.ViewObject.ShapeColor = (r, g, b)
 
-            Gui.updateGui()
+            #Gui.updateGui()
 
         self.modelDoc.recompute()
+        Gui.updateGui()
 
         # if obj1.TypeId == 'App::DocumentObjectGroup':
         #     for objname in obj1.getSubObjects():
@@ -201,15 +188,21 @@ class checkInterference:
         print("")
 
 
-    def make_simple_part_copy(self, doc, obj):
+    # makes a new Part::Feature and assignes it the shape of the original object
+    # works also with ShapeBinders but it's much slower
+    def make_shape_copy(self, doc, obj):
+        '''
+        new_obj = doc.addObject('PartDesign::SubShapeBinder', obj.Label)
+        new_obj.Support = [(obj, ('',))]
+        '''
         __shape = Part.getShape(obj, '', needSubElement=False, refine=False)
-        doc.addObject('Part::Feature', obj.Label).Shape = __shape
-        doc.ActiveObject.Label = obj.Label
-        new_obj = doc.ActiveObject
+        new_obj = doc.addObject('Part::Feature', obj.Label)
+        new_obj.Label = obj.Label
+        new_obj.Shape = __shape
         new_obj.ViewObject.ShapeColor = getattr(obj.getLinkedObject(True).ViewObject, 'ShapeColor', new_obj.ViewObject.ShapeColor)
         new_obj.ViewObject.LineColor  = getattr(obj.getLinkedObject(True).ViewObject, 'LineColor',  new_obj.ViewObject.LineColor)
         new_obj.ViewObject.PointColor = getattr(obj.getLinkedObject(True).ViewObject, 'PointColor', new_obj.ViewObject.PointColor)
-        doc.recompute()
+        # doc.recompute()
         return new_obj
 
 
