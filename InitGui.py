@@ -120,8 +120,6 @@ class Assembly4Workbench(Workbench):
         self.dot()
         import newPartCmd          # creates a new App::Part container called 'Model'
         self.dot()
-        #import mirrorPartCmd     # OBSOLETE : creates a new App::Part container with the mirrored part of the selection
-        #self.dot()
         import infoPartCmd         # edits part information for BoM
         self.dot()
         import insertLinkCmd       # inserts an App::Link to a 'Model' in another file
@@ -238,7 +236,6 @@ class Assembly4Workbench(Workbench):
                         "Asm4_makeBOM",
                         "Asm4_listLinkedFiles",
                         "Asm4_checkInterference",
-                        "Asm4_removeInterference",
                         "Asm4_Measure",
                         'Asm4_showLcs',
                         'Asm4_hideLcs',
@@ -285,7 +282,6 @@ class Assembly4Workbench(Workbench):
                         "Asm4_makeBOM",
                         "Asm4_listLinkedFiles",
                         "Asm4_checkInterference",
-                        "Asm4_removeInterference",
                         "Asm4_Measure",
                         "Asm4_variablesCmd",
                         "Asm4_openConfigurations",
