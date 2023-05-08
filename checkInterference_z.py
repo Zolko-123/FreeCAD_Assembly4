@@ -51,6 +51,7 @@ class checkInterference:
         self.assembly.Visibility = True
         self.modelDoc.recompute()
         Gui.updateGui()
+
         # Create the Interferences folder
         self.InterferencesGroup = self.modelDoc.addObject('App::DocumentObjectGroup', 'Interferences')
         self.InterferencesGroup.Label = 'Interferences'
@@ -69,12 +70,13 @@ class checkInterference:
 
         # build the list of objects to consider
         self.partList = []
-        print("\n>> BUILDING PART LIST:")
+        print("\n>> BUILDING PART LIST ...")
         for obj in self.assembly.Group:
             if obj.Visibility and obj.TypeId in PARTID2CHECK :
                 obj_cpy = self.make_shape_copy( self.modelDoc, obj )
                 self.ShapesCopy.addObject( obj_cpy )
                 self.partList.append( obj_cpy )
+        print( "FOUND {} OBJECTS\n".format(len(self.partList)) )
         self.modelDoc.recompute()
         Gui.updateGui()
 
@@ -83,7 +85,7 @@ class checkInterference:
             self.assembly.Visibility = False
             self.parse_interferences( self.modelDoc )
             # Update intersections (remove empty and change colors)
-            print("\n>> PROCESSING INTERSECTIONS:")
+            print("\n>> PROCESSING INTERSECTIONS ... ")
             hasConflict = False
             for obj in self.ConflictsGroup.Group:
                 if obj.TypeId == "Part::MultiCommon" :
@@ -100,9 +102,9 @@ class checkInterference:
             print('Not enough parts for intersections\n')
         # Summary
         if hasConflict:
-            print("\n>> DONE. There seems to be some conflicts between parts\n")
+            print("DONE. \nThere seems to be some conflicts between parts\n")
         else:
-            print("\n>> DONE. No conflicts found\n")
+            print("DONE. No conflicts found\n")
         self.modelDoc.recompute()
         Gui.updateGui()
 
