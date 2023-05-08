@@ -81,14 +81,14 @@ class checkInterference:
         # parse the assembly
         for obj1 in self.model.Group:
             # we only check for visible objects
-            if obj1.Visibility==True and ( obj1.isDerivedFrom('App::Link') or obj1.isDerivedFrom('Part::Feature') ):
+            if obj1.Visibility == True and obj1.TypeId == 'App::Link' :
                 print("\n==============================================================")
                 i = i + 1
                 j = 0
                 # parse the assembly
                 for obj2 in self.model.Group:
                     if obj2 != obj1:
-                        if obj2.Visibility==True and ( obj2.isDerivedFrom('App::Link') or obj2.isDerivedFrom('Part::Feature') ):
+                        if obj2.Visibility==True and obj2.TypeId == 'App::Link' :
                             j = j + 1
                             if not jlim == 0 and j >= jlim:
                                 break
