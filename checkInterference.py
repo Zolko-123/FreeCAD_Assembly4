@@ -45,17 +45,15 @@ class checkInterference:
         self.check_interferences()
         self.modelDoc.recompute()
 
-
     # the real stuff happens here
     def check_interferences(self, ilim=0, jlim=0):
-        # self.remove_interference_folder()
         doc = App.ActiveDocument
         self.model.Visibility = False
         self.modelDoc.Parts.Visibility = False
         for obj in self.modelDoc.Parts.Group:
             try:
                 obj.Visibility = False
-            except: 
+            except:
                 pass
 
         # Create the Interferences folder
@@ -122,65 +120,25 @@ class checkInterference:
                                         obj2_model_cpy.ViewObject.ShapeColor = (0.90, 0.90, 0.90)
                                         obj2_model_cpy.ViewObject.DisplayMode = "Shaded"
 
-
                                     obj1_cpy = self.make_shape_copy(doc, obj1)
                                     obj2_cpy = self.make_shape_copy(doc, obj2)
                                     common = self.make_intersection(doc, obj1_cpy, obj2_cpy, c)
-                                    Intersections.addObject(common)
-
-                            else:
-                                if not obj2.Label in checked_dict[obj1.Label]:
-                                    c += 1
-
-                                    # print("Obj {} already used, checking intersection (2)...".format(obj1.Label))
-
-                                    obj1_list = checked_dict[obj1.Label]
-                                    obj1_list.append(obj2.Label)
-                                    checked_dict[obj1.Label] = obj1_list
-
-                                    if obj2.Label in checked_dict:
-                                        obj2_list = checked_dict[obj2.Label]
-                                        obj2_list.append(obj1.Label)
-                                        checked_dict[obj2.Label] = obj2_list
-
-                                    obj1_cpy = self.make_shape_copy(doc, obj1)
-                                    obj2_cpy = self.make_shape_copy(doc, obj2)
-                                    common = self.make_intersection(doc, obj1_cpy, obj2_cpy, c)
-                                    Intersections.addObject(common)
-                                # else:
-                                    # print("Intersection already checked!")
-                            #Gui.updateGui()
-                #Gui.updateGui()
+                                    # if common.TypeId == "Part::MultiCommon":
+                                    if not self.remove_empty_common(obj):
+                                        common.ViewObject.Transparency = 60
+                                        r = rnd.random()
+                                        g = rnd.random()
+                                        b = rnd.random()
+                                        common.ViewObject.ShapeColor = (r, g, b)
+                                        Intersections.addObject(common)
+                                    else:
+                                        self.modelDoc.removeObject(common.Name)
 
             if not ilim == 0 and i >= ilim:
                 break
 
-        # Update intersections (remove empty and change colors)
-        print("\n>> PROCESSING INTERSECTIONS:")
-        for obj in Intersections.Group:
-            if obj.TypeId == "Part::MultiCommon":
-                if not self.remove_empty_common(obj):
-                    obj.ViewObject.Transparency = 60
-                    r = rnd.random()
-                    g = rnd.random()
-                    b = rnd.random()
-                    obj.ViewObject.ShapeColor = (r, g, b)
-
-            #Gui.updateGui()
-
         self.modelDoc.recompute()
         Gui.updateGui()
-
-        # if obj1.TypeId == 'App::DocumentObjectGroup':
-        #     for objname in obj1.getSubObjects():
-        #         subobj = obj.Document.getObject(objname[0:-1])
-
-
-        # print("\n>> CHECKED OBJECTS:")
-        # for a, key in enumerate(checked_dict):
-        #     print("  ", a+1, key)
-        #     for b, item in enumerate(checked_dict[key]):
-        #         print("    ", b+1, item)
 
         print("\n>> USED PARTS:")
         for p, part in enumerate(checked_dict):
@@ -225,8 +183,8 @@ class checkInterference:
         try:
             if obj.Shape:
                 try:
+                    print("{} | Collision detected".format(obj.Label))
                     if obj.Shape.Volume > 0.0:
-                        print("{} | Collision detected".format(obj.Label))
                         return False
                     else:
                         print("{} | Touching faces (REMOVING)".format(obj.Label))
@@ -252,7 +210,7 @@ class checkInterference:
         for obj in self.modelDoc.Parts.Group:
             try:
                 obj.Visibility = False
-            except: 
+            except:
                 pass
         try:
             existing_folder = self.modelDoc.getObject("Interferences")
@@ -278,80 +236,5 @@ class checkInterference:
         except:
             pass
 
-
-
-'''
-class removeInterference:
-
-    def __init__(self):
-        super(removeInterference, self).__init__()
-
-    def GetResources(self):
-
-        menutext = "Clear Interference Checks"
-        tooltip  = "Remove the generated interference checks, restoring visibilty of the Assembly."
-        iconFile = os.path.join(Asm4.iconPath, 'Asm4_Interference_Cleanup.svg')
-
-        return {
-            "MenuText": menutext,
-            "ToolTip": tooltip,
-            "Pixmap": iconFile
-        }
-
-    def IsActive(self):
-        if Asm4.getAssembly() is None:
-            return False
-        else:
-            return True
-
-    def Activated(self):
-        self.remove_interference_folder()
-
-    def remove_interference_folder(self):
-
-        doc = App.ActiveDocument
-
-        try:
-            model = doc.Model
-            model.Visibility = True
-        except:
-            model = doc.Assembly
-            model.Visibility = True
-
-        self.modelDoc.Parts.Visibility = True
-        for obj in self.modelDoc.Parts.Group:
-            try:
-                obj.Visibility = False
-            except: 
-                pass
-
-        # Remove existing folder and its contents
-        try:
-            existing_folder = self.modelDoc.getObject("Interference")
-            for obj in existing_folder.Group:
-
-                if obj.TypeId == 'App::Part':
-                    obj.removeObjectsFromDocument() # Remove Part's content
-                    self.modelDoc.removeObject(obj.Name) # Remove the Part
-
-                elif obj.TypeId == 'App::DocumentObjectGroup':
-
-                    for obj2 in obj.Group:
-
-                        if obj2.TypeId == "Part::MultiCommon":
-                            for shape in obj2.Shapes:
-                                self.modelDoc.removeObject(shape.Name) # Remove Common's Parts
-                            self.modelDoc.removeObject(obj2.Name) # Remove Common
-
-                    self.modelDoc.removeObject(obj.Name) # Remove Group
-
-            self.modelDoc.removeObject(existing_folder.Name) # Remove Interference folder
-            self.modelDoc.recompute()
-        except:
-            pass
-'''
-
-
 # Add the command in the workbench
 Gui.addCommand('Asm4_checkInterference',  checkInterference())
-#Gui.addCommand('Asm4_removeInterference', removeInterference())
