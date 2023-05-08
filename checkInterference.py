@@ -182,7 +182,7 @@ class checkInterference:
             self.model.Visibility = True
 
 
-    # makes a new Part::Feature and assignee it the shape of the original object
+    # makes a new Part::Feature and assigns it the shape of the original object
     # works also with ShapeBinders but it's much slower
     def make_shape_copy(self, doc, obj):
         '''
