@@ -47,6 +47,9 @@ class checkInterference:
 
     # the real stuff happens here
     def check_interferences(self, ilim=0, jlim=0):
+
+        print("Check interferences has started. Hold on, this may take time")
+
         doc = App.ActiveDocument
         self.model.Visibility = False
         self.modelDoc.Parts.Visibility = False
@@ -80,7 +83,6 @@ class checkInterference:
         for obj1 in self.model.Group:
             # we only check for visible objects
             if obj1.Visibility == True and obj1.TypeId == 'App::Link' :
-                print("\n==============================================================")
                 i = i + 1
                 j = 0
                 # parse the assembly
@@ -91,40 +93,42 @@ class checkInterference:
                             if not jlim == 0 and j >= jlim:
                                 break
 
-                            print(">> {} ({}, {}) {}, {}".format(c, i, j, obj1.Label, obj2.Label))
+                            print(">> {} ({}, {}) Checking: {} - {}".format(c, j, i, obj1.Label, obj2.Label))
 
+                            # When the 1st object was never compared
                             if not obj1.Label in checked_dict:
-                                    c += 1
-                                    # print("1st time {} being used, checking intersection (1)...".format(obj1.Label))
-                                    obj1_list = []
-                                    obj1_list.append(obj2.Label)
-                                    checked_dict[obj1.Label] = obj1_list
 
-                                    obj1_model_cpy = self.make_shape_copy(doc, obj1)
-                                    shapes_copy.addObject(obj1_model_cpy)
-                                    obj1_model_cpy.Visibility = True
-                                    obj1_model_cpy.ViewObject.Transparency = 88
-                                    obj1_model_cpy.ViewObject.ShapeColor = (0.90, 0.90, 0.90)
-                                    obj1_model_cpy.ViewObject.DisplayMode = "Shaded"
+                                c += 1
+                                checked_dict[obj1.Label] = []
 
-                                    # Also add the complement to the dictionary for complitude
-                                    if not obj2.Label in checked_dict:
-                                        obj2_list = []
-                                        obj2_list.append(obj1.Label)
-                                        checked_dict[obj2.Label] = obj2_list
+                                obj1_model_cpy = self.make_shape_copy(doc, obj1)
+                                shapes_copy.addObject(obj1_model_cpy)
+                                obj1_model_cpy.Visibility = True
+                                obj1_model_cpy.ViewObject.Transparency = 88
+                                obj1_model_cpy.ViewObject.ShapeColor = (0.90, 0.90, 0.90)
+                                obj1_model_cpy.ViewObject.DisplayMode = "Shaded"
 
-                                        obj2_model_cpy = self.make_shape_copy(doc, obj2)
-                                        shapes_copy.addObject(obj2_model_cpy)
-                                        obj2_model_cpy.Visibility = True
-                                        obj2_model_cpy.ViewObject.Transparency = 88
-                                        obj2_model_cpy.ViewObject.ShapeColor = (0.90, 0.90, 0.90)
-                                        obj2_model_cpy.ViewObject.DisplayMode = "Shaded"
+                                # When the 2nd object was never compared
+                                if not obj2.Label in checked_dict:
 
-                                    obj1_cpy = self.make_shape_copy(doc, obj1)
-                                    obj2_cpy = self.make_shape_copy(doc, obj2)
-                                    common = self.make_intersection(doc, obj1_cpy, obj2_cpy, c)
-                                    # if common.TypeId == "Part::MultiCommon":
-                                    if not self.remove_empty_common(obj):
+                                    checked_dict[obj2.Label] = []
+
+                                    obj2_model_cpy = self.make_shape_copy(doc, obj2)
+                                    shapes_copy.addObject(obj2_model_cpy)
+                                    obj2_model_cpy.Visibility = True
+                                    obj2_model_cpy.ViewObject.Transparency = 88
+                                    obj2_model_cpy.ViewObject.ShapeColor = (0.90, 0.90, 0.90)
+                                    obj2_model_cpy.ViewObject.DisplayMode = "Shaded"
+
+                                checked_dict[obj1.Label].append(obj2.Label)
+                                checked_dict[obj2.Label].append(obj1.Label)
+
+                                obj1_cpy = self.make_shape_copy(doc, obj1)
+                                obj2_cpy = self.make_shape_copy(doc, obj2)
+                                common = self.make_intersection(doc, obj1_cpy, obj2_cpy, c)
+
+                                if common:
+                                    if not self.remove_empty_common(common):
                                         common.ViewObject.Transparency = 60
                                         r = rnd.random()
                                         g = rnd.random()
@@ -134,19 +138,51 @@ class checkInterference:
                                     else:
                                         self.modelDoc.removeObject(common.Name)
 
+                            else:
+
+                                # When the 1st object was compared before but not with the 2nd object
+                                if not obj2.Label in checked_dict[obj1.Label]:
+
+                                    checked_dict[obj1.Label].append(obj2.Label)
+
+                                    obj2_list = []
+                                    obj2_list.append(obj2.Label)
+                                    checked_dict[obj2.Label] = obj2_list
+
+                                    obj1_cpy = self.make_shape_copy(doc, obj1)
+                                    obj2_cpy = self.make_shape_copy(doc, obj2)
+                                    common = self.make_intersection(doc, obj1_cpy, obj2_cpy, c)
+
+                                    if common:
+                                        if not self.remove_empty_common(common):
+                                            common.ViewObject.Transparency = 60
+                                            r = rnd.random()
+                                            g = rnd.random()
+                                            b = rnd.random()
+                                            common.ViewObject.ShapeColor = (r, g, b)
+                                            Intersections.addObject(common)
+                                        else:
+                                            self.modelDoc.removeObject(common.Name)
+
+                                else:
+                                    print("  Interference previously processed")
+
+
+
             if not ilim == 0 and i >= ilim:
                 break
 
         self.modelDoc.recompute()
         Gui.updateGui()
 
-        print("\n>> USED PARTS:")
-        for p, part in enumerate(checked_dict):
-            print("  ", p+1, part)
-        print("")
+        # Remove the intersections folder if there is no interference
+        if not Intersections.Group:
+            print("Design clean, no interference found")
+            self.remove_interference_folder()
+            self.model.Visibility = True
 
 
-    # makes a new Part::Feature and assignes it the shape of the original object
+    # makes a new Part::Feature and assignee it the shape of the original object
     # works also with ShapeBinders but it's much slower
     def make_shape_copy(self, doc, obj):
         '''
@@ -176,18 +212,26 @@ class checkInterference:
         obj.ViewObject.DisplayMode = "Shaded"
         doc.recompute()
         obj.Label2 = "Volume = {:4f}".format(obj.Shape.Volume)
-        return obj
+        if obj.Shape.Volume > 0.0:
+            return obj
+        else:
+            # Avoiding the following issue:
+            # <Part> ViewProviderExt.cpp(1266): Cannot compute Inventor representation for the shape of <OBJECTNAME>: Bnd_Box is void
+            self.modelDoc.removeObject(obj1.Name)
+            self.modelDoc.removeObject(obj2.Name)
+            self.modelDoc.removeObject(obj.Name)
+            return
 
 
     def remove_empty_common(self, obj):
         try:
             if obj.Shape:
                 try:
-                    print("{} | Collision detected".format(obj.Label))
+                    print("  {} | Collision detected".format(obj.Label))
                     if obj.Shape.Volume > 0.0:
                         return False
                     else:
-                        print("{} | Touching faces (REMOVING)".format(obj.Label))
+                        print("  Touching faces (REMOVING)".format(obj.Label))
                         for shape in obj.Shapes:
                             self.modelDoc.removeObject(shape.Name)
                         self.modelDoc.removeObject(obj.Name)
@@ -196,11 +240,13 @@ class checkInterference:
                     for shape in obj.Shapes:
                         self.modelDoc.removeObject(shape.Name)
                     self.modelDoc.removeObject(obj.Name)
+                    print("  Interference clear".format(obj.Label))
                     return True
         except:
             for shape in common.Shapes:
                 self.modelDoc.removeObject(shape.Name)
             self.modelDoc.removeObject(common.Name)
+            print("  Interference clear".format(obj.Label))
             return True
 
 
