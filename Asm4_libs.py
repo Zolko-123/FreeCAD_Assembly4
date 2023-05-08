@@ -162,8 +162,9 @@ def makeAsmProperties( obj, reset=False ):
     return
 
 
-def hasVarContainer():
-    retval = False
+# checks whether there is a Variables container, and returns it
+def getVarContainer():
+    retval = None
     # check whether there already is a Variables object
     variables = App.ActiveDocument.getObject('Variables')
     if variables and variables.TypeId=='App::FeaturePython':
@@ -171,7 +172,7 @@ def hasVarContainer():
             if hasattr(variables,'Type') :
                 if variables.Type == 'App::PropertyContainer':
                     retval = variables
-    
+    return retval
 
 
 # the Variables container
@@ -307,7 +308,8 @@ def checkModel():
 def getSelectionTree(index=0):
     retval = (None,None)
     # we obviously need something selected
-    if len(Gui.Selection.getSelection()) >= index:
+    # if len(Gui.Selection.getSelection()) >= index:
+    if len(Gui.Selection.getSelection()) > index:
         selObj = Gui.Selection.getSelection()[index]
         retval = ( selObj, None )
         # objects at the document root don't have a selection tree

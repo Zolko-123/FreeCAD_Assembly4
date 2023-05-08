@@ -2,6 +2,11 @@
 
 ## Release notes
 
+* 2023.05.07 (**0.50.2**) :  
+Finally managed to read version info from package.xml  
+Fixed deleteVariable greyed-out  
+Custon ViewProvider for variantLink  
+
 * 2023.04.16 (**0.50.1**) :  
 Fixed some QLayout warnings with latest FreeCAD builds  
 

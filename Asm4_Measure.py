@@ -351,14 +351,13 @@ class MeasureUI():
         self.rbShape.setChecked(True)
         self.snapGrid.addWidget(self.rbShape, 0, 2 )
 
+        '''
+        # TODO : make this selectionFilter be applied
         # new snap/select tools
         self.selGroup = QtGui.QFrame(self.form)
         self.selGroup.setFrameStyle(QtGui.QFrame.StyledPanel | QtGui.QFrame.Plain)
-        # self.snapGroup.setTitle("Selection method")
         self.mainLayout.addWidget(self.selGroup)
         self.selGrid = QtGui.QGridLayout(self.selGroup)
-        # self.mainLayout.addLayout(self.selGrid)
-        
         # 0,0 SnapCenter
         pm.loadFromData(base64.b64decode(SnapCenter_b64))
         self.selCenter = QtGui.QPushButton(self.selGroup)
@@ -370,7 +369,6 @@ class MeasureUI():
         self.selCenter.setChecked(False)
         self.selCenter.setFlat(True)
         self.selGrid.addWidget(self.selCenter, 0, 0 )
-
         # 0,1 SnapVertex
         pm.loadFromData(base64.b64decode(SnapVertex_b64))
         self.selVertex = QtGui.QPushButton(self.selGroup)
@@ -382,7 +380,6 @@ class MeasureUI():
         self.selVertex.setChecked(False)
         self.selVertex.setFlat(True)
         self.selGrid.addWidget(self.selVertex, 0, 1 )
-
         # 0,2 SnapEdge
         pm.loadFromData(base64.b64decode(SnapEdge_b64))
         self.selEdge = QtGui.QPushButton(self.selGroup)
@@ -394,7 +391,6 @@ class MeasureUI():
         self.selEdge.setChecked(False)
         self.selEdge.setFlat(True)
         self.selGrid.addWidget(self.selEdge, 0, 2 )
-
         # 0,3 SnapFace
         pm.loadFromData(base64.b64decode(SnapFace_b64))
         self.selFace = QtGui.QPushButton(self.selGroup)
@@ -406,7 +402,6 @@ class MeasureUI():
         self.selFace.setChecked(False)
         self.selFace.setFlat(True)
         self.selGrid.addWidget(self.selFace, 0, 3 )
-
         # 0,4 SnapAll
         pm.loadFromData(base64.b64decode(SelectAll_b64))
         self.selShape = QtGui.QPushButton(self.selGroup)
@@ -418,7 +413,6 @@ class MeasureUI():
         self.selShape.setChecked(True)
         self.selShape.setFlat(True)
         self.selGrid.addWidget(self.selShape, 0, 4 )
-
         # exclusive buttons
         self.buttonGroup = QtGui.QButtonGroup(self.selGroup)
         self.buttonGroup.setExclusive(True)
@@ -427,6 +421,7 @@ class MeasureUI():
         self.buttonGroup.addButton(self.selEdge)
         self.buttonGroup.addButton(self.selFace)
         self.buttonGroup.addButton(self.selShape)
+        '''
         
         # select elements
         self.selectGrid = QtGui.QGridLayout()
