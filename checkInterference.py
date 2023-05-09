@@ -7,6 +7,8 @@
 
 import os
 import random as rnd
+import math
+import logging
 
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
@@ -14,6 +16,8 @@ import FreeCAD as App
 
 import Asm4_libs as Asm4
 import Part
+
+MIN_VOLUME_ALLOWED = 0.0001
 
 class checkInterference:
 
@@ -75,8 +79,16 @@ class checkInterference:
         Intersections.Label = 'Intersections'
         intersections_folder.addObject(Intersections)
 
+        n_objects = len(self.model.Group)
+        print(">> {} has {} objects".format(self.model.Label, n_objects))
+
+        total_comparisons = (int) (math.factorial(n_objects) / (math.factorial(2) * math.factorial(n_objects - 2)))
+        print(">> Totaling {} possible comparisons".format(total_comparisons))
+
+        c = 1 # number of comparisons done
+        t = 1 # total number of objects
+
         i = 0
-        c = 1
         checked_dict = dict()
 
         # parse the assembly
@@ -125,6 +137,7 @@ class checkInterference:
 
                                 obj1_cpy = self.make_shape_copy(doc, obj1)
                                 obj2_cpy = self.make_shape_copy(doc, obj2)
+
                                 common = self.make_intersection(doc, obj1_cpy, obj2_cpy, c)
 
                                 if common:
@@ -137,11 +150,12 @@ class checkInterference:
                                         Intersections.addObject(common)
                                     else:
                                         self.modelDoc.removeObject(common.Name)
-
                             else:
 
                                 # When the 1st object was compared before but not with the 2nd object
                                 if not obj2.Label in checked_dict[obj1.Label]:
+
+                                    c += 1
 
                                     checked_dict[obj1.Label].append(obj2.Label)
 
@@ -163,9 +177,8 @@ class checkInterference:
                                             Intersections.addObject(common)
                                         else:
                                             self.modelDoc.removeObject(common.Name)
-
                                 else:
-                                    print("  Interference previously processed")
+                                    print("   Interference previously processed")
 
 
 
@@ -201,7 +214,25 @@ class checkInterference:
 
 
     def make_intersection(self, doc, obj1, obj2, count):
+
+        shape_missing = 0
+
+        if not obj1.Shape.Solids:
+            shape_missing = 1
+            App.Console.PrintWarning("   {} does not have a shape.\n".format(obj1.Label))
+
+        if not obj2.Shape.Solids:
+            shape_missing = 1
+            App.Console.PrintWarning("   {} does not have a shape.\n".format(obj2.Label))
+
+        if shape_missing:
+            App.Console.PrintWarning("   Missing shape(s), skipping the check.\n".format(obj2.Label))
+            self.modelDoc.removeObject(obj1.Name)
+            self.modelDoc.removeObject(obj2.Name)
+            return
+
         obj = doc.addObject("Part::MultiCommon", "Common")
+
         obj.Shapes = [obj1, obj2]
         obj1.Visibility = False
         obj2.Visibility = False
@@ -211,8 +242,11 @@ class checkInterference:
         obj.ViewObject.Transparency = 0
         obj.ViewObject.DisplayMode = "Shaded"
         doc.recompute()
+
+        # Sometimes there are not shapes...
+        # try:
         obj.Label2 = "Volume = {:4f}".format(obj.Shape.Volume)
-        if obj.Shape.Volume > 0.0:
+        if obj.Shape.Volume > MIN_VOLUME_ALLOWED:
             return obj
         else:
             # Avoiding the following issue:
@@ -221,14 +255,15 @@ class checkInterference:
             self.modelDoc.removeObject(obj2.Name)
             self.modelDoc.removeObject(obj.Name)
             return
-
+        # except:
+        #     return
 
     def remove_empty_common(self, obj):
         try:
             if obj.Shape:
                 try:
                     print("  {} | Collision detected".format(obj.Label))
-                    if obj.Shape.Volume > 0.0:
+                    if obj.Shape.Volume > MIN_VOLUME_ALLOWED:
                         return False
                     else:
                         print("  Touching faces (REMOVING)".format(obj.Label))
