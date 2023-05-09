@@ -76,7 +76,7 @@ class checkInterference:
         intersections_folder.addObject(Intersections)
 
         i = 0
-        c = 0
+        c = 1
         checked_dict = dict()
 
         # parse the assembly
