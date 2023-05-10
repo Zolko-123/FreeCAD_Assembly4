@@ -15,6 +15,7 @@ import FreeCADGui as Gui
 import FreeCAD as App
 
 import Asm4_libs as Asm4
+import showHideLcsCmd as lcs
 import Part
 
 MIN_VOLUME_ALLOWED = 0.0001
@@ -45,6 +46,7 @@ class checkInterference:
         self.modelDoc = App.ActiveDocument
         # this has been checked before
         self.model = Asm4.getAssembly()
+        lcs.showHide(False)
         self.remove_interference_folder()
         self.check_interferences()
         self.modelDoc.recompute()
