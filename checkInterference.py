@@ -79,7 +79,11 @@ class checkInterference:
         Intersections.Label = 'Intersections'
         intersections_folder.addObject(Intersections)
 
-        n_objects = len(self.model.Group)
+        n_objects = 0
+        for obj in self.model.Group:
+            if obj.TypeId == 'App::Link' or obj.TypeId == 'Part::FeaturePython' and (obj.Content.find("FastenersCmd") or (obj.Content.find("PCBStandoff")) > -1):
+                n_objects += 1
+
         print(">> {} has {} objects".format(self.model.Label, n_objects))
 
         total_comparisons = (int) (math.factorial(n_objects) / (math.factorial(2) * math.factorial(n_objects - 2)))
@@ -219,11 +223,11 @@ class checkInterference:
 
         if not obj1.Shape.Solids:
             shape_missing = 1
-            App.Console.PrintWarning("   {} does not have a shape.\n".format(obj1.Label))
+            App.Console.PrintWarning("   {} does not have a shape.".format(obj1.Label))
 
         if not obj2.Shape.Solids:
             shape_missing = 1
-            App.Console.PrintWarning("   {} does not have a shape.\n".format(obj2.Label))
+            App.Console.PrintWarning("   {} does not have a shape.".format(obj2.Label))
 
         if shape_missing:
             App.Console.PrintWarning("   Missing shape(s), skipping the check.\n".format(obj2.Label))
