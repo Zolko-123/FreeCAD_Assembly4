@@ -129,7 +129,6 @@ class checkInterference:
                             print(msg)
                             self.progress_log += "{}\n".format(msg)
                             self.log_area.setPlainText(self.progress_log)
-                            self.modelDoc.recompute()
                             Gui.updateGui()
 
                             # When the 1st object was never compared
@@ -173,6 +172,7 @@ class checkInterference:
                                         b = rnd.random()
                                         common.ViewObject.ShapeColor = (r, g, b)
                                         Intersections.addObject(common)
+                                        self.modelDoc.recompute()
                                     else:
                                         self.modelDoc.removeObject(common.Name)
                             else:
@@ -200,6 +200,7 @@ class checkInterference:
                                             b = rnd.random()
                                             common.ViewObject.ShapeColor = (r, g, b)
                                             Intersections.addObject(common)
+                                            self.modelDoc.recompute()
                                         else:
                                             self.modelDoc.removeObject(common.Name)
                                 else:
@@ -207,7 +208,8 @@ class checkInterference:
                                     msg = "   Interference previously processed"
                                     print(msg)
                                     self.progress_log += "{}\n".format(msg)
-
+                                    self.log_area.setPlainText(self.progress_log)
+                                    Gui.updateGui()
 
 
             if not ilim == 0 and i >= ilim:
@@ -221,6 +223,8 @@ class checkInterference:
             msg = "Design clean, no interference found"
             print(msg)
             self.progress_log += "{}\n".format(msg)
+            self.log_area.setPlainText(self.progress_log)
+            Gui.updateGui()
             self.remove_interference_folder()
             self.model.Visibility = True
 
@@ -252,16 +256,22 @@ class checkInterference:
             msg = "   {} does not have a shape.".format(obj1.Label)
             App.Console.PrintWarning(msg)
             self.progress_log += "{}\n".format(msg)
+            self.log_area.setPlainText(self.progress_log)
+            Gui.updateGui()
         if not obj2.Shape.Solids:
             shape_missing = 1
             msg = "   {} does not have a shape.".format(obj2.Label)
             App.Console.PrintWarning(msg)
             self.progress_log += "{}\n".format(msg)
+            self.log_area.setPlainText(self.progress_log)
+            Gui.updateGui()
 
         if shape_missing:
             msg = "   Missing shape(s), skipping the check.\n".format(obj2.Label)
             App.Console.PrintWarning(msg)
             self.progress_log += "{}\n".format(msg)
+            self.log_area.setPlainText(self.progress_log)
+            Gui.updateGui()
             self.modelDoc.removeObject(obj1.Name)
             self.modelDoc.removeObject(obj2.Name)
             return
@@ -300,6 +310,8 @@ class checkInterference:
                     msg = "  {} | Collision detected".format(obj.Label)
                     print(msg)
                     self.progress_log += "{}\n".format(msg)
+                    self.log_area.setPlainText(self.progress_log)
+                    Gui.updateGui()
 
                     if obj.Shape.Volume > MIN_VOLUME_ALLOWED:
                         return False
@@ -307,6 +319,8 @@ class checkInterference:
                         msg = "  Touching faces (REMOVING)".format(obj.Label)
                         print(msg)
                         self.progress_log += "{}\n".format(msg)
+                        self.log_area.setPlainText(self.progress_log)
+                        Gui.updateGui()
 
                         for shape in obj.Shapes:
                             self.modelDoc.removeObject(shape.Name)
@@ -319,6 +333,8 @@ class checkInterference:
                     msg = "  Interference clear".format(obj.Label)
                     print(msg)
                     self.progress_log += "{}\n".format(msg)
+                    self.log_area.setPlainText(self.progress_log)
+                    Gui.updateGui()
 
                     return True
         except:
@@ -328,6 +344,8 @@ class checkInterference:
             msg = "  Interference clear".format(obj.Label)
             print(msg)
             self.progress_log += "{}\n".format(msg)
+            self.log_area.setPlainText(self.progress_log)
+            Gui.updateGui()
 
             return True
 
@@ -388,9 +406,9 @@ class checkInterference:
         # TODO: if running only
         # self.progress_log += "\nOPERATION ABORTED\n"
         # self.log_area.setPlainText(self.progress_log)
-        self.remove_interference_folder()
-        self.model.Visibility = True
-        self.modelDoc.Parts.Visibility = True
+        # self.remove_interference_folder()
+        # self.model.Visibility = True
+        # self.modelDoc.Parts.Visibility = True
         self.UI.close()
 
     def onClear(self):
@@ -448,6 +466,14 @@ class checkInterference:
         # The Log view is a plain text field
         self.log_area = QtGui.QPlainTextEdit()
         self.log_area.setLineWrapMode(QtGui.QPlainTextEdit.NoWrap)
+        self.log_area.setMinimumWidth(Gui.getMainWindow().width()/2)
+        self.log_area.setMinimumHeight(Gui.getMainWindow().height()/2)
+        self.log_area.setLineWrapMode(QtGui.QPlainTextEdit.NoWrap)
+        f = QtGui.QFont("unexistent");
+        f.setStyleHint(QtGui.QFont.Monospace);
+        self.log_area.setFont(f);
+
+
         self.mainLayout.addWidget(self.log_area)
 
         # The button row definition
