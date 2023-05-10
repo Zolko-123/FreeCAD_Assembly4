@@ -364,11 +364,18 @@ class checkInterference:
 
     def onStart(self):
         self.model = Asm4.getAssembly()
+        self.StartButton.setEnabled(False)
+        self.ClearButton.setEnabled(False)
+        self.CancelButton.setText("Abort")
         self.progress_log = ""
         self.log_area.setPlainText(self.progress_log)
+        self.progress_bar_reset()
         self.remove_interference_folder()
         self.check_interferences()
         self.model.recompute()
+        self.StartButton.setEnabled(True)
+        self.ClearButton.setEnabled(True)
+        self.CancelButton.setText("Close")
 
     def onCancel(self):
         # do something to abort current operations, if any
