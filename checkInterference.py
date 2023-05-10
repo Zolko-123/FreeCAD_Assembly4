@@ -11,6 +11,7 @@ import math
 import logging
 
 from PySide import QtGui, QtCore
+
 import FreeCADGui as Gui
 import FreeCAD as App
 
@@ -29,6 +30,7 @@ class checkInterference:
         self.current_value = 0
         self.max_value = -1
         self.progress_log = str()
+        self.enable_fasteners_check = False
 
     def GetResources(self):
         menutext = "Check Intereferences"
@@ -381,16 +383,28 @@ class checkInterference:
         # do something to abort current operations, if any
         self.abort = True
         self.progress_log = ""
-        self.log_area.setPlainText(self.progress_log)        
-        self.remove_interference_folder()        
+        self.log_area.setPlainText(self.progress_log)
+
+        # TODO: if running only
+        # self.progress_log += "\nOPERATION ABORTED\n"
+        # self.log_area.setPlainText(self.progress_log)
+        self.remove_interference_folder()
         self.model.Visibility = True
         self.modelDoc.Parts.Visibility = True
         self.UI.close()
 
     def onClear(self):
         self.progress_log = ""
-        self.log_area.setPlainText(self.progress_log)        
+        self.log_area.setPlainText(self.progress_log)
         self.remove_interference_folder()
+
+
+    def onCheckFasterners(self, state):
+        if state == QtCore.Qt.Checked:
+            self.enable_fasteners_check = True
+        else:
+            self.enable_fasteners_check = False
+
 
     def progress_bar_reset(self):
         self.current_value = 0
@@ -417,14 +431,15 @@ class checkInterference:
         self.mainLayout.addWidget(self.LabelDescription)
 
         # TODOS:
-        # Add qtd of models
+        # Add qty of models
         # Add total number of operations
         # In the end add the time that took to process (good info to know)
 
-        # TODO: Add Checkbox to enable/disable Processing fastners
-        self.LabelFastners = QtGui.QLabel()
-        self.LabelFastners.setText('[x] Include Fastners? (TODO: Add the checkbox)')
-        self.mainLayout.addWidget(self.LabelFastners)
+        self.CheckBoxFastners = QtGui.QCheckBox("Check fastners?")
+        self.CheckBoxFastners.setChecked(False)
+        self.CheckBoxFastners.fastne = "Cat"
+        self.CheckBoxFastners.toggled.connect(self.onCheckFasterners)
+        self.mainLayout.addWidget(self.CheckBoxFastners)
 
         self.progress_bar = QtGui.QProgressBar()
         self.progress_bar.setValue(0)
