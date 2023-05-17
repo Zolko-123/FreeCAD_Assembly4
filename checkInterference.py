@@ -9,6 +9,7 @@ import os
 import random as rnd
 import math
 import logging
+from timeit import default_timer as timer
 
 from PySide import QtGui, QtCore
 
@@ -28,8 +29,7 @@ class checkInterference:
 
         self.abort = 0
         self.current_value = 0
-        self.max_value = -1
-        self.progress_log = str()
+        self.log_msg = str()
         self.enable_fasteners_check = False
 
     def GetResources(self):
@@ -44,6 +44,7 @@ class checkInterference:
 
     def IsActive(self):
         if Asm4.getAssembly() is None:
+            print("There is no Assembly in this file")
             return False
         else:
             return True
@@ -51,17 +52,45 @@ class checkInterference:
     def Activated(self):
         self.UI = QtGui.QDialog()
         self.modelDoc = App.ActiveDocument
+        self.model = Asm4.getAssembly()
         self.abort = False
         lcs.showHide(False)
         self.drawUI()
         self.UI.show()
-        self.log_area.clear()
-        self.log_area.setPlainText(self.progress_log)
+        self.log_msg = ""
+        # self.log_view.clear()
+        # self.log_view.setPlainText(self.log_msg)
+        # self.log_number_of_objects()
+        # self.log_number_of_comparisons()
+        self.progress_bar.setMaximum(self.total_comparisons)
+
+    def log_number_of_objects(self):
+        self.n_objects = 0
+        for obj in self.model.Group:
+            # if obj.TypeId == 'App::Link' or obj.TypeId == 'Part::FeaturePython' and (obj.Content.find("FastenersCmd") or (obj.Content.find("PCBStandoff")) > -1):
+            if obj.TypeId == 'App::Link':
+                self.n_objects += 1
+
+        msg="{} has {} objects".format(self.model.Label, self.n_objects)
+        self.log_msg += "{}\n".format(msg)
+        self.log_view.setPlainText(self.log_msg)
+        # Gui.updateGui()
+
+    def log_number_of_comparisons(self):
+        self.total_comparisons = (int) ((math.factorial(self.n_objects) / (math.factorial(2) * math.factorial(self.n_objects - 2))) - self.n_objects)
+
+        msg="Totaling {} possible comparisons".format(self.total_comparisons)
+        self.log_msg += "{}\n".format(msg)
+        self.log_view.setPlainText(self.log_msg)
+
+        msg="Checking interferences may take time, hold on.".format(self.total_comparisons)
+        self.log_msg += "{}\n".format(msg)
+        self.log_view.setPlainText(self.log_msg)
 
     # the real stuff happens here
     def check_interferences(self, ilim=0, jlim=0):
 
-        print("Check interferences has started. Hold on, this may take time")
+        start_time_s = timer()
 
         doc = App.ActiveDocument
         self.model.Visibility = False
@@ -88,18 +117,6 @@ class checkInterference:
         Intersections.Label = 'Intersections'
         intersections_folder.addObject(Intersections)
 
-        n_objects = 0
-        for obj in self.model.Group:
-            if obj.TypeId == 'App::Link' or obj.TypeId == 'Part::FeaturePython' and (obj.Content.find("FastenersCmd") or (obj.Content.find("PCBStandoff")) > -1):
-                n_objects += 1
-
-        print(">> {} has {} objects".format(self.model.Label, n_objects))
-
-        total_comparisons = (int) (math.factorial(n_objects) / (math.factorial(2) * math.factorial(n_objects - 2)))
-        print(">> Totaling {} possible comparisons".format(total_comparisons))
-
-        self.progress_bar.setMaximum(total_comparisons)
-
         c = 1 # number of comparisons done
         t = 1 # total number of objects
 
@@ -121,15 +138,14 @@ class checkInterference:
                             if not jlim == 0 and j >= jlim:
                                 break
 
-                            self.progress_bar_progress()
                             if self.abort:
                                 return
 
-                            msg = ">> {} ({}, {}) Checking: {} - {}".format(c, j, i, obj1.Label, obj2.Label)
-                            print(msg)
-                            self.progress_log += "{}\n".format(msg)
-                            self.log_area.setPlainText(self.progress_log)
-                            Gui.updateGui()
+                            # msg = ">> {} ({}, {}) Checking: {} - {}".format(c, j, i, obj1.Label, obj2.Label)
+                            msg = "{}. Checking: '{}' vs '{}'".format(c, obj1.Label, obj2.Label)
+                            # print(msg)
+                            self.log_msg += "{}\n".format(msg)
+                            self.log_view.setPlainText(self.log_msg)
 
                             # When the 1st object was never compared
                             if not obj1.Label in checked_dict:
@@ -206,10 +222,12 @@ class checkInterference:
                                 else:
 
                                     msg = "   Interference previously processed"
-                                    print(msg)
-                                    self.progress_log += "{}\n".format(msg)
-                                    self.log_area.setPlainText(self.progress_log)
-                                    Gui.updateGui()
+                                    # print(msg)
+                                    self.log_msg += "{}\n".format(msg)
+                                    self.log_view.setPlainText(self.log_msg)
+
+                            self.progress_bar_progress()
+                            Gui.updateGui()
 
 
             if not ilim == 0 and i >= ilim:
@@ -220,13 +238,32 @@ class checkInterference:
 
         # Remove the intersections folder if there is no interference
         if not Intersections.Group:
-            msg = "Design clean, no interference found"
-            print(msg)
-            self.progress_log += "{}\n".format(msg)
-            self.log_area.setPlainText(self.progress_log)
-            Gui.updateGui()
+            msg = "\n>>> Design Clean <<<"
+            # print(msg)
+            self.log_msg += "{}\n".format(msg)
+            self.log_view.setPlainText(self.log_msg)
             self.remove_interference_folder()
             self.model.Visibility = True
+            Gui.updateGui()
+        else:
+            msg = "\n>>> {} has {} interferences <<<".format(self.model.Label, len(Intersections.Group))
+            # print(msg)
+            self.log_msg += "{}\n".format(msg)
+            self.log_view.setPlainText(self.log_msg)
+
+
+        end_time_s = timer()
+        elapsed_time_s = end_time_s - start_time_s
+        if elapsed_time_s < 1:
+            msg = "\nElapsed time: {:0.2} ms".format(elapsed_time_s / 1000)
+        elif elapsed_time_s < 60:
+            msg = "\nElapsed time: {:0.2} s".format(elapsed_time_s)
+        elif elapsed_time_s < 3600:
+            msg = "\nElapsed time: {:0.2} min".format(elapsed_time_s / 60)
+        else:
+            msg = "\nElapsed time: {:0.2} h".format(elapsed_time_s / 3600)
+        self.log_msg += "{}\n".format(msg)
+        self.log_view.setPlainText(self.log_msg)
 
 
     # makes a new Part::Feature and assigns it the shape of the original object
@@ -255,22 +292,22 @@ class checkInterference:
             shape_missing = 1
             msg = "   {} does not have a shape.".format(obj1.Label)
             App.Console.PrintWarning(msg)
-            self.progress_log += "{}\n".format(msg)
-            self.log_area.setPlainText(self.progress_log)
+            self.log_msg += "{}\n".format(msg)
+            self.log_view.setPlainText(self.log_msg)
             Gui.updateGui()
         if not obj2.Shape.Solids:
             shape_missing = 1
             msg = "   {} does not have a shape.".format(obj2.Label)
             App.Console.PrintWarning(msg)
-            self.progress_log += "{}\n".format(msg)
-            self.log_area.setPlainText(self.progress_log)
+            self.log_msg += "{}\n".format(msg)
+            self.log_view.setPlainText(self.log_msg)
             Gui.updateGui()
 
         if shape_missing:
             msg = "   Missing shape(s), skipping the check.\n".format(obj2.Label)
             App.Console.PrintWarning(msg)
-            self.progress_log += "{}\n".format(msg)
-            self.log_area.setPlainText(self.progress_log)
+            self.log_msg += "{}\n".format(msg)
+            self.log_view.setPlainText(self.log_msg)
             Gui.updateGui()
             self.modelDoc.removeObject(obj1.Name)
             self.modelDoc.removeObject(obj2.Name)
@@ -307,19 +344,21 @@ class checkInterference:
         try:
             if obj.Shape:
                 try:
-                    msg = "  {} | Collision detected".format(obj.Label)
-                    print(msg)
-                    self.progress_log += "{}\n".format(msg)
-                    self.log_area.setPlainText(self.progress_log)
+                    msg = "| Collision detected".format(obj.Label)
+                    # msg = "  {} | Collision detected".format(obj.Label)
+                    # print(msg)
+                    self.log_msg += "{}\n".format(msg)
+                    self.log_view.setPlainText(self.log_msg)
                     Gui.updateGui()
 
                     if obj.Shape.Volume > MIN_VOLUME_ALLOWED:
                         return False
                     else:
-                        msg = "  Touching faces (REMOVING)".format(obj.Label)
-                        print(msg)
-                        self.progress_log += "{}\n".format(msg)
-                        self.log_area.setPlainText(self.progress_log)
+                        # msg = "| Touching faces (KEEPING)".format(obj.Label)
+                        msg = "| Touching faces (REMOVING)".format(obj.Label)
+                        # print(msg)
+                        self.log_msg += "{}\n".format(msg)
+                        self.log_view.setPlainText(self.log_msg)
                         Gui.updateGui()
 
                         for shape in obj.Shapes:
@@ -330,10 +369,10 @@ class checkInterference:
                     for shape in obj.Shapes:
                         self.modelDoc.removeObject(shape.Name)
                     self.modelDoc.removeObject(obj.Name)
-                    msg = "  Interference clear".format(obj.Label)
-                    print(msg)
-                    self.progress_log += "{}\n".format(msg)
-                    self.log_area.setPlainText(self.progress_log)
+                    msg = "| Interference clear".format(obj.Label)
+                    # print(msg)
+                    self.log_msg += "{}\n".format(msg)
+                    self.log_view.setPlainText(self.log_msg)
                     Gui.updateGui()
 
                     return True
@@ -341,10 +380,10 @@ class checkInterference:
             for shape in common.Shapes:
                 self.modelDoc.removeObject(shape.Name)
             self.modelDoc.removeObject(common.Name)
-            msg = "  Interference clear".format(obj.Label)
-            print(msg)
-            self.progress_log += "{}\n".format(msg)
-            self.log_area.setPlainText(self.progress_log)
+            msg = "| Interference clear".format(obj.Label)
+            # print(msg)
+            self.log_msg += "{}\n".format(msg)
+            self.log_view.setPlainText(self.log_msg)
             Gui.updateGui()
 
             return True
@@ -387,8 +426,8 @@ class checkInterference:
         self.StartButton.setEnabled(False)
         self.ClearButton.setEnabled(False)
         self.CancelButton.setText("Abort")
-        self.progress_log = ""
-        self.log_area.setPlainText(self.progress_log)
+        # self.log_msg = str()
+        # self.log_view.setPlainText(self.log_msg)
         self.progress_bar_reset()
         self.remove_interference_folder()
         self.check_interferences()
@@ -400,21 +439,25 @@ class checkInterference:
     def onCancel(self):
         # do something to abort current operations, if any
         self.abort = True
-        self.progress_log = ""
-        self.log_area.setPlainText(self.progress_log)
+        self.log_msg = str()
+        self.log_view.setPlainText(self.log_msg)
 
         # TODO: if running only
-        # self.progress_log += "\nOPERATION ABORTED\n"
-        # self.log_area.setPlainText(self.progress_log)
+        # self.log_msg += "\nOPERATION ABORTED\n"
+        # self.log_view.setPlainText(self.log_msg)
         # self.remove_interference_folder()
         # self.model.Visibility = True
         # self.modelDoc.Parts.Visibility = True
         self.UI.close()
 
     def onClear(self):
-        self.progress_log = ""
-        self.log_area.setPlainText(self.progress_log)
+        self.log_msg = str()
+        self.log_view.setPlainText(self.log_msg)
         self.remove_interference_folder()
+        self.log_number_of_objects()
+        self.log_number_of_comparisons()
+        self.log_msg += "Interference check may take time\n"
+        self.log_view.setPlainText(self.log_msg)
 
 
     def onCheckFasterners(self, state):
@@ -443,38 +486,44 @@ class checkInterference:
         self.UI.setModal(False)
         self.mainLayout = QtGui.QVBoxLayout(self.UI)
 
-        # Help and Log
-        self.LabelDescription = QtGui.QLabel()
-        self.LabelDescription.setText('Interference check may take time')
-        self.mainLayout.addWidget(self.LabelDescription)
+        self.checkBox1 = QtGui.QCheckBox("Allow touching faces")
+        self.checkBox2 = QtGui.QCheckBox("Include fasteners")
+        self.checkBox1.setChecked(True)
+        self.checkBox2.setChecked(False)
 
-        # TODOS:
-        # Add qty of models
-        # Add total number of operations
-        # In the end add the time that took to process (good info to know)
+        self.formLayout = QtGui.QFormLayout()
+        self.entry1 = QtGui.QLineEdit()
+        self.volumeLabel = QtGui.QLabel("Ignoring interference with volume equal or less than:")
+        self.min_volume = QtGui.QLineEdit()
+        self.min_volume.setText(str(MIN_VOLUME_ALLOWED))
+        self.formLayout.addRow(self.volumeLabel, self.min_volume)
 
-        self.CheckBoxFastners = QtGui.QCheckBox("Check fastners?")
-        self.CheckBoxFastners.setChecked(False)
-        self.CheckBoxFastners.fastne = "Cat"
-        self.CheckBoxFastners.toggled.connect(self.onCheckFasterners)
-        self.mainLayout.addWidget(self.CheckBoxFastners)
+        self.vbox = QtGui.QVBoxLayout()
+        self.vbox.addWidget(self.checkBox1)
+        self.vbox.addWidget(self.checkBox2)
+        self.vbox.addLayout(self.formLayout)
+        self.vbox.addStretch(1)
+
+        self.groupBox = QtGui.QGroupBox()
+        self.groupBox.setLayout(self.vbox)
+        self.mainLayout.addWidget(self.groupBox)
 
         self.progress_bar = QtGui.QProgressBar()
         self.progress_bar.setValue(0)
         self.mainLayout.addWidget(self.progress_bar)
 
-        # The Log view is a plain text field
-        self.log_area = QtGui.QPlainTextEdit()
-        self.log_area.setLineWrapMode(QtGui.QPlainTextEdit.NoWrap)
-        self.log_area.setMinimumWidth(Gui.getMainWindow().width()/2)
-        self.log_area.setMinimumHeight(Gui.getMainWindow().height()/2)
-        self.log_area.setLineWrapMode(QtGui.QPlainTextEdit.NoWrap)
+        self.log_view = QtGui.QPlainTextEdit()
+        self.log_view.setLineWrapMode(QtGui.QPlainTextEdit.NoWrap)
+        self.log_view.setMinimumWidth(Gui.getMainWindow().width()/2)
+        self.log_view.setMinimumHeight(Gui.getMainWindow().height()/3)
+        self.log_view.verticalScrollBar().setValue(self.log_view.verticalScrollBar().minimum())
+        # self.log_view.moveCursor(QtGui.QTextCursor.End)
+        # self.log_view.ensureCursorVisible()
+
         f = QtGui.QFont("unexistent");
         f.setStyleHint(QtGui.QFont.Monospace);
-        self.log_area.setFont(f);
-
-
-        self.mainLayout.addWidget(self.log_area)
+        self.log_view.setFont(f);
+        self.mainLayout.addWidget(self.log_view)
 
         # The button row definition
         self.buttonLayout = QtGui.QHBoxLayout()
