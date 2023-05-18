@@ -458,6 +458,7 @@ class checkInterference:
         self.StartButton.setEnabled(state)
         self.checkBox1.setEnabled(state)
         self.checkBox2.setEnabled(state)
+        self.checkBox3.setEnabled(state)
         self.volumeLabel.setEnabled(state)
         self.min_volume.setEnabled(state)
         self.ClearButton.setEnabled(state)
