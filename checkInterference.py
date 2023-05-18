@@ -285,7 +285,6 @@ class checkInterference:
             self.log_write("\n>>> {} is clean! <<<".format(self.Assembly.Label))
             self.remove_interference_folder()
             self.Assembly.Visibility = True
-            self.restore_obj_view([self.Document.Parts, self.Assembly])
             Gui.updateGui()
         else:
             self.log_write("\n>>> Found {} interferences <<<".format(self.interference_count))
