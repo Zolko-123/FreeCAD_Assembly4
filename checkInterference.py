@@ -214,20 +214,20 @@ class checkInterference:
                                 return
 
                             # When the 1st object was never compared
-                            if not obj1.Label in checked_dict:
+                            # if not obj1.Label in checked_dict:
 
                                 # self.log_write("{count: {width}}. {obj1} vs {obj2}".format(count=c, width=self.width_of_number_of_objects(), obj1=obj1.Label, obj2=obj2.Label))
 
                                 # c += 1
 
-                                checked_dict[obj1.Label] = []
+                                # checked_dict[obj1.Label] = []
 
-                                obj1_model_cpy = self.make_shape_copy(doc, obj1)
-                                assembly_copy.addObject(obj1_model_cpy)
-                                obj1_model_cpy.Visibility = True
-                                obj1_model_cpy.ViewObject.Transparency = 88
-                                obj1_model_cpy.ViewObject.ShapeColor = (0.90, 0.90, 0.90)
-                                obj1_model_cpy.ViewObject.DisplayMode = "Shaded"
+                                # obj1_model_cpy = self.make_shape_copy(doc, obj1)
+                                # assembly_copy.addObject(obj1_model_cpy)
+                                # obj1_model_cpy.Visibility = True
+                                # obj1_model_cpy.ViewObject.Transparency = 88
+                                # obj1_model_cpy.ViewObject.ShapeColor = (0.90, 0.90, 0.90)
+                                # obj1_model_cpy.ViewObject.DisplayMode = "Shaded"
 
                                 # When the Obj2 was never compared with Obj1
                                 # if not obj2.Label in checked_dict[obj1.Label]:
