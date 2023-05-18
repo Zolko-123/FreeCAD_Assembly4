@@ -445,7 +445,7 @@ class checkInterference:
         self.log_write("=====================================\n")
         self.processing = True
         self.min_volume_allowed = float(self.min_volume_input.text())
-        self.log_write("Minimum volume allowed to interfere set with = {}".format(self.min_volume_allowed))
+        self.log_write("Minimum interference volume = {}".format(self.min_volume_allowed))
         self.enable_elements(False)
         self.cancel_abort_button.setText("Abort")
         self.Assembly = Asm4.getAssembly()
@@ -539,7 +539,7 @@ class checkInterference:
         self.verbose_checkbox.stateChanged.connect(self.on_verbosity)
 
         self.form_layout = QtGui.QFormLayout()
-        self.min_volume_label = QtGui.QLabel("Ignoring interference with volume equal or less than:")
+        self.min_volume_label = QtGui.QLabel("Minimum interference volume:")
         self.min_volume_input = QtGui.QLineEdit()
         self.min_volume_input.setFixedWidth(10)
         self.min_volume_input.setText(str(self.min_volume_allowed))
