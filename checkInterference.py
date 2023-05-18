@@ -214,56 +214,16 @@ class checkInterference:
                                 return
 
                             # When the 1st object was never compared
-                            # if not obj1.Label in checked_dict:
+                            if not obj1.Label in checked_dict:
 
-                                # self.log_write("{count: {width}}. {obj1} vs {obj2}".format(count=c, width=self.width_of_number_of_objects(), obj1=obj1.Label, obj2=obj2.Label))
+                                checked_dict[obj1.Label] = []
 
-                                # c += 1
-
-                                # checked_dict[obj1.Label] = []
-
-                                # obj1_model_cpy = self.make_shape_copy(doc, obj1)
-                                # assembly_copy.addObject(obj1_model_cpy)
-                                # obj1_model_cpy.Visibility = True
-                                # obj1_model_cpy.ViewObject.Transparency = 88
-                                # obj1_model_cpy.ViewObject.ShapeColor = (0.90, 0.90, 0.90)
-                                # obj1_model_cpy.ViewObject.DisplayMode = "Shaded"
-
-                                # When the Obj2 was never compared with Obj1
-                                # if not obj2.Label in checked_dict[obj1.Label]:
-
-                                #     if not obj2.Label in checked_dict:
-                                #         checked_dict[obj2.Label] = []
-
-                                #     obj2_model_cpy = self.make_shape_copy(doc, obj2)
-                                #     assembly_copy.addObject(obj2_model_cpy)
-                                #     obj2_model_cpy.Visibility = True
-                                #     obj2_model_cpy.ViewObject.Transparency = 88
-                                #     obj2_model_cpy.ViewObject.ShapeColor = (0.90, 0.90, 0.90)
-                                #     obj2_model_cpy.ViewObject.DisplayMode = "Shaded"
-
-                                # checked_dict[obj1.Label].append(obj2.Label)
-                                # checked_dict[obj2.Label].append(obj1.Label)
-
-                                # obj1_cpy = self.make_shape_copy(doc, obj1)
-                                # obj2_cpy = self.make_shape_copy(doc, obj2)
-
-                                # common = self.make_part_intersection(doc, obj1_cpy, obj2_cpy, c)
-
-                                # if common:
-                                #     if not self.remove_common_if_empty(common, c):
-                                #         common.ViewObject.Transparency = 60
-                                #         r = rnd.random()
-                                #         g = rnd.random()
-                                #         b = rnd.random()
-                                #         common.ViewObject.ShapeColor = (r, g, b)
-                                #         Intersections.addObject(common)
-                                #         self.interference_count += 1
-                                #         self.Document.recompute()
-                                #     else:
-                                #         self.Document.removeObject(common.Name)
-
-                                # self.progress_bar_progress()
+                                obj1_model_cpy = self.make_shape_copy(doc, obj1)
+                                assembly_copy.addObject(obj1_model_cpy)
+                                obj1_model_cpy.Visibility = True
+                                obj1_model_cpy.ViewObject.Transparency = 88
+                                obj1_model_cpy.ViewObject.ShapeColor = (0.90, 0.90, 0.90)
+                                obj1_model_cpy.ViewObject.DisplayMode = "Shaded"
 
                             # When the 1st object was compared before but not with the 2nd object
                             if not obj2.Label in checked_dict[obj1.Label]:
