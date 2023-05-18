@@ -4,6 +4,8 @@
 # checkInterference.py
 #
 # Check interferences between parts
+#
+# Author: Leandro Sehnem Heck
 
 import os
 import random as rnd
@@ -20,17 +22,19 @@ import Asm4_libs as Asm4
 import showHideLcsCmd as lcs
 import Part
 
-MIN_VOLUME_ALLOWED = 0.0001
-
 class checkInterference:
 
     def __init__(self):
         super(checkInterference, self).__init__()
 
-        self.abort = 0
-        self.current_value = 0
+        self.abort_processing = False
+        self.min_volume_allowed = 0.0001
+        self.allow_faces_touching = True
+        self.current_progress_value = 0
+        self.check_fasteners = False
         self.log_msg = str()
-        self.enable_fasteners_check = False
+        self.interference_count = 0
+        self.verbose = False
 
     def GetResources(self):
         menutext = "Check Intereferences"
@@ -42,53 +46,112 @@ class checkInterference:
             "Pixmap": iconFile
         }
 
+
     def IsActive(self):
         if Asm4.getAssembly() is None:
-            print("There is no Assembly in this file")
+            print("Check interference works with Asm4 Assemblies and there is none in this file")
             return False
         else:
             return True
 
+
     def Activated(self):
-        self.UI = QtGui.QDialog()
+
         self.modelDoc = App.ActiveDocument
         self.model = Asm4.getAssembly()
-        self.abort = False
+
+        self.abort_processing = False
         lcs.showHide(False)
+
+        self.UI = QtGui.QDialog()
         self.drawUI()
         self.UI.show()
-        self.log_msg = ""
-        # self.log_view.clear()
-        # self.log_view.setPlainText(self.log_msg)
-        # self.log_number_of_objects()
-        # self.log_number_of_comparisons()
-        self.progress_bar.setMaximum(self.total_comparisons)
+
+        self.log_msg = str()
+        self.log_number_of_objects()
+        self.log_number_of_comparisons()
+
+        if self.check_fasteners:
+            self.progress_bar.setMaximum(self.total_comparisons)
+        else:
+            self.progress_bar.setMaximum(self.total_comparisons_without_fasteners)
+
+
+    def log_clear(self):
+        self.log_msg = str()
+        self.log_view.setPlainText(self.log_msg)
+
+
+    def log_write(self, msg):
+        self.log_msg += "{}\n".format(msg)
+        self.log_view.setPlainText(self.log_msg)
+        Gui.updateGui()
+
 
     def log_number_of_objects(self):
         self.n_objects = 0
+        self.n_objects_without_fasteners = 0
         for obj in self.model.Group:
-            # if obj.TypeId == 'App::Link' or obj.TypeId == 'Part::FeaturePython' and (obj.Content.find("FastenersCmd") or (obj.Content.find("PCBStandoff")) > -1):
-            if obj.TypeId == 'App::Link':
+            if obj.Visibility == True and (obj.TypeId == 'App::Link' or (obj.TypeId == 'Part::FeaturePython' and (obj.Content.find("FastenersCmd") or (obj.Content.find("PCBStandoff")) > -1))):
                 self.n_objects += 1
+            if obj.Visibility == True and (obj.TypeId == 'App::Link'):
+                self.n_objects_without_fasteners += 1
+        if self.check_fasteners:
+            self.log_write("{} has {} objects. (with fasteners)".format(self.model.Label, self.n_objects))
+        else:
+            self.log_write("{} has {} objects.".format(self.model.Label, self.n_objects_without_fasteners))
 
-        msg="{} has {} objects".format(self.model.Label, self.n_objects)
-        self.log_msg += "{}\n".format(msg)
-        self.log_view.setPlainText(self.log_msg)
-        # Gui.updateGui()
 
     def log_number_of_comparisons(self):
-        self.total_comparisons = (int) ((math.factorial(self.n_objects) / (math.factorial(2) * math.factorial(self.n_objects - 2))) - self.n_objects)
+        self.total_comparisons = (int) (math.factorial(self.n_objects) / (math.factorial(2) * math.factorial(self.n_objects - 2)))
+        self.total_comparisons_without_fasteners = (int) (math.factorial(self.n_objects_without_fasteners) / (math.factorial(2) * math.factorial(self.n_objects_without_fasteners - 2)))
+        if self.check_fasteners:
+            self.log_write("Totaling {} possible comparisons (with fasteners)".format(self.total_comparisons))
+        else:
+            self.log_write("Totaling {} possible comparisons".format(self.total_comparisons_without_fasteners))
+        self.log_write("Checking interferences may take time, hold on.")
 
-        msg="Totaling {} possible comparisons".format(self.total_comparisons)
-        self.log_msg += "{}\n".format(msg)
-        self.log_view.setPlainText(self.log_msg)
 
-        msg="Checking interferences may take time, hold on.".format(self.total_comparisons)
-        self.log_msg += "{}\n".format(msg)
-        self.log_view.setPlainText(self.log_msg)
+    def log_elapsed_time(self, start_time_s, end_time_s):
 
-    # the real stuff happens here
-    def check_interferences(self, ilim=0, jlim=0):
+        elapsed_time_s = end_time_s - start_time_s
+        if elapsed_time_s < 1:
+            self.log_write("\nElapsed time: {:.2f} ms".format(elapsed_time_s * 1000))
+        elif elapsed_time_s < 60:
+            self.log_write("\nElapsed time: {:.2f} s".format(elapsed_time_s))
+        elif elapsed_time_s < 3600:
+            self.log_write("\nElapsed time: {:.2f} min".format(elapsed_time_s / 60))
+        else:
+            self.log_write("\nElapsed time: {:.2f} h".format(elapsed_time_s / 3600))
+
+
+    def width_of_number_of_objects(self):
+        if self.check_fasteners:
+            c_len = len(str(self.n_objects))
+        else:
+            c_len = len(str(self.n_objects_without_fasteners))
+        return c_len
+
+
+    def log_checked_objects(self, checked_dict):
+        self.log_write("")
+        self.log_write("Checked itens:")
+        k=0
+        for key, values in checked_dict.items():
+            self.log_write("{}. {}".format(k+1, key))
+            k+=1
+            for i, value in enumerate(values):
+                self.log_write("  {}. {}".format(i+1, value))
+
+
+    def check_interferences(self):
+
+        if self.check_fasteners:
+            self.progress_bar.setMaximum(self.total_comparisons)
+        else:
+            self.progress_bar.setMaximum(self.total_comparisons_without_fasteners)
+
+        self.log_write("\nStarting checking interferences...")
 
         start_time_s = timer()
 
@@ -101,7 +164,6 @@ class checkInterference:
             except:
                 pass
 
-        # Create the Interferences folder
         intersections_folder = self.modelDoc.addObject('App::DocumentObjectGroup', 'Interferences')
         self.modelDoc.Tip = intersections_folder
         intersections_folder.Label = 'Interferences'
@@ -111,46 +173,45 @@ class checkInterference:
         shapes_copy.Label = 'ShapeCopies'
         intersections_folder.addObject(shapes_copy)
 
-        # Create the Common folder inside of the Interferences
         Intersections = self.modelDoc.addObject('App::DocumentObjectGroup', 'Intersections')
         self.modelDoc.Tip = Intersections
         Intersections.Label = 'Intersections'
         intersections_folder.addObject(Intersections)
 
-        c = 1 # number of comparisons done
-        t = 1 # total number of objects
-
+        c = 1 # index of the comparison
         i = 0
         checked_dict = dict()
 
-        # parse the assembly
+        # Walk thorough the Assembly
         for obj1 in self.model.Group:
-            # we only check for visible objects
-            if obj1.Visibility == True and (obj1.TypeId == 'App::Link' or (obj1.TypeId == 'Part::FeaturePython' and (obj1.Content.find("FastenersCmd") or (obj1.Content.find("PCBStandoff")) > -1))):
 
-                i = i + 1
+            # Summary: VISIBLE && ( LINK || ( CHECK_FASTENERS && FASTENER ) )
+            if obj1.Visibility == True and (obj1.TypeId == 'App::Link' or (self.check_fasteners and (obj1.TypeId == 'Part::FeaturePython' and (obj1.Content.find("FastenersCmd") or (obj1.Content.find("PCBStandoff")) > -1)))):
+
+                i += 1
                 j = 0
-                # parse the assembly
+
+                # Walk thorough the Assembly (again)
                 for obj2 in self.model.Group:
+
+                    # Ignore checks with the same part
                     if obj2 != obj1:
-                        if obj2.Visibility == True and (obj2.TypeId == 'App::Link' or (obj2.TypeId == 'Part::FeaturePython' and (obj2.Content.find("FastenersCmd") or (obj2.Content.find("PCBStandoff")) > -1))):
-                            j = j + 1
-                            if not jlim == 0 and j >= jlim:
-                                break
 
-                            if self.abort:
+                        # Summary: VISIBLE && ( LINK || ( CHECK_FASTENERS && FASTENER ) )
+                        if obj2.Visibility == True and (obj2.TypeId == 'App::Link' or (self.check_fasteners and (obj2.TypeId == 'Part::FeaturePython' and (obj2.Content.find("FastenersCmd") or (obj2.Content.find("PCBStandoff")) > -1)))):
+
+                            j += 1
+
+                            if self.abort_processing:
                                 return
-
-                            # msg = ">> {} ({}, {}) Checking: {} - {}".format(c, j, i, obj1.Label, obj2.Label)
-                            msg = "{}. Checking: '{}' vs '{}'".format(c, obj1.Label, obj2.Label)
-                            # print(msg)
-                            self.log_msg += "{}\n".format(msg)
-                            self.log_view.setPlainText(self.log_msg)
 
                             # When the 1st object was never compared
                             if not obj1.Label in checked_dict:
 
+                                self.log_write("{count: {width}}. {obj1} vs {obj2}".format(count=c, width=self.width_of_number_of_objects(), obj1=obj1.Label, obj2=obj2.Label))
+
                                 c += 1
+
                                 checked_dict[obj1.Label] = []
 
                                 obj1_model_cpy = self.make_shape_copy(doc, obj1)
@@ -160,10 +221,12 @@ class checkInterference:
                                 obj1_model_cpy.ViewObject.ShapeColor = (0.90, 0.90, 0.90)
                                 obj1_model_cpy.ViewObject.DisplayMode = "Shaded"
 
-                                # When the 2nd object was never compared
-                                if not obj2.Label in checked_dict:
+                                # When the Obj2 was never compared with Obj1
+                                # if not obj2.Label in checked_dict:
+                                if not obj2.Label in checked_dict[obj1.Label]:
 
-                                    checked_dict[obj2.Label] = []
+                                    if not obj2.Label in checked_dict:
+                                        checked_dict[obj2.Label] = []
 
                                     obj2_model_cpy = self.make_shape_copy(doc, obj2)
                                     shapes_copy.addObject(obj2_model_cpy)
@@ -178,95 +241,83 @@ class checkInterference:
                                 obj1_cpy = self.make_shape_copy(doc, obj1)
                                 obj2_cpy = self.make_shape_copy(doc, obj2)
 
-                                common = self.make_intersection(doc, obj1_cpy, obj2_cpy, c)
+                                common = self.make_part_intersection(doc, obj1_cpy, obj2_cpy, c)
 
                                 if common:
-                                    if not self.remove_empty_common(common):
+                                    if not self.remove_common_if_empty(common, c):
                                         common.ViewObject.Transparency = 60
                                         r = rnd.random()
                                         g = rnd.random()
                                         b = rnd.random()
                                         common.ViewObject.ShapeColor = (r, g, b)
                                         Intersections.addObject(common)
+                                        self.interference_count += 1
                                         self.modelDoc.recompute()
                                     else:
                                         self.modelDoc.removeObject(common.Name)
-                            else:
 
-                                # When the 1st object was compared before but not with the 2nd object
-                                if not obj2.Label in checked_dict[obj1.Label]:
+                                self.progress_bar_progress()
+
+                            # When the 1st object was compared before but not with the 2nd object
+                            elif not obj2.Label in checked_dict[obj1.Label]:
+
+                                    self.log_write("{count: {width}}. {obj1} vs {obj2}".format(count=c, width=self.width_of_number_of_objects(), obj1=obj1.Label, obj2=obj2.Label))
 
                                     c += 1
 
                                     checked_dict[obj1.Label].append(obj2.Label)
 
-                                    obj2_list = []
-                                    obj2_list.append(obj2.Label)
-                                    checked_dict[obj2.Label] = obj2_list
+                                    if not obj2.Label in checked_dict:
+                                        checked_dict[obj2.Label] = []
+
+                                    checked_dict[obj2.Label].append(obj1.Label)
 
                                     obj1_cpy = self.make_shape_copy(doc, obj1)
                                     obj2_cpy = self.make_shape_copy(doc, obj2)
-                                    common = self.make_intersection(doc, obj1_cpy, obj2_cpy, c)
+                                    common = self.make_part_intersection(doc, obj1_cpy, obj2_cpy, c)
 
                                     if common:
-                                        if not self.remove_empty_common(common):
+                                        if not self.remove_common_if_empty(common, c):
                                             common.ViewObject.Transparency = 60
                                             r = rnd.random()
                                             g = rnd.random()
                                             b = rnd.random()
                                             common.ViewObject.ShapeColor = (r, g, b)
                                             Intersections.addObject(common)
+                                            self.interference_count += 1
                                             self.modelDoc.recompute()
                                         else:
                                             self.modelDoc.removeObject(common.Name)
-                                else:
 
-                                    msg = "   Interference previously processed"
-                                    # print(msg)
-                                    self.log_msg += "{}\n".format(msg)
-                                    self.log_view.setPlainText(self.log_msg)
+                                    self.progress_bar_progress()
 
-                            self.progress_bar_progress()
+                            else:
+                                if self.verbose:
+                                    self.log_write("{count: {width}}. {obj1} vs {obj2}".format(count=c, width=self.width_of_number_of_objects(), obj1=obj1.Label, obj2=obj2.Label))
+                                    indent = " " * (self.width_of_number_of_objects() + 3)
+                                    self.log_write("{}| Step already processed".format(indent))
+                                    self.log_write("{}| See {} vs {}".format(indent, obj2.Label, obj1.Label))
+
                             Gui.updateGui()
-
-
-            if not ilim == 0 and i >= ilim:
-                break
 
         self.modelDoc.recompute()
         Gui.updateGui()
 
-        # Remove the intersections folder if there is no interference
+        if self.verbose:
+            self.log_checked_objects(checked_dict)
+
+        # Remove the intersections folder if there is no "ce
         if not Intersections.Group:
-            msg = "\n>>> Design Clean <<<"
-            # print(msg)
-            self.log_msg += "{}\n".format(msg)
-            self.log_view.setPlainText(self.log_msg)
+            self.log_write("\n>>> {} is clean! <<<".format(self.model.Label))
             self.remove_interference_folder()
             self.model.Visibility = True
             Gui.updateGui()
-        else:
-            msg = "\n>>> {} has {} interferences <<<".format(self.model.Label, len(Intersections.Group))
-            # print(msg)
-            self.log_msg += "{}\n".format(msg)
-            self.log_view.setPlainText(self.log_msg)
-
 
         end_time_s = timer()
-        elapsed_time_s = end_time_s - start_time_s
-        if elapsed_time_s < 1:
-            msg = "\nElapsed time: {:0.2} ms".format(elapsed_time_s / 1000)
-        elif elapsed_time_s < 60:
-            msg = "\nElapsed time: {:0.2} s".format(elapsed_time_s)
-        elif elapsed_time_s < 3600:
-            msg = "\nElapsed time: {:0.2} min".format(elapsed_time_s / 60)
-        else:
-            msg = "\nElapsed time: {:0.2} h".format(elapsed_time_s / 3600)
-        self.log_msg += "{}\n".format(msg)
-        self.log_view.setPlainText(self.log_msg)
+        self.log_elapsed_time(start_time_s, end_time_s)
 
 
-    # makes a new Part::Feature and assigns it the shape of the original object
+    # Makes a new Part::Feature and assigns it the shape of the original object
     # works also with ShapeBinders but it's much slower
     def make_shape_copy(self, doc, obj):
         '''
@@ -280,37 +331,30 @@ class checkInterference:
         new_obj.ViewObject.ShapeColor = getattr(obj.getLinkedObject(True).ViewObject, 'ShapeColor', new_obj.ViewObject.ShapeColor)
         new_obj.ViewObject.LineColor  = getattr(obj.getLinkedObject(True).ViewObject, 'LineColor',  new_obj.ViewObject.LineColor)
         new_obj.ViewObject.PointColor = getattr(obj.getLinkedObject(True).ViewObject, 'PointColor', new_obj.ViewObject.PointColor)
-        # doc.recompute()
         return new_obj
 
 
-    def make_intersection(self, doc, obj1, obj2, count):
+    def make_part_intersection(self, doc, obj1, obj2, count):
 
         shape_missing = 0
 
+        indent = " " * (self.width_of_number_of_objects() + 3)
+
         if not obj1.Shape.Solids:
+            self.log_write("{}| {} does not have shape.".format(indent, obj1.Label))
             shape_missing = 1
-            msg = "   {} does not have a shape.".format(obj1.Label)
-            App.Console.PrintWarning(msg)
-            self.log_msg += "{}\n".format(msg)
-            self.log_view.setPlainText(self.log_msg)
             Gui.updateGui()
+
         if not obj2.Shape.Solids:
+            self.log_write("{}| {} does not have shape.".format(indent, obj2.Label))
             shape_missing = 1
-            msg = "   {} does not have a shape.".format(obj2.Label)
-            App.Console.PrintWarning(msg)
-            self.log_msg += "{}\n".format(msg)
-            self.log_view.setPlainText(self.log_msg)
             Gui.updateGui()
 
         if shape_missing:
-            msg = "   Missing shape(s), skipping the check.\n".format(obj2.Label)
-            App.Console.PrintWarning(msg)
-            self.log_msg += "{}\n".format(msg)
-            self.log_view.setPlainText(self.log_msg)
-            Gui.updateGui()
+            self.log_write("{}| There are missing shape(s) (SKIPPING).".format(indent))
             self.modelDoc.removeObject(obj1.Name)
             self.modelDoc.removeObject(obj2.Name)
+            Gui.updateGui()
             return
 
         obj = doc.addObject("Part::MultiCommon", "Common")
@@ -318,17 +362,17 @@ class checkInterference:
         obj.Shapes = [obj1, obj2]
         obj1.Visibility = False
         obj2.Visibility = False
-        obj.Label = "Common {} - {} - {}".format(str(count), obj1.Label, obj2.Label)
+        obj.Label = "Common {} - {} - {} - {}".format(self.interference_count+1, count-1, obj1.Label, obj2.Label)
         obj.ViewObject.DisplayMode = getattr(obj1.getLinkedObject(True).ViewObject, 'DisplayMode', obj.ViewObject.DisplayMode)
         obj.ViewObject.ShapeColor = (1., 0.666, 0.) # YELLOW
         obj.ViewObject.Transparency = 0
         obj.ViewObject.DisplayMode = "Shaded"
         doc.recompute()
 
-        # Sometimes there are not shapes...
+        # Sometimes there are no shapes.
         # try:
         obj.Label2 = "Volume = {:4f}".format(obj.Shape.Volume)
-        if obj.Shape.Volume > MIN_VOLUME_ALLOWED:
+        if obj.Shape.Volume > self.min_volume_allowed:
             return obj
         else:
             # Avoiding the following issue:
@@ -340,56 +384,44 @@ class checkInterference:
         # except:
         #     return
 
-    def remove_empty_common(self, obj):
+    def remove_common_if_empty(self, obj, count):
+
+        indent = " " * (self.width_of_number_of_objects() + 3)
+
         try:
             if obj.Shape:
                 try:
-                    msg = "| Collision detected".format(obj.Label)
-                    # msg = "  {} | Collision detected".format(obj.Label)
-                    # print(msg)
-                    self.log_msg += "{}\n".format(msg)
-                    self.log_view.setPlainText(self.log_msg)
-                    Gui.updateGui()
-
-                    if obj.Shape.Volume > MIN_VOLUME_ALLOWED:
+                    self.log_write("{}| Collision detected".format(indent))
+                    self.log_write("{}| Object = {}".format(indent, obj.Label))
+                    self.log_write("{}| Shape volume = {}".format(indent, obj.Shape.Volume))
+                    if obj.Shape.Volume > self.min_volume_allowed:
                         return False
                     else:
-                        # msg = "| Touching faces (KEEPING)".format(obj.Label)
-                        msg = "| Touching faces (REMOVING)".format(obj.Label)
-                        # print(msg)
-                        self.log_msg += "{}\n".format(msg)
-                        self.log_view.setPlainText(self.log_msg)
-                        Gui.updateGui()
-
-                        for shape in obj.Shapes:
-                            self.modelDoc.removeObject(shape.Name)
-                        self.modelDoc.removeObject(obj.Name)
-                        return True
+                        if self.allow_faces_touching:
+                            self.log_write("{}| Touching faces (KEEPING)".format(indent))
+                            self.log_write("{}| {}".format(indent, obj.Label))
+                            return False
+                        else:
+                            self.log_write("{}| Touching faces (REMOVING)".format(indent))
+                            for shape in obj.Shapes:
+                                self.modelDoc.removeObject(shape.Name)
+                            self.modelDoc.removeObject(obj.Name)
+                            return True
                 except:
+                    self.log_write("{}| Interference clear".format(indent))
                     for shape in obj.Shapes:
                         self.modelDoc.removeObject(shape.Name)
                     self.modelDoc.removeObject(obj.Name)
-                    msg = "| Interference clear".format(obj.Label)
-                    # print(msg)
-                    self.log_msg += "{}\n".format(msg)
-                    self.log_view.setPlainText(self.log_msg)
-                    Gui.updateGui()
-
                     return True
         except:
+            self.log_write("{}| Interference clear".format(indent))
             for shape in common.Shapes:
                 self.modelDoc.removeObject(shape.Name)
             self.modelDoc.removeObject(common.Name)
-            msg = "| Interference clear".format(obj.Label)
-            # print(msg)
-            self.log_msg += "{}\n".format(msg)
-            self.log_view.setPlainText(self.log_msg)
-            Gui.updateGui()
-
             return True
 
 
-    # Remove existing folder and its contents
+    # Remove Interferences folder recursively
     def remove_interference_folder(self):
         self.modelDoc.Parts.Visibility = True
         for obj in self.modelDoc.Parts.Group:
@@ -421,60 +453,90 @@ class checkInterference:
         except:
             pass
 
+
+    def enable_elements(self, state):
+        self.StartButton.setEnabled(state)
+        self.checkBox1.setEnabled(state)
+        self.checkBox2.setEnabled(state)
+        self.volumeLabel.setEnabled(state)
+        self.min_volume.setEnabled(state)
+        self.ClearButton.setEnabled(state)
+
+
     def onStart(self):
-        self.model = Asm4.getAssembly()
-        self.StartButton.setEnabled(False)
-        self.ClearButton.setEnabled(False)
+        self.log_write("")
+        self.log_write("=====================================\n")
+        self.processing = True
+        self.min_volume_allowed = float(self.min_volume.text())
+        self.log_write("Minimum volume allowed to interfere set with = {}".format(self.min_volume_allowed))
+        self.enable_elements(False)
         self.CancelButton.setText("Abort")
-        # self.log_msg = str()
-        # self.log_view.setPlainText(self.log_msg)
+        self.model = Asm4.getAssembly()
         self.progress_bar_reset()
         self.remove_interference_folder()
         self.check_interferences()
+        self.abort_processing = False
         self.model.recompute()
-        self.StartButton.setEnabled(True)
-        self.ClearButton.setEnabled(True)
+        self.enable_elements(True)
         self.CancelButton.setText("Close")
+        self.processing = False
+
 
     def onCancel(self):
-        # do something to abort current operations, if any
-        self.abort = True
-        self.log_msg = str()
-        self.log_view.setPlainText(self.log_msg)
+        if self.processing:
+            self.abort_processing = True
+            self.log_write("\n>>> OPERATION ABORTED <<<")
+            self.progress_bar_reset()
+            self.model.Visibility = True
+            self.modelDoc.Parts.Visibility = True
+        else:
+            self.UI.close()
 
-        # TODO: if running only
-        # self.log_msg += "\nOPERATION ABORTED\n"
-        # self.log_view.setPlainText(self.log_msg)
-        # self.remove_interference_folder()
-        # self.model.Visibility = True
-        # self.modelDoc.Parts.Visibility = True
-        self.UI.close()
 
     def onClear(self):
-        self.log_msg = str()
-        self.log_view.setPlainText(self.log_msg)
         self.remove_interference_folder()
+        self.log_clear()
         self.log_number_of_objects()
         self.log_number_of_comparisons()
-        self.log_msg += "Interference check may take time\n"
-        self.log_view.setPlainText(self.log_msg)
 
 
-    def onCheckFasterners(self, state):
+    def onToggleAllowFaces(self, state):
         if state == QtCore.Qt.Checked:
-            self.enable_fasteners_check = True
+            self.allow_faces_touching = True
         else:
-            self.enable_fasteners_check = False
+            self.allow_faces_touching = False
+        self.log_write("Allow faces touching = {}".format(self.allow_faces_touching))
+
+
+    def onToggleCheckFasterners(self, state):
+        if state == QtCore.Qt.Checked:
+            self.check_fasteners = True
+        else:
+            self.check_fasteners = False
+        self.log_clear()
+        self.log_write("Check fasteners = {}".format(self.check_fasteners))
+        self.log_write("==============================")
+        self.log_number_of_objects()
+        self.log_number_of_comparisons()
+
+    def onToggleVerbosity(self, state):
+        if state == QtCore.Qt.Checked:
+            self.verbose = True
+        else:
+            self.verbose = False
+        self.log_write("Verbose = {}".format(self.verbose))
 
 
     def progress_bar_reset(self):
-        self.current_value = 0
+        self.current_progress_value = 0
         self.progress_bar.reset()
 
+
     def progress_bar_progress(self):
-        if self.current_value <= self.progress_bar.maximum():
-            self.current_value += 1
-            self.progress_bar.setValue(self.current_value)
+        if self.current_progress_value <= self.progress_bar.maximum():
+            self.current_progress_value += 1
+            self.progress_bar.setValue(self.current_progress_value)
+
 
     # Define the UI (static elements, only)
     def drawUI(self):
@@ -486,21 +548,28 @@ class checkInterference:
         self.UI.setModal(False)
         self.mainLayout = QtGui.QVBoxLayout(self.UI)
 
-        self.checkBox1 = QtGui.QCheckBox("Allow touching faces")
+        self.checkBox1 = QtGui.QCheckBox("Allow faces touching")
         self.checkBox2 = QtGui.QCheckBox("Include fasteners")
+        self.checkBox3 = QtGui.QCheckBox("Verbose")
         self.checkBox1.setChecked(True)
         self.checkBox2.setChecked(False)
+        self.checkBox3.setChecked(False)
+        self.checkBox1.stateChanged.connect(self.onToggleAllowFaces)
+        self.checkBox2.stateChanged.connect(self.onToggleCheckFasterners)
+        self.checkBox3.stateChanged.connect(self.onToggleVerbosity)
 
         self.formLayout = QtGui.QFormLayout()
         self.entry1 = QtGui.QLineEdit()
         self.volumeLabel = QtGui.QLabel("Ignoring interference with volume equal or less than:")
         self.min_volume = QtGui.QLineEdit()
-        self.min_volume.setText(str(MIN_VOLUME_ALLOWED))
+        self.min_volume.setFixedWidth(10)
+        self.min_volume.setText(str(self.min_volume_allowed))
         self.formLayout.addRow(self.volumeLabel, self.min_volume)
 
         self.vbox = QtGui.QVBoxLayout()
         self.vbox.addWidget(self.checkBox1)
         self.vbox.addWidget(self.checkBox2)
+        self.vbox.addWidget(self.checkBox3)
         self.vbox.addLayout(self.formLayout)
         self.vbox.addStretch(1)
 
@@ -516,9 +585,12 @@ class checkInterference:
         self.log_view.setLineWrapMode(QtGui.QPlainTextEdit.NoWrap)
         self.log_view.setMinimumWidth(Gui.getMainWindow().width()/2)
         self.log_view.setMinimumHeight(Gui.getMainWindow().height()/3)
-        self.log_view.verticalScrollBar().setValue(self.log_view.verticalScrollBar().minimum())
-        # self.log_view.moveCursor(QtGui.QTextCursor.End)
-        # self.log_view.ensureCursorVisible()
+        self.log_view.ensureCursorVisible()
+        self.log_view.moveCursor(QtGui.QTextCursor.End)
+        self.log_view.ensureCursorVisible()
+        self.log_view.verticalScrollBar().setValue(self.log_view.verticalScrollBar().maximum())
+        # self.log_view.textChanged.connect(self.log_view.verticalScrollBar().maximum())
+
 
         f = QtGui.QFont("unexistent");
         f.setStyleHint(QtGui.QFont.Monospace);
@@ -528,20 +600,20 @@ class checkInterference:
         # The button row definition
         self.buttonLayout = QtGui.QHBoxLayout()
 
-        # Start button
-        self.StartButton = QtGui.QPushButton('Start Checks')
-        self.StartButton.setDefault(True)
-        self.buttonLayout.addWidget(self.StartButton)
-        self.mainLayout.addLayout(self.buttonLayout)
-
         # Delete Interferences folder
         self.ClearButton = QtGui.QPushButton('Clear Checks')
         self.ClearButton.setDefault(True)
         self.buttonLayout.addWidget(self.ClearButton)
         self.mainLayout.addLayout(self.buttonLayout)
 
+        # Start button
+        self.StartButton = QtGui.QPushButton('Check Interferences')
+        self.StartButton.setDefault(True)
+        self.buttonLayout.addWidget(self.StartButton)
+        self.mainLayout.addLayout(self.buttonLayout)
+
         # Cancel button
-        self.CancelButton = QtGui.QPushButton('Close')
+        self.CancelButton = QtGui.QPushButton('Cancel')
         self.CancelButton.setDefault(True)
         self.buttonLayout.addWidget(self.CancelButton)
         self.mainLayout.addLayout(self.buttonLayout)
