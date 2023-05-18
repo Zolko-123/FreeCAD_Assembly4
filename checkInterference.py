@@ -67,7 +67,7 @@ class checkInterference:
         self.drawUI()
         self.UI.show()
 
-        self.log_msg = str()
+        self.log_clear()
         self.log_number_of_objects()
         self.log_number_of_comparisons()
 
