@@ -232,7 +232,6 @@ class Assembly4Workbench(Workbench):
                         "Asm4_shapeBinder",
                         "Separator",
                         "Asm4_infoPart",
-                        "Asm4_makeLocalBOM",
                         "Asm4_makeBOM",
                         "Asm4_listLinkedFiles",
                         "Asm4_checkInterference",
