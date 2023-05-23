@@ -16,42 +16,85 @@ from FreeCAD import Console as FCC
 import Asm4_libs as Asm4
 import infoKeys
 
-ConfUserDir = os.path.join(App.getUserAppDataDir(),'Templates')
-ConfUserFilename = "Asm4_infoPartConf.json"
-ConfUserFilejson = os.path.join(ConfUserDir, ConfUserFilename)
-
-'''
-# Check if the configuration file exists
-try:
-    file = open(ConfUserFilejson, 'r')
-    file.close()
-except:
-    partInfoDef = dict()
-    for prop in infoKeys.partInfo:
-        partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': True})
-    for prop in infoKeys.partInfo_Invisible:
-        partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': False})
-    try:
-        os.mkdir(ConfUserDir)
-    except:
-        pass
-    file = open(ConfUserFilejson, 'x')
-    json.dump(partInfoDef, file)
-    file.close()
-'''
+# file_version = infoKeys.file_version
+part_info = infoKeys.part_info
+part_info_tooltip = infoKeys.part_info_tooltip
+hidden_part_info = infoKeys.hidden_part_info
 
 """
     +-----------------------------------------------+
     |                  Helper Tools                 |
     +-----------------------------------------------+
 """
+
+config_dir_path = os.path.join(App.getUserAppDataDir(), 'Templates')
+config_filename = "Asm4_infoPartConf.json"
+config_file_path = os.path.join(config_dir_path, config_filename)
+
+
 def writeXml(text):
     text = text.encode('unicode_escape').decode().replace('\\', '_x_m_l_')
     return text
 
+
 def decodeXml(text):
     text = text.replace('_x_m_l_', '\\').encode().decode('unicode_escape')
     return text
+
+
+def versiontuple(v):
+   filled = []
+   for point in v.split("."):
+      filled.append(point.zfill(8))
+   return tuple(filled)
+
+
+def load_config_file_data():
+
+    parts_plist = dict() # part properties list
+
+    # If config file exists compare its version
+    # and if its version is older, delete it so it will be recreated
+    if os.path.isfile(config_file_path):
+
+        with open(config_file_path, 'r') as f:
+            try:
+                p = json.load(f).copy()
+                if not "file_version" in p:
+                    os.remove(config_file_path)
+                else:
+                    if versiontuple(file_version) > versiontuple(p["file_version"]["userData"]):
+                        pass
+                        # os.remove(config_file_path)
+            except:
+                # Malformed file, delete it so it will be recreated
+                os.remove(config_file_path)
+
+    # (Re)Create the config file if it does not exist
+    if not os.path.isfile(config_file_path):
+
+        # Add file version
+        # parts_plist.setdefault("file_version", file_version)
+
+        # Add the default settings
+        for prop in part_info:
+            parts_plist.setdefault(prop, {"userData": prop, "active": True, "visible": True})
+
+        # Add hidden settings for fastners only
+        for prop in hidden_part_info:
+            parts_plist.setdefault(prop, {"userData": prop, "active": True, "visible": False})
+
+        if not os.path.exists(config_dir_path):
+            os.mkdir(config_dir_path)
+
+        with open(config_file_path, 'x') as f:
+            json.dump(parts_plist, f, indent=4, separators=(", ", ": "))
+
+
+    with open(config_file_path, 'r') as f:
+        parts_plist = json.load(f).copy()
+
+    return parts_plist
 
 
 """
@@ -59,21 +102,29 @@ def decodeXml(text):
     |                Info Part Command              |
     +-----------------------------------------------+
 """
+
 class infoPartCmd():
 
     def __init__(self):
         super(infoPartCmd, self).__init__()
 
+
     def GetResources(self):
         tooltip  = "<p>Edit Part information</p>"
         tooltip += "<p>User-supplied information can be added to a part</p>"
         iconFile = os.path.join(Asm4.iconPath, 'Asm4_PartInfo.svg')
-        return {"MenuText": "Edit Part Information", "ToolTip": tooltip, "Pixmap": iconFile}
+
+        return {
+            "MenuText": "Edit Part Information",
+            "ToolTip": tooltip,
+            "Pixmap": iconFile}
+
 
     def IsActive(self):
         if App.ActiveDocument and Asm4.getSelectedContainer():
             return True
         return False
+
 
     def Activated(self):
         Gui.Control.showDialog(infoPartUI())
@@ -84,6 +135,7 @@ class infoPartCmd():
     |       UI and functions in the Task panel      |
     +-----------------------------------------------+
 """
+
 class infoPartUI():
 
     def __init__(self):
@@ -96,29 +148,18 @@ class infoPartUI():
         self.part = Asm4.getSelectedContainer()
         # Check and load if the configuration file exists
         try:
-            file = open(ConfUserFilejson, 'r')
+            file = open(config_file_path, 'r')
             self.infoKeysUser = json.load(file).copy()
             file.close()
         except:
             self.infoKeysUser = dict()
+
             for prop in infoKeys.partInfo:
                 self.infoKeysUser.setdefault(prop, {'userData': prop, 'active': True, 'visible': True})
+
             for prop in infoKeys.partInfo_Invisible:
                 self.infoKeysUser.setdefault(prop, {'userData': prop, 'active': True, 'visible': False})
-        '''
-            try:
-                os.mkdir(ConfUserDir)
-            except:
-                pass
-            file = open(ConfUserFilejson, 'x')
-            json.dump(partInfoDef, file)
-            file.close()
 
-        # should be safe now
-        file = open(ConfUserFilejson, 'r')
-        self.infoKeysUser = json.load(file).copy()
-        file.close()
-        '''
         self.makePartInfo(self, self.part)
         self.infoTable = []
         self.getPartInfo()
@@ -170,27 +211,31 @@ class infoPartUI():
 
     # Reset the list of properties
     def reInit(self):
-        List = self.part.PropertiesList
-        listpi = []
-        for prop in List:
-            if self.part.getGroupOfProperty(prop) == 'PartInfo':
-                listpi.append(prop)
-        for suppr in listpi: # delete all PartInfo properties
-            self.part.removeProperty(suppr)
 
-        # Recover initial json file since fateners keys are being lost
-        partInfoDef = dict()
-        for prop in infoKeys.partInfo:
-            partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': True})
-        for prop in infoKeys.partInfo_Invisible:
-            partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': False})
-        try:
-            os.mkdir(ConfUserDir)
-        except:
-            pass
-        file = open(ConfUserFilejson, 'w')
-        json.dump(partInfoDef, file)
-        file.close()
+        load_config_file_data()
+
+        # List = self.part.PropertiesList
+        # listpi = []
+        # for prop in List:
+        #     if self.part.getGroupOfProperty(prop) == 'PartInfo':
+        #         listpi.append(prop)
+        # for suppr in listpi: # delete all PartInfo properties
+        #     self.part.removeProperty(suppr)
+
+        # # Recover initial json file since fateners keys are being lost
+        # partInfoDef = dict()
+        # for prop in infoKeys.partInfo:
+        #     partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': True})
+        # for prop in infoKeys.partInfo_Invisible:
+        #     partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': False})
+        # try:
+        #     os.mkdir(config_dir_path)
+        # except:
+        #     pass
+        # file = open(config_file_path, 'w')
+        # json.dump(partInfoDef, file)
+        # file.close()
+
 
         '''
         mb = QtGui.QMessageBox()
@@ -204,9 +249,10 @@ class infoPartUI():
 
     def infoDefault(self):
         # infoKeys.infoDefault(self)
-        file = open(ConfUserFilejson, 'r')
-        infoKeysUser = json.load(file).copy()
-        file.close()
+        # file = open(config_file_path, 'r')
+        # infoKeysUser = json.load(file).copy()
+        # file.close()
+        infoKeysUser = load_config_file_data()
         try:
             self.TypeId
             part = self
@@ -226,29 +272,55 @@ class infoPartUI():
                             pass
             try:
                 self.LabelDoc(self, part, doc)
-            except NameError:
+            except:
                 # print('LabelDoc: there is no Document on the Part ', part.FullName)
                 pass
             try:
                 self.LabelPart(self, part)
-            except NameError:
+            except:
                 # print('LabelPart: Part does not exist')
                 pass
             try:
                 self.PadLength(self, part, pad)
-            except NameError:
+            except:
                 # print('PadLenght: there is no Pad in the Part ', part.FullName)
                 pass
             try:
                 self.ShapeLength(self, part, sketch)
-            except NameError:
+            except:
                 # print('ShapeLength: there is no Sketch in the Part ', part.FullName)
                 pass
             try:
                 self.ShapeVolume(self, part, body)
-            except NameError:
+            except:
                 # print('ShapeVolume: there is no Shape in the Part ', part.FullName)
                 pass
+
+
+    def LabelDoc(self, part, doc):
+
+        # Recover doc_name from parts_dict
+        try:
+            if infoKeysUser.get("Doc_Label").get('active'):
+                try:
+                    doc_name = getattr(obj, infoKeysUser.get("Doc_Label").get('userData'))
+                except AttributeError:
+                    doc_name = obj.Document.Name
+        except:
+            doc_name = obj.Document.Name
+
+        auto_info_field = infoKeysUser.get("Doc_Label").get('userData')
+        auto_info_fill = doc_name
+        try:
+            self.TypeId
+            setattr(part, auto_info_field, auto_info_fill)
+        except AttributeError:
+            try:
+                for i in range(len(self.infoTable)):
+                    if self.infoTable[i][0] == auto_info_field:
+                        self.infos[i].setText(auto_info_fill)
+            except AttributeError:
+                self.infos[i].setText("-")
 
 
     def LabelPart(self, part):
@@ -383,6 +455,8 @@ class infoPartUI():
             self.addNew()
         '''
 
+
+
 class infoPartConfUI():
 
     def __init__(self):
@@ -394,7 +468,7 @@ class infoPartConfUI():
 
         self.infoKeysDefault = infoKeys.partInfo.copy()
         self.infoToolTip = infoKeys.infoToolTip.copy()
-        file = open(ConfUserFilejson, 'r')
+        file = open(config_file_path, 'r')
         self.infoKeysUser = json.load(file).copy()
         file.close()
 
@@ -403,14 +477,18 @@ class infoPartConfUI():
 
         self.drawConfUI()
 
+
     def finish(self):
         Gui.Control.closeDialog()
+
 
     def getStandardButtons(self):
         return int(QtGui.QDialogButtonBox.Cancel | QtGui.QDialogButtonBox.Ok)
 
+
     def reject(self):
         self.finish()
+
 
     def accept(self):
         i = 0
@@ -442,11 +520,11 @@ class infoPartConfUI():
                 partInfoDef.setdefault(prop, {'userData': uData.replace(" ", "_"), 'active': self.checker[i].isChecked(), 'visible': True})
                 i += 1
 
-        file = open(ConfUserFilejson, 'w')
+        file = open(config_file_path, 'w')
         json.dump(partInfoDef, file)
         file.close()
 
-        file = open(ConfUserFilejson, 'r')
+        file = open(config_file_path, 'r')
         self.infoKeysUser = json.load(file).copy()
         file.close()
 
@@ -458,6 +536,7 @@ class infoPartConfUI():
         '''
 
         self.finish()
+
 
     def addNewManField(self):
         """
@@ -472,6 +551,7 @@ class infoPartConfUI():
             fieldName = baseName + "_" + str(indexref)
         self.newOne.setText('')
         self.addNewField(fieldName, fieldLabel)
+
 
     def addNewField(self, newRef, newField):
         """
@@ -502,6 +582,7 @@ class infoPartConfUI():
 
         self.i += 1
 
+
     def deleteField(self):
         """
         Delete custom fields
@@ -527,6 +608,7 @@ class infoPartConfUI():
 
         return
 
+
     def updateAutoFieldlist(self):
         listUser = []
         for li in self.infoKeysUser:
@@ -544,6 +626,7 @@ class infoPartConfUI():
         else:
             return listDefault
 
+
     def updateAutoField(self):
         """
         Update auto field (used when new default keys are added to the infoKeys.py)
@@ -551,6 +634,7 @@ class infoPartConfUI():
         upField = self.upCombo.currentText()
         self.upCombo.removeItem(self.upCombo.currentIndex())
         self.addNewField(upField, upField)
+
 
     # Define the UI
     # TODO : make it static
