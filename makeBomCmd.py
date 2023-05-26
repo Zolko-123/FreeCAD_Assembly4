@@ -65,7 +65,7 @@ class makeBOM:
         self.parts_dict = dict()
         self.follow_subassemblies = False
         self.subassembly_parts_are_the_same = True
-        self.max_part_nested_level = 0
+        self.max_part_nested_level = 1
         self.parts_list_done = False
         self.verbose = True # TODO: IT SHOULD BE FALSE, HERE IS IS TRUE FOR DEBUGGIN
 
@@ -109,7 +109,9 @@ class makeBOM:
         # TODO: The VERBOSE should start as "False"
         # When it starts with True, it executes automatically (debugging only)
         if self.verbose:
-            self.log_write('\n>>> DEBUGGING VERBOSE ACTIVATED <<<\n')
+            self.log_write('\n>>> DEBUGGING VERBOSE ACTIVATED <<<')
+            self.log_write('\n>>> GENERATING PARTS LIST <<<\n')
+            self.log_write('\n>>> Chill, this may take time... <<<\n')
             self.list_parts(self.Assembly)
             self.parts_list_done = True
             self.log_write('\n>>> Parts Listing Done <<<\n')
@@ -383,18 +385,20 @@ class makeBOM:
         if obj == None:
             return
 
-        self.log_write("> [DEBUG] [{hl},{pl}] ({tid}) {lbl}".format(hl=hier_level, pl=part_level, tid=obj.TypeId, lbl=obj.Label))
+        if self.verbose:
+            obj_visibility = ""
+            if not obj.Visibility:
+                obj_visibility = "(INVISIBLE)"
+            self.log_write("\n> [DEBUG] [{hl},{pl}] ({tid}) {lbl} {v}".format(hl=hier_level, pl=part_level, tid=obj.TypeId, lbl=obj.Label, v=obj_visibility))
 
         # Visible Assembly4 App::Part
         if obj.TypeId == 'App::Part' and Asm4.isAsm4Model(obj):
             self.log_write("> [{hl},{pl}] ({tid}) {lbl}".format(hl=hier_level, pl=part_level, tid=obj.TypeId, lbl=obj.Label))
-            if hier_level == 0: # Root Asm4
-                for nested_obj in obj.Group:
+            if obj.Visibility == True and hier_level == 0: # Root Asm4
+                for obj_name in obj.getSubObjects():
+                    nested_obj = obj.Document.getObject(obj_name[0:-1])
                     self.list_parts(nested_obj, hier_level+1, part_level)
-                # for obj_name in obj.getSubObjects():
-                    # nested_obj = obj.Document.getObject(obj_name[0:-1])
-                    # self.list_parts(nested_obj, hier_level+1, part_level)
-            elif obj.Visibility == True:
+            elif obj.Visibility == False:
                 if self.follow_subassemblies:
                     for obj_name in obj.getSubObjects():
                         nested_obj = obj.Document.getObject(obj_name[0:-1])
@@ -547,6 +551,8 @@ class makeBOM:
 
     def on_generate_parts_list(self):
         self.log_clear()
+        self.log_write('\n>>> GENERATING PARTS LIST <<<\n')
+        self.log_write('Chill, this may take time, sometimes... \n')
         self.max_part_nested_level = int(self.parts_depth_input.text())
         self.parts_dict.clear()
         self.list_parts(self.Assembly)
