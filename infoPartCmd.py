@@ -19,7 +19,7 @@ import infoKeys
 # file_version = infoKeys.file_version
 part_info = infoKeys.part_info
 part_info_tooltip = infoKeys.part_info_tooltip
-hidden_part_info = infoKeys.hidden_part_info
+fastener_info = infoKeys.fastener_info
 
 """
     +-----------------------------------------------+
@@ -81,7 +81,7 @@ def load_config_file_data():
             parts_plist.setdefault(prop, {"userData": prop, "active": True, "visible": True})
 
         # Add hidden settings for fastners only
-        for prop in hidden_part_info:
+        for prop in fastener_info:
             parts_plist.setdefault(prop, {"userData": prop, "active": True, "visible": False})
 
         if not os.path.exists(config_dir_path):
