@@ -154,10 +154,10 @@ class infoPartUI():
         except:
             self.infoKeysUser = dict()
 
-            for prop in infoKeys.partInfo:
+            for prop in infoKeys.part_info:
                 self.infoKeysUser.setdefault(prop, {'userData': prop, 'active': True, 'visible': True})
 
-            for prop in infoKeys.partInfo_Invisible:
+            for prop in infoKeys.part_info_Invisible:
                 self.infoKeysUser.setdefault(prop, {'userData': prop, 'active': True, 'visible': False})
 
         self.makePartInfo(self, self.part)
@@ -224,9 +224,9 @@ class infoPartUI():
 
         # # Recover initial json file since fateners keys are being lost
         # partInfoDef = dict()
-        # for prop in infoKeys.partInfo:
+        # for prop in infoKeys.part_info:
         #     partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': True})
-        # for prop in infoKeys.partInfo_Invisible:
+        # for prop in infoKeys.part_info_Invisible:
         #     partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': False})
         # try:
         #     os.mkdir(config_dir_path)
@@ -466,8 +466,8 @@ class infoPartConfUI():
         self.form.setWindowIcon(QtGui.QIcon(iconFile))
         self.form.setWindowTitle("Edit Part Information")
 
-        self.infoKeysDefault = infoKeys.partInfo.copy()
-        self.infoToolTip = infoKeys.infoToolTip.copy()
+        self.infoKeysDefault = infoKeys.part_info.copy()
+        self.part_info_tooltip = infoKeys.part_info_tooltip.copy()
         file = open(config_file_path, 'r')
         self.infoKeysUser = json.load(file).copy()
         file.close()
@@ -507,9 +507,9 @@ class infoPartConfUI():
 
         # Restore file and appen new config
         partInfoDef = dict()
-        for prop in infoKeys.partInfo:
+        for prop in infoKeys.part_info:
             partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': True})
-        for prop in infoKeys.partInfo_Invisible:
+        for prop in infoKeys.part_info_Invisible:
             partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': False})
 
         i = 0
@@ -659,7 +659,7 @@ class infoPartConfUI():
         for prop in self.confTemplate:
             if self.confTemplate.get(prop).get('visible'):
                 default = QtGui.QLabel(prop)
-                default.setToolTip(self.infoToolTip.get(prop))
+                default.setToolTip(self.part_info_tooltip.get(prop))
                 self.gridLayout.addWidget(default, i, 0)
                 self.label.append(default)
                 i += 1
