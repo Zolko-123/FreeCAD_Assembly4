@@ -66,7 +66,7 @@ class makeBOM:
         self.parts_dict = dict()
         self.follow_subassemblies = False
         self.subassembly_parts_are_the_same = True
-        self.max_part_nested_level = 1
+        self.max_part_nested_level = 0
         self.parts_list_done = False
         self.verbose = True # TODO: IT SHOULD BE FALSE, HERE IS IS TRUE FOR DEBUGGIN
 
@@ -113,8 +113,10 @@ class makeBOM:
             self.log_write('\n>>> DEBUGGING VERBOSE ACTIVATED <<<')
             self.log_write('\n>>> GENERATING PARTS LIST <<<\n')
             self.log_write('\n>>> Chill, this may take time... <<<\n')
+            self.export_bom_button.setEnabled(False)
             self.list_parts(self.Assembly)
             self.parts_list_done = True
+            self.export_bom_button.setEnabled(True)
             self.log_write('\n>>> Parts Listing Done <<<\n')
             self.log_parts_dict()
             self.log_parts_quantities()
@@ -134,6 +136,11 @@ class makeBOM:
 
 
     def log_parts_quantities(self):
+
+        def filter_bodies(key_val):
+            key, value = key_val
+            if re.match("body*", value["Type"],  re.IGNORECASE): return True
+            else: return False
 
         def filter_parts(key_val):
             key, value = key_val
@@ -170,6 +177,7 @@ class makeBOM:
                 self.log_write("{i} {u} {t}".format(i=k1.rjust(max_keylen), u=str(uniq).rjust(max_col_len), t=str(total).rjust(max_col_len)))
 
 
+        bodies_d = dict(filter(filter_bodies, self.parts_dict.items()))
         parts_d = dict(filter(filter_parts, self.parts_dict.items()))
         fasteners_d = dict(filter(filter_fasteners, self.parts_dict.items()))
         subassemblies_d = dict(filter(filter_subassemblies, self.parts_dict.items()))
@@ -182,6 +190,10 @@ class makeBOM:
         self.log_write("\n>>> PARTS SUMMARY <<<\n")
 
         bom_summary = dict()
+
+        bom_summary["Bodies"] = {
+             "Uniq":  uniq_objs_qty(bodies_d),
+            "Total": total_objs_qty(bodies_d)}
 
         bom_summary["Parts"] = {
              "Uniq":  uniq_objs_qty(parts_d),
@@ -196,8 +208,8 @@ class makeBOM:
             "Total": total_objs_qty(subassemblies_d)}
 
         bom_summary["Total"] = {
-             "Uniq":  uniq_objs_qty(parts_d) +  uniq_objs_qty(fasteners_d) +  uniq_objs_qty(subassemblies_d),
-            "Total": total_objs_qty(parts_d) + total_objs_qty(fasteners_d) + total_objs_qty(subassemblies_d)}
+             "Uniq":  uniq_objs_qty(bodies_d) +  uniq_objs_qty(parts_d) +  uniq_objs_qty(fasteners_d) +  uniq_objs_qty(subassemblies_d),
+            "Total": total_objs_qty(bodies_d) + total_objs_qty(parts_d) + total_objs_qty(fasteners_d) + total_objs_qty(subassemblies_d)}
 
         header = ["OBJECTS".rjust(13), "UNIQ".rjust(6), "TOTAL".rjust(6)]
 
@@ -236,8 +248,10 @@ class makeBOM:
                     value = doc_name
 
                 elif prop == "Type":
-                    if self.isAssembly(obj):
+                    if self.isAssembly(obj) or obj.TypeId == 'App::Link':
                         value = "Subassembly"
+                    elif obj.TypeId == 'PartDesign::Body':
+                        value = "Body"
                     else:
                         value = "Part"
 
@@ -342,7 +356,7 @@ class makeBOM:
     def isAssembly(self, obj):
         if not obj:
             return False
-        if obj.TypeId=='App::Part':
+        if obj.TypeId == 'App::Part':
             if hasattr(obj,'Type') and obj.Type=='Assembly':
                 return True
         return False
@@ -417,12 +431,13 @@ class makeBOM:
             self.log_write("\n> [DEBUG] [{hl},{pl}] ({tid}) {lbl} {v}".format(hl=hier_level, pl=part_level, tid=obj.TypeId, lbl=obj.Label, v=obj_visibility))
 
         # Visible Assembly App::Part
-        if obj.TypeId == 'App::Part' and self.isAssembly(obj):
+        if self.isAssembly(obj):
             self.log_write("> [{hl},{pl}] ({tid}) {lbl}".format(hl=hier_level, pl=part_level, tid=obj.TypeId, lbl=obj.Label))
-            if obj.Visibility == True and hier_level == 0: # Assembly root
-                for obj_name in obj.getSubObjects():
-                    nested_obj = obj.Document.getObject(obj_name[0:-1])
-                    self.list_parts(nested_obj, hier_level+1, part_level)
+            if hier_level == 0: # Assembly root
+                if obj.Visibility == True:
+                    for obj_name in obj.getSubObjects():
+                        nested_obj = obj.Document.getObject(obj_name[0:-1])
+                        self.list_parts(nested_obj, hier_level+1, part_level)
             else:
                 if self.follow_subassemblies:
                     for obj_name in obj.getSubObjects():
@@ -592,8 +607,10 @@ class makeBOM:
         self.log_write('Chill, this may take time, sometimes... \n')
         self.max_part_nested_level = int(self.parts_depth_input.text())
         self.parts_dict.clear()
+        self.export_bom_button.setEnabled(False)
         self.list_parts(self.Assembly)
         self.parts_list_done = True
+        self.export_bom_button.setEnabled(True)
         self.export_bom_button.setEnabled(True)
         self.log_write('\n>>> Parts Listing Done <<<\n')
 
@@ -627,7 +644,7 @@ class makeBOM:
         self.UI.setModal(False)
         self.main_layout = QtGui.QVBoxLayout(self.UI)
 
-        self.follow_subassemblies_checkbox = QtGui.QCheckBox("Include Sub-assemblies")
+        self.follow_subassemblies_checkbox = QtGui.QCheckBox("Include sub-assemblies parts?")
         tooltip = """
              (DEFAULT) If Unchecked, the Sub-assembly will be added to the BOM as a Part.
             Otherwise, if Checked, the contents of the Sub-assembly will be added instead.
@@ -643,8 +660,8 @@ class makeBOM:
         self.parts_depth_input.setText(str(self.max_part_nested_level))
         self.form_layout.addRow(self.parts_depth_label, self.parts_depth_input)
 
-        self.same_parts_checkbox = QtGui.QCheckBox("Objects with same name are the same")
-        self.same_parts_checkbox.setToolTip ('Consider Objects with the same name on different sub-assemblies the same')
+        self.same_parts_checkbox = QtGui.QCheckBox("Objects with same name, in different sub-assemblies, are the same object")
+        self.same_parts_checkbox.setToolTip ('Do not group objects with the same name in different sub-assemblies (not working yet)')
         self.same_parts_checkbox.setChecked(self.subassembly_parts_are_the_same)
         self.same_parts_checkbox.stateChanged.connect(self.on_same_parts)
 
