@@ -44,6 +44,7 @@
 import os
 import json
 import re
+# from decimal import *
 
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
@@ -136,16 +137,18 @@ class makeBOM:
 
         def filter_parts(key_val):
             key, value = key_val
-            if value["Fastener_Type"] != "-": return False
-            else: return True
+            if re.match("part*", value["Type"],  re.IGNORECASE): return True
+            else: return False
 
         def filter_fasteners(key_val):
             key, value = key_val
-            if value["Fastener_Type"] != "-": return True
+            if re.match("fastener*", value["Type"],  re.IGNORECASE): return True
             else: return False
 
         def filter_subassemblies(key_val):
-            return False
+            key, value = key_val
+            if re.match("sub[*]assembl*", value["Type"],  re.IGNORECASE): return True
+            else: return False
 
         def uniq_objs_qty(d):
             return len(d)
@@ -206,7 +209,7 @@ class makeBOM:
         self.infoKeysUser = infoPartCmd.load_config_file_data()
 
 
-    def create_property(self, obj, doc_name, obj_label, qty=1):
+    def create_record(self, obj, doc_name, obj_label, qty=1):
 
         self.parts_dict[obj_label] = dict()
         info = ""
@@ -232,6 +235,12 @@ class makeBOM:
                 if prop == "Doc_Label":
                     value = doc_name
 
+                elif prop == "Type":
+                    if self.isAssembly(obj):
+                        value = "Subassembly"
+                    else:
+                        value = "Part"
+
                 elif prop == "Part_Label":
                     value = obj_label
 
@@ -249,6 +258,7 @@ class makeBOM:
 
                 elif prop == 'Shape_Volume':
                     value = obj.Shape.Volume
+                    # value = Decimal(str(obj.Shape.Volume)).to_eng_string()
 
                 else:
                     value = "-"
@@ -283,7 +293,7 @@ class makeBOM:
         #         doc_name = getattr(obj, self.infoKeysUser.get("Doc_Label").get('userData'))
 
         if not obj.Label in self.parts_dict:
-            self.create_property(obj, doc_name, obj.Label)
+            self.create_record(obj, doc_name, obj.Label)
         else:
             if self.parts_dict[obj.Label]["Doc_Label"] == doc_name:
                 self.increment_qty(obj)
@@ -323,10 +333,19 @@ class makeBOM:
 
 
         if not obj_label in self.parts_dict:
-            self.create_property(obj, doc_name, obj_label)
+            self.create_record(obj, doc_name, obj_label)
         else:
             if self.parts_dict[obj_label]["Doc_Label"] == doc_name:
                 self.increment_qty(obj)
+
+
+    def isAssembly(self, obj):
+        if not obj:
+            return False
+        if obj.TypeId=='App::Part':
+            if hasattr(obj,'Type') and obj.Type=='Assembly':
+                return True
+        return False
 
 
     def record_fastener(self, obj):
@@ -348,6 +367,9 @@ class makeBOM:
 
                 if prop == "Doc_Label":
                     value = doc_name
+
+                elif prop == "Type":
+                    value = "Fastener"
 
                 elif prop == "Part_Label":
                     value = obj_label
@@ -394,14 +416,14 @@ class makeBOM:
                 obj_visibility = "(INVISIBLE)"
             self.log_write("\n> [DEBUG] [{hl},{pl}] ({tid}) {lbl} {v}".format(hl=hier_level, pl=part_level, tid=obj.TypeId, lbl=obj.Label, v=obj_visibility))
 
-        # Visible Assembly4 App::Part
-        if obj.TypeId == 'App::Part' and Asm4.isAsm4Model(obj):
+        # Visible Assembly App::Part
+        if obj.TypeId == 'App::Part' and self.isAssembly(obj):
             self.log_write("> [{hl},{pl}] ({tid}) {lbl}".format(hl=hier_level, pl=part_level, tid=obj.TypeId, lbl=obj.Label))
-            if obj.Visibility == True and hier_level == 0: # Root Asm4
+            if obj.Visibility == True and hier_level == 0: # Assembly root
                 for obj_name in obj.getSubObjects():
                     nested_obj = obj.Document.getObject(obj_name[0:-1])
                     self.list_parts(nested_obj, hier_level+1, part_level)
-            elif obj.Visibility == False:
+            else:
                 if self.follow_subassemblies:
                     for obj_name in obj.getSubObjects():
                         nested_obj = obj.Document.getObject(obj_name[0:-1])
@@ -410,7 +432,7 @@ class makeBOM:
                     self.record_part(obj)
 
         # App::Part
-        elif obj.TypeId == 'App::Part' and not Asm4.isAsm4Model(obj):
+        elif obj.TypeId == 'App::Part' and not self.isAssembly(obj):
             self.log_write("> [{hl},{pl}] ({tid}) {lbl}".format(hl=hier_level, pl=part_level, tid=obj.TypeId, lbl=obj.Label))
             if part_level == self.max_part_nested_level:
                 self.record_part(obj)
@@ -427,10 +449,13 @@ class makeBOM:
                 if obj.ElementCount > 0:
                     self.log_write("  | Element count = {}".format(obj.ElementCount))
             count = obj.ElementCount
-            if count == 0:
-                count = 1
-            for i in range(count):
-                self.list_parts(obj.LinkedObject, hier_level+1, part_level, ignore_visibility=True)
+            if self.isAssembly(obj):
+                self.record_part(obj)
+            else:
+                if count == 0:
+                    count = 1
+                for i in range(count):
+                    self.list_parts(obj.LinkedObject, hier_level+1, part_level, ignore_visibility=True)
 
         # PartDesign::Body
         elif obj.TypeId == 'PartDesign::Body':
@@ -477,7 +502,7 @@ class makeBOM:
                 else:
                     self.bom_spreadsheet.set(str(chr(ord('a') + i)).upper() + str(row + 1), str(d))
 
-        def column_letter_name(n):
+        def to_column_index(n):
             name = ''
             while n > 0:
                 index = (n - 1) % 26
@@ -509,10 +534,19 @@ class makeBOM:
             write_row(parts_values[i].values(), i+1)
 
         # Customize spreadsheet header
-        self.bom_spreadsheet.setAlignment( 'A1:{}1'.format(column_letter_name(n_parts_values)), 'center|vcenter|vimplied')
-        self.bom_spreadsheet.setForeground('A1:{}1'.format(column_letter_name(n_parts_values)), (1.0, 1.0, 1.0, 1.0))
-        self.bom_spreadsheet.setBackground('A1:{}1'.format(column_letter_name(n_parts_values)), (0.0, 0.0, 0.0, 1.0))
+        self.bom_spreadsheet.setAlignment( 'A1:{}1'.format(to_column_index(n_parts_values)), 'center|vcenter|vimplied')
+        self.bom_spreadsheet.setForeground('A1:{}1'.format(to_column_index(n_parts_values)), (1.0, 1.0, 1.0, 1.0))
+        self.bom_spreadsheet.setBackground('A1:{}1'.format(to_column_index(n_parts_values)), (0.0, 0.0, 0.0, 1.0))
         App.ActiveDocument.recompute()
+
+        # Customize spreadsheet columns
+        rows = len(list(self.parts_dict.values()))+1
+        for i, header in enumerate(parts_values[0].keys()):
+            if header == "Fastener_Diameter" or header == "Fastener_Length" or header == "Fastener_Type" or header == "Qty":
+                self.bom_spreadsheet.setAlignment('{c}2:{c}{r}'.format(c=to_column_index(i+1), r=rows), 'center|vcenter|vimplied')
+        App.ActiveDocument.recompute()
+
+        Gui.Selection.addSelection(self.Document.Name, self.bom_spreadsheet.Name)
 
         if creating_new_bom:
             self.log_write("\n>>> BOM was Created <<<")
