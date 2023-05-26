@@ -277,7 +277,7 @@ class makeBOM:
     def record_body(self, obj):
 
         # Document name is needed to check if the part was already added
-        doc_name = obj.Document.Name
+        doc_name = obj.Document.Label
         # if self.infoKeysUser.get("Doc_Label").get('active'):
         #     if getattr(obj, self.infoKeysUser.get("Doc_Label").get('userData')):
         #         doc_name = getattr(obj, self.infoKeysUser.get("Doc_Label").get('userData'))
@@ -297,9 +297,11 @@ class makeBOM:
                 try:
                     doc_name = getattr(obj, self.infoKeysUser.get("Doc_Label").get('userData'))
                 except AttributeError:
-                    doc_name = obj.Document.Name
+                    doc_name = obj.Document.Label
+            else:
+                doc_name = obj.Document.Label
         except:
-            doc_name = obj.Document.Name
+            doc_name = obj.Document.Label
 
         # Recover obj_label from parts_dict
         try:
@@ -308,16 +310,17 @@ class makeBOM:
                     obj_label = getattr(obj, self.infoKeysUser.get("Part_Label").get('userData'))
                 except AttributeError:
                     obj_label = obj.Label
+            else:
+                obj_label = obj.Label
         except:
-            obj_label = doc_name
+            # obj_label = doc_name
+            obj_label = obj.Label
 
         # If multiple sub-assembly objects have the same name (Assembly/Model), they will be grouped
         # This is not intended and may happen since people don't rename this object like I do
         if obj_label == "Model" or obj_label == "Assembly":
-           obj_label = obj.Document.Name
+           obj_label = doc_name
 
-        doc_name = obj.Document.Name
-        obj_label = obj.Label
 
         if not obj_label in self.parts_dict:
             self.create_property(obj, doc_name, obj_label)
