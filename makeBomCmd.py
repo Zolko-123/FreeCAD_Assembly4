@@ -70,6 +70,7 @@ class makeBOM:
         self.parts_list_done = False
         self.total_number_of_objects = 0
         self.current_progress_value = 0
+        self.abort_operation = False
         self.verbose = True # TODO: IT SHOULD BE FALSE, HERE IS IS TRUE FOR DEBUGGIN
 
 
@@ -110,11 +111,9 @@ class makeBOM:
         if self.parts_dict:
             self.parts_dict.clear()
 
-
         # self.progress_bar.setMaximum()
         n_objs = self.number_of_objects()
         self.progress_bar.setMaximum(n_objs)
-
 
         # TODO: The VERBOSE should start as "False"
         # When it starts with True, it executes automatically (debugging only)
@@ -123,13 +122,22 @@ class makeBOM:
             self.log_write('\n>>> GENERATING PARTS LIST <<<\n')
             self.log_write('Chill, this may take time... \n')
             self.export_bom_button.setEnabled(False)
+            self.cancel_button.setText("Abort")
             self.list_parts(self.Assembly)
+            if not self.abort_operation:
+                self.export_bom_button.setEnabled(True)
+                self.log_write('\n>>> Parts Listing Done <<<\n')
+                self.log_parts_dict()
+                self.log_parts_quantities()
+                self.create_bom_spreadsheet()
+                self.cancel_button.setText("Close")
+            else:
+                self.log_write('\n>>> PARTS LISTING ABORTED <<<\n')
+                self.cancel_button.setText("Cancel")
+                self.progress_bar_reset()
+
             self.parts_list_done = True
-            self.export_bom_button.setEnabled(True)
-            self.log_write('\n>>> Parts Listing Done <<<\n')
-            self.log_parts_dict()
-            self.log_parts_quantities()
-            self.create_bom_spreadsheet()
+            self.abort_operation = False
 
 
     def log_clear(self):
@@ -512,6 +520,9 @@ class makeBOM:
     # Recursive method to collect BOM data
     def list_parts(self, obj, hier_level=0, part_level=0, ignore_visibility=False):
 
+        if self.abort_operation:
+            return
+
         if obj == None:
             return
 
@@ -525,7 +536,7 @@ class makeBOM:
 
         # Visible Assembly App::Part
         if self.isAssembly(obj):
-            self.log_write("> [{hl},{pl}] ({tid}) {lbl}".format(hl=hier_level, pl=part_level, tid=obj.TypeId, lbl=obj.Label))
+            self.log_write("> [{hl},{pl}] ({tid}) {lbl}".format(hl=hier_level, pl=part_level, tid="App::Part(Asm4)", lbl=obj.Label))
             if hier_level == 0: # Assembly root
                 if obj.Visibility == True:
                     for obj_name in obj.getSubObjects():
@@ -556,10 +567,17 @@ class makeBOM:
                 self.log_write("> [{hl},{pl}] ({tid}) {lbl}".format(hl=hier_level, pl=part_level, tid=obj.TypeId, lbl=obj.Label))
                 if obj.ElementCount > 0:
                     self.log_write("  | Element count = {}".format(obj.ElementCount))
-            count = obj.ElementCount
             if self.isAssembly(obj):
-                self.record_part(obj)
+                if self.follow_subassemblies:
+                    for obj_name in obj.getSubObjects():
+                        nested_obj = obj.Document.getObject(obj_name[0:-1])
+                        self.list_parts(nested_obj, hier_level+1, part_level)
+                else:
+                    # self.record_part(obj)
+                    # self.record_part(obj.LinkedObject)
+                    self.list_parts(obj.LinkedObject, hier_level, part_level, ignore_visibility=True)
             else:
+                count = obj.ElementCount
                 if count == 0:
                     count = 1
                 for i in range(count):
@@ -634,6 +652,11 @@ class makeBOM:
             self.bom_spreadsheet = self.Document.BOM
             self.bom_spreadsheet.clearAll()
 
+        # local_parts_dict = dict(sorted(self.parts_dict.items())) # Sort keys so parts from the same document will be close to each other
+        # myKeys = list(self.parts_dict[0].keys())
+        # myKeys.sort()
+        # local_parts_dict = {i: self.parts_dict[i] for i in myKeys}
+
         parts_values = list(self.parts_dict.values())
         n_parts_values = len(parts_values[0].keys())
 
@@ -654,8 +677,6 @@ class makeBOM:
                 self.bom_spreadsheet.setAlignment('{c}2:{c}{r}'.format(c=to_column_index(i+1), r=rows), 'center|vcenter|vimplied')
         App.ActiveDocument.recompute()
 
-        Gui.Selection.addSelection(self.Document.Name, self.bom_spreadsheet.Name)
-
         if creating_new_bom:
             self.log_write("\n>>> BOM was Created <<<")
         else:
@@ -670,9 +691,9 @@ class makeBOM:
 
     def on_follow_subassemblies_checkbox(self, state):
         if state == QtCore.Qt.Checked:
-            self.local_bom = True
+            self.follow_subassemblies = True
         else:
-            self.local_bom = False
+            self.follow_subassemblies = False
 
 
     def on_same_parts(self, state):
@@ -699,22 +720,26 @@ class makeBOM:
         self.progress_bar_reset()
         self.log_write('\n>>> GENERATING PARTS LIST <<<\n')
         self.log_write('Chill, this may take time, sometimes... \n')
+        self.cancel_button.setText("Abort")
         self.max_part_nested_level = int(self.parts_depth_input.text())
         self.parts_dict.clear()
         self.export_bom_button.setEnabled(False)
         self.list_parts(self.Assembly)
+
+        if not self.abort_operation:
+            self.export_bom_button.setEnabled(True)
+            self.log_write('\n>>> Parts Listing Done <<<\n')
+            if self.verbose:
+                self.log_parts_dict()
+            self.log_parts_quantities()
+            self.cancel_button.setText("Close")
+        else:
+            self.log_write('\n>>> PARTS LISTING ABORTED <<<\n')
+            self.cancel_button.setText("Cancel")
+            self.progress_bar_reset()
+
         self.parts_list_done = True
-        self.export_bom_button.setEnabled(True)
-        self.export_bom_button.setEnabled(True)
-        self.log_write('\n>>> Parts Listing Done <<<\n')
-
-        if self.verbose:
-            self.log_parts_dict()
-
-        self.log_parts_quantities()
-
-        # if self.verbose:
-            # self.create_bom_spreadsheet()
+        self.abort_operation = False
 
 
     def on_update_bom_spreedsheet(self):
@@ -722,12 +747,18 @@ class makeBOM:
         self.export_bom_button.setText("Update BOM Spreadsheet")
         self.parts_list_done = False
         self.export_bom_button.setEnabled(False)
-        # Gui.Selection.addSelection(self.Document.Name, 'BOM')
-        # Gui.updateGui()
 
 
     def on_cancel(self):
-        self.UI.close()
+        if not self.cancel_button.text() == "Abort":
+            self.UI.close()
+            try:
+                Gui.Selection.addSelection(self.Document.Name, self.bom_spreadsheet.Name)
+                Gui.updateGui()
+            except:
+                pass
+        else:
+            self.abort_operation = True
 
 
     def progress_bar_reset(self):
@@ -743,7 +774,7 @@ class makeBOM:
 
     def drawUI(self):
 
-        self.UI.setWindowTitle('Bill of Materials (BOM)')
+        self.UI.setWindowTitle('Generate a Bill of Materials (BOM)')
         self.UI.setWindowIcon(QtGui.QIcon(os.path.join(Asm4.iconPath, 'FreeCad.svg')))
         self.UI.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         self.UI.setModal(False)
