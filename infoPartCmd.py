@@ -157,7 +157,7 @@ class infoPartUI():
             for prop in infoKeys.part_info:
                 self.infoKeysUser.setdefault(prop, {'userData': prop, 'active': True, 'visible': True})
 
-            for prop in infoKeys.part_info_Invisible:
+            for prop in infoKeys.fastener_info:
                 self.infoKeysUser.setdefault(prop, {'userData': prop, 'active': True, 'visible': False})
 
         self.makePartInfo(self, self.part)
@@ -226,7 +226,7 @@ class infoPartUI():
         # partInfoDef = dict()
         # for prop in infoKeys.part_info:
         #     partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': True})
-        # for prop in infoKeys.part_info_Invisible:
+        # for prop in infoKeys.fastener_info:
         #     partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': False})
         # try:
         #     os.mkdir(config_dir_path)
@@ -509,7 +509,7 @@ class infoPartConfUI():
         partInfoDef = dict()
         for prop in infoKeys.part_info:
             partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': True})
-        for prop in infoKeys.part_info_Invisible:
+        for prop in infoKeys.fastener_info:
             partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': False})
 
         i = 0
