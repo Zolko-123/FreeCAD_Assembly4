@@ -68,7 +68,10 @@ class makeBOM:
         self.subassembly_parts_are_the_same = True
         self.max_part_nested_level = 0
         self.parts_list_done = False
+        self.total_number_of_objects = 0
+        self.current_progress_value = 0
         self.verbose = True # TODO: IT SHOULD BE FALSE, HERE IS IS TRUE FOR DEBUGGIN
+
 
     def GetResources(self):
 
@@ -107,12 +110,18 @@ class makeBOM:
         if self.parts_dict:
             self.parts_dict.clear()
 
+
+        # self.progress_bar.setMaximum()
+        n_objs = self.number_of_objects()
+        self.progress_bar.setMaximum(n_objs)
+
+
         # TODO: The VERBOSE should start as "False"
         # When it starts with True, it executes automatically (debugging only)
         if self.verbose:
             self.log_write('\n>>> DEBUGGING VERBOSE ACTIVATED <<<')
             self.log_write('\n>>> GENERATING PARTS LIST <<<\n')
-            self.log_write('\n>>> Chill, this may take time... <<<\n')
+            self.log_write('Chill, this may take time... \n')
             self.export_bom_button.setEnabled(False)
             self.list_parts(self.Assembly)
             self.parts_list_done = True
@@ -133,6 +142,84 @@ class makeBOM:
         self.log_view.setPlainText(self.log_msg)
         self.log_view.verticalScrollBar().setValue(self.log_view.verticalScrollBar().maximum())
         Gui.updateGui()
+
+
+    def number_of_objects(self):
+        n = self.count_parts(self.Assembly)
+        self.log_write("Number of objects: {}".format(n))
+        return n
+
+
+    def count_parts(self, obj, hier_level=0, part_level=0, ignore_visibility=False, count=0):
+
+        count_objs = count + 1
+
+        if obj == None:
+            return count_objs
+
+        # Visible Assembly App::Part
+        if self.isAssembly(obj):
+            if hier_level == 0: # Assembly root
+                if obj.Visibility == True:
+                    for obj_name in obj.getSubObjects():
+                        nested_obj = obj.Document.getObject(obj_name[0:-1])
+                        count_objs = self.count_parts(nested_obj, hier_level+1, part_level, count=count_objs)
+            else:
+                if self.follow_subassemblies:
+                    for obj_name in obj.getSubObjects():
+                        nested_obj = obj.Document.getObject(obj_name[0:-1])
+                        count_objs = self.count_parts(nested_obj, hier_level+1, part_level, count=count_objs)
+                # else:
+                    # pass
+
+        # App::Part
+        elif obj.TypeId == 'App::Part' and not self.isAssembly(obj):
+            if part_level == self.max_part_nested_level:
+                pass
+            else:
+                # level 0 until max-1
+                for obj_name in obj.getSubObjects():
+                    nested_obj = obj.Document.getObject(obj_name[0:-1])
+                    count_objs = self.count_parts(nested_obj, hier_level+1, part_level+1, count=count_objs)
+
+        # Visible App::Link (and App:Link Array)
+        elif (obj.Visibility == True or ignore_visibility) and obj.TypeId == 'App::Link':
+            count = obj.ElementCount
+            if self.isAssembly(obj):
+                pass
+            else:
+                if count == 0:
+                    count = 1
+                for i in range(count):
+                    count_objs = self.count_parts(obj.LinkedObject, hier_level+1, part_level, ignore_visibility=True, count=count_objs)
+
+        # PartDesign::Body
+        elif obj.TypeId == 'PartDesign::Body':
+            pass
+
+        # Visible Python::Array
+        elif (obj.Visibility == True or ignore_visibility) and obj.TypeId == 'Part::FeaturePython' and hasattr(obj, 'ArrayType'):
+            count = obj.Count
+            if count == 0:
+                count = 1
+            for i in range(count):
+                count_objs = self.count_parts(obj.SourceObject, hier_level+1, part_level, ignore_visibility=True, count=count_objs)
+
+        # Python::Fastener
+        elif (obj.Visibility == True or ignore_visibility) and obj.TypeId == 'Part::FeaturePython' and ((obj.Content.find("FastenersCmd") > -1) or (obj.Content.find("PCBStandoff") > -1)):
+            pass
+
+        # Visible App::DocumentObjectGroup
+        elif obj.Visibility == True and obj.TypeId == 'App::DocumentObjectGroup':
+            for obj_name in obj.getSubObjects():
+                nested_obj = obj.Document.getObject(obj_name[0:-1])
+                count_objs = self.count_parts(nested_obj, hier_level+1, part_level, count=count_objs)
+
+        # else:
+            # pass
+
+        return count_objs
+
 
 
     def log_parts_quantities(self):
@@ -172,9 +259,10 @@ class makeBOM:
             max_col_len = 6
             for k1, v1 in d.items():
                 for k2, v2 in v1.items():
-                    if k2 ==  "Uniq":  uniq = v2
-                    if k2 == "Total": total = v2
-                self.log_write("{i} {u} {t}".format(i=k1.rjust(max_keylen), u=str(uniq).rjust(max_col_len), t=str(total).rjust(max_col_len)))
+                    if k2 ==   "Uniq":   uniq = v2
+                    if k2 ==  "Total":  total = v2
+                    if k2 == "Reused": reused = v2
+                self.log_write("{i} {u} {t} {r}".format(i=k1.rjust(max_keylen), u=str(uniq).rjust(max_col_len), t=str(total).rjust(max_col_len), r=str(reused).rjust(max_col_len)))
 
 
         bodies_d = dict(filter(filter_bodies, self.parts_dict.items()))
@@ -192,26 +280,30 @@ class makeBOM:
         bom_summary = dict()
 
         bom_summary["Bodies"] = {
-             "Uniq":  uniq_objs_qty(bodies_d),
-            "Total": total_objs_qty(bodies_d)}
+              "Uniq":  uniq_objs_qty(bodies_d),
+             "Total": total_objs_qty(bodies_d),
+            "Reused": total_objs_qty(bodies_d) - uniq_objs_qty(bodies_d)}
 
         bom_summary["Parts"] = {
-             "Uniq":  uniq_objs_qty(parts_d),
-            "Total": total_objs_qty(parts_d)}
+              "Uniq":  uniq_objs_qty(parts_d),
+             "Total": total_objs_qty(parts_d),
+            "Reused": total_objs_qty(parts_d) - uniq_objs_qty(parts_d)}
 
         bom_summary["Fasteners"] = {
-             "Uniq":  uniq_objs_qty(fasteners_d),
-            "Total": total_objs_qty(fasteners_d)}
+              "Uniq":  uniq_objs_qty(fasteners_d),
+             "Total": total_objs_qty(fasteners_d),
+            "Reused": total_objs_qty(fasteners_d) - uniq_objs_qty(fasteners_d)}
 
         bom_summary["Subassemblies"] = {
-             "Uniq":  uniq_objs_qty(subassemblies_d),
-            "Total": total_objs_qty(subassemblies_d)}
+              "Uniq":  uniq_objs_qty(subassemblies_d),
+             "Total": total_objs_qty(subassemblies_d),
+            "Reused": total_objs_qty(subassemblies_d) - uniq_objs_qty(subassemblies_d)}
 
         bom_summary["Total"] = {
              "Uniq":  uniq_objs_qty(bodies_d) +  uniq_objs_qty(parts_d) +  uniq_objs_qty(fasteners_d) +  uniq_objs_qty(subassemblies_d),
             "Total": total_objs_qty(bodies_d) + total_objs_qty(parts_d) + total_objs_qty(fasteners_d) + total_objs_qty(subassemblies_d)}
 
-        header = ["OBJECTS".rjust(13), "UNIQ".rjust(6), "TOTAL".rjust(6)]
+        header = ["OBJECTS".rjust(13), "UNIQ".rjust(6), "TOTAL".rjust(6), "REUSED".rjust(6)]
 
         # self.log_write(json.dumps(bom_summary, indent=4))
         print_formatted_table(header, bom_summary)
@@ -248,7 +340,7 @@ class makeBOM:
                     value = doc_name
 
                 elif prop == "Type":
-                    if self.isAssembly(obj) or obj.TypeId == 'App::Link':
+                    if self.isAssembly(obj):
                         value = "Subassembly"
                     elif obj.TypeId == 'PartDesign::Body':
                         value = "Body"
@@ -299,7 +391,6 @@ class makeBOM:
 
 
     def record_body(self, obj):
-
         # Document name is needed to check if the part was already added
         doc_name = obj.Document.Label
         # if self.infoKeysUser.get("Doc_Label").get('active'):
@@ -423,6 +514,8 @@ class makeBOM:
 
         if obj == None:
             return
+
+        self.progress_bar_progress()
 
         if self.verbose:
             obj_visibility = ""
@@ -603,6 +696,7 @@ class makeBOM:
 
     def on_generate_parts_list(self):
         self.log_clear()
+        self.progress_bar_reset()
         self.log_write('\n>>> GENERATING PARTS LIST <<<\n')
         self.log_write('Chill, this may take time, sometimes... \n')
         self.max_part_nested_level = int(self.parts_depth_input.text())
@@ -634,6 +728,17 @@ class makeBOM:
 
     def on_cancel(self):
         self.UI.close()
+
+
+    def progress_bar_reset(self):
+        self.current_progress_value = 0
+        self.progress_bar.reset()
+
+
+    def progress_bar_progress(self):
+        if self.current_progress_value <= self.progress_bar.maximum():
+            self.current_progress_value += 1
+            self.progress_bar.setValue(self.current_progress_value)
 
 
     def drawUI(self):
@@ -680,6 +785,10 @@ class makeBOM:
         self.gbox = QtGui.QGroupBox()
         self.gbox.setLayout(self.vbox)
         self.main_layout.addWidget(self.gbox)
+
+        self.progress_bar = QtGui.QProgressBar()
+        self.progress_bar.setValue(0)
+        self.main_layout.addWidget(self.progress_bar)
 
         self.log_view = QtGui.QPlainTextEdit()
         self.log_view.setLineWrapMode(QtGui.QPlainTextEdit.NoWrap)
