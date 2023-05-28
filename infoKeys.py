@@ -9,12 +9,12 @@ import json
 import FreeCAD as App
 
 # Incremente this to rewrite the config file
-file_version = "1.1"
+# file_version = "1.2"
 
 # Body and Part
 part_info = [
     'Doc_Label',
-    'Type',
+    'Type_Label',
     'Part_Label',
     'Pad_Length',
     'Shape_Length',
