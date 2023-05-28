@@ -289,29 +289,34 @@ class makeBOM:
 
         bom_summary = dict()
 
+        reused_bodies = total_objs_qty(bodies_d) - uniq_objs_qty(bodies_d)
         bom_summary["Bodies"] = {
               "Uniq":  uniq_objs_qty(bodies_d),
              "Total": total_objs_qty(bodies_d),
-            "Reused": total_objs_qty(bodies_d) - uniq_objs_qty(bodies_d)}
+            "Reused": reused_bodies}
 
+        reused_parts = total_objs_qty(parts_d) - uniq_objs_qty(parts_d)
         bom_summary["Parts"] = {
               "Uniq":  uniq_objs_qty(parts_d),
              "Total": total_objs_qty(parts_d),
-            "Reused": total_objs_qty(parts_d) - uniq_objs_qty(parts_d)}
+            "Reused": reused_parts}
 
+        reused_fasteners = total_objs_qty(fasteners_d) - uniq_objs_qty(fasteners_d)
         bom_summary["Fasteners"] = {
               "Uniq":  uniq_objs_qty(fasteners_d),
              "Total": total_objs_qty(fasteners_d),
-            "Reused": total_objs_qty(fasteners_d) - uniq_objs_qty(fasteners_d)}
+            "Reused": reused_fasteners}
 
+        reused_subassemblies = total_objs_qty(subassemblies_d) - uniq_objs_qty(subassemblies_d)
         bom_summary["Subassemblies"] = {
               "Uniq":  uniq_objs_qty(subassemblies_d),
              "Total": total_objs_qty(subassemblies_d),
-            "Reused": total_objs_qty(subassemblies_d) - uniq_objs_qty(subassemblies_d)}
+            "Reused": reused_subassemblies}
 
         bom_summary["Total"] = {
-             "Uniq":  uniq_objs_qty(bodies_d) +  uniq_objs_qty(parts_d) +  uniq_objs_qty(fasteners_d) +  uniq_objs_qty(subassemblies_d),
-            "Total": total_objs_qty(bodies_d) + total_objs_qty(parts_d) + total_objs_qty(fasteners_d) + total_objs_qty(subassemblies_d)}
+              "Uniq":  uniq_objs_qty(bodies_d) +  uniq_objs_qty(parts_d) +  uniq_objs_qty(fasteners_d) +  uniq_objs_qty(subassemblies_d),
+             "Total": total_objs_qty(bodies_d) + total_objs_qty(parts_d) + total_objs_qty(fasteners_d) + total_objs_qty(subassemblies_d),
+            "Reused": reused_bodies + reused_parts + reused_fasteners + reused_subassemblies}
 
         header = ["OBJECTS".rjust(13), "UNIQ".rjust(6), "TOTAL".rjust(6), "REUSED".rjust(6)]
 
