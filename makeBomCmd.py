@@ -44,7 +44,8 @@
 import os
 import json
 import re
-# from decimal import *
+import math
+from decimal import *
 
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
@@ -54,8 +55,8 @@ import Asm4_libs as Asm4
 import infoPartCmd
 import infoKeys
 
-makePartInfo = infoPartCmd.infoPartUI.makePartInfo
-infoDefault = infoPartCmd.infoPartUI.infoDefault
+create_partinfo_fields = infoPartCmd.infoPartUI.create_partinfo_fields
+set_partinfo_data = infoPartCmd.infoPartUI.set_partinfo_data
 
 
 class makeBOM:
@@ -71,6 +72,7 @@ class makeBOM:
         self.total_number_of_objects = 0
         self.current_progress_value = 0
         self.abort_operation = False
+        self.sort_doclabel = False
         self.verbose = True # TODO: IT SHOULD BE FALSE, HERE IS IS TRUE FOR DEBUGGIN
 
 
@@ -192,10 +194,10 @@ class makeBOM:
 
         # Visible App::Link (and App:Link Array)
         elif (obj.Visibility == True or ignore_visibility) and obj.TypeId == 'App::Link':
-            count = obj.ElementCount
             if self.isAssembly(obj):
                 pass
             else:
+                count = obj.ElementCount
                 if count == 0:
                     count = 1
                 for i in range(count):
@@ -214,7 +216,7 @@ class makeBOM:
                 count_objs = self.count_parts(obj.SourceObject, hier_level+1, part_level, ignore_visibility=True, count=count_objs)
 
         # Python::Fastener
-        elif (obj.Visibility == True or ignore_visibility) and obj.TypeId == 'Part::FeaturePython' and ((obj.Content.find("FastenersCmd") > -1) or (obj.Content.find("PCBStandoff") > -1)):
+        elif (obj.Visibility == True or ignore_visibility) and self.isFastener(obj):
             pass
 
         # Visible App::DocumentObjectGroup
@@ -234,22 +236,22 @@ class makeBOM:
 
         def filter_bodies(key_val):
             key, value = key_val
-            if re.match("body*", value["Type"],  re.IGNORECASE): return True
+            if re.match("body*", value["Type_Label"],  re.IGNORECASE): return True
             else: return False
 
         def filter_parts(key_val):
             key, value = key_val
-            if re.match("part*", value["Type"],  re.IGNORECASE): return True
+            if re.match("part*", value["Type_Label"],  re.IGNORECASE): return True
             else: return False
 
         def filter_fasteners(key_val):
             key, value = key_val
-            if re.match("fastener*", value["Type"],  re.IGNORECASE): return True
+            if re.match("fastener*", value["Type_Label"],  re.IGNORECASE): return True
             else: return False
 
         def filter_subassemblies(key_val):
             key, value = key_val
-            if re.match("sub[*]assembl*", value["Type"],  re.IGNORECASE): return True
+            if re.match("sub[*]assembl*", value["Type_Label"],  re.IGNORECASE): return True
             else: return False
 
         def uniq_objs_qty(d):
@@ -318,107 +320,124 @@ class makeBOM:
 
 
     def load_config_file(self):
-        self.infoKeysUser = infoPartCmd.load_config_file_data()
+        self.infoKeysUser = infoPartCmd.load_config_file()
 
 
     def create_record(self, obj, doc_name, obj_label, qty=1):
 
         self.parts_dict[obj_label] = dict()
-        info = ""
 
         for prop in self.infoKeysUser:
 
+            value = ""
+            info = ""
+
             if self.infoKeysUser.get(prop).get('active'):
 
-                # if self.infoKeysUser.get(prop).get('userData'):
-                #     if hasattr(obj, self.infoKeysUser.get(prop).get('userData')):
-                #         getattr(obj, self.infoKeysUser.get(prop).get('userData'))
-                #         info = "(Custom)"
-                # else:
-                    # makePartInfo(self, obj)
-                    # infoDefault(obj)
+                field_name = self.infoKeysUser.get(prop).get('userData')
 
-                if self.infoKeysUser.get(prop).get('visible'):
-                    if hasattr(obj, self.infoKeysUser.get(prop).get('userData')):
-                        value = getattr(obj, self.infoKeysUser.get(prop).get('userData'))
-                    else:
-                        value = "-"
+                if not hasattr(obj, field_name):
+                    create_partinfo_fields(self, obj)
+                    # set_partinfo_data(obj)
 
-                if prop == "Doc_Label":
-                    value = doc_name
+                if hasattr(obj, field_name):
+                    if getattr(obj, field_name):
+                        value = getattr(obj, field_name)
+                        info = "(from PartInfo)"
 
-                elif prop == "Type":
-                    if self.isAssembly(obj):
-                        value = "Subassembly"
-                    elif obj.TypeId == 'PartDesign::Body':
-                        value = "Body"
-                    else:
-                        value = "Part"
+                if value == "" or value == "-":
 
-                elif prop == "Part_Label":
-                    value = obj_label
+                    info = "(from makeBOM)"
 
-                elif prop == 'Pad_Length':
-                    try:
-                        value = obj.Pad_Length
-                    except:
-                        value = "-"
+                    if prop == self.infoKeysUser.get("Doc_Label").get('userData'):
+                        value = doc_name
 
-                elif prop == 'Shape_Length':
-                    try:
+                    elif prop == self.infoKeysUser.get("Type_Label").get('userData'):
+                        if self.isAssembly(obj):
+                            value = "Subassembly"
+                        elif obj.TypeId == 'PartDesign::Body':
+                            value = "Body"
+                        else:
+                            value = "Part"
+
+                    elif prop == self.infoKeysUser.get("Part_Label").get('userData'):
+                        value = obj_label
+
+                    elif prop == self.infoKeysUser.get('Pad_Length').get('userData'):
+                        if obj.Pad_Length:
+                            value = obj.Pad_Length
+                            # getcontext().prec = 2
+                            # value = '\'' + Decimal(obj.Pad_Length).normalize().to_eng_string()
+                        else:
+                            value = "-"
+
+                    elif prop == self.infoKeysUser.get('Shape_Length').get('userData'):
                         value = obj.Shape.Length
-                    except:
+                        # getcontext().prec = 2
+                        # value = '\'' + Decimal(obj.Shape.Length).normalize().to_eng_string()
+
+                    elif prop == self.infoKeysUser.get('Shape_Volume').get('userData'):
+                        if obj.Shape.Volume < 0:
+                            value = ""
+                        else:
+                            value = obj.Shape.Volume
+                        # getcontext().prec = 2
+                        # value = '\'' + Decimal(obj.Shape.Volume).normalize().to_eng_string()
+
+
+                    else:
                         value = "-"
 
-                elif prop == 'Shape_Volume':
-                    value = obj.Shape.Volume
-                    # value = Decimal(str(obj.Shape.Volume)).to_eng_string()
-
-                else:
-                    value = "-"
-
-                if value == "":
-                    value = "-"
+                    if value == "":
+                        # value = field_name
+                        value = ""
 
                 # if not "Fastener_" in prop:
                 if self.infoKeysUser.get(prop).get('visible'):
                     if value != "-" or not self.verbose:
                         self.log_write("  | {}: {} {}".format(prop, value, info))
 
-                self.parts_dict[obj.Label][self.infoKeysUser.get(prop).get('userData')] = value
+                self.parts_dict[obj_label][self.infoKeysUser.get(prop).get('userData')] = value
 
-        self.parts_dict[obj.Label]['Qty'] = 1
-        self.log_write("  | Quantity = {}".format(self.parts_dict[obj.Label]['Qty']))
+        self.parts_dict[obj_label]['Qty'] = 1
+        self.log_write("  | Quantity = {}".format(self.parts_dict[obj_label]['Qty']))
 
 
-    def increment_qty(self, obj, qty=1):
-        qty = self.parts_dict[obj.Label]['Qty'] + int(qty)
+    def increment_qty(self, obj, obj_label, qty=1):
+        qty = self.parts_dict[obj_label]['Qty'] + int(qty)
         self.log_write("  | Already accounted for".format(qty))
         self.log_write("  | Quantity = {}".format(qty))
-        self.parts_dict[obj.Label]['Qty'] = qty
+        self.parts_dict[obj_label]['Qty'] = qty
 
 
     def record_body(self, obj):
-        # Document name is needed to check if the part was already added
+
         doc_name = obj.Document.Label
-        # if self.infoKeysUser.get("Doc_Label").get('active'):
-        #     if getattr(obj, self.infoKeysUser.get("Doc_Label").get('userData')):
-        #         doc_name = getattr(obj, self.infoKeysUser.get("Doc_Label").get('userData'))
+        if self.infoKeysUser.get("Doc_Label").get('active'):
+            if hasattr(obj, self.infoKeysUser.get("Doc_Label").get('userData')):
+                if getattr(obj, self.infoKeysUser.get("Doc_Label").get('userData')):
+                    doc_name = getattr(obj, self.infoKeysUser.get("Doc_Label").get('userData'))
 
         if not obj.Label in self.parts_dict:
             self.create_record(obj, doc_name, obj.Label)
         else:
-            if self.parts_dict[obj.Label]["Doc_Label"] == doc_name:
-                self.increment_qty(obj)
+            if self.parts_dict[obj.Label]["Doc_Label"] == doc_name or not self.subassembly_parts_are_the_same:
+                self.increment_qty(obj, obj.Label)
+            else:
+                self.create_record(obj, doc_name, obj.Label)
 
 
     def record_part(self, obj):
+
+        doc_field_name = self.infoKeysUser.get("Doc_Label").get('userData')
 
         # Recover doc_name from parts_dict
         try:
             if self.infoKeysUser.get("Doc_Label").get('active'):
                 try:
-                    doc_name = getattr(obj, self.infoKeysUser.get("Doc_Label").get('userData'))
+                    doc_name = getattr(obj, doc_field_name)
+                    if doc_name == "":
+                        doc_name = obj.Document.Label
                 except AttributeError:
                     doc_name = obj.Document.Label
             else:
@@ -431,12 +450,13 @@ class makeBOM:
             if self.infoKeysUser.get("Part_Label").get('active'):
                 try:
                     obj_label = getattr(obj, self.infoKeysUser.get("Part_Label").get('userData'))
+                    if obj_label == "":
+                        obj_label = obj.Label
                 except AttributeError:
                     obj_label = obj.Label
             else:
                 obj_label = obj.Label
         except:
-            # obj_label = doc_name
             obj_label = obj.Label
 
         # If multiple sub-assembly objects have the same name (Assembly/Model), they will be grouped
@@ -448,16 +468,25 @@ class makeBOM:
         if not obj_label in self.parts_dict:
             self.create_record(obj, doc_name, obj_label)
         else:
-            if self.parts_dict[obj_label]["Doc_Label"] == doc_name:
-                self.increment_qty(obj)
+            if self.parts_dict[obj_label]["Doc_Label"] == doc_name or not self.subassembly_parts_are_the_same:
+                self.increment_qty(obj, obj_label)
+            else:
+                self.create_record(obj, doc_name, obj_label)
 
 
     def isAssembly(self, obj):
         if not obj:
             return False
         if obj.TypeId == 'App::Part':
-            if hasattr(obj,'Type') and obj.Type=='Assembly':
+            if hasattr(obj, 'Type') and obj.Type == 'Assembly':
                 return True
+        return False
+
+    def isFastener(self, obj):
+        if not obj:
+            return False
+        if obj.TypeId == 'Part::FeaturePython' and ((obj.Content.find("FastenersCmd") > -1) or (obj.Content.find("PCBStandoff") > -1)):
+            return True
         return False
 
 
@@ -468,7 +497,7 @@ class makeBOM:
 
         if obj_label in self.parts_dict:
 
-            if self.parts_dict[obj_label]["Doc_Label"] == doc_name:
+            if self.parts_dict[obj_label]["Doc_Label"] == doc_name or not self.subassembly_parts_are_the_same:
                 qty = self.parts_dict[obj_label]['Qty'] + 1
                 self.log_write("  | Quantity = {}".format(qty))
                 self.parts_dict[obj_label]['Qty'] = qty
@@ -481,7 +510,7 @@ class makeBOM:
                 if prop == "Doc_Label":
                     value = doc_name
 
-                elif prop == "Type":
+                elif prop == "Type_Label":
                     value = "Fastener"
 
                 elif prop == "Part_Label":
@@ -600,7 +629,7 @@ class makeBOM:
                 self.list_parts(obj.SourceObject, hier_level+1, part_level, ignore_visibility=True)
 
         # Python::Fastener
-        elif (obj.Visibility == True or ignore_visibility) and obj.TypeId == 'Part::FeaturePython' and ((obj.Content.find("FastenersCmd") > -1) or (obj.Content.find("PCBStandoff") > -1)):
+        elif (obj.Visibility == True or ignore_visibility) and self.isFastener(obj):
             self.log_write("> [{hl},{pl}] ({tid}) {lbl}".format(hl=hier_level, pl=part_level, tid="Python::Fastener", lbl=obj.Label))
             self.record_fastener(obj)
 
@@ -652,12 +681,11 @@ class makeBOM:
             self.bom_spreadsheet = self.Document.BOM
             self.bom_spreadsheet.clearAll()
 
-        # local_parts_dict = dict(sorted(self.parts_dict.items())) # Sort keys so parts from the same document will be close to each other
-        # myKeys = list(self.parts_dict[0].keys())
-        # myKeys.sort()
-        # local_parts_dict = {i: self.parts_dict[i] for i in myKeys}
+        local_parts_dict = self.parts_dict
+        if self.sort_doclabel:
+            local_parts_dict = dict(sorted(self.parts_dict.items()))
 
-        parts_values = list(self.parts_dict.values())
+        parts_values = list(local_parts_dict.values())
         n_parts_values = len(parts_values[0].keys())
 
         write_row(parts_values[0].keys(), 0) # header
@@ -670,12 +698,22 @@ class makeBOM:
         self.bom_spreadsheet.setBackground('A1:{}1'.format(to_column_index(n_parts_values)), (0.0, 0.0, 0.0, 1.0))
         App.ActiveDocument.recompute()
 
-        # Customize spreadsheet columns
-        rows = len(list(self.parts_dict.values()))+1
+        # Customize spreadsheet columns - Centralinzing text
+        rows = len(list(local_parts_dict.values()))+1
         for i, header in enumerate(parts_values[0].keys()):
             if header == "Fastener_Diameter" or header == "Fastener_Length" or header == "Fastener_Type" or header == "Qty":
                 self.bom_spreadsheet.setAlignment('{c}2:{c}{r}'.format(c=to_column_index(i+1), r=rows), 'center|vcenter|vimplied')
-        App.ActiveDocument.recompute()
+
+        # Optimize column width
+        for i, header in enumerate(parts_values[0].keys()):
+            l = list(map(str, [d[header] for d in parts_values]))
+            l.append(header)
+            max_len = len(max(l, key=len))
+            pixel = 1/92
+            pixels = math.ceil(max_len / pixel * 0.09)
+            # mm = pixels * 1/92
+            # print(header, max_len, pixels, mm)
+            self.bom_spreadsheet.setColumnWidth('{c}'.format(c=to_column_index(i+1)), pixels)
 
         if creating_new_bom:
             self.log_write("\n>>> BOM was Created <<<")
@@ -687,6 +725,9 @@ class makeBOM:
 
         self.parts_list_done = False  # to Reset it
         self.export_bom_button.setEnabled(False)
+
+        App.ActiveDocument.recompute()
+        Gui.updateGui()
 
 
     def on_follow_subassemblies_checkbox(self, state):
@@ -701,6 +742,13 @@ class makeBOM:
             self.subassembly_parts_are_the_same = True
         else:
             self.subassembly_parts_are_the_same = False
+
+
+    def on_sort_doclabel_checkbox(self, state):
+        if state == QtCore.Qt.Checked:
+            self.sort_doclabel = True
+        else:
+            self.sort_doclabel = False
 
 
     def on_verbose_checkbox(self, state):
@@ -782,10 +830,10 @@ class makeBOM:
 
         self.follow_subassemblies_checkbox = QtGui.QCheckBox("Include sub-assemblies parts?")
         tooltip = """
-             (DEFAULT) If Unchecked, the Sub-assembly will be added to the BOM as a Part.
-            Otherwise, if Checked, the contents of the Sub-assembly will be added instead.
-            """
-        self.follow_subassemblies_checkbox.setToolTip ("")
+        (DEFAULT) If Unchecked, the Sub-assembly will be added to the BOM as a Part.
+        Otherwise, if Checked, the contents of the Sub-assembly will be added instead.
+        """
+        self.follow_subassemblies_checkbox.setToolTip(tooltip)
         self.follow_subassemblies_checkbox.setChecked(self.follow_subassemblies)
         self.follow_subassemblies_checkbox.stateChanged.connect(self.on_follow_subassemblies_checkbox)
 
@@ -797,9 +845,14 @@ class makeBOM:
         self.form_layout.addRow(self.parts_depth_label, self.parts_depth_input)
 
         self.same_parts_checkbox = QtGui.QCheckBox("Objects with same name, in different sub-assemblies, are the same object")
-        self.same_parts_checkbox.setToolTip ('Do not group objects with the same name in different sub-assemblies (not working yet)')
+        self.same_parts_checkbox.setToolTip("Do not group objects with the same name in different sub-assemblies.")
         self.same_parts_checkbox.setChecked(self.subassembly_parts_are_the_same)
         self.same_parts_checkbox.stateChanged.connect(self.on_same_parts)
+
+        self.sort_doclabel_checkbox = QtGui.QCheckBox("Sort Doc_Label Column on BOM")
+        self.sort_doclabel_checkbox.setToolTip("Sort Doc_Label Column on spreadsheet, otherwise items are placed in the order they appear.")
+        self.sort_doclabel_checkbox.setChecked(self.sort_doclabel)
+        self.sort_doclabel_checkbox.stateChanged.connect(self.on_sort_doclabel_checkbox)
 
         self.verbose_checkbox = QtGui.QCheckBox("Verbose")
         self.verbose_checkbox.setChecked(self.verbose)
@@ -809,6 +862,7 @@ class makeBOM:
         self.vbox.addWidget(self.follow_subassemblies_checkbox)
         self.vbox.addWidget(self.same_parts_checkbox)
         self.vbox.addLayout(self.form_layout)
+        self.vbox.addWidget(self.sort_doclabel_checkbox)
         self.vbox.addWidget(self.verbose_checkbox)
         self.vbox.addStretch(1)
         self.vbox.setSizeConstraint(QtGui.QLayout.SetFixedSize)
@@ -836,7 +890,7 @@ class makeBOM:
         self.button_layout = QtGui.QHBoxLayout()
 
         self.parse_bom_button = QtGui.QPushButton('Generate Parts Lists')
-        # self.parse_bom_button.setDefault(True)
+        self.parse_bom_button.setDefault(True)
         self.parse_bom_button.clicked.connect(self.on_generate_parts_list)
 
         if not hasattr(self.Document, 'BOM'):
@@ -845,11 +899,11 @@ class makeBOM:
             export_bom_button_text = "Update BOM Spreadsheet"
 
         self.export_bom_button = QtGui.QPushButton(export_bom_button_text)
-        # self.export_bom_button.setDefault(True)
+        self.export_bom_button.setDefault(True)
         self.export_bom_button.clicked.connect(self.on_update_bom_spreedsheet)
 
         self.cancel_button = QtGui.QPushButton('Cancel')
-        # self.cancel_button.setDefault(True)
+        self.cancel_button.setDefault(True)
         self.cancel_button.clicked.connect(self.on_cancel)
 
         self.button_layout.addWidget(self.parse_bom_button)
