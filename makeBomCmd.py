@@ -364,26 +364,22 @@ class makeBOM:
                         value = obj_label
 
                     elif prop == self.infoKeysUser.get('Pad_Length').get('userData'):
-                        if obj.Pad_Length:
-                            value = obj.Pad_Length
-                            # getcontext().prec = 2
-                            # value = '\'' + Decimal(obj.Pad_Length).normalize().to_eng_string()
-                        else:
-                            value = "-"
+                        value = "-"
 
                     elif prop == self.infoKeysUser.get('Shape_Length').get('userData'):
-                        value = obj.Shape.Length
-                        # getcontext().prec = 2
-                        # value = '\'' + Decimal(obj.Shape.Length).normalize().to_eng_string()
+                        # value = obj.Shape.Length
+                        getcontext().prec = 2
+                        value = '\'' + Decimal(obj.Shape.Length).normalize().to_eng_string()
 
                     elif prop == self.infoKeysUser.get('Shape_Volume').get('userData'):
                         if obj.Shape.Volume < 0:
                             value = ""
                         else:
-                            value = obj.Shape.Volume
-                        # getcontext().prec = 2
-                        # value = '\'' + Decimal(obj.Shape.Volume).normalize().to_eng_string()
-
+                            # value = obj.Shape.Volume
+                            # getcontext().prec = 2
+                            # value = '\'' + Decimal(obj.Shape.Volume).normalize().to_eng_string()
+                            bbc = obj.Shape.BoundBox
+                            field_data = str(str(round(bbc.ZLength, 3)) + str('x') + str(round(bbc.YLength, 3)) + str('x') + str(round(bbc.XLength, 3)))
 
                     else:
                         value = "-"
@@ -463,7 +459,6 @@ class makeBOM:
         # This is not intended and may happen since people don't rename this object like I do
         if obj_label == "Model" or obj_label == "Assembly":
            obj_label = doc_name
-
 
         if not obj_label in self.parts_dict:
             self.create_record(obj, doc_name, obj_label)
@@ -801,6 +796,7 @@ class makeBOM:
         if not self.cancel_button.text() == "Abort":
             self.UI.close()
             try:
+                Gui.Selection.clearSelection()
                 Gui.Selection.addSelection(self.Document.Name, self.bom_spreadsheet.Name)
                 Gui.updateGui()
             except:
