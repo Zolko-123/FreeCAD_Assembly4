@@ -212,7 +212,7 @@ class infoPartUI():
         # self.set_partinfo_data()
 
         # Asm4.warningBox("The Part Info fields have been cleared")
-        # self.finish()
+        self.finish()
 
 
     def set_partinfo_data(self):
@@ -230,69 +230,60 @@ class infoPartUI():
         except AttributeError:
             part = self.part
 
-        print("-----------------------------")
-
         doc = part.Document
 
-        for i, obj1 in enumerate(part.Group):
-            if obj1.TypeId == 'PartDesign::Body':
-                body = obj1
-                for j, obj2 in enumerate(body.Group):
-                    if obj2.TypeId == 'PartDesign::Pad':
-                        pad = obj2
-                        try:
-                            sketch = pad.Profile[0]
-                        except NameError :
-                            print('Sketch: {}, Pad {} does not have Sketch'.format(part.FullName, sketch))
-                            pass
+        body = None
+        pad = None
+        sketch = None
 
-            try:
-                self.LabelDoc(self, part, doc)
-            except:
-                print('LabelDoc: {} does not have Doc_Label'.format(part.FullName))
-                pass
-            try:
-                self.LabelType(self, part)
-            except:
-                print('LabelType: {} does not have TypeId'.format(part.FullName))
-                pass
-            try:
-                self.LabelPart(self, part)
-            except:
-                print('LabelPart: Part does not exist')
-                pass
-            try:
-                self.PadLength(self, part, pad)
-            except:
-                print('PadLenght: {} does not have a Pad feature'.format(part.FullName))
-                pass
-            try:
-                self.ShapeLength(self, part, sketch)
-            except:
-                print('ShapeLength: {} does not have a Sketch'.format(part.FullName))
-                pass
-            try:
-                self.ShapeVolume(self, part, body)
-            except:
-                print('ShapeVolume: {} does not have a Shape'.format(part.FullName))
-                pass
+        # Find the first Body, Pad and Sketch
+        if part.TypeId == "App::Part":
+            for i, obj1 in enumerate(part.Group):
+                if obj1.TypeId == 'PartDesign::Body':
+                    body = obj1
+                    for j, obj2 in enumerate(body.Group):
+                        if obj2.TypeId == 'PartDesign::Pad':
+                            pad = obj2
+                            if pad.Profile:
+                                sketch = pad.Profile[0]
+                                break
+        elif part.TypeId == 'PartDesign::Body':
+            body = part
+            for j, obj2 in enumerate(body.Group):
+                if obj2.TypeId == 'PartDesign::Pad':
+                    pad = obj2
+                    if pad.Profile:
+                        sketch = pad.Profile[0]
+                        break
+
+        if part:
+            self.LabelDoc(part, doc)
+            self.LabelType(part)
+            self.LabelPart(part)
+            if body:
+                self.ShapeVolume(part, body)
+                if pad:
+                    self.PadLength(part, pad)
+                    if sketch:
+                        self.ShapeLength(part, sketch)
+                    else:
+                        print("{}: Sketch IS MISSING".format(part))
+                else:
+                    print("{}: Pad IS MISSING".format(part))
+            else:
+                print("{}: Body IS MISSING".format(part))
+        else:
+            print("{}: Part IS MISSING".format(part))
 
 
     def LabelDoc(self, part, doc):
 
-        # Recover doc_name from parts_dict
-        try:
-            if infoKeysUser.get("Doc_Label").get('active'):
-                try:
-                    doc_name = getattr(obj, infoKeysUser.get("Doc_Label").get('userData'))
-                except AttributeError:
-                    doc_name = obj.Document.Label
-            else:
-                doc_name = obj.Document.Label
-        except:
-            doc_name = obj.Document.Label
+        doc_name = part.Document.Label
+        if self.infoKeysUser.get("Doc_Label").get('active'):
+            if getattr(part, self.infoKeysUser.get("Doc_Label").get('userData')):
+                doc_name = getattr(part, self.infoKeysUser.get("Doc_Label").get('userData'))
 
-        field_name = infoKeysUser.get("Doc_Label").get('userData')
+        field_name = self.infoKeysUser.get("Doc_Label").get('userData')
         field_data = doc_name
 
         try:
@@ -309,9 +300,8 @@ class infoPartUI():
 
     def LabelType(self, part):
 
-        field_name = infoKeysUser.get('Type_Label').get('userData')
+        field_name = self.infoKeysUser.get('Type_Label').get('userData')
 
-        # field_data = part.TypeId
         if Asm4.isAssembly(part):
             field_data = "Subassembly"
         elif part.TypeId == "App::Part":
@@ -334,7 +324,7 @@ class infoPartUI():
 
 
     def LabelPart(self, part):
-        field_name = infoKeysUser.get('Part_Label').get('userData')
+        field_name = self.infoKeysUser.get('Part_Label').get('userData')
         field_data = part.Label
 
         try:
@@ -350,11 +340,13 @@ class infoPartUI():
 
 
     def PadLength(self, part, pad):
-        field_name = infoKeysUser.get('Pad_Length').get('userData')
+        field_name = self.infoKeysUser.get('Pad_Length').get('userData')
+
         try:
-            field_data = str(pad.Length).replace('mm','')
+            field_data = str(pad.Length).replace("mm","").strip(" ")
         except AttributeError:
             return
+
         try:
             self.TypeId
             setattr(part, field_name, field_data)
@@ -368,11 +360,13 @@ class infoPartUI():
 
 
     def ShapeLength(self, part, sketch):
-        field_name = infoKeysUser.get('Shape_Length').get('userData')
+        field_name = self.infoKeysUser.get('Shape_Length').get('userData')
+
         try:
             field_data = str(sketch.Shape.Length)
         except AttributeError:
             return
+
         try:
             self.TypeId
             setattr(part, field_name, field_data)
@@ -386,9 +380,9 @@ class infoPartUI():
 
 
     def ShapeVolume(self, part, body):
-        field_name = infoKeysUser.get('Shape_Volume').get('userData')
+        field_name = self.infoKeysUser.get('Shape_Volume').get('userData')
         bbc = body.Shape.BoundBox
-        field_data = str(str(round(bbc.ZLength, 3)) + str(' mm x ') + str(round(bbc.YLength, 3)) + str(' mm x ') + str(round(bbc.XLength, 3)) + str(' mm'))
+        field_data = str(str(round(bbc.ZLength, 3)) + str(' x ') + str(round(bbc.YLength, 3)) + str(' x ') + str(round(bbc.XLength, 3)))
         try:
             self.TypeId
             setattr(part, field_name, field_data)
@@ -399,7 +393,6 @@ class infoPartUI():
                         self.infos[i].setText(field_data)
             except AttributeError:
                 self.infos[i].setText("-")
-
 
 
     def finish(self):
