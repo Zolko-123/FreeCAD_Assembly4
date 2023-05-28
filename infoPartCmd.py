@@ -49,7 +49,7 @@ def versiontuple(v):
    return tuple(filled)
 
 
-def load_config_file_data():
+def load_config_file():
 
     parts_plist = dict() # part properties list
 
@@ -144,64 +144,49 @@ class infoPartUI():
         iconFile = os.path.join(Asm4.iconPath, 'Asm4_PartInfo.svg')
         self.form.setWindowIcon(QtGui.QIcon(iconFile))
         self.form.setWindowTitle("Edit Part Information")
-        # has been checked before
+        self.infoKeysUser = load_config_file()
         self.part = Asm4.getSelectedContainer()
-        # Check and load if the configuration file exists
-        try:
-            file = open(config_file_path, 'r')
-            self.infoKeysUser = json.load(file).copy()
-            file.close()
-        except:
-            self.infoKeysUser = dict()
-
-            for prop in infoKeys.part_info:
-                self.infoKeysUser.setdefault(prop, {'userData': prop, 'active': True, 'visible': True})
-
-            for prop in infoKeys.fastener_info:
-                self.infoKeysUser.setdefault(prop, {'userData': prop, 'active': True, 'visible': False})
-
-        self.makePartInfo(self, self.part)
+        self.create_partinfo_fields(self.part)
         self.infoTable = []
         self.getPartInfo()
         self.drawUI()
 
 
+    # Create PartInfo fields (Part|Body|Fastener)
+    def create_partinfo_fields(self, obj):
+        for user_prop in self.infoKeysUser:
+            if self.infoKeysUser.get(user_prop).get('active') and self.infoKeysUser.get(user_prop).get('visible'):
+                if hasattr(obj, "part"):
+                    if not hasattr(obj.part, self.infoKeysUser.get(user_prop).get('userData')):
+                        obj.part.addProperty('App::PropertyString', self.infoKeysUser.get(user_prop).get('userData'), 'PartInfo')
+                else:
+                    if obj.TypeId == "App::Part" or obj.TypeId == "PartDesign::Body" or obj.TypeId == 'Part::FeaturePython' and ((obj.Content.find("FastenersCmd") > -1) or (obj.Content.find("PCBStandoff") > -1)):
+                        if not hasattr(obj, self.infoKeysUser.get(user_prop).get('userData')):
+                            obj.addProperty('App::PropertyString', self.infoKeysUser.get(user_prop).get('userData'), 'PartInfo')
+
+
     def getPartInfo(self):
         self.infoTable.clear()
-        for propuser in self.infoKeysUser:
-            for prop in self.part.PropertiesList:
-                if self.part.getGroupOfProperty(prop) == 'PartInfo':
-                    if self.part.getTypeIdOfProperty(prop) == 'App::PropertyString':
-                        if self.infoKeysUser.get(propuser).get('userData') == prop:
-                            if self.infoKeysUser.get(propuser).get('active') and self.infoKeysUser.get(propuser).get('visible'):
-                                value = self.part.getPropertyByName(prop)
-                                self.infoTable.append([prop, value])
-
-
-    # Add the default part information
-    def makePartInfo(self, object, reset=False):
-        for propuser in self.infoKeysUser:
-            if self.infoKeysUser.get(propuser).get('active') and self.infoKeysUser.get(propuser).get('visible'):
-                try:
-                    object.part
-                    if not hasattr(object.part, self.infoKeysUser.get(propuser).get('userData')):
-                        object.part.addProperty('App::PropertyString', self.infoKeysUser.get(propuser).get('userData'), 'PartInfo')
-                except AttributeError:
-                    if object.TypeId == 'App::Part':
-                        if not hasattr(object,self.infoKeysUser.get(propuser).get('userData')):
-                            object.addProperty('App::PropertyString', self.infoKeysUser.get(propuser).get('userData'), 'PartInfo')
-        return
+        for user_prop in self.infoKeysUser:
+            for part_prop in self.part.PropertiesList:
+                if self.part.getGroupOfProperty(part_prop) == 'PartInfo':
+                    if self.part.getTypeIdOfProperty(part_prop) == 'App::PropertyString':
+                        if self.infoKeysUser.get(user_prop).get('userData') == part_prop:
+                            if self.infoKeysUser.get(user_prop).get('active') and self.infoKeysUser.get(user_prop).get('visible'):
+                                value = self.part.getPropertyByName(part_prop)
+                                self.infoTable.append([part_prop, value])
 
 
     def addNew(self):
-        for i, prop in enumerate(self.infoTable):
-            if self.part.getGroupOfProperty(prop[0]) == 'PartInfo':
-                if self.part.getTypeIdOfProperty(prop[0]) == 'App::PropertyString':
-                    for propuser in self.infoKeysUser:
-                        if self.infoKeysUser.get(propuser).get('userData') == prop[0]:
-                            if self.infoKeysUser.get(propuser).get('active') and self.infoKeysUser.get(propuser).get('visible'):
-                                text = self.infos[i].text()
-                                setattr(self.part, prop[0], str(text))
+        for i, part_prop in enumerate(self.infoTable):
+            if hasattr(self.part, part_prop[0]):
+                if self.part.getGroupOfProperty(part_prop[0]) == 'PartInfo':
+                    if self.part.getTypeIdOfProperty(part_prop[0]) == 'App::PropertyString':
+                        for user_prop in self.infoKeysUser:
+                            if self.infoKeysUser.get(user_prop).get('userData') == part_prop[0]:
+                                if self.infoKeysUser.get(user_prop).get('active') and self.infoKeysUser.get(user_prop).get('visible'):
+                                    text = self.infos[i].text()
+                                    setattr(self.part, part_prop[0], str(text))
 
 
     def editKeys(self):
@@ -210,90 +195,86 @@ class infoPartUI():
 
 
     # Reset the list of properties
-    def reInit(self):
+    def on_reinit_part(self):
 
-        load_config_file_data()
+        part_props = self.part.PropertiesList
+        part_info_props = []
 
-        # List = self.part.PropertiesList
-        # listpi = []
-        # for prop in List:
-        #     if self.part.getGroupOfProperty(prop) == 'PartInfo':
-        #         listpi.append(prop)
-        # for suppr in listpi: # delete all PartInfo properties
-        #     self.part.removeProperty(suppr)
+        for part_prop in part_props:
+            if self.part.getGroupOfProperty(part_prop) == 'PartInfo':
+                part_info_props.append(part_prop)
 
-        # # Recover initial json file since fateners keys are being lost
-        # partInfoDef = dict()
-        # for prop in infoKeys.part_info:
-        #     partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': True})
-        # for prop in infoKeys.fastener_info:
-        #     partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': False})
-        # try:
-        #     os.mkdir(config_dir_path)
-        # except:
-        #     pass
-        # file = open(config_file_path, 'w')
-        # json.dump(partInfoDef, file)
-        # file.close()
+        for suppr in part_info_props: # delete all PartInfo properties
+            self.part.removeProperty(suppr)
+
+        self.infoKeysUser = load_config_file()
+        self.create_partinfo_fields(self.part)
+        # self.set_partinfo_data()
+
+        # Asm4.warningBox("The Part Info fields have been cleared")
+        # self.finish()
 
 
-        '''
-        mb = QtGui.QMessageBox()
-        mb.setWindowTitle("Clear fileds")
-        mb.setText("The Part Info field\nhas been cleared")
-        mb.exec_()
-        '''
-        Asm4.warningBox("The Part Info field has been cleared")
-        self.finish()
+    def set_partinfo_data(self):
 
+        # if not hasattr(self, "infoKeysUser"):
+            # self.infoKeysUser = load_config_file()
+        # elif not self.infoKeysUser:
+            # self.infoKeysUser = load_config_file()
 
-    def infoDefault(self):
-        # infoKeys.infoDefault(self)
-        # file = open(config_file_path, 'r')
-        # infoKeysUser = json.load(file).copy()
-        # file.close()
-        infoKeysUser = load_config_file_data()
+        # infoKeysUser = load_config_file()
+
         try:
             self.TypeId
             part = self
         except AttributeError:
             part = self.part
+
+        print("-----------------------------")
+
         doc = part.Document
-        for i in range(len(part.Group)):
-            if part.Group[i].TypeId == 'PartDesign::Body':
-                body = part.Group[i]
-                for i in range(len(body.Group)):
-                    if body.Group[i].TypeId == 'PartDesign::Pad':
-                        pad = body.Group[i]
+
+        for i, obj1 in enumerate(part.Group):
+            if obj1.TypeId == 'PartDesign::Body':
+                body = obj1
+                for j, obj2 in enumerate(body.Group):
+                    if obj2.TypeId == 'PartDesign::Pad':
+                        pad = obj2
                         try:
                             sketch = pad.Profile[0]
                         except NameError :
-                            # print('There is no Sketch on a Pad of the Part', part.FullName)
+                            print('Sketch: {}, Pad {} does not have Sketch'.format(part.FullName, sketch))
                             pass
+
             try:
                 self.LabelDoc(self, part, doc)
             except:
-                # print('LabelDoc: there is no Document on the Part ', part.FullName)
+                print('LabelDoc: {} does not have Doc_Label'.format(part.FullName))
+                pass
+            try:
+                self.LabelType(self, part)
+            except:
+                print('LabelType: {} does not have TypeId'.format(part.FullName))
                 pass
             try:
                 self.LabelPart(self, part)
             except:
-                # print('LabelPart: Part does not exist')
+                print('LabelPart: Part does not exist')
                 pass
             try:
                 self.PadLength(self, part, pad)
             except:
-                # print('PadLenght: there is no Pad in the Part ', part.FullName)
+                print('PadLenght: {} does not have a Pad feature'.format(part.FullName))
                 pass
             try:
                 self.ShapeLength(self, part, sketch)
             except:
-                # print('ShapeLength: there is no Sketch in the Part ', part.FullName)
+                print('ShapeLength: {} does not have a Sketch'.format(part.FullName))
                 pass
             try:
                 self.ShapeVolume(self, part, body)
             except:
-                # print('ShapeVolume: there is no Shape in the Part ', part.FullName)
+                print('ShapeVolume: {} does not have a Shape'.format(part.FullName))
                 pass
 
 
@@ -305,87 +286,117 @@ class infoPartUI():
                 try:
                     doc_name = getattr(obj, infoKeysUser.get("Doc_Label").get('userData'))
                 except AttributeError:
-                    doc_name = obj.Document.Name
+                    doc_name = obj.Document.Label
+            else:
+                doc_name = obj.Document.Label
         except:
-            doc_name = obj.Document.Name
+            doc_name = obj.Document.Label
 
-        auto_info_field = infoKeysUser.get("Doc_Label").get('userData')
-        auto_info_fill = doc_name
+        field_name = infoKeysUser.get("Doc_Label").get('userData')
+        field_data = doc_name
+
         try:
             self.TypeId
-            setattr(part, auto_info_field, auto_info_fill)
+            setattr(part, field_name, field_data)
         except AttributeError:
             try:
                 for i in range(len(self.infoTable)):
-                    if self.infoTable[i][0] == auto_info_field:
-                        self.infos[i].setText(auto_info_fill)
+                    if self.infoTable[i][0] == field_name:
+                        self.infos[i].setText(field_data)
+            except AttributeError:
+                self.infos[i].setText("-")
+
+
+    def LabelType(self, part):
+
+        field_name = infoKeysUser.get('Type_Label').get('userData')
+
+        # field_data = part.TypeId
+        if Asm4.isAssembly(part):
+            field_data = "Subassembly"
+        elif part.TypeId == "App::Part":
+            field_data = "Part"
+        elif part.TypeId == "PartDesign::Body":
+            field_data = "Body"
+        else:
+            field_data = "Fastener"
+
+        try:
+            self.TypeId
+            setattr(part, field_name, field_data)
+        except AttributeError:
+            try:
+                for i in range(len(self.infoTable)):
+                    if self.infoTable[i][0] == field_name:
+                        self.infos[i].setText(field_data)
             except AttributeError:
                 self.infos[i].setText("-")
 
 
     def LabelPart(self, part):
-        auto_info_field = infoKeysUser.get('Part_Label').get('userData')
-        auto_info_fill = part.Label
+        field_name = infoKeysUser.get('Part_Label').get('userData')
+        field_data = part.Label
+
         try:
             self.TypeId
-            setattr(part, auto_info_field, auto_info_fill)
+            setattr(part, field_name, field_data)
         except AttributeError:
             try:
                 for i in range(len(self.infoTable)):
-                    if self.infoTable[i][0] == auto_info_field:
-                        self.infos[i].setText(auto_info_fill)
+                    if self.infoTable[i][0] == field_name:
+                        self.infos[i].setText(field_data)
             except AttributeError:
                 self.infos[i].setText("-")
 
 
     def PadLength(self, part, pad):
-        auto_info_field = infoKeysUser.get('Pad_Length').get('userData')
+        field_name = infoKeysUser.get('Pad_Length').get('userData')
         try:
-            auto_info_fill = str(pad.Length).replace('mm','')
+            field_data = str(pad.Length).replace('mm','')
         except AttributeError:
             return
         try:
             self.TypeId
-            setattr(part, auto_info_field, auto_info_fill)
+            setattr(part, field_name, field_data)
         except AttributeError:
             try:
                 for i in range(len(self.infoTable)):
-                    if self.infoTable[i][0] == auto_info_field:
-                        self.infos[i].setText(auto_info_fill)
+                    if self.infoTable[i][0] == field_name:
+                        self.infos[i].setText(field_data)
             except AttributeError:
                 self.infos[i].setText("-")
 
 
     def ShapeLength(self, part, sketch):
-        auto_info_field = infoKeysUser.get('Shape_Length').get('userData')
+        field_name = infoKeysUser.get('Shape_Length').get('userData')
         try:
-            auto_info_fill = str(sketch.Shape.Length)
+            field_data = str(sketch.Shape.Length)
         except AttributeError:
             return
         try:
             self.TypeId
-            setattr(part, auto_info_field, auto_info_fill)
+            setattr(part, field_name, field_data)
         except AttributeError:
             try:
                 for i in range(len(self.infoTable)):
-                    if self.infoTable[i][0] == auto_info_field:
-                        self.infos[i].setText(auto_info_fill)
+                    if self.infoTable[i][0] == field_name:
+                        self.infos[i].setText(field_data)
             except AttributeError:
                 self.infos[i].setText("-")
 
 
     def ShapeVolume(self, part, body):
-        auto_info_field = infoKeysUser.get('Shape_Volume').get('userData')
+        field_name = infoKeysUser.get('Shape_Volume').get('userData')
         bbc = body.Shape.BoundBox
-        auto_info_fill = str(str(round(bbc.ZLength, 3)) + str(' mm x ') + str(round(bbc.YLength, 3)) + str(' mm x ') + str(round(bbc.XLength, 3)) + str(' mm'))
+        field_data = str(str(round(bbc.ZLength, 3)) + str(' mm x ') + str(round(bbc.YLength, 3)) + str(' mm x ') + str(round(bbc.XLength, 3)) + str(' mm'))
         try:
             self.TypeId
-            setattr(part, auto_info_field, auto_info_fill)
+            setattr(part, field_name, field_data)
         except AttributeError:
             try:
                 for i in range(len(self.infoTable)):
-                    if self.infoTable[i][0] == auto_info_field:
-                        self.infos[i].setText(auto_info_fill)
+                    if self.infoTable[i][0] == field_name:
+                        self.infos[i].setText(field_data)
             except AttributeError:
                 self.infos[i].setText("-")
 
@@ -440,18 +451,18 @@ class infoPartUI():
 
         # Actions
         self.confFields.clicked.connect(self.editKeys)
-        self.reinit.clicked.connect(self.reInit)
-        self.autoFill.clicked.connect(self.infoDefault)
+        self.reinit.clicked.connect(self.on_reinit_part)
+        self.autoFill.clicked.connect(self.set_partinfo_data)
 
         '''
         test = False
         try:
             if self.infoTable[0][1] == '':
                 test = True
-        except IndexError:
+        except IndexError:set_partinfo_data
             test = True
         if test:
-            self.infoDefault()
+            self.set_partinfo_data()
             self.addNew()
         '''
 
@@ -468,9 +479,11 @@ class infoPartConfUI():
 
         self.infoKeysDefault = infoKeys.part_info.copy()
         self.part_info_tooltip = infoKeys.part_info_tooltip.copy()
-        file = open(config_file_path, 'r')
-        self.infoKeysUser = json.load(file).copy()
-        file.close()
+
+        # file = open(config_file_path, 'r')
+        # self.infoKeysUser = json.load(file).copy()
+        # file.close()
+        self.infoKeysUser = load_config_file()
 
         self.confTemplate = dict()
         self.confTemplate = self.infoKeysUser.copy()
@@ -501,7 +514,7 @@ class infoPartConfUI():
                     mb.setText("Fields Name cannot be blank\nYou must disable or delete it")
                     mb.exec_()
                     '''
-                    Asm4.warningBox("Fields Name cannot be blank. You must disable or delete it")
+                    Asm4.warningBox("Name of the field cannot be blank. You must disable or delete it")
                     return
                 i += 1
 
@@ -520,13 +533,13 @@ class infoPartConfUI():
                 partInfoDef.setdefault(prop, {'userData': uData.replace(" ", "_"), 'active': self.checker[i].isChecked(), 'visible': True})
                 i += 1
 
-        file = open(config_file_path, 'w')
-        json.dump(partInfoDef, file)
-        file.close()
-
-        file = open(config_file_path, 'r')
-        self.infoKeysUser = json.load(file).copy()
-        file.close()
+        # file = open(config_file_path, 'w')
+        # json.dump(partInfoDef, file, indent=4, separators=(", ", ": "))
+        # file.close()
+        # file = open(config_file_path, 'r')
+        # self.infoKeysUser = json.load(file).copy()
+        # file.close()
+        self.infoKeysUser = load_config_file()
 
         '''
         mb = QtGui.QMessageBox()
