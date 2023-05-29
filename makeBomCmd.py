@@ -352,7 +352,7 @@ class makeBOM:
 
                 if value == "" or value == "-":
 
-                    info = "(from makeBOM)"
+                    info = ""
 
                     if prop == self.infoKeysUser.get("Doc_Label").get('userData'):
                         value = doc_name
@@ -701,7 +701,7 @@ class makeBOM:
         # Customize spreadsheet columns - Centralinzing text
         rows = len(list(local_parts_dict.values()))+1
         for i, header in enumerate(parts_values[0].keys()):
-            if header == "Fastener_Diameter" or header == "Fastener_Length" or header == "Fastener_Type" or header == "Qty":
+            if header == "Pad_Length" or header == "Shape_Length" or header == "Shape_Volume" or header == "Fastener_Diameter" or header == "Fastener_Length" or header == "Fastener_Type" or header == "Qty":
                 self.bom_spreadsheet.setAlignment('{c}2:{c}{r}'.format(c=to_column_index(i+1), r=rows), 'center|vcenter|vimplied')
 
         # Optimize column width
@@ -710,9 +710,11 @@ class makeBOM:
             l.append(header)
             max_len = len(max(l, key=len))
             pixel = 1/92
-            pixels = math.ceil(max_len / pixel * 0.09)
+            pixels = math.ceil(max_len / pixel * 0.085)
             # mm = pixels * 1/92
             # print(header, max_len, pixels, mm)
+            if pixels > 200:
+                pixels = 200
             self.bom_spreadsheet.setColumnWidth('{c}'.format(c=to_column_index(i+1)), pixels)
 
         if creating_new_bom:
