@@ -300,8 +300,11 @@ class makeBOM:
                                 data = obj_label
 
                             if data != "-":
-                                self.Verbose += "- " + prop + ": " + data + " " + info + "\n"
-
+                                try:
+                                    self.Verbose += "- " + prop + ": " + data + " " + info + "\n"
+                                except TypeError  as e:
+                                     self.Verbose += "- Error: " + str(e) + "\n"
+                                     #todo Not sure if this is the best solution.
                             self.PartsList[obj_label][self.infoKeysUser.get(prop).get('userData')] = data
 
                     self.PartsList[obj_label]['Qty.'] = 1
