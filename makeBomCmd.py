@@ -239,6 +239,7 @@ class makeBOM:
 
         elif obj.TypeId == 'App::Part' and not Asm4.isAsm4Model(obj):
             if level > 0 and level <= max_level:
+                obj_label = ""
                 # Recover the record, if any
                 try:
                     if self.infoKeysUser.get("Document").get('active'):
