@@ -223,6 +223,7 @@ class infoPartUI():
         doc = part.Document
         print (len(part.Group))
         for i in range(len(part.Group)):
+            print (part.Group[i].TypeId)
             if part.Group[i].TypeId == 'PartDesign::Body':
                 body = part.Group[i]
                 for i in range(len(body.Group)):

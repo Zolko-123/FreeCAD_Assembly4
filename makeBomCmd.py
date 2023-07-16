@@ -418,13 +418,14 @@ class makeBOM:
 
                     self.PartsList[obj_label] = dict()
                     for prop in self.infoKeysUser:
+                        print ("prop="+prop)
                         if prop == 'Document':
                             data = doc_name
                         elif prop == 'Part_Label':
                             data = obj_label
                         elif prop == "Fastener_Diameter":
                             data = obj.diameter
-                        elif prop == "Fastener_Type":
+                        elif prop == "FastenerType":
                             data = obj.type
                         elif prop == "Fastener_Length":
                             try:
