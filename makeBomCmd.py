@@ -53,7 +53,7 @@ file.close()
 class makeBOM:
 
     def __init__(self, follow_subassemblies=True):
-        super(makeBOM, self).__init__()
+        super().__init__()
         self.follow_subassemblies = follow_subassemblies
         '''
         file = open(ConfUserFilejson, 'r')
@@ -280,13 +280,18 @@ class makeBOM:
                     self.PartsList[obj_label] = dict()
                     for prop in self.infoKeysUser:
                         if self.infoKeysUser.get(prop).get('active'):
+                            data =""
                             try: # to get partInfo
                                 getattr(obj, self.infoKeysUser.get(prop).get('userData'))
                                 info = "(predefined)"
                             except AttributeError:
                                 crea(self,obj)
-                                fill(obj)
-                                info = "(extracted)"
+                                try:
+                                    info = fill(obj)
+                                    #info = "(extracted)"
+                                except Exception as e:
+                                    print ("Expection:"+ e)
+                                    info = "(Unknown)"
 
                             if self.infoKeysUser.get(prop).get('visible'):
                                 data = getattr(obj, self.infoKeysUser.get(prop).get('userData'))
@@ -347,18 +352,23 @@ class makeBOM:
                     self.PartsList[obj.Label] = dict()
                     for prop in self.infoKeysUser:
                         self.Verbose +=  "- " + prop + ': '
-                        if prop == 'Document':
-                            data = obj.Document.Label
-                        elif prop == 'PartName':
-                            data = obj.PartName
-                        elif prop == 'PartLength':
-                            data = obj.PartLength
-                        elif prop == 'PartWidth':
-                            data = obj.PartWidth
-                        elif prop == 'PartHeight':
-                            data = obj.PartHeight
-                        else:
-                            data = "-"
+                        # JT putting the exception message in data should be removed once we figure out what's going on
+                        data = ""
+                        try:
+                            if prop == 'Document':
+                                data = obj.Document.Label
+                            elif prop == 'PartName':
+                                data = obj.PartName
+                            elif prop == 'PartLength':
+                                data = obj.PartLength
+                            elif prop == 'PartWidth':
+                                data = obj.PartWidth
+                            elif prop == 'PartHeight':
+                                data = obj.PartHeight
+                            else:
+                                data = "-"
+                        except Exception as e:
+                            data = "todo Remove after debug" + str(e)
 
                         if data != "-":
                             self.Verbose += data + '\n'

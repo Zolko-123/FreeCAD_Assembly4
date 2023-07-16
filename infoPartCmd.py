@@ -142,6 +142,8 @@ class infoPartUI():
         for propuser in self.infoKeysUser:
             if self.infoKeysUser.get(propuser).get('active') and self.infoKeysUser.get(propuser).get('visible'):
                 try:
+                    #if object.part doesn't exist at the object Typeid is App::Part through it in there?
+                    #need to think on that one.
                     object.part
                     if not hasattr(object.part, self.infoKeysUser.get(propuser).get('userData')):
                         object.part.addProperty('App::PropertyString', self.infoKeysUser.get(propuser).get('userData'), 'PartInfo')
@@ -149,7 +151,7 @@ class infoPartUI():
                     if object.TypeId == 'App::Part':
                         if not hasattr(object,self.infoKeysUser.get(propuser).get('userData')):
                             object.addProperty('App::PropertyString', self.infoKeysUser.get(propuser).get('userData'), 'PartInfo')
-        return
+
 
 
     def addNew(self):
@@ -207,12 +209,26 @@ class infoPartUI():
         file = open(ConfUserFilejson, 'r')
         infoKeysUser = json.load(file).copy()
         file.close()
+        #trying to understand this. Not positive that I'm correct here.
+        #This routine attempts to autopopulate the fields that are defined in infoKeys.py and also appear in the json file
+        #it appears that these fields are inserted into self or self.part by infoPartCmd.infoPartUI.makePartInfo
+
+        #for now just bail out of till we have samples running and we can get a better idea of what the heck is going on.
+        msg = "!! Not implemented yet !!"
+        return msg
+
+
+
+
+        '''
+        # this whole section appears pretty hosed up to me.
         try:
             self.TypeId
             part = self
         except AttributeError:
             part = self.part
         doc = part.Document
+        print (len(part.Group))
         for i in range(len(part.Group)):
             if part.Group[i].TypeId == 'PartDesign::Body':
                 body = part.Group[i]
@@ -227,8 +243,10 @@ class infoPartUI():
             try:
                 self.LabelDoc(self, part, doc)
             except NameError:
-                # print('LabelDoc: there is no Document on the Part ', part.FullName)
+                #print('LabelDoc: there is no Document on the Part ', part.FullName)
                 pass
+            #except Exception as e:
+            #    print ("Exception"+e)
             try:
                 self.LabelPart(self, part)
             except NameError:
@@ -249,7 +267,7 @@ class infoPartUI():
             except NameError:
                 # print('ShapeVolume: there is no Shape in the Part ', part.FullName)
                 pass
-
+'''
 
     def LabelPart(self, part):
         auto_info_field = infoKeysUser.get('Part_Label').get('userData')
