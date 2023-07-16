@@ -26,12 +26,12 @@ infoToolTip = {
 
 partInfo_Invisible = [
     'FastenerDiameter',
-    'FastenerLenght',
+    'FastenerLength',
     'FastenerType']
 
 infoToolTip_Invisible = {
     'FastenerDiameter': 'Fastener diameter',
-    'FastenerLenght':   'Fastener length',
+    'FastenerLength':   'Fastener length',
     'FastenerType':     'Fastener type'}
 
 ConfUserDir = os.path.join(App.getUserAppDataDir(),'Templates')

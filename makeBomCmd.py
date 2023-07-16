@@ -427,7 +427,7 @@ class makeBOM:
                             data = obj.diameter
                         elif prop == "FastenerType":
                             data = obj.type
-                        elif prop == "Fastener_Length":
+                        elif prop == "FastenerLength":
                             try:
                                 data = str(obj.length).strip("mm")
                             except:
