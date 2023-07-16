@@ -421,9 +421,9 @@ class makeBOM:
                         print ("prop="+prop)
                         if prop == 'Document':
                             data = doc_name
-                        elif prop == 'Part_Label':
+                        elif prop == 'PartName':
                             data = obj_label
-                        elif prop == "Fastener_Diameter":
+                        elif prop == "FastenerDiameter":
                             data = obj.diameter
                         elif prop == "FastenerType":
                             data = obj.type
