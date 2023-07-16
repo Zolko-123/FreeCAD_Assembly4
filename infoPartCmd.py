@@ -213,9 +213,6 @@ class infoPartUI():
         #This routine attempts to autopopulate the fields that are defined in infoKeys.py and also appear in the json file
         #it appears that these fields are inserted into self or self.part by infoPartCmd.infoPartUI.makePartInfo
 
-        #for now just bail out of till we have samples running and we can get a better idea of what the heck is going on.
-        msg = "!! Not implemented yet !!"
-        return msg
 
 
         try:
