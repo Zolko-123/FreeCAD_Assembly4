@@ -218,10 +218,6 @@ class infoPartUI():
         return msg
 
 
-
-
-        '''
-        # this whole section appears pretty hosed up to me.
         try:
             self.TypeId
             part = self
@@ -240,6 +236,7 @@ class infoPartUI():
                         except NameError :
                             # print('There is no Sketch on a Pad of the Part', part.FullName)
                             pass
+        '''
             try:
                 self.LabelDoc(self, part, doc)
             except NameError:
