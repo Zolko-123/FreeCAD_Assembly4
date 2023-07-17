@@ -9,20 +9,24 @@ import FreeCAD as App
 # import infoPartCmd
 
 partInfo = [
+    'BomKey',
     'Document',
-    'PartName',
-    'Reference',
-    'PartLength',
-    'PartWidth',
-    'PartVolume']
+    'PartName']
+    # This is just add way too much complexity to figure out
+    # If there is going there should be a special class of object based that represents raw material imho if we are talking about subtractive manufacturing
+    # There should be class of primatives with material built in
+    #'PartLength',
+    #'PartWidth',
+    #'PartVolume']
 
 infoToolTip = {
+    'BomKey':    'Unique identifier how Bom items are grouped',
     'Document':     'Document or File name',
-    'PartName':     'Part Name',
-    'Reference':    'Part Reference',
-    'PartLength':   'Cut length of the raw material',
-    'PartWidth':    'Width of the raw material',
-    'PartVolume':   'Object dimensions (x, y, z)'}
+    'PartName':     'Part Name'}
+   # This appears will work for wood, but what if you are making gears from sawed slugs where you need a cut allowance/
+   #  PartLength':   'Cut length of the raw material',
+   # 'PartWidth':    'Width of the raw material',
+   # 'PartVolume':   'Object dimensions (x, y, z)'}
 
 partInfo_Invisible = [
     'FastenerDiameter',

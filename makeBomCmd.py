@@ -137,13 +137,34 @@ class makeBOM:
         if self.PartsList == None:
             self.PartsList = {}
 
+
+        print ("-------------------------------------------------- remove after debugging")
+        print (obj.TypeId)
+        print (obj.Label)
         #=======================
         # VISIBLE APP LINK
         #=======================
 
         if obj.TypeId == 'App::Link':
             if obj.Visibility == True:
+
+
                 print("ASM4> {level}{obj_typeid} | {obj_name} | {obj_label}".format(level=self.indent(level), obj_label=obj.Label, obj_name=obj.FullName, obj_typeid=obj.TypeId))
+
+                #'-----------------------------------------------------------------------'
+                #'--- Test to see if we have an Linked Part in the assembly if we do  ---'
+                #'-----------------------------------------------------------------------'
+
+
+                try:
+                    if isinstance(obj.LinkedObject, App.Part):
+                        print ("--  We need to add this to the list")
+
+
+                except Exception as e:
+                    print ("Error message " + str(e))
+
+
 
                 # self.Verbose += "> {level} | {type}: {label}, {fullname}".format(level=obj.Label, type="APP_LINK", label=obj.Label, fullname=obj.FullName)
                 # try:
@@ -152,7 +173,7 @@ class makeBOM:
                 #     self.Verbose += "- linked: {linked_obj}\n".format(linked_obj=obj.Name)
                 # self.Verbose += '- not included\n\n'
 
-                # Navigate on objects inside a App:Links (Groups of Fastners)
+                # Navigate on objects inside a App:Links
                 if obj.ElementCount > 0:
                     for i in range(obj.ElementCount):
                         self.listParts(obj.LinkedObject, level, parent=obj)
@@ -238,6 +259,8 @@ class makeBOM:
         #============================
 
         elif obj.TypeId == 'App::Part' and not Asm4.isAsm4Model(obj):
+            #in the use case I'm testing, I have a seperate Assembly4 file linked to another assembly.
+            #At this point I don't understand why it this part winds up showing up if this is false.
             if level > 0 and level <= max_level:
                 obj_label = ""
                 # Recover the record, if any
@@ -451,7 +474,8 @@ class makeBOM:
 
                     self.PartsList[obj_label]['Qty.'] = 1
                     self.Verbose += '\n'
-
+        else:
+            print ("Nothing Applied")
 
         # else:
             # print("@", obj.TypeId)
