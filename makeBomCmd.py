@@ -53,7 +53,7 @@ file.close()
 class makeBOM:
 
     def __init__(self, follow_subassemblies=True):
-        super().__init__()
+        #super().__init__()
         self.follow_subassemblies = follow_subassemblies
         '''
         file = open(ConfUserFilejson, 'r')
@@ -253,15 +253,15 @@ class makeBOM:
                 # Recover the record, if any
 
                 try:
-                    if self.infoKeysUser.get("Part_Label").get('active'):
+                    if self.infoKeysUser.get("PartName").get('active'):
                         try:
-                            obj_label = getattr(obj, self.infoKeysUser.get("Part_Label").get('userData'))
+                            obj_label = getattr(obj, self.infoKeysUser.get("PartName").get('userData'))
                         except AttributeError:
                             obj_label = obj.Label
                 except:
                     doc_name = obj.Label
 
-                # The name cannot be model othewise it will sum all other 'Model' names togueter
+                # The name cannot be model othewise it will sum all other 'Model' names together
                 if obj_label == "Model":
                    obj_label = obj.Document.Name
 
@@ -282,6 +282,8 @@ class makeBOM:
                         if self.infoKeysUser.get(prop).get('active'):
                             data =""
                             try: # to get partInfo
+                                print ("prop=" +prop)
+                                print ("infoKeysUser="+ self.infoKeysUser.get(prop).get('userData'))
                                 getattr(obj, self.infoKeysUser.get(prop).get('userData'))
                                 info = "(predefined)"
                             except AttributeError:
@@ -290,7 +292,7 @@ class makeBOM:
                                     info = fill(obj)
                                     #info = "(extracted)"
                                 except Exception as e:
-                                    print ("Expection:"+ e)
+                                    print ("Expection:"+ str( e))
                                     info = "(Unknown)"
 
                             if self.infoKeysUser.get(prop).get('visible'):
@@ -301,8 +303,12 @@ class makeBOM:
                             if data == "":
                                 data = "-"
 
-                            if prop == "Part_Label":
-                                data = obj_label
+                            #I think this can be deleted.
+                            #if prop == "Part_Label":
+                            #    data = obj_label
+
+                            #if prop == "PartName":
+                            #    data = obj_label
 
                             if data != "-":
                                 try:
@@ -310,8 +316,11 @@ class makeBOM:
                                 except TypeError  as e:
                                      self.Verbose += "- Error: " + str(e) + "\n"
                                      #todo Not sure if this is the best solution.
+                            try:
+                                print (data)
+                            except Exception as e:
+                                print ("Exception="+ str(e) )
                             self.PartsList[obj_label][self.infoKeysUser.get(prop).get('userData')] = data
-
                     self.PartsList[obj_label]['Qty.'] = 1
                     self.Verbose += '\n'
 
@@ -358,7 +367,7 @@ class makeBOM:
                             if prop == 'Document':
                                 data = obj.Document.Label
                             elif prop == 'PartName':
-                                data = obj.PartName
+                                data = obj.Label
                             elif prop == 'PartLength':
                                 data = obj.PartLength
                             elif prop == 'PartWidth':

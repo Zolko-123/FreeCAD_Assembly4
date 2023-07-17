@@ -207,7 +207,7 @@ class infoPartUI():
     def infoDefault(self):
         # infoKeys.infoDefault(self)
         file = open(ConfUserFilejson, 'r')
-        infoKeysUser = json.load(file).copy()
+        self.infoKeysUser = json.load(file).copy()
         file.close()
         #trying to understand this. Not positive that I'm correct here.
         #This routine attempts to autopopulate the fields that are defined in infoKeys.py and also appear in the json file
@@ -234,7 +234,7 @@ class infoPartUI():
                         except NameError :
                             # print('There is no Sketch on a Pad of the Part', part.FullName)
                             pass
-        '''
+            '''
             try:
                 self.LabelDoc(self, part, doc)
             except NameError:
@@ -242,11 +242,16 @@ class infoPartUI():
                 pass
             #except Exception as e:
             #    print ("Exception"+e)
-            try:
-                self.LabelPart(self, part)
-            except NameError:
-                # print('LabelPart: Part does not exist')
-                pass
+            '''
+        try:
+            self.GetPartName(part)
+            #info_cmd = infoPartCmd()  # Create an instance of infoPartCmd
+            #info_cmd.GetPartName(part)  # Call GetPartName from infoPartCmd instance
+        except NameError:
+            # print('LabelPart: Part does not exist')
+            pass
+
+            '''
             try:
                 self.PadLength(self, part, pad)
             except NameError:
@@ -262,10 +267,10 @@ class infoPartUI():
             except NameError:
                 # print('ShapeVolume: there is no Shape in the Part ', part.FullName)
                 pass
-'''
+            '''
 
-    def LabelPart(self, part):
-        auto_info_field = infoKeysUser.get('Part_Label').get('userData')
+    def GetPartName(self, part):
+        auto_info_field = infoKeysUser.get('PartName').get('userData')
         auto_info_fill = part.Label
         try:
             self.TypeId
