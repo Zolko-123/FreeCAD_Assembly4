@@ -156,13 +156,7 @@ class makeBOM:
                 #'-----------------------------------------------------------------------'
 
 
-                try:
-                    if isinstance(obj.LinkedObject, App.Part):
-                        print ("--  We need to add this to the list")
 
-
-                except Exception as e:
-                    print ("Error message " + str(e))
 
 
 
@@ -191,10 +185,31 @@ class makeBOM:
         #If we have standard nuts and bolts we want howmany times those are called out.
 
         elif obj.TypeId == 'App::Part':
-            if level > 0 and level <= max_level:
-                FullPartId = obj.Label
-                if obj.Label in self.PartsList:
-                    if self.PartsList[obj.Label]['Document'] == doc_name:
+            if level <= max_level:
+
+                #the BomKey is the unique identifier.
+                #if its a flat part list, it's Drawing-Part Id for non hardware
+                #if it's a multi-level bom it would be Someline line 001.001.001 representing which item level a part is on the bom.
+                BomKey = obj.FullName
+
+                obj_fullname = obj.FullName
+
+                # Split the string based on the "#" delimiter
+                parts = obj_fullname.split("#")
+
+                # Extract the Document and PartName from the parts list
+                if len(parts) == 2:
+                    Document = parts[0]
+                    #PartName = parts[1]
+                else:
+                    # Handle the case where there is no "#" delimiter in the string
+                    # or there are more than one "#" delimiters (not in the format we expect)
+                    Document = ""
+                    #PartName = ""
+                PartName = obj.Label
+
+                if BomKey in self.PartsList:
+                    if self.PartsList[obj.Label]['BomKey'] == BomKey:
                         qtd = self.PartsList[obj.Label]['Qty.'] + 1
                         print("ASM4> {level}{qtd}x | {obj_typeid} | {obj_name} | {obj_label}".format(level=self.indent(level, tag=" "), obj_label=obj.Label, obj_name=obj.FullName, obj_typeid=obj.TypeId, qtd=qtd))
                         self.Verbose += "> {level} | {type}: {label}, {fullname}\n".format(level=obj.Label, type="PART", label=obj.Label, fullname=obj.FullName)
@@ -211,8 +226,10 @@ class makeBOM:
                         # JT putting the exception message in data should be removed once we figure out what's going on
                         data = ""
                         try:
-                            if prop == 'Document':
-                                data = obj.Document.Label
+                            if prop == 'BomKey':
+                                data = BomKey
+                            elif prop =='Document':
+                                data = Document
                             elif prop == 'PartName':
                                 data = obj.Label
                             elif prop == 'PartLength':
@@ -230,8 +247,8 @@ class makeBOM:
                             self.Verbose += data + '\n'
 
                         self.PartsList[obj.Label][self.infoKeysUser.get(prop).get('userData')] = data
-
                     self.PartsList[obj.Label]['Qty.'] = 1
+
                     self.Verbose += '\n'
 
         #============================
@@ -260,7 +277,7 @@ class makeBOM:
                     self.listParts(subobj, level, parent=obj)
 
                 elif obj_label in self.PartsList:
-                    if self.PartsList[obj_label]['Document'] == doc_name:
+                    if self.PartsList[obj_label]['BomKey'] == BomKey:
                         qtd = self.PartsList[obj_label]['Qty.'] + 1
                         print("ASM4> {level}| {qtd}x | {obj_typeid} | {obj_name} | {obj_label}".format(level=self.indent(level, tag=" "), obj_label=obj_label, obj_name=obj.FullName, obj_typeid=obj.TypeId, qtd=qtd))
                         self.Verbose += "> {level} | {type}: {label}, {fullname}\n".format(level=obj_label, type="FASTENER", label=obj_label, fullname=obj.FullName)
@@ -276,8 +293,14 @@ class makeBOM:
                     self.PartsList[obj_label] = dict()
                     for prop in self.infoKeysUser:
                         print ("prop="+prop)
-                        if prop == 'Document':
-                            data = doc_name
+                        if prop =='BomKey':
+                            data = BomKey
+                        elif prop == "Document":
+                            #we may want to build in more smarts here.
+                            #For a flat bom, ireally just want to know how many nuts and bolts I have total regardless of sub assembly.'
+                            data = "All"
+                            #if we had an identented bill of material we would want to know all.
+                            #data = doc_name
                         elif prop == 'PartName':
                             data = obj_label
                         elif prop == "FastenerDiameter":
