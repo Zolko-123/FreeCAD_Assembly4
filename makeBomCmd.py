@@ -106,7 +106,7 @@ class makeBOM:
         self.UI.show()
         self.BOM.clear()
         self.Verbose = str()
-        self.PartsList = {}
+        self.BomKeyList = {}
 
         if self.follow_subassemblies == True:
             print("ASM4> BOM following sub-assemblies")
@@ -134,8 +134,8 @@ class makeBOM:
         if obj == None:
             return
 
-        if self.PartsList == None:
-            self.PartsList = {}
+        if self.BomKeyList == None:
+            self.BomKeyList = {}
 
 
         print ("-------------------------------------------------- remove after debugging")
@@ -154,11 +154,6 @@ class makeBOM:
                 #'-----------------------------------------------------------------------'
                 #'--- Test to see if we have an Linked Part in the assembly if we do  ---'
                 #'-----------------------------------------------------------------------'
-
-
-
-
-
 
                 # self.Verbose += "> {level} | {type}: {label}, {fullname}".format(level=obj.Label, type="APP_LINK", label=obj.Label, fullname=obj.FullName)
                 # try:
@@ -208,19 +203,19 @@ class makeBOM:
                     #PartName = ""
                 PartName = obj.Label
 
-                if BomKey in self.PartsList:
-                    if self.PartsList[obj.Label]['BomKey'] == BomKey:
-                        qtd = self.PartsList[obj.Label]['Qty.'] + 1
+                if BomKey in self.BomKeyList:
+                    if self.BomKeyList[BomKey]['BomKey'] == BomKey:
+                        qtd = self.BomKeyList[BomKey]['Qty.'] + 1
                         print("ASM4> {level}{qtd}x | {obj_typeid} | {obj_name} | {obj_label}".format(level=self.indent(level, tag=" "), obj_label=obj.Label, obj_name=obj.FullName, obj_typeid=obj.TypeId, qtd=qtd))
                         self.Verbose += "> {level} | {type}: {label}, {fullname}\n".format(level=obj.Label, type="PART", label=obj.Label, fullname=obj.FullName)
                         self.Verbose += "- object already added (" + str(qtd) + ")\n\n"
-                        self.PartsList[obj.Label]['Qty.'] = qtd
+                        self.BomKeyList[BomKey]['Qty.'] = qtd
 
                 else:
                     print("ASM4> {level}1x | {obj_typeid} | {obj_name} | {obj_label}".format(level=self.indent(level, tag=" "), obj_label=obj.Label, obj_name=obj.FullName, obj_typeid=obj.TypeId))
                     self.Verbose += "> {level} | {type}: {label}, {fullname}\n".format(level=obj.Label, type="PARTDESIGN", label=obj.Label, fullname=obj.FullName)
                     self.Verbose += "- adding object (1)\n"
-                    self.PartsList[obj.Label] = dict()
+                    self.BomKeyList[BomKey] = dict()
                     for prop in self.infoKeysUser:
                         self.Verbose +=  "- " + prop + ': '
                         # JT putting the exception message in data should be removed once we figure out what's going on
@@ -246,8 +241,8 @@ class makeBOM:
                         if data != "-":
                             self.Verbose += data + '\n'
 
-                        self.PartsList[obj.Label][self.infoKeysUser.get(prop).get('userData')] = data
-                    self.PartsList[obj.Label]['Qty.'] = 1
+                        self.BomKeyList[BomKey][self.infoKeysUser.get(prop).get('userData')] = data
+                    self.BomKeyList[BomKey]['Qty.'] = 1
 
                     self.Verbose += '\n'
 
@@ -276,13 +271,13 @@ class makeBOM:
                     print("    ", i, "...")
                     self.listParts(subobj, level, parent=obj)
 
-                elif obj_label in self.PartsList:
-                    if self.PartsList[obj_label]['BomKey'] == BomKey:
-                        qtd = self.PartsList[obj_label]['Qty.'] + 1
+                elif obj_label in self.BomKeyList:
+                    if self.BomKeyList[BomKey]['BomKey'] == BomKey:
+                        qtd = self.BomKeyList[BomKey]['Qty.'] + 1
                         print("ASM4> {level}| {qtd}x | {obj_typeid} | {obj_name} | {obj_label}".format(level=self.indent(level, tag=" "), obj_label=obj_label, obj_name=obj.FullName, obj_typeid=obj.TypeId, qtd=qtd))
                         self.Verbose += "> {level} | {type}: {label}, {fullname}\n".format(level=obj_label, type="FASTENER", label=obj_label, fullname=obj.FullName)
                         self.Verbose += "- object already added (" + str(qtd) + ")\n\n"
-                        self.PartsList[obj_label]['Qty.'] = qtd
+                        self.BomKeyList[BomKey]['Qty.'] = qtd
 
                 else: # if the part is a was not added already
                     print("ASM4> {level}| 1x | {obj_typeid} | {obj_name} | {obj_label}".format(level=self.indent(level, tag=" "), obj_label=obj_label, obj_name=obj.FullName, obj_typeid=obj.TypeId))
@@ -290,7 +285,7 @@ class makeBOM:
                     self.Verbose += "> {level} | {type}: {label}, {fullname}\n".format(level=obj_label, type="FASTENER", label=obj_label, fullname=obj.FullName)
                     self.Verbose += "- adding object (1)\n"
 
-                    self.PartsList[obj_label] = dict()
+                    self.BomKeyList[obj_label] = dict()
                     for prop in self.infoKeysUser:
                         print ("prop="+prop)
                         if prop =='BomKey':
@@ -318,9 +313,9 @@ class makeBOM:
                         if data != "-":
                             self.Verbose += "- " + prop + ': ' + data + '\n'
 
-                        self.PartsList[obj_label][self.infoKeysUser.get(prop).get('userData')] = data
+                        self.BomKeyList[BomKey][self.infoKeysUser.get(prop).get('userData')] = data
 
-                    self.PartsList[obj_label]['Qty.'] = 1
+                    self.BomKeyList[BomKey]['Qty.'] = 1
                     self.Verbose += '\n'
         else:
             print ("Nothing Applied")
@@ -352,7 +347,7 @@ class makeBOM:
     # Copy Parts list to Spreadsheet
     def inSpreadsheet(self):
         document = App.ActiveDocument
-        plist = self.PartsList
+        plist = self.BomKeyList
 
         if len(plist) == 0:
             return
