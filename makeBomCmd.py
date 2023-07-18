@@ -181,194 +181,18 @@ class makeBOM:
                     self.listParts(obj.LinkedObject, level + 1, parent=obj)
 
         #==================================
-        # MODEL_PART aka ASM4 SUB-ASSEMBLY
+        # TRY TREATING ALL PARTS THE SAME =
         #==================================
-        elif obj.TypeId == 'App::Part' and Asm4.isAsm4Model(obj):
-            if level > 0 and level <= max_level and self.follow_subassemblies == False:
-                # Recover the record, if any
-                try:
-                    if self.infoKeysUser.get("Document").get('active'):
-                        try:
-                            doc_name = getattr(obj, self.infoKeysUser.get("Document").get('userData'))
-                        except AttributeError:
-                            doc_name = obj.Document.Name
-                except:
-                    doc_name = obj.Document.Name
+        #Not sure if this is going to work,It just seems that we have some endless complexity.
+        #at the end of the day we have parts and standard hardware
+        #Parts should have a drawing number associated with them
+        #Some Drawings can have multiple parts.
+        #The Goal (I think is to pull out how many times we have a Part called out
+        #If we have standard nuts and bolts we want howmany times those are called out.
 
-                # Recover the record, if any
-                if self.infoKeysUser.get("Part_Label").get('active'):
-                    try:
-                        obj_label = getattr(obj, self.infoKeysUser.get("Part_Label").get('userData'))
-                    except AttributeError:
-                        obj_label = obj.Label
-
-                # The name cannot be Model othewise it will sum all other 'Model' names togueter
-                if obj_label == "Model":
-                   obj_label = obj.Document.Name
-
-                if obj_label in self.PartsList:
-                    if self.PartsList[obj_label]['Document'] == doc_name:
-                        qtd = self.PartsList[obj_label]['Qty.'] + 1
-
-                        print("ASM4> {level}| {qtd}x | {obj_typeid} | {obj_name} | {obj_label}".format(level=self.indent(level, tag=" "), obj_label=obj_label, obj_name=obj.FullName, obj_typeid=obj.TypeId, qtd=qtd))
-
-                        self.Verbose += "> {level} | {type}: {label}, {fullname}\n".format(level=obj_label, type="ASM4_PART", label=obj_label, fullname=obj.FullName)
-                        self.Verbose += "- object already added (" + str(qtd) + ")\n\n"
-                        self.PartsList[obj_label]['Qty.'] = qtd
-
-                else:
-                    print("ASM4> {level}| 1x | {obj_typeid} | {obj_name} | {obj_label}".format(level=self.indent(level, tag=" "), obj_label=obj_label, obj_name=obj.FullName, obj_typeid=obj.TypeId))
-
-                    self.Verbose += "> {level} | {type}: {label}, {fullname}\n".format(level=obj_label, type="ASM4_PART", label=obj_label, fullname=obj.FullName)
-                    self.Verbose += "- adding object (1)\n"
-
-                    self.PartsList[obj_label] = dict()
-                    for prop in self.infoKeysUser:
-
-                        if self.infoKeysUser.get(prop).get('active'):
-                            try: # to get partInfo
-                                getattr(obj, self.infoKeysUser.get(prop).get('userData'))
-                                info = "(predefined)"
-                            except AttributeError:
-                                crea(self,obj)
-                                fill(obj)
-                                info = "(extracted)"
-
-                            if self.infoKeysUser.get(prop).get('visible'):
-                                data = getattr(obj, self.infoKeysUser.get(prop).get('userData'))
-                            else:
-                                data = "-"
-
-                            if data == "":
-                                data = "-"
-
-                            if prop == "Part_Label":
-                                data = obj_label
-
-                            if data != "-":
-                                self.Verbose += "- " + prop + ": " + data + " " + info + "\n"
-
-                            self.PartsList[obj_label][self.infoKeysUser.get(prop).get('userData')] = data
-
-                    self.PartsList[obj_label]['Qty.'] = 1
-                    self.Verbose += '\n'
-
-
-        #============================
-        # STANDALONE MODEL_PART
-        #============================
-
-        elif obj.TypeId == 'App::Part' and not Asm4.isAsm4Model(obj):
-            #in the use case I'm testing, I have a seperate Assembly4 file linked to another assembly.
-            #At this point I don't understand why it this part winds up showing up if this is false.
+        elif obj.TypeId == 'App::Part':
             if level > 0 and level <= max_level:
-                obj_label = ""
-                # Recover the record, if any
-                try:
-                    if self.infoKeysUser.get("Document").get('active'):
-                        try:
-                            doc_name = getattr(obj, self.infoKeysUser.get("Document").get('userData'))
-                        except AttributeError:
-                            doc_name = obj.Document.Name
-                except:
-                    doc_name = obj.Document.Name
-
-                # Recover the record, if any
-
-                try:
-                    if self.infoKeysUser.get("PartName").get('active'):
-                        try:
-                            obj_label = getattr(obj, self.infoKeysUser.get("PartName").get('userData'))
-                        except AttributeError:
-                            obj_label = obj.Label
-                except:
-                    doc_name = obj.Label
-
-                # The name cannot be model othewise it will sum all other 'Model' names together
-                if obj_label == "Model":
-                   obj_label = obj.Document.Name
-
-                if obj_label in self.PartsList:
-                    if self.PartsList[obj_label]['Document'] == doc_name:
-                        qtd = self.PartsList[obj_label]['Qty.'] + 1
-                        print("ASM4> {level}| {qtd}x | {obj_typeid} | {obj_name} | {obj_label}".format(level=self.indent(level, tag=" "), obj_label=obj_label, obj_name=obj.FullName, obj_typeid=obj.TypeId, qtd=qtd))
-                        self.Verbose += "> {level} | {type}: {label}, {fullname}\n".format(level=obj_label, type="PART", label=obj_label, fullname=obj.FullName)
-                        self.Verbose += "- object already added (" + str(qtd) + ")\n\n"
-                        self.PartsList[obj_label]['Qty.'] = qtd
-
-                else:
-                    print("ASM4> {level}| 1x | {obj_typeid} | {obj_name} | {obj_label}".format(level=self.indent(level, tag=" "), obj_label=obj_label, obj_name=obj.FullName, obj_typeid=obj.TypeId))
-                    self.Verbose += "> {level} | {type}: {label}, {fullname}\n".format(level=obj_label, type="PART", label=obj_label, fullname=obj.FullName)
-                    self.Verbose += "- adding object (1)\n"
-                    self.PartsList[obj_label] = dict()
-                    for prop in self.infoKeysUser:
-                        if self.infoKeysUser.get(prop).get('active'):
-                            data =""
-                            try: # to get partInfo
-                                print ("prop=" +prop)
-                                print ("infoKeysUser="+ self.infoKeysUser.get(prop).get('userData'))
-                                getattr(obj, self.infoKeysUser.get(prop).get('userData'))
-                                info = "(predefined)"
-                            except AttributeError:
-                                crea(self,obj)
-                                try:
-                                    info = fill(obj)
-                                    #info = "(extracted)"
-                                except Exception as e:
-                                    print ("Expection:"+ str( e))
-                                    info = "(Unknown)"
-
-                            if self.infoKeysUser.get(prop).get('visible'):
-                                data = getattr(obj, self.infoKeysUser.get(prop).get('userData'))
-                            else:
-                                data = "-"
-
-                            if data == "":
-                                data = "-"
-
-                            #I think this can be deleted.
-                            #if prop == "Part_Label":
-                            #    data = obj_label
-
-                            #if prop == "PartName":
-                            #    data = obj_label
-
-                            if data != "-":
-                                try:
-                                    self.Verbose += "- " + prop + ": " + data + " " + info + "\n"
-                                except TypeError  as e:
-                                     self.Verbose += "- Error: " + str(e) + "\n"
-                                     #todo Not sure if this is the best solution.
-                            try:
-                                print (data)
-                            except Exception as e:
-                                print ("Exception="+ str(e) )
-                            self.PartsList[obj_label][self.infoKeysUser.get(prop).get('userData')] = data
-                    self.PartsList[obj_label]['Qty.'] = 1
-                    self.Verbose += '\n'
-
-        #============================
-        # STANDALONE MODEL_PARTDESIGN
-        #============================
-
-        elif obj.TypeId == 'PartDesign::Body':
-
-            # if level > 0 and level <= max_level and Asm4.isAsm4Model(parent):
-            if level > 0 and level <= max_level :
-
-                ##### This try/except isn't working right - Document field can't be set, but is active by default.
-                ##### This results in a blank document name and the Quantity never increments on any part.
-                ## Recover the record, if any
-                #try:
-                #    if self.infoKeysUser.get("Document").get('active'):
-                #        try:
-                #            doc_name = getattr(obj, self.infoKeysUser.get("Document").get('userData'))
-                #        except AttributeError:
-                #            doc_name = obj.Document.Name
-                #except:
-                #    doc_name = obj.Document.Name
-                doc_name = obj.Document.Name
-
+                FullPartId = obj.Label
                 if obj.Label in self.PartsList:
                     if self.PartsList[obj.Label]['Document'] == doc_name:
                         qtd = self.PartsList[obj.Label]['Qty.'] + 1
@@ -410,7 +234,6 @@ class makeBOM:
                     self.PartsList[obj.Label]['Qty.'] = 1
                     self.Verbose += '\n'
 
-
         #============================
         # FASTENERS AND ARRAYS
         #============================
@@ -418,7 +241,9 @@ class makeBOM:
         elif obj.TypeId == 'Part::FeaturePython' and (obj.Content.find("FastenersCmd") or (obj.Content.find("PCBStandoff")) > -1):
             if level > 0 and level <= max_level:
                 doc_name = os.path.splitext(os.path.basename(obj.Document.FileName))[0]
+
                 obj_label = re.sub(r'[0-9]+$', '', obj.Label)
+                BomKey = obj_label
 
                 # if array
                 if obj.Content.find("Orthogonal array")>-1:
