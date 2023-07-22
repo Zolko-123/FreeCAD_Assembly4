@@ -11,7 +11,14 @@ import FreeCAD as App
 partInfo = [
     'BomKey',
     'Document',
-    'PartName']
+    'DocumentRevision'
+    'PartID'
+    'PartDescription',
+    'DrawnBy',
+    'DrawnDate',
+    'CheckedBy',
+    'CheckDate']
+
     # This is just add way too much complexity to figure out
     # If there is going there should be a special class of object based that represents raw material imho if we are talking about subtractive manufacturing
     # There should be class of primatives with material built in
@@ -22,7 +29,18 @@ partInfo = [
 infoToolTip = {
     'BomKey':    'Unique identifier how Bom items are grouped',
     'Document':     'Document or File name',
-    'PartName':     'Part Name'}
+    'DocumentRevision': 'Document Revision',
+    'PartID':     'Part ID',
+    'PartDescription': 'Part Description,
+    'DrawnBy': 'Drawn By',
+    'DrawnDate': 'Drawn Date',
+    'CheckedBy':,' Checked By',
+    'CheckDate':,'Check Date']
+
+
+
+
+    }
    # This appears will work for wood, but what if you are making gears from sawed slugs where you need a cut allowance/
    #  PartLength':   'Cut length of the raw material',
    # 'PartWidth':    'Width of the raw material',
