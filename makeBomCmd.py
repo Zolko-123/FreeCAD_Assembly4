@@ -256,9 +256,9 @@ class makeBOM:
             if level > 0 and level <= max_level:
                 doc_name = os.path.splitext(os.path.basename(obj.Document.FileName))[0]
 
-                obj_label = re.sub(r'[0-9]+$', '', obj.Label)
+                obj_label = f"{re.sub(r'[0-9]+$', '', obj.Label)}({obj.type})"
                 BomKey = obj_label
-
+                print (f"Bomkey: {BomKey}")
                 # if array
                 if obj.Content.find("Orthogonal array")>-1:
                   # count up the objects in the array
