@@ -247,21 +247,20 @@ class infoPartUI():
     def infoDefault(self):
         # infoKeys.infoDefault(self)
 
+        #Values are being populated through the back door
+        #if the diaglog control is open and you click on autofill
+        #the back end data is populated
+        #when you press ok.. What
+        Gui.Control.closeDialog()
+
+
         file = open(ConfUserFilejson, 'r')
         self.infoKeysUser = json.load(file).copy()
         file.close()
 
-
-
-
-
-
-
         #trying to understand this. Not positive that I'm correct here.
         #This routine attempts to autopopulate the fields that are defined in infoKeys.py and also appear in the json file
         #it appears that these fields are inserted into self or self.part by infoPartCmd.infoPartUI.makePartInfo
-
-
 
         try:
             self.TypeId
@@ -288,6 +287,26 @@ class infoPartUI():
             #Probably should be looking at a separate .py file that is customized to the users business rules.
             print (doc.FileName)
             print ("got to here")
+            try:
+
+                infoKeys.InsertCustomizationsForPartWithSingleBodyIntoUserField()
+            except Exception as e:
+                print (f"A standard exception has occurred: {str(e)}  while insert default customization")
+                # First things first.  We want to insert the file name into the drawing slot.
+                #self.SetPartInfoValue('DrawingName', os.path.basename(doc.FileName))
+                try:
+
+                except Exception as e:
+                    raise e
+
+
+
+                self.part.DrawingName =os.path.basename(doc.FileName)
+
+
+
+
+
 
 
         else:
@@ -350,7 +369,21 @@ class infoPartUI():
             # More than one PartDesign::Body found in the group
             return None
 
+    def SetPartInfoValue(self,fieldName, fieldvalue):
 
+
+        auto_info_field = self.infoKeysUser.get(fieldName).get('userData')
+        try:
+            #This sets the value behind the curtain
+            self.infoKeysUser[auto_info_field][1]= fieldvalue
+            #if the Edit part information window is open and you press ok what ever is in that textbox will overwrite
+
+
+
+        except Exception as e:
+            #print (f" This expection was thrown: {str(e)})
+            # Re throw the exception
+            raise e
 
 
 
@@ -474,7 +507,8 @@ class infoPartUI():
         self.reinit.clicked.connect(self.reInit)
         self.autoFill.clicked.connect(self.infoDefault)
 
-
+'''
+#JT This seems to be creating some issue Lets disable for the moment.'
         test = False
         try:
             if self.infoTable[0][1] == '':
@@ -484,7 +518,7 @@ class infoPartUI():
         if test:
             self.infoDefault()
             self.addNew()
-
+'''
 
 class infoPartConfUI():
 

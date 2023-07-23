@@ -225,10 +225,12 @@ class makeBOM:
                         try:
                             if prop == 'BomKey':
                                 data = BomKey
-                            elif prop =='Document':
-                                data = Document
-                            elif prop == 'PartName':
+                            elif prop =='DrawingName':
+                                data = DrawingName
+                            elif prop == 'PartID':
                                 data = obj.Label
+                            elif prop == 'PartDescription':
+                                data = "tbd"
                             elif prop == 'PartLength':
                                 data = obj.PartLength
                             elif prop == 'PartWidth':

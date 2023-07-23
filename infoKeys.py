@@ -36,6 +36,12 @@ infoToolTipUserAdded ={
    # 'PartVolume':   'Object dimensions (x, y, z)'}
 
 
+#--------------------------------------------------------------------------
+#-- F
+
+def InsertCustomizationsForPartWithSingleBodyIntoUserField( ):
+    raise NotImplementedError("Function not implemented yet")
+
 
 
 
