@@ -18,6 +18,7 @@ import infoKeys
 
 #This is partcoded part information.
 partInfo = [
+    'BomKey',
     'DrawingName',
     'DrawingRevision',
     'PartID',
@@ -26,6 +27,7 @@ partInfo = [
 
 
 infoToolTip = {
+    'BomKey': 'BomKey',
     'DrawingName':     'Document or File name',
     'DrawingRevision': 'Document Revision',
     'PartID':     'Part ID',
@@ -217,7 +219,8 @@ class infoPartUI():
         for suppr in listpi: # delete all PartInfo properties
             self.part.removeProperty(suppr)
 
-        # Recover initial json file since fateners keys are being lost
+        # Recover initial json file since fasteners keys are being lost
+        # JT Not sure about above being an accurate statement.
         partInfoDef = dict()
         for prop in partInfo:
             partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': True})
