@@ -222,27 +222,52 @@ class infoPartUI():
             part = self.part
         doc = part.Document
         print (len(part.Group))
-        for i in range(len(part.Group)):
-            print (part.Group[i].TypeId)
-            if part.Group[i].TypeId == 'PartDesign::Body':
-                body = part.Group[i]
-                for i in range(len(body.Group)):
-                    if body.Group[i].TypeId == 'PartDesign::Pad':
-                        pad = body.Group[i]
-                        try:
-                            sketch = pad.Profile[0]
-                        except NameError :
-                            # print('There is no Sketch on a Pad of the Part', part.FullName)
-                            pass
-            '''
+
+
+        #We are looking at the standard instance where we have a ASM4 which has a single
+        #PartDesign:: Body given that use case
+        try:
+            hasSingleBody = self.check_single_body(self.part)
+        except Exception as e:
+            print (str(e))
+        if hasSingleBody:
+            # 'body' contains the single PartDesign::Body object
+            print(f"Part contains a single PartDesign::Body: {hasSingleBody.Name}")
+
+            #in JT use case The Fcstd file name contains the Part_id (a portion of it if it is a mult-level part
+            #Since this is not how everyone will want to do this.
+            #Also file name contains a revision
+            #Probably should be looking at a separate .py file that is customized to the users business rules.
+            print (doc.FileName)
+            print ("got to here")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        else:
+            # There is no PartDesign::Body or more than one found in the 'part'
+            print("Part does not contain a single PartDesign::Body.")
+
+        ''''
+            # This needs to be moved up into the for look
             try:
                 self.LabelDoc(self, part, doc)
             except NameError:
                 #print('LabelDoc: there is no Document on the Part ', part.FullName)
                 pass
-            #except Exception as e:
-            #    print ("Exception"+e)
-            '''
+            except Exception as e:
+                print ("Exception"+e)
+
         try:
             self.GetPartName(part)
             #info_cmd = infoPartCmd()  # Create an instance of infoPartCmd
@@ -251,7 +276,7 @@ class infoPartUI():
             # print('LabelPart: Part does not exist')
             pass
 
-            '''
+
             try:
                 self.PadLength(self, part, pad)
             except NameError:
@@ -267,7 +292,31 @@ class infoPartUI():
             except NameError:
                 # print('ShapeVolume: there is no Shape in the Part ', part.FullName)
                 pass
-            '''
+        '''
+
+
+    def check_single_body(self,part):
+        num_bodies = 0
+        objBody = None
+
+        for obj in part.Group:
+            if obj.TypeId == 'PartDesign::Body':
+                num_bodies += 1
+                objBody = obj
+
+        if num_bodies == 0:
+            # No PartDesign::Body found in the group
+            return None
+        elif num_bodies == 1:
+            # Only one PartDesign::Body found in the group
+            return objBody
+        else:
+            # More than one PartDesign::Body found in the group
+            return None
+
+
+
+
 
     def GetPartName(self, part):
         auto_info_field = infoKeysUser.get('PartName').get('userData')
@@ -283,7 +332,7 @@ class infoPartUI():
             except AttributeError:
                 self.infos[i].setText("-")
 
-
+    '''
     def PadLength(self, part, pad):
         auto_info_field = infoKeysUser.get('Pad_Length').get('userData')
         try:
@@ -334,7 +383,7 @@ class infoPartUI():
                         self.infos[i].setText(auto_info_fill)
             except AttributeError:
                 self.infos[i].setText("-")
-
+    '''
 
 
     def finish(self):
@@ -389,7 +438,7 @@ class infoPartUI():
         self.reinit.clicked.connect(self.reInit)
         self.autoFill.clicked.connect(self.infoDefault)
 
-        '''
+
         test = False
         try:
             if self.infoTable[0][1] == '':
@@ -399,7 +448,7 @@ class infoPartUI():
         if test:
             self.infoDefault()
             self.addNew()
-        '''
+
 
 class infoPartConfUI():
 

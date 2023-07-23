@@ -8,11 +8,11 @@ import os, json
 import FreeCAD as App
 # import infoPartCmd
 
+#Not sure whats going on if I use  Document it does add to the list Changed it to Drawing
 partInfo = [
-    'BomKey',
-    'Document',
-    'DocumentRevision'
-    'PartID'
+    'DrawingName',
+    'DrawingRevision',
+    'PartID',
     'PartDescription',
     'DrawnBy',
     'DrawnDate',
@@ -27,20 +27,15 @@ partInfo = [
     #'PartVolume']
 
 infoToolTip = {
-    'BomKey':    'Unique identifier how Bom items are grouped',
-    'Document':     'Document or File name',
-    'DocumentRevision': 'Document Revision',
+    'DrawingName':     'Document or File name',
+    'DrawingRevision': 'Document Revision',
     'PartID':     'Part ID',
-    'PartDescription': 'Part Description,
+    'PartDescription': 'Part Description',
     'DrawnBy': 'Drawn By',
     'DrawnDate': 'Drawn Date',
-    'CheckedBy':,' Checked By',
-    'CheckDate':,'Check Date']
+    'CheckedBy': ' Checked By',
+    'CheckDate': 'Check Date'}
 
-
-
-
-    }
    # This appears will work for wood, but what if you are making gears from sawed slugs where you need a cut allowance/
    #  PartLength':   'Cut length of the raw material',
    # 'PartWidth':    'Width of the raw material',
