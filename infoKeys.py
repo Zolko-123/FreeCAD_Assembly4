@@ -3,57 +3,42 @@
 #
 # LGPL
 
+
+# The intent to infoKeys.py is to allow for allow for user customization but also a basic core functionality so #that minimum part list can be extracted in part theory partInfoUser and InfoToolTup user could be blank and it #should till work.
+
+
+
 import os, json
 
 import FreeCAD as App
 # import infoPartCmd
 
-#Not sure whats going on if I use  Document it does add to the list Changed it to Drawing
-partInfo = [
-    'DrawingName',
-    'DrawingRevision',
-    'PartID',
-    'PartDescription',
+#UserAdded fields and routines should be defined  this is file.
+partInfoUserAdded = [
     'DrawnBy',
     'DrawnDate',
     'CheckedBy',
     'CheckDate']
 
-    # This is just add way too much complexity to figure out
-    # If there is going there should be a special class of object based that represents raw material imho if we are talking about subtractive manufacturing
-    # There should be class of primatives with material built in
-    #'PartLength',
-    #'PartWidth',
-    #'PartVolume']
 
-infoToolTip = {
-    'DrawingName':     'Document or File name',
-    'DrawingRevision': 'Document Revision',
-    'PartID':     'Part ID',
-    'PartDescription': 'Part Description',
+infoToolTipUserAdded ={
     'DrawnBy': 'Drawn By',
     'DrawnDate': 'Drawn Date',
     'CheckedBy': ' Checked By',
     'CheckDate': 'Check Date'}
+
+
+
 
    # This appears will work for wood, but what if you are making gears from sawed slugs where you need a cut allowance/
    #  PartLength':   'Cut length of the raw material',
    # 'PartWidth':    'Width of the raw material',
    # 'PartVolume':   'Object dimensions (x, y, z)'}
 
-partInfo_Invisible = [
-    'FastenerDiameter',
-    'FastenerLength',
-    'FastenerType']
 
-infoToolTip_Invisible = {
-    'FastenerDiameter': 'Fastener diameter',
-    'FastenerLength':   'Fastener length',
-    'FastenerType':     'Fastener type'}
 
-ConfUserDir = os.path.join(App.getUserAppDataDir(),'Templates')
-ConfUserFilename = "Asm4_infoPartConf.json"
-ConfUserFilejson = os.path.join(ConfUserDir, ConfUserFilename)
+
+
 
 
 '''

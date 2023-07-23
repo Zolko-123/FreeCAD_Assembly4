@@ -16,20 +16,57 @@ from FreeCAD import Console as FCC
 import Asm4_libs as Asm4
 import infoKeys
 
+#This is partcoded part information.
+partInfo = [
+    'DrawingName',
+    'DrawingRevision',
+    'PartID',
+    'PartDescription']
+
+
+
+infoToolTip = {
+    'DrawingName':     'Document or File name',
+    'DrawingRevision': 'Document Revision',
+    'PartID':     'Part ID',
+    'PartDescription': 'Part Description'}
+
+# Remaining fields that can be customized
+try:
+    import infoKeys
+    partInfo += infoKeys.partInfoUserAdded
+    infoToolTip.update(infoKeys.infoToolTipUserAdded)
+except ImportError:
+    pass
+
+
+
+
+partInfo_Invisible = [
+    'FastenerDiameter',
+    'FastenerLength',
+    'FastenerType']
+
+infoToolTip_Invisible = {
+    'FastenerDiameter': 'Fastener diameter',
+    'FastenerLength':   'Fastener length',
+    'FastenerType':     'Fastener type'}
+
 ConfUserDir = os.path.join(App.getUserAppDataDir(),'Templates')
 ConfUserFilename = "Asm4_infoPartConf.json"
 ConfUserFilejson = os.path.join(ConfUserDir, ConfUserFilename)
 
-'''
+
+
 # Check if the configuration file exists
 try:
     file = open(ConfUserFilejson, 'r')
     file.close()
 except:
     partInfoDef = dict()
-    for prop in infoKeys.partInfo:
+    for prop in partInfo:
         partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': True})
-    for prop in infoKeys.partInfo_Invisible:
+    for prop in partInfo_Invisible:
         partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': False})
     try:
         os.mkdir(ConfUserDir)
@@ -38,7 +75,7 @@ except:
     file = open(ConfUserFilejson, 'x')
     json.dump(partInfoDef, file)
     file.close()
-'''
+
 
 """
     +-----------------------------------------------+
@@ -101,9 +138,9 @@ class infoPartUI():
             file.close()
         except:
             self.infoKeysUser = dict()
-            for prop in infoKeys.partInfo:
+            for prop in partInfo:
                 self.infoKeysUser.setdefault(prop, {'userData': prop, 'active': True, 'visible': True})
-            for prop in infoKeys.partInfo_Invisible:
+            for prop in partInfo_Invisible:
                 self.infoKeysUser.setdefault(prop, {'userData': prop, 'active': True, 'visible': False})
         '''
             try:
@@ -182,9 +219,9 @@ class infoPartUI():
 
         # Recover initial json file since fateners keys are being lost
         partInfoDef = dict()
-        for prop in infoKeys.partInfo:
+        for prop in partInfo:
             partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': True})
-        for prop in infoKeys.partInfo_Invisible:
+        for prop in partInfo_Invisible:
             partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': False})
         try:
             os.mkdir(ConfUserDir)
@@ -206,9 +243,17 @@ class infoPartUI():
 
     def infoDefault(self):
         # infoKeys.infoDefault(self)
+
         file = open(ConfUserFilejson, 'r')
         self.infoKeysUser = json.load(file).copy()
         file.close()
+
+
+
+
+
+
+
         #trying to understand this. Not positive that I'm correct here.
         #This routine attempts to autopopulate the fields that are defined in infoKeys.py and also appear in the json file
         #it appears that these fields are inserted into self or self.part by infoPartCmd.infoPartUI.makePartInfo
@@ -240,18 +285,6 @@ class infoPartUI():
             #Probably should be looking at a separate .py file that is customized to the users business rules.
             print (doc.FileName)
             print ("got to here")
-
-
-
-
-
-
-
-
-
-
-
-
 
 
         else:
@@ -459,8 +492,8 @@ class infoPartConfUI():
         self.form.setWindowIcon(QtGui.QIcon(iconFile))
         self.form.setWindowTitle("Edit Part Information")
 
-        self.infoKeysDefault = infoKeys.partInfo.copy()
-        self.infoToolTip = infoKeys.infoToolTip.copy()
+        self.infoKeysDefault = partInfo.copy()
+        self.infoToolTip = infoToolTip.copy()
         file = open(ConfUserFilejson, 'r')
         self.infoKeysUser = json.load(file).copy()
         file.close()
@@ -496,9 +529,9 @@ class infoPartConfUI():
 
         # Restore file and appen new config
         partInfoDef = dict()
-        for prop in infoKeys.partInfo:
+        for prop in infoPartCmd.partInfo:
             partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': True})
-        for prop in infoKeys.partInfo_Invisible:
+        for prop in infoPartCmd.partInfo_Invisible:
             partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': False})
 
         i = 0
