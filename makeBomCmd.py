@@ -172,7 +172,7 @@ class makeBOM:
                     self.listParts(obj.LinkedObject, level + 1, parent=obj)
 
         #==================================
-        # TRY TREATING ALL PARTS THE SAME =
+        # TRY TREATING ALL PARTS (AND ASSEMBLY) THE SAME =
         #==================================
         #Not sure if this is going to work,It just seems that we have some endless complexity.
         #at the end of the day we have parts and standard hardware
@@ -222,6 +222,9 @@ class makeBOM:
                         self.Verbose +=  "- " + prop + ': '
                         # JT putting the exception message in data should be removed once we figure out what's going on
                         data = ""
+
+                        # With the  exception of the BomKey the info in the try needs to be refactored
+
                         try:
                             if prop == 'BomKey':
                                 data = BomKey

@@ -249,8 +249,8 @@ class infoPartUI():
 
         #Values are being populated through the back door
         #if the diaglog control is open and you click on autofill
-        #the back end data is populated
-        #when you press ok.. What
+        #the dialog needs to be closed otherwise
+        #backdoor values will be overwritten when you press ok..
         Gui.Control.closeDialog()
 
 
@@ -269,24 +269,29 @@ class infoPartUI():
             part = self.part
         doc = part.Document
         print (len(part.Group))
+        part.Type
+        if part.Type =="Assembly" and part.TypeId == 'App::Part':
 
+            print ("We have an assembly")
+            try:
+                self.AssignValuesForAutofile(part, doc,None)
+            except Exception as e:
+                raise e
 
-        #We are looking at the standard instance where we have a ASM4 which has a single
-        #PartDesign:: Body given that use case
-        try:
-            hasSingleBody = self.check_single_body(self.part)
-        except Exception as e:
-            print (str(e))
-        if hasSingleBody:
+        elif part.Type =='' and part.TypeId == 'App::Part':
+            #We are looking at the standard instance where we have a ASM4 which has a single
+            #PartDesign:: Body given that use case
+            try:
+                ObjSingleBody = self.check_single_body(self.part)
+            except Exception as e:
+                print (str(e))
+                raise NotImplementedError(f"Logic only implement for Part with single body this exception was thrown: {str(e)}")
             # 'body' contains the single PartDesign::Body object
-            print(f"Part contains a single PartDesign::Body: {hasSingleBody.Name}")
-
+            print(f"Part contains a single PartDesign::Body: {ObjSingleBody.Name}")
             #in JT use case The Fcstd file name contains the Part_id (a portion of it if it is a mult-level part
             #Since this is not how everyone will want to do this.
             #Also file name contains a revision
             #Probably should be looking at a separate .py file that is customized to the users business rules.
-            print (doc.FileName)
-            print ("got to here")
             try:
 
                 infoKeys.InsertCustomizationsForPartWithSingleBodyIntoUserField()
@@ -295,25 +300,21 @@ class infoPartUI():
                 # First things first.  We want to insert the file name into the drawing slot.
                 #self.SetPartInfoValue('DrawingName', os.path.basename(doc.FileName))
                 try:
-
+                    self.AssignValuesForAutofile(part, doc,ObjSingleBody)
                 except Exception as e:
                     raise e
 
 
-
-                self.part.DrawingName =os.path.basename(doc.FileName)
-
-
-
-
-
-
+            except Exception as e:
+                print (str(e))
+                raise e
 
         else:
             # There is no PartDesign::Body or more than one found in the 'part'
+            raise NotImplementedError("Need to develop logic for something that is neither a part or an assembly")
             print("Part does not contain a single PartDesign::Body.")
 
-        ''''
+        '''
             # This needs to be moved up into the for look
             try:
                 self.LabelDoc(self, part, doc)
@@ -347,7 +348,26 @@ class infoPartUI():
             except NameError:
                 # print('ShapeVolume: there is no Shape in the Part ', part.FullName)
                 pass
-        '''
+            '''
+
+    def AssignValuesForAutofile(self,part, doc, singleBodyOfPart):
+        try:
+
+            infoKeys.InsertCustomizationsForPartWithSingleBodyIntoUserField()
+        except Exception as e:
+            print (f"A standard exception has occurred: {str(e)}  while insert default customization")
+            # First things first.  We want to insert the file name into the drawing slot.
+            #self.SetPartInfoValue('DrawingName', os.path.basename(doc.FileName))
+            try:
+                self.part.DrawingName =os.path.basename(doc.FileName)
+
+                self.part.PartID = doc.Label
+                if singleBodyOfPart != None:
+                    self.part.PartDescription = singleBodyOfPart.Label
+            except Exception as e:
+                raise e
+
+
 
 
     def check_single_body(self,part):
