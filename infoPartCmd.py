@@ -117,9 +117,13 @@ def infoDefault(part):
 
         print ("We have an assembly")
         try:
-            AssignValuesForAutofile(part, doc,None)
+
+            infoKeys.AssignCustomerValuesIntoUserFieldsForPartWithSingleBody(part, doc, None)
         except Exception as e:
-            raise e
+            try:
+                AssignValuesForAutofile(part, doc,None)
+            except Exception as ee:
+                raise ee
 
     elif part.Type =='' and part.TypeId == 'App::Part':
         #We are looking at the standard instance where we have a ASM4 which has a single
@@ -137,7 +141,7 @@ def infoDefault(part):
         #Probably should be looking at a separate .py file that is customized to the users business rules.
         try:
 
-            infoKeys.InsertCustomizationsForPartWithSingleBodyIntoUserField()
+            infoKeys.AssignCustomerValuesIntoUserFieldsForPartWithSingleBody(part, doc, ObjSingleBody)
         except Exception as e:
             print (f"A standard exception has occurred: {str(e)}  while insert default customization")
             # First things first.  We want to insert the file name into the drawing slot.
@@ -145,11 +149,6 @@ def infoDefault(part):
                 AssignValuesForAutofile(part, doc,ObjSingleBody)
             except Exception as e:
                 raise e
-
-
-        except Exception as e:
-            print (str(e))
-            raise e
 
     else:
         # There is no PartDesign::Body or more than one found in the 'part'
@@ -215,7 +214,7 @@ def AssignValuesForAutofile(part, doc, singleBodyOfPart):
     #todo if part is not
     try:
 
-        infoKeys.InsertCustomizationsForPartWithSingleBodyIntoUserField()
+        infoKeys.AssignCustomerValuesIntoUserFieldsForPartWithSingleBody(part, doc, singleBodyOfPart)
     except Exception as e:
         print (f"Customization failed or is not setup : {str(e)}  Attempting to insert default values")
         try:

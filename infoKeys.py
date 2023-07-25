@@ -3,7 +3,6 @@
 #
 # LGPL
 
-
 # The intent to infoKeys.py is to allow for allow for user customization but also a basic core functionality so #that minimum part list can be extracted in part theory partInfoUser and InfoToolTup user could be blank and it #should till work.
 
 
@@ -14,37 +13,85 @@ import FreeCAD as App
 # import infoPartCmd
 
 #UserAdded fields and routines should be defined  this is file.
-partInfoUserAdded = [
+partInfoUserAdded = []
+''' Implement this later
     'DrawnBy',
     'DrawnDate',
     'CheckedBy',
     'CheckDate']
+'''
 
-
-infoToolTipUserAdded ={
+infoToolTipUserAdded ={}
+'''
     'DrawnBy': 'Drawn By',
     'DrawnDate': 'Drawn Date',
     'CheckedBy': ' Checked By',
     'CheckDate': 'Check Date'}
+'''
 
 
 
+#infoPartCmd has base values that get used if this function fails
+def AssignCustomerValuesIntoUserFieldsForPartWithSingleBody(part, doc, singleBodyOfPart):
+    #Different people have different use cases
+    #basic functionality should work if an exception is thrown.
+    #JT I made some very specfic customizations for my work flow which work for me.
+    #
 
-   # This appears will work for wood, but what if you are making gears from sawed slugs where you need a cut allowance/
-   #  PartLength':   'Cut length of the raw material',
-   # 'PartWidth':    'Width of the raw material',
-   # 'PartVolume':   'Object dimensions (x, y, z)'}
+    if '/home/jonasthomas' in doc.FileName:
+        #
+        jtCustomizations(part, doc, singleBodyOfPart)
 
-
-#--------------------------------------------------------------------------
-#-- F
-
-def InsertCustomizationsForPartWithSingleBodyIntoUserField( ):
-    raise NotImplementedError("Function not implemented yet")
-
-
+    else:
 
 
+        raise NotImplementedError("Function not implemented yet")
+
+
+
+def jtCustomizations(part, doc, singleBodyOfPart):
+    # People are going to want to have there own customization and may not want to share
+    # I don't have a problem sharing my system, but it may not be for everyone.
+    # If this code makes it into zolko's repo and you want to modify this, please reach out to me,
+    # otherwise feel free to made your own function either in this file, if you want to share or..
+    # point to another file that's not in th e ASM4 repo.
+
+    # Basic explanation of my file numbering system
+    # Q-003-S_0-01.FCStd
+    # Everything up to the first _ is the base partIDa
+    # If a .FCstd contains more than one part It is appended with a :1
+    # After the _ is the revision
+    # Within the base part ID there is a project id in this instance Q
+    # and incremental counter (TODO need to automated that eventually)
+    # Also a sub classication.  Currently done manually
+    # C is  file with multiple parts
+    # S is a sub assembly
+    # A is the major assembly in the sub folder
+    file_name = os.path.basename(doc.FileName)
+    elements = file_name.split('_')
+    print (file_name)
+    if len(elements) == 1:
+        base_part_id = elements[0].split('.')[0]
+        revision = None
+    else:
+        base_part_id, revision_with_extension = elements
+        revision = revision_with_extension.split('.')[0]
+
+    part.DrawingName = base_part_id
+    part.DrawingRevision = revision
+
+    print("Base Part ID:", base_part_id)
+    print("Revision:", revision)
+
+    part.PartID = base_part_id
+    # todo need to deal with the situation where we have more than one part in a table.
+    if singleBodyOfPart is not None:
+        part.PartDescription = singleBodyOfPart.Label
+    else:
+        if part.Type == 'Assembly':
+            part.PartDescription = part.Label
+        else:
+            part.PartDescription = 'not implemented'
 
 
 '''
