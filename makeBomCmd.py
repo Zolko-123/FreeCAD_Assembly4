@@ -109,11 +109,21 @@ class makeBOM:
         self.BOM.clear()
         self.Verbose = str()
         self.BomKeyList = {}
+        self.BomKeyForAutoFillList = {}
 
         if self.follow_subassemblies == True:
             print("ASM4> BOM following sub-assemblies")
         else:
             print("ASM4> BOM local parts only")
+
+        # This recursive routine goes through the Bom to find parts making up the
+        # Assembly it then runs the Autofill to make sure that values than can be automatically applied are
+        # There is mimimum functionality hardcoded into inPartCmd.py for a generic use case
+        # if you a modding and your use case is not "universal" please consider placing these mods in InfoKeys.py
+        # so we're not tripping over each other.
+        # todo, there should be some type of toggle, to optionally fire this.
+        self.RecursivelyAutoFillPartInfoInBom(self.model)
+
 
         self.listParts(self.model)
         self.inSpreadsheet()
@@ -122,6 +132,75 @@ class makeBOM:
     def indent(self, level, tag="|"):
         spaces = (level + 1) * "  "
         return "[{level}]{spaces}{tag} ".format(level=str(level), tag=tag, spaces=spaces)
+
+
+
+    #This routine uses basically looks for parts and assemblies called out for the first time and applies
+    # infoPartCmd.infoDefaul to auto populate the Part_info fields where such logic exists
+    #
+    def RecursivelyAutoFillPartInfoInBom(self, obj, level=0, parent=None):
+        max_level = 100
+        file = open(ConfUserFilejson, 'r')
+        self.infoKeysUser = json.load(file).copy()
+        file.close()
+
+        if obj == None:
+            return
+
+        if self.BomKeyForAutoFillList == None:
+            self.BomKeyForAutoFillList = {}
+        if obj.TypeId == 'App::Link':
+            if obj.ElementCount > 0:
+                for i in range(obj.ElementCount):
+                    self.RecursivelyAutoFillPartInfoInBom(obj.LinkedObject, level, parent=obj)
+                else:
+                    self.RecursivelyAutoFillPartInfoInBom(obj.LinkedObject, level + 1, parent=obj)
+        elif obj.TypeId == 'App::Part':
+            BomKeyAF = obj.FullName
+            print (f"Level = {level}  Parent = {str(parent)}")
+            if level <= max_level:
+                if  BomKeyAF in self.BomKeyForAutoFillList: # we don't need to add info because we did it already
+                # would like to keep score though
+                    if self.BomKeyForAutoFillList[BomKeyAF]['BomKeyAF'] == BomKeyAF:
+                        qtd = self.BomKeyForAutoFillList[BomKeyAF]['Qty.'] + 1
+                        self.BomKeyForAutoFillList[BomKey]['Qty.'] = qtd
+                else:
+                    #This is the first time a Part or assembly has been called.
+                    #We need to apply the magic
+                    infoPartCmd.infoPartUI.infoDefault(obj, doc)
+                    self.BomKeyForAutoFillList[BomKey]['Qty.'] =1
+
+
+
+
+        #============================
+        # FASTENERS AND ARRAYS
+        #============================
+        elif obj.TypeId == 'Part::FeaturePython' and (obj.Content.find("FastenersCmd") or (obj.Content.find("PCBStandoff")) > -1):
+            pass #This should be fine
+
+        else:
+            print ("Nothing Applied")
+        #===================================
+        # Continue walking inside the groups
+        #===================================
+
+        # Navigate on objects inide a folders
+        if obj.TypeId == 'App::DocumentObjectGroup':
+            for objname in obj.getSubObjects():
+                subobj = obj.Document.getObject(objname[0:-1])
+                self.RecursivelyAutoFillPartInfoInBom(subobj, level, parent=obj)
+
+        # Navigate on objects inide a ASM4 Part (Links and Folders)
+        if obj.TypeId == 'App::Part':
+            for objname in obj.getSubObjects():
+                subobj = obj.Document.getObject(objname[0:-1])
+                # if subobj.TypeId == 'App::Link' or subobj.TypeId == 'App::DocumentObjectGroup':
+                self.RecursivelyAutoFillPartInfoInBom(subobj, level+1, parent=obj)
+
+        return
+
+
 
     def listParts(self, obj, level=0, parent=None):
 
@@ -218,6 +297,7 @@ class makeBOM:
                     self.Verbose += "> {level} | {type}: {label}, {fullname}\n".format(level=obj.Label, type="PARTDESIGN", label=obj.Label, fullname=obj.FullName)
                     self.Verbose += "- adding object (1)\n"
                     self.BomKeyList[BomKey] = dict()
+
                     for prop in self.infoKeysUser:
                         self.Verbose +=  "- " + prop + ': '
                         # JT putting the exception message in data should be removed once we figure out what's going on
@@ -228,20 +308,9 @@ class makeBOM:
                         try:
                             if prop == 'BomKey':
                                 data = BomKey
-                            elif prop =='DrawingName':
-                                data = DrawingName
-                            elif prop == 'PartID':
-                                data = obj.Label
-                            elif prop == 'PartDescription':
-                                data = "tbd"
-                            elif prop == 'PartLength':
-                                data = obj.PartLength
-                            elif prop == 'PartWidth':
-                                data = obj.PartWidth
-                            elif prop == 'PartHeight':
-                                data = obj.PartHeight
                             else:
-                                data = "-"
+                                data = getattr(obj,prop,"-")
+
                         except Exception as e:
                             data = "todo Remove after debug" + str(e)
 
