@@ -92,6 +92,149 @@ def decodeXml(text):
     text = text.replace('_x_m_l_', '\\').encode().decode('unicode_escape')
     return text
 
+def infoDefault(part):
+    # infoKeys.infoDefault(self)
+
+    #Values are being populated through the back door
+    #if the diaglog control is open and you click on autofill
+    #the dialog needs to be closed otherwise
+    #backdoor values will be overwritten when you press ok..
+
+
+
+    file = open(ConfUserFilejson, 'r')
+    infoKeysUser = json.load(file).copy()
+    file.close()
+
+    #trying to understand this. Not positive that I'm correct here.
+    #This routine attempts to autopopulate the fields that are defined in infoKeys.py and also appear in the json file
+    #it appears that these fields are inserted into self or self.part by infoPartCmd.infoPartUI.makePartInfo
+
+    doc = part.Document
+    print (len(part.Group))
+    part.Type
+    if part.Type =="Assembly" and part.TypeId == 'App::Part':
+
+        print ("We have an assembly")
+        try:
+            AssignValuesForAutofile(part, doc,None)
+        except Exception as e:
+            raise e
+
+    elif part.Type =='' and part.TypeId == 'App::Part':
+        #We are looking at the standard instance where we have a ASM4 which has a single
+        #PartDesign:: Body given that use case
+        try:
+            ObjSingleBody = check_single_body(part)
+        except Exception as e:
+            print (str(e))
+            raise NotImplementedError(f"Logic only implement for Part with single body this exception was thrown: {str(e)}")
+        # 'body' contains the single PartDesign::Body object
+        print(f"Part contains a single PartDesign::Body: {ObjSingleBody.Name}")
+        #in JT use case The Fcstd file name contains the Part_id (a portion of it if it is a mult-level part
+        #Since this is not how everyone will want to do this.
+        #Also file name contains a revision
+        #Probably should be looking at a separate .py file that is customized to the users business rules.
+        try:
+
+            infoKeys.InsertCustomizationsForPartWithSingleBodyIntoUserField()
+        except Exception as e:
+            print (f"A standard exception has occurred: {str(e)}  while insert default customization")
+            # First things first.  We want to insert the file name into the drawing slot.
+            try:
+                AssignValuesForAutofile(part, doc,ObjSingleBody)
+            except Exception as e:
+                raise e
+
+
+        except Exception as e:
+            print (str(e))
+            raise e
+
+    else:
+        # There is no PartDesign::Body or more than one found in the 'part'
+        raise NotImplementedError("Need to develop logic for something that is neither a part or an assembly")
+        print("Part does not contain a single PartDesign::Body.")
+
+    '''
+        # This needs to be moved up into the for look
+        try:
+            self.LabelDoc(self, part, doc)
+        except NameError:
+            #print('LabelDoc: there is no Document on the Part ', part.FullName)
+            pass
+        except Exception as e:
+            print ("Exception"+e)
+
+    try:
+        self.GetPartName(part)
+        #info_cmd = infoPartCmd()  # Create an instance of infoPartCmd
+        #info_cmd.GetPartName(part)  # Call GetPartName from infoPartCmd instance
+    except NameError:
+        # print('LabelPart: Part does not exist')
+        pass
+
+
+        try:
+            self.PadLength(self, part, pad)
+        except NameError:
+            # print('PadLenght: there is no Pad in the Part ', part.FullName)
+            pass
+        try:
+            self.ShapeLength(self, part, sketch)
+        except NameError:
+            # print('ShapeLength: there is no Sketch in the Part ', part.FullName)
+            pass
+        try:
+            self.ShapeVolume(self, part, body)
+        except NameError:
+            # print('ShapeVolume: there is no Shape in the Part ', part.FullName)
+            pass
+        '''
+
+def check_single_body(part):
+    num_bodies = 0
+    objBody = None
+
+    for obj in part.Group:
+        if obj.TypeId == 'PartDesign::Body':
+            num_bodies += 1
+            objBody = obj
+
+    if num_bodies == 0:
+        # No PartDesign::Body found in the group
+        return None
+    elif num_bodies == 1:
+        # Only one PartDesign::Body found in the group
+        return objBody
+    else:
+        # More than one PartDesign::Body found in the group
+        return None
+
+def AssignValuesForAutofile(part, doc, singleBodyOfPart):
+    #todo if part is not
+    try:
+
+        infoKeys.InsertCustomizationsForPartWithSingleBodyIntoUserField()
+    except Exception as e:
+        print (f"Customization failed or is not setup : {str(e)}  Attempting to insert default values")
+        try:
+            try:
+                part.DrawingName
+            except Exception as e:
+                # if we're here it means that there was no cust
+                #JT not sure at the moment if we should fix it here or just add logic upstream to prevent this from happening
+                raise Exception(f"{part.FullName} in {doc.FileName} is missing Part information fields. It needs to be reset in Edit Part Information- Configure fields .")
+
+
+            part.DrawingName =os.path.basename(doc.FileName)
+            part.PartID = doc.Label
+            if singleBodyOfPart != None:
+                part.PartDescription = singleBodyOfPart.Label
+        except Exception as e:
+            raise e
+
+
 
 """
     +-----------------------------------------------+
@@ -253,141 +396,13 @@ class infoPartUI():
         #backdoor values will be overwritten when you press ok..
         Gui.Control.closeDialog()
 
-
-        file = open(ConfUserFilejson, 'r')
-        self.infoKeysUser = json.load(file).copy()
-        file.close()
-
-        #trying to understand this. Not positive that I'm correct here.
-        #This routine attempts to autopopulate the fields that are defined in infoKeys.py and also appear in the json file
-        #it appears that these fields are inserted into self or self.part by infoPartCmd.infoPartUI.makePartInfo
-
         try:
             self.TypeId
             part = self
         except AttributeError:
             part = self.part
-        doc = part.Document
-        print (len(part.Group))
-        part.Type
-        if part.Type =="Assembly" and part.TypeId == 'App::Part':
+        infoDefault(part)
 
-            print ("We have an assembly")
-            try:
-                self.AssignValuesForAutofile(part, doc,None)
-            except Exception as e:
-                raise e
-
-        elif part.Type =='' and part.TypeId == 'App::Part':
-            #We are looking at the standard instance where we have a ASM4 which has a single
-            #PartDesign:: Body given that use case
-            try:
-                ObjSingleBody = self.check_single_body(self.part)
-            except Exception as e:
-                print (str(e))
-                raise NotImplementedError(f"Logic only implement for Part with single body this exception was thrown: {str(e)}")
-            # 'body' contains the single PartDesign::Body object
-            print(f"Part contains a single PartDesign::Body: {ObjSingleBody.Name}")
-            #in JT use case The Fcstd file name contains the Part_id (a portion of it if it is a mult-level part
-            #Since this is not how everyone will want to do this.
-            #Also file name contains a revision
-            #Probably should be looking at a separate .py file that is customized to the users business rules.
-            try:
-
-                infoKeys.InsertCustomizationsForPartWithSingleBodyIntoUserField()
-            except Exception as e:
-                print (f"A standard exception has occurred: {str(e)}  while insert default customization")
-                # First things first.  We want to insert the file name into the drawing slot.
-                #self.SetPartInfoValue('DrawingName', os.path.basename(doc.FileName))
-                try:
-                    self.AssignValuesForAutofile(part, doc,ObjSingleBody)
-                except Exception as e:
-                    raise e
-
-
-            except Exception as e:
-                print (str(e))
-                raise e
-
-        else:
-            # There is no PartDesign::Body or more than one found in the 'part'
-            raise NotImplementedError("Need to develop logic for something that is neither a part or an assembly")
-            print("Part does not contain a single PartDesign::Body.")
-
-        '''
-            # This needs to be moved up into the for look
-            try:
-                self.LabelDoc(self, part, doc)
-            except NameError:
-                #print('LabelDoc: there is no Document on the Part ', part.FullName)
-                pass
-            except Exception as e:
-                print ("Exception"+e)
-
-        try:
-            self.GetPartName(part)
-            #info_cmd = infoPartCmd()  # Create an instance of infoPartCmd
-            #info_cmd.GetPartName(part)  # Call GetPartName from infoPartCmd instance
-        except NameError:
-            # print('LabelPart: Part does not exist')
-            pass
-
-
-            try:
-                self.PadLength(self, part, pad)
-            except NameError:
-                # print('PadLenght: there is no Pad in the Part ', part.FullName)
-                pass
-            try:
-                self.ShapeLength(self, part, sketch)
-            except NameError:
-                # print('ShapeLength: there is no Sketch in the Part ', part.FullName)
-                pass
-            try:
-                self.ShapeVolume(self, part, body)
-            except NameError:
-                # print('ShapeVolume: there is no Shape in the Part ', part.FullName)
-                pass
-            '''
-
-    def AssignValuesForAutofile(self,part, doc, singleBodyOfPart):
-        try:
-
-            infoKeys.InsertCustomizationsForPartWithSingleBodyIntoUserField()
-        except Exception as e:
-            print (f"A standard exception has occurred: {str(e)}  while insert default customization")
-            # First things first.  We want to insert the file name into the drawing slot.
-            #self.SetPartInfoValue('DrawingName', os.path.basename(doc.FileName))
-            try:
-                self.part.DrawingName =os.path.basename(doc.FileName)
-
-                self.part.PartID = doc.Label
-                if singleBodyOfPart != None:
-                    self.part.PartDescription = singleBodyOfPart.Label
-            except Exception as e:
-                raise e
-
-
-
-
-    def check_single_body(self,part):
-        num_bodies = 0
-        objBody = None
-
-        for obj in part.Group:
-            if obj.TypeId == 'PartDesign::Body':
-                num_bodies += 1
-                objBody = obj
-
-        if num_bodies == 0:
-            # No PartDesign::Body found in the group
-            return None
-        elif num_bodies == 1:
-            # Only one PartDesign::Body found in the group
-            return objBody
-        else:
-            # More than one PartDesign::Body found in the group
-            return None
 
     def SetPartInfoValue(self,fieldName, fieldvalue):
 

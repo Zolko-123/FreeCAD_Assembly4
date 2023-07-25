@@ -146,29 +146,32 @@ class makeBOM:
 
         if obj == None:
             return
-
+        print (f"TypeID = {obj.TypeId} Level = {level}  Parent = {str(parent)}  Obj.Fullname ={obj.FullName}")
         if self.BomKeyForAutoFillList == None:
             self.BomKeyForAutoFillList = {}
         if obj.TypeId == 'App::Link':
             if obj.ElementCount > 0:
                 for i in range(obj.ElementCount):
                     self.RecursivelyAutoFillPartInfoInBom(obj.LinkedObject, level, parent=obj)
-                else:
-                    self.RecursivelyAutoFillPartInfoInBom(obj.LinkedObject, level + 1, parent=obj)
+            else:
+                self.RecursivelyAutoFillPartInfoInBom(obj.LinkedObject, level + 1, parent=obj)
         elif obj.TypeId == 'App::Part':
             BomKeyAF = obj.FullName
-            print (f"Level = {level}  Parent = {str(parent)}")
+            print ("------------")
+            print (f"Level = {level}  Parent = {str(parent)}  BomKeyAF={BomKeyAF}")
             if level <= max_level:
                 if  BomKeyAF in self.BomKeyForAutoFillList: # we don't need to add info because we did it already
                 # would like to keep score though
                     if self.BomKeyForAutoFillList[BomKeyAF]['BomKeyAF'] == BomKeyAF:
                         qtd = self.BomKeyForAutoFillList[BomKeyAF]['Qty.'] + 1
-                        self.BomKeyForAutoFillList[BomKey]['Qty.'] = qtd
+                        self.BomKeyForAutoFillList[BomKeyAF]['Qty.'] = qtd
                 else:
                     #This is the first time a Part or assembly has been called.
                     #We need to apply the magic
-                    infoPartCmd.infoPartUI.infoDefault(obj, doc)
-                    self.BomKeyForAutoFillList[BomKey]['Qty.'] =1
+
+                    infoPartCmd.infoPartUI.infoDefault(obj)
+                    self.BomKeyForAutoFillList[BomKeyAF] = {'BomKeyAF': BomKeyAF, 'Qty.': 1}
+
 
 
 
@@ -183,7 +186,7 @@ class makeBOM:
             print ("Nothing Applied")
         #===================================
         # Continue walking inside the groups
-        #===================================
+        #=====  ==============================
 
         # Navigate on objects inide a folders
         if obj.TypeId == 'App::DocumentObjectGroup':
@@ -366,13 +369,13 @@ class makeBOM:
                         print ("prop="+prop)
                         if prop =='BomKey':
                             data = BomKey
-                        elif prop == "Document":
+                        elif prop == "DrawingName":
                             #we may want to build in more smarts here.
                             #For a flat bom, ireally just want to know how many nuts and bolts I have total regardless of sub assembly.'
                             data = "All"
                             #if we had an identented bill of material we would want to know all.
                             #data = doc_name
-                        elif prop == 'PartName':
+                        elif prop == 'PartID':
                             data = obj_label
                         elif prop == "FastenerDiameter":
                             data = obj.diameter
