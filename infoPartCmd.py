@@ -117,15 +117,11 @@ def infoDefault(part):
 
         print ("We have an assembly")
         try:
-
             infoKeys.AssignCustomerValuesIntoUserFieldsForPartWithSingleBody(part, doc, None)
-        except Exception as e:
-            try:
-                AssignValuesForAutofile(part, doc,None)
-            except Exception as ee:
-                raise ee
+        except NotImplementedError as e:
+            AssignValuesForAutofile(part, doc,None)
 
-    elif part.Type =='' and part.TypeId == 'App::Part':
+    elif part.Type !='Assembly' and part.TypeId == 'App::Part':
         #We are looking at the standard instance where we have a ASM4 which has a single
         #PartDesign:: Body given that use case
         try:
@@ -140,15 +136,10 @@ def infoDefault(part):
         #Also file name contains a revision
         #Probably should be looking at a separate .py file that is customized to the users business rules.
         try:
-
             infoKeys.AssignCustomerValuesIntoUserFieldsForPartWithSingleBody(part, doc, ObjSingleBody)
-        except Exception as e:
-            print (f"A standard exception has occurred: {str(e)}  while insert default customization")
-            # First things first.  We want to insert the file name into the drawing slot.
-            try:
-                AssignValuesForAutofile(part, doc,ObjSingleBody)
-            except Exception as e:
-                raise e
+        except NotImplementedError as e:
+            print (str (e))
+            AssignValuesForAutofile(part, doc,ObjSingleBody)
 
     else:
         # There is no PartDesign::Body or more than one found in the 'part'

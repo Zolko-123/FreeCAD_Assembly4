@@ -164,7 +164,8 @@ class makeBOM:
                 # would like to keep score though
                     if self.BomKeyForAutoFillList[BomKeyAF]['BomKeyAF'] == BomKeyAF:
                         qtd = self.BomKeyForAutoFillList[BomKeyAF]['Qty.'] + 1
-                        self.BomKeyForAutoFillList[BomKeyAF]['Qty.'] = qtd
+                        #self.BomKeyForAutoFillList[BomKeyAF]['Qty.'] = qtd
+                        self.BomKeyForAutoFillList[BomKeyAF] = {'BomKeyAF': BomKeyAF, 'Qty.': qtd}
                 else:
                     #This is the first time a Part or assembly has been called.
                     #We need to apply the magic
