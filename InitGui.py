@@ -93,6 +93,7 @@ class Assembly4Workbench(Workbench):
             Asm4_version = metadata.Version
         # with file VERSION (FreeCAD ≤0.20)
         except:
+            '''
             FCVersion    = App.Version()[0]+'.'+App.Version()[1]
             if FCVersion=='0.19':
                 FCDate       = " from "+App.Version()[4][0:4]
@@ -103,6 +104,7 @@ class Assembly4Workbench(Workbench):
             message      = "You seem to be using FreeCAD version "+FCVersion+FCDate+" which is quite old. "
             message     += "Some functionality of latest versions might be missing\n"
             FreeCAD.Console.PrintMessage(message)
+            '''
             versionPath  = os.path.join( Asm4_path, 'VERSION' )
             versionFile  = open(versionPath,"r")
             # read second line
