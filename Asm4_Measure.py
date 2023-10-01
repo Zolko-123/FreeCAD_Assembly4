@@ -973,7 +973,7 @@ class selectionObserver():
             sg.addChild(sep)
 
 
-    def drawLine( self, pt1, pt2, name='aLine', width=3 ):
+    def drawLine( self, pt1, pt2, name='aLine', width=5 ):
         global taskUI
         if pt1!=pt2:
             line = Part.makeLine( pt1, pt2 )

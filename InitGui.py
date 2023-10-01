@@ -93,6 +93,7 @@ class Assembly4Workbench(Workbench):
             Asm4_version = metadata.Version
         # with file VERSION (FreeCAD ≤0.20)
         except:
+            '''
             FCVersion    = App.Version()[0]+'.'+App.Version()[1]
             if FCVersion=='0.19':
                 FCDate       = " from "+App.Version()[4][0:4]
@@ -103,6 +104,7 @@ class Assembly4Workbench(Workbench):
             message      = "You seem to be using FreeCAD version "+FCVersion+FCDate+" which is quite old. "
             message     += "Some functionality of latest versions might be missing\n"
             FreeCAD.Console.PrintMessage(message)
+            '''
             versionPath  = os.path.join( Asm4_path, 'VERSION' )
             versionFile  = open(versionPath,"r")
             # read second line
@@ -120,8 +122,6 @@ class Assembly4Workbench(Workbench):
         self.dot()
         import newPartCmd          # creates a new App::Part container called 'Model'
         self.dot()
-        #import mirrorPartCmd     # OBSOLETE : creates a new App::Part container with the mirrored part of the selection
-        #self.dot()
         import infoPartCmd         # edits part information for BoM
         self.dot()
         import insertLinkCmd       # inserts an App::Link to a 'Model' in another file
@@ -149,6 +149,8 @@ class Assembly4Workbench(Workbench):
         import Asm4_Measure        # Measure tool in the Task panel
         self.dot()
         import makeBomCmd          # creates the parts list
+        self.dot()
+        import checkInterference   # check interferences btween parts inside the Assembly
         self.dot()
         import exportFiles         # creates a hierarchical tree listing of files in an assembly
         self.dot()
@@ -235,6 +237,7 @@ class Assembly4Workbench(Workbench):
                         "Asm4_makeLocalBOM",
                         "Asm4_makeBOM",
                         "Asm4_listLinkedFiles",
+                        "Asm4_checkInterference",
                         "Asm4_Measure",
                         'Asm4_showLcs',
                         'Asm4_hideLcs',
@@ -261,6 +264,7 @@ class Assembly4Workbench(Workbench):
                         "Asm4_newGroup",
                         "Asm4_infoPart",
                         "Asm4_insertLink",
+                        "Asm4_variantLink",
                         self.FastenersCmd,
                         "Separator",
                         "Asm4_newSketch",
@@ -276,12 +280,14 @@ class Assembly4Workbench(Workbench):
                         "Asm4_linearArray",
                         "Asm4_circularArray",
                         "Asm4_expressionArray",
-                        "Asm4_variantLink",
+                        "Asm4_variablesCmd",
                         "Separator",
                         "Asm4_makeBOM",
                         "Asm4_listLinkedFiles",
+                        'Asm4_showLcs',
+                        'Asm4_hideLcs',
+                        "Asm4_checkInterference",
                         "Asm4_Measure",
-                        "Asm4_variablesCmd",
                         "Asm4_openConfigurations",
                         "Asm4_Animate",
                         ]

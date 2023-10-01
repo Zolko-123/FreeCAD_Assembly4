@@ -155,8 +155,14 @@ class addVariable():
     def onNameEdited(self):
         pattern = re.compile("^[A-Za-z][_A-Za-z0-9]*$")
         if pattern.match(self.varName.text()):
-            self.varName.setStyleSheet("color: black;")
-            self.OkButton.setEnabled(True)
+            try:
+                App.Units.parseQuantity(self.varName.text())
+            except:
+                self.varName.setStyleSheet("color: red;")
+                self.OkButton.setEnabled(False)
+            else:
+                self.varName.setStyleSheet("color: black;")
+                self.OkButton.setEnabled(True)
         else:
             self.varName.setStyleSheet("color: red;")
             self.OkButton.setEnabled(False)

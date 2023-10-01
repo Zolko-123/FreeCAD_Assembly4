@@ -2,6 +2,11 @@
 
 ## Release notes
 
+* 2023.10.01 (**0.50.3**) :  
+Initial interference check (thanx to leoheck)  
+Put show/hide LCS back in the toolbar  
+Various small fixes  
+
 * 2023.05.07 (**0.50.2**) :  
 Finally managed to read version info from package.xml  
 Fixed deleteVariable greyed-out  
