@@ -265,7 +265,7 @@ def getAssembly():
                 # last chance, very old Asm4 Model
                 if model and model.TypeId=='App::Part'  \
                         and model.getParentGeoFeatureGroup() is None:
-                    FCC.PrintMessage("Deprecated Asm4 Model detected, this could lead to uncompatibilities\n")
+                    # FCC.PrintMessage("Deprecated Asm4 Model detected, this could lead to uncompatibilities\n")
                     retval = model
     return retval
 
