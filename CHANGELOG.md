@@ -2,6 +2,9 @@
 
 ## Release notes
 
+* 2023.10.02 (**0.50.4**) :  
+Inversed variable name check for units  
+
 * 2023.10.01 (**0.50.3**) :  
 Initial interference check (thanx to leoheck)  
 Put show/hide LCS back in the toolbar  
