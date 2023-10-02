@@ -158,11 +158,11 @@ class addVariable():
             try:
                 App.Units.parseQuantity(self.varName.text())
             except:
-                self.varName.setStyleSheet("color: red;")
-                self.OkButton.setEnabled(False)
-            else:
                 self.varName.setStyleSheet("color: black;")
                 self.OkButton.setEnabled(True)
+            else:
+                self.varName.setStyleSheet("color: red;")
+                self.OkButton.setEnabled(False)
         else:
             self.varName.setStyleSheet("color: red;")
             self.OkButton.setEnabled(False)
