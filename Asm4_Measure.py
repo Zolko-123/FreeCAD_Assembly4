@@ -558,11 +558,35 @@ class selectionObserver():
             #Faces or Edges
             if len(selEx[0].SubObjects)>0:
                 subShape = selEx[0].SubObjects[0]
-                # we have selected an LCS
+                # we have selected an LCS, this needs special treatment
                 if selObj.TypeId == 'PartDesign::CoordinateSystem':
-                    base = selObj.Placement.Base
-                    PtS  = self.drawPoint( App.Vector(base.x,base.y,base.z) )
-                    subShape = PtS.Shape
+                    # get the selection hierarchy
+                    ( obj, tree ) = Asm4.getSelectionTree()
+                    # double-check, should always be true
+                    if selObj == obj:
+                        # first object is always in the current document
+                        doc = App.ActiveDocument
+                        globalPlacement = App.Placement()
+                        # we parse the tree and cumulate the Placements
+                        for objName in tree:
+                            obj = doc.getObject(objName)
+                            # Groups don't have Placement properties, ignore
+                            if hasattr(obj,'Placement'):
+                                globalPlacement *= obj.Placement
+                            # check whether *this* object is a link to an *external* doc
+                            if obj.isDerivedFrom('App::Link') and obj.LinkedObject.Document != App.ActiveDocument:
+                                doc = obj.LinkedObject.Document
+                            # else, keep the same document
+                            else:
+                                pass
+                        # create a point at the origin of the LCS
+                        base = globalPlacement.Base
+                        PtS  = self.drawPoint( App.Vector(base.x,base.y,base.z) )
+                        subShape = PtS.Shape
+                    # something went wrong, shouldn't have happened
+                    else:
+                        subShape = None
+                        FCC.PrintMessage('subShape = None\n')
                 # if valid selection
                 if subShape.isValid() and ('Face' in str(subShape) or 'Edge' in str(subShape) or 'Vertex' in str(subShape)):
                     # clear the result area
