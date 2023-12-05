@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.50.4
+Current version 0.50.5
 
 
 ## Overview

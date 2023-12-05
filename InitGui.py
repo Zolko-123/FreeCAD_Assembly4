@@ -243,8 +243,8 @@ class Assembly4Workbench(Workbench):
                         'Asm4_hideLcs',
                         "Asm4_addVariable",
                         "Asm4_delVariable",
-                        "Asm4_openConfigurations",
                         "Asm4_Animate",
+                        "Asm4_openConfigurations"
                         ]
         return commandList
 
@@ -282,14 +282,14 @@ class Assembly4Workbench(Workbench):
                         "Asm4_expressionArray",
                         "Asm4_variablesCmd",
                         "Separator",
+                        "Asm4_Animate",
+                        "Asm4_Measure",
                         "Asm4_makeBOM",
                         "Asm4_listLinkedFiles",
                         'Asm4_showLcs',
                         'Asm4_hideLcs',
                         "Asm4_checkInterference",
-                        "Asm4_Measure",
-                        "Asm4_openConfigurations",
-                        "Asm4_Animate",
+                        "Asm4_openConfigurations"
                         ]
         return commandList
 

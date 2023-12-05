@@ -2,6 +2,10 @@
 
 ## Release notes
 
+* 2023.12.05 (**0.50.5**) :  
+Removed annoying warning in checkInterference  
+Cleanup in Asm4_libs  
+
 * 2023.10.02 (**0.50.4**) :  
 Inversed variable name check for units  
 

@@ -15,7 +15,6 @@
 """
 
 import os
-#__dir__ = os.path.dirname(__file__)
 wbPath   = os.path.dirname(__file__)
 iconPath = os.path.join( wbPath, 'Resources/icons' )
 libPath  = os.path.join( wbPath, 'Resources/library' )
@@ -133,13 +132,6 @@ def placeObjectToLCS( attObj, attLink, attDoc, attLCS ):
     +-----------------------------------------------+
 """
 def makeAsmProperties( obj, reset=False ):
-    # property AssemblyType
-    # DEPRECATED
-    '''
-    if not hasattr(obj,'AssemblyType'):
-        obj.addProperty( 'App::PropertyString', 'AssemblyType', 'Assembly' )
-    obj.setPropertyStatus('AssemblyType','ReadOnly')
-    '''
     # property AttachedBy
     if not hasattr(obj,'AttachedBy'):
         obj.addProperty( 'App::PropertyString', 'AttachedBy', 'Assembly' )
@@ -265,7 +257,6 @@ def getAssembly():
                 # last chance, very old Asm4 Model
                 if model and model.TypeId=='App::Part'  \
                         and model.getParentGeoFeatureGroup() is None:
-                    # FCC.PrintMessage("Deprecated Asm4 Model detected, this could lead to uncompatibilities\n")
                     retval = model
     return retval
 
@@ -274,29 +265,6 @@ def getAssembly():
 # DEPRECATED : it's called Assembly again
 def checkModel():
     return getAssembly()
-    '''
-    retval = None
-    if App.ActiveDocument:
-        model = App.ActiveDocument.getObject('Model')
-        # the current (as per v0.12) assembly container
-        if model and model.TypeId=='App::Part' \
-                and model.Type == 'Assembly'   \
-                and model.getParentGeoFeatureGroup() is None:
-            retval = model
-        else:
-            # former Assembly compatibility check:
-            assy = App.ActiveDocument.getObject('Assembly')
-            if assy and assy.TypeId=='App::Part'  \
-                    and assy.Type == 'Assembly'   \
-                    and assy.getParentGeoFeatureGroup() is None:
-                retval = assy
-            else:
-                # last chance, very old Asm4 Model
-                if  model   and model.TypeId=='App::Part'  \
-                            and model.getParentGeoFeatureGroup() is None:
-                    retval = model
-    return retval
-    '''
 
 
 # returns the selected object and its selection hierarchy
@@ -520,17 +488,6 @@ def isLinkToPart(obj):
         if  obj.LinkedObject.isDerivedFrom('App::Part') or obj.LinkedObject.isDerivedFrom('PartDesign::Body'):
             return True
     return False
-
-
-'''
-def isPartLinkAssembly(obj):
-    if not obj:
-        return False
-    if hasattr(obj,'AssemblyType') and hasattr(obj,'SolverId'):
-        if obj.AssemblyType == 'Part::Link' or obj.AssemblyType == '' :
-            return True
-    return False
-'''
 
 
 def isAsm4EE(obj):
