@@ -42,7 +42,7 @@ class checkInterference:
 
     def IsActive(self):
         if Asm4.getAssembly() is None:
-            print("Check interference works with Asm4 Assemblies and there is none in this file")
+            # print("Check interference works with Asm4 Assemblies and there is none in this file")
             return False
         else:
             return True
