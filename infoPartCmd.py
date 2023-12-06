@@ -16,20 +16,59 @@ from FreeCAD import Console as FCC
 import Asm4_libs as Asm4
 import infoKeys
 
+#This is partcoded part information.
+partInfo = [
+    'BomKey',
+    'DrawingName',
+    'DrawingRevision',
+    'PartID',
+    'PartDescription']
+
+
+
+infoToolTip = {
+    'BomKey': 'BomKey',
+    'DrawingName':     'Document or File name',
+    'DrawingRevision': 'Document Revision',
+    'PartID':     'Part ID',
+    'PartDescription': 'Part Description'}
+
+# Remaining fields that can be customized
+try:
+    import infoKeys
+    partInfo += infoKeys.partInfoUserAdded
+    infoToolTip.update(infoKeys.infoToolTipUserAdded)
+except ImportError:
+    pass
+
+
+
+
+partInfo_Invisible = [
+    'FastenerDiameter',
+    'FastenerLength',
+    'FastenerType']
+
+infoToolTip_Invisible = {
+    'FastenerDiameter': 'Fastener diameter',
+    'FastenerLength':   'Fastener length',
+    'FastenerType':     'Fastener type'}
+
 ConfUserDir = os.path.join(App.getUserAppDataDir(),'Templates')
 ConfUserFilename = "Asm4_infoPartConf.json"
 ConfUserFilejson = os.path.join(ConfUserDir, ConfUserFilename)
 
-'''
+
+
 # Check if the configuration file exists
 try:
     file = open(ConfUserFilejson, 'r')
     file.close()
 except:
     partInfoDef = dict()
-    for prop in infoKeys.partInfo:
+    for prop in partInfo:
         partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': True})
-    for prop in infoKeys.partInfo_Invisible:
+    for prop in partInfo_Invisible:
         partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': False})
     try:
         os.mkdir(ConfUserDir)
@@ -38,7 +77,7 @@ except:
     file = open(ConfUserFilejson, 'x')
     json.dump(partInfoDef, file)
     file.close()
-'''
+
 
 """
     +-----------------------------------------------+
@@ -52,6 +91,139 @@ def writeXml(text):
 def decodeXml(text):
     text = text.replace('_x_m_l_', '\\').encode().decode('unicode_escape')
     return text
+
+def infoDefault(part):
+    # infoKeys.infoDefault(self)
+
+    #Values are being populated through the back door
+    #if the diaglog control is open and you click on autofill
+    #the dialog needs to be closed otherwise
+    #backdoor values will be overwritten when you press ok..
+
+
+
+    file = open(ConfUserFilejson, 'r')
+    infoKeysUser = json.load(file).copy()
+    file.close()
+
+    #trying to understand this. Not positive that I'm correct here.
+    #This routine attempts to autopopulate the fields that are defined in infoKeys.py and also appear in the json file
+    #it appears that these fields are inserted into self or self.part by infoPartCmd.infoPartUI.makePartInfo
+
+    doc = part.Document
+    print (len(part.Group))
+    part.Type
+    if part.Type =="Assembly" and part.TypeId == 'App::Part':
+
+        print ("We have an assembly")
+        try:
+            infoKeys.AssignCustomerValuesIntoUserFieldsForPartWithSingleBody(part, doc, None)
+        except NotImplementedError as e:
+            AssignValuesForAutofile(part, doc,None)
+
+    elif part.Type !='Assembly' and part.TypeId == 'App::Part':
+        #We are looking at the standard instance where we have a ASM4 which has a single
+        #PartDesign:: Body given that use case
+        try:
+            ObjSingleBody = check_single_body(part)
+        except Exception as e:
+            print (str(e))
+            raise NotImplementedError(f"Logic only implement for Part with single body this exception was thrown: {str(e)}")
+        # 'body' contains the single PartDesign::Body object
+        print(f"Part contains a single PartDesign::Body: {ObjSingleBody.Name}")
+        #in JT use case The Fcstd file name contains the Part_id (a portion of it if it is a mult-level part
+        #Since this is not how everyone will want to do this.
+        #Also file name contains a revision
+        #Probably should be looking at a separate .py file that is customized to the users business rules.
+        try:
+            infoKeys.AssignCustomerValuesIntoUserFieldsForPartWithSingleBody(part, doc, ObjSingleBody)
+        except NotImplementedError as e:
+            print (str (e))
+            AssignValuesForAutofile(part, doc,ObjSingleBody)
+
+    else:
+        # There is no PartDesign::Body or more than one found in the 'part'
+        raise NotImplementedError("Need to develop logic for something that is neither a part or an assembly")
+        print("Part does not contain a single PartDesign::Body.")
+
+    '''
+        # This needs to be moved up into the for look
+        try:
+            self.LabelDoc(self, part, doc)
+        except NameError:
+            #print('LabelDoc: there is no Document on the Part ', part.FullName)
+            pass
+        except Exception as e:
+            print ("Exception"+e)
+
+    try:
+        self.GetPartName(part)
+        #info_cmd = infoPartCmd()  # Create an instance of infoPartCmd
+        #info_cmd.GetPartName(part)  # Call GetPartName from infoPartCmd instance
+    except NameError:
+        # print('LabelPart: Part does not exist')
+        pass
+
+
+        try:
+            self.PadLength(self, part, pad)
+        except NameError:
+            # print('PadLenght: there is no Pad in the Part ', part.FullName)
+            pass
+        try:
+            self.ShapeLength(self, part, sketch)
+        except NameError:
+            # print('ShapeLength: there is no Sketch in the Part ', part.FullName)
+            pass
+        try:
+            self.ShapeVolume(self, part, body)
+        except NameError:
+            # print('ShapeVolume: there is no Shape in the Part ', part.FullName)
+            pass
+        '''
+
+def check_single_body(part):
+    num_bodies = 0
+    objBody = None
+
+    for obj in part.Group:
+        if obj.TypeId == 'PartDesign::Body':
+            num_bodies += 1
+            objBody = obj
+
+    if num_bodies == 0:
+        # No PartDesign::Body found in the group
+        return None
+    elif num_bodies == 1:
+        # Only one PartDesign::Body found in the group
+        return objBody
+    else:
+        # More than one PartDesign::Body found in the group
+        return None
+
+def AssignValuesForAutofile(part, doc, singleBodyOfPart):
+    #todo if part is not
+    try:
+
+        infoKeys.AssignCustomerValuesIntoUserFieldsForPartWithSingleBody(part, doc, singleBodyOfPart)
+    except Exception as e:
+        print (f"Customization failed or is not setup : {str(e)}  Attempting to insert default values")
+        try:
+            try:
+                part.DrawingName
+            except Exception as e:
+                # if we're here it means that there was no cust
+                #JT not sure at the moment if we should fix it here or just add logic upstream to prevent this from happening
+                raise Exception(f"{part.FullName} in {doc.FileName} is missing Part information fields. It needs to be reset in Edit Part Information- Configure fields .")
+
+
+            part.DrawingName =os.path.basename(doc.FileName)
+            part.PartID = doc.Label
+            if singleBodyOfPart != None:
+                part.PartDescription = singleBodyOfPart.Label
+        except Exception as e:
+            raise e
+
 
 
 """
@@ -101,9 +273,9 @@ class infoPartUI():
             file.close()
         except:
             self.infoKeysUser = dict()
-            for prop in infoKeys.partInfo:
+            for prop in partInfo:
                 self.infoKeysUser.setdefault(prop, {'userData': prop, 'active': True, 'visible': True})
-            for prop in infoKeys.partInfo_Invisible:
+            for prop in partInfo_Invisible:
                 self.infoKeysUser.setdefault(prop, {'userData': prop, 'active': True, 'visible': False})
         '''
             try:
@@ -142,6 +314,8 @@ class infoPartUI():
         for propuser in self.infoKeysUser:
             if self.infoKeysUser.get(propuser).get('active') and self.infoKeysUser.get(propuser).get('visible'):
                 try:
+                    #if object.part doesn't exist at the object Typeid is App::Part through it in there?
+                    #need to think on that one.
                     object.part
                     if not hasattr(object.part, self.infoKeysUser.get(propuser).get('userData')):
                         object.part.addProperty('App::PropertyString', self.infoKeysUser.get(propuser).get('userData'), 'PartInfo')
@@ -149,7 +323,7 @@ class infoPartUI():
                     if object.TypeId == 'App::Part':
                         if not hasattr(object,self.infoKeysUser.get(propuser).get('userData')):
                             object.addProperty('App::PropertyString', self.infoKeysUser.get(propuser).get('userData'), 'PartInfo')
-        return
+
 
 
     def addNew(self):
@@ -178,11 +352,12 @@ class infoPartUI():
         for suppr in listpi: # delete all PartInfo properties
             self.part.removeProperty(suppr)
 
-        # Recover initial json file since fateners keys are being lost
+        # Recover initial json file since fasteners keys are being lost
+        # JT Not sure about above being an accurate statement.
         partInfoDef = dict()
-        for prop in infoKeys.partInfo:
+        for prop in partInfo:
             partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': True})
-        for prop in infoKeys.partInfo_Invisible:
+        for prop in partInfo_Invisible:
             partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': False})
         try:
             os.mkdir(ConfUserDir)
@@ -204,55 +379,41 @@ class infoPartUI():
 
     def infoDefault(self):
         # infoKeys.infoDefault(self)
-        file = open(ConfUserFilejson, 'r')
-        infoKeysUser = json.load(file).copy()
-        file.close()
+
+        #Values are being populated through the back door
+        #if the diaglog control is open and you click on autofill
+        #the dialog needs to be closed otherwise
+        #backdoor values will be overwritten when you press ok..
+        Gui.Control.closeDialog()
+
         try:
             self.TypeId
             part = self
         except AttributeError:
             part = self.part
-        doc = part.Document
-        for i in range(len(part.Group)):
-            if part.Group[i].TypeId == 'PartDesign::Body':
-                body = part.Group[i]
-                for i in range(len(body.Group)):
-                    if body.Group[i].TypeId == 'PartDesign::Pad':
-                        pad = body.Group[i]
-                        try:
-                            sketch = pad.Profile[0]
-                        except NameError :
-                            # print('There is no Sketch on a Pad of the Part', part.FullName)
-                            pass
-            try:
-                self.LabelDoc(self, part, doc)
-            except NameError:
-                # print('LabelDoc: there is no Document on the Part ', part.FullName)
-                pass
-            try:
-                self.LabelPart(self, part)
-            except NameError:
-                # print('LabelPart: Part does not exist')
-                pass
-            try:
-                self.PadLength(self, part, pad)
-            except NameError:
-                # print('PadLenght: there is no Pad in the Part ', part.FullName)
-                pass
-            try:
-                self.ShapeLength(self, part, sketch)
-            except NameError:
-                # print('ShapeLength: there is no Sketch in the Part ', part.FullName)
-                pass
-            try:
-                self.ShapeVolume(self, part, body)
-            except NameError:
-                # print('ShapeVolume: there is no Shape in the Part ', part.FullName)
-                pass
+        infoDefault(part)
 
 
-    def LabelPart(self, part):
-        auto_info_field = infoKeysUser.get('Part_Label').get('userData')
+    def SetPartInfoValue(self,fieldName, fieldvalue):
+
+
+        auto_info_field = self.infoKeysUser.get(fieldName).get('userData')
+        try:
+            #This sets the value behind the curtain
+            self.infoKeysUser[auto_info_field][1]= fieldvalue
+            #if the Edit part information window is open and you press ok what ever is in that textbox will overwrite
+
+
+
+        except Exception as e:
+            #print (f" This expection was thrown: {str(e)})
+            # Re throw the exception
+            raise e
+
+
+
+    def GetPartName(self, part):
+        auto_info_field = infoKeysUser.get('PartName').get('userData')
         auto_info_fill = part.Label
         try:
             self.TypeId
@@ -265,7 +426,7 @@ class infoPartUI():
             except AttributeError:
                 self.infos[i].setText("-")
 
-
+    '''
     def PadLength(self, part, pad):
         auto_info_field = infoKeysUser.get('Pad_Length').get('userData')
         try:
@@ -316,7 +477,7 @@ class infoPartUI():
                         self.infos[i].setText(auto_info_fill)
             except AttributeError:
                 self.infos[i].setText("-")
-
+    '''
 
 
     def finish(self):
@@ -371,7 +532,8 @@ class infoPartUI():
         self.reinit.clicked.connect(self.reInit)
         self.autoFill.clicked.connect(self.infoDefault)
 
-        '''
+'''
+#JT This seems to be creating some issue Lets disable for the moment.'
         test = False
         try:
             if self.infoTable[0][1] == '':
@@ -381,7 +543,7 @@ class infoPartUI():
         if test:
             self.infoDefault()
             self.addNew()
-        '''
+'''
 
 class infoPartConfUI():
 
@@ -392,8 +554,8 @@ class infoPartConfUI():
         self.form.setWindowIcon(QtGui.QIcon(iconFile))
         self.form.setWindowTitle("Edit Part Information")
 
-        self.infoKeysDefault = infoKeys.partInfo.copy()
-        self.infoToolTip = infoKeys.infoToolTip.copy()
+        self.infoKeysDefault = partInfo.copy()
+        self.infoToolTip = infoToolTip.copy()
         file = open(ConfUserFilejson, 'r')
         self.infoKeysUser = json.load(file).copy()
         file.close()
@@ -429,9 +591,9 @@ class infoPartConfUI():
 
         # Restore file and appen new config
         partInfoDef = dict()
-        for prop in infoKeys.partInfo:
+        for prop in infoPartCmd.partInfo:
             partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': True})
-        for prop in infoKeys.partInfo_Invisible:
+        for prop in infoPartCmd.partInfo_Invisible:
             partInfoDef.setdefault(prop, {'userData': prop, 'active': True, 'visible': False})
 
         i = 0
