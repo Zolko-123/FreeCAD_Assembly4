@@ -573,7 +573,8 @@ class selectionObserver():
                             # Groups don't have Placement properties, ignore
                             if hasattr(obj,'Placement'):
                                 globalPlacement *= obj.Placement
-                            # check whether *this* object is a link to an *external* doc
+                            # if *this* object is a link to an *external* document, switch to that document
+                            # necessary because links can be in the *current* document also
                             if obj.isDerivedFrom('App::Link') and obj.LinkedObject.Document != App.ActiveDocument:
                                 doc = obj.LinkedObject.Document
                             # else, keep the same document
