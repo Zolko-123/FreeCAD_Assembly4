@@ -282,8 +282,10 @@ def getSelectionTree(index=0):
         retval = ( selObj, None )
         # objects at the document root don't have a selection tree
         if len(Gui.Selection.getSelectionEx("", 0)[0].SubElementNames) >= index:
-            # we only treat thefirst selected object
+            # we only treat the first selected object
+            # TODO : are we sure about that ? Shouldn't this be [index] ?
             # this is a dot-separated list of the selection hierarchy
+            # selList = Gui.Selection.getSelectionEx("", 0)[index].SubElementNames[0]
             selList = Gui.Selection.getSelectionEx("", 0)[0].SubElementNames[index]
             # this is the final tree table
             # this first element will be overwritten later
@@ -304,7 +306,7 @@ def getSelectionTree(index=0):
                     topObj = App.ActiveDocument.getObject(selTree[1])
                     rootObj = topObj.getParentGeoFeatureGroup()
                     selTree[0] = rootObj.Name
-                    # all went well, we return the selected object and it's tree
+                    # all went well, we return the selected object and its tree
                     retval = ( selObj, selTree )
     return retval
 
