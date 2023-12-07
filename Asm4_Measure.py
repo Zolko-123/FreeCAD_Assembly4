@@ -562,33 +562,25 @@ class selectionObserver():
                 if selObj.TypeId == 'PartDesign::CoordinateSystem':
                     globalPlacement = App.Placement()
                     '''
-                    # from https://forum.freecad.org/viewtopic.php?p=569083#p569083
-                    # for sel in Gui.Selection.getSelectionEx('',0):
-                    for sel in selEx:
-                        for path in sel.SubElementNames if sel.SubElementNames else ['']:
-                            # retType=3 returns the placement. Check the doc string for more info
-                            globalPlacement = sel.Object.getSubObject(path, retType=3) 
-                            # print('%s.%s -- %s' % (sel.Object.Name, path, placement))
-
                     # get the selection hierarchy
                     ( obj, tree ) = Asm4.getSelectionTree()
                     # double-check, should always be true
-                    # if selObj == obj:
-                    # first object is always in the current document
-                    doc = App.ActiveDocument
-                    # we parse the tree and cumulate the Placements
-                    for objName in tree:
-                        obj = doc.getObject(objName)
-                        # Groups don't have Placement properties, ignore
-                        if hasattr(obj,'Placement'):
-                            globalPlacement *= obj.Placement
-                        # if *this* object is a link to an *external* document, switch to that document
-                        # necessary because links can be in the *current* document also
-                        if obj.isDerivedFrom('App::Link') and obj.LinkedObject.Document != App.ActiveDocument:
-                            doc = obj.LinkedObject.Document
-                        # else, keep the same document
-                        else:
-                            pass
+                    if selObj == obj:
+                        # first object is always in the current document
+                        doc = App.ActiveDocument
+                        # we parse the tree and cumulate the Placements
+                        for objName in tree:
+                            obj = doc.getObject(objName)
+                            # Groups don't have Placement properties, ignore
+                            if hasattr(obj,'Placement'):
+                                globalPlacement *= obj.Placement
+                            # if *this* object is a link to an *external* document, switch to that document
+                            # necessary because links can be in the *current* document also
+                            if obj.isDerivedFrom('App::Link') and obj.LinkedObject.Document != App.ActiveDocument:
+                                doc = obj.LinkedObject.Document
+                            # else, keep the same document
+                            else:
+                                pass
                     '''
                     # from https://forum.freecad.org/viewtopic.php?p=569083#p569083
                     # retType=3 returns the placement. Check the doc string for more info
