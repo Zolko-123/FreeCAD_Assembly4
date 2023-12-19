@@ -591,12 +591,6 @@ class selectionObserver():
                     base = globalPlacement.Base
                     PtS  = self.drawPoint( App.Vector(base.x,base.y,base.z) )
                     subShape = PtS.Shape
-                    # something went wrong, shouldn't have happened
-                    '''
-                    else:
-                        subShape = None
-                        FCC.PrintMessage('subShape = None\n')
-                    '''
                 # if valid selection
                 if subShape.isValid() and ('Face' in str(subShape) or 'Edge' in str(subShape) or 'Vertex' in str(subShape)):
                     # clear the result area
