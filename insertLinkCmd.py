@@ -148,7 +148,6 @@ class insertLink():
     def lookForParts( self, doc=None ):
         self.allParts = []
         self.partsDoc = []
-        self.partList.clear()
         if doc is None:
             docList = App.listDocuments().values()
         else:
@@ -169,17 +168,30 @@ class insertLink():
                     if obj != self.rootAssembly and obj.getParentGeoFeatureGroup() is None:
                         self.allParts.append( obj )
                         self.partsDoc.append( doc )
+
                 for obj in doc.findObjects("PartDesign::Body"):
                     # but only those at top level (not nested inside other containers)
                     if obj.getParentGeoFeatureGroup() is None:
                         self.allParts.append( obj )
                         self.partsDoc.append( doc )
         # build the list
+        self.partList.clear()
         for part in self.allParts:
             newItem = QtGui.QListWidgetItem()
             newItem.setText( part.Document.Name +"#"+ Asm4.labelName(part) )
             newItem.setIcon(part.ViewObject.Icon)
             self.partList.addItem(newItem)
+
+    def onFilterChange(self):
+        filterStr = self.filterPartList.text().strip()
+        for x in range(self.partList.count()):
+            item = self.partList.item(x)
+            # check the items's text match the filter ignoring the case
+            matchStr =  re.search(filterStr, item.text(), flags=re.IGNORECASE)
+            if filterStr and not matchStr:
+                item.setHidden(True)
+            else:
+                item.setHidden(False)
 
 
     # from A2+
@@ -290,18 +302,6 @@ class insertLink():
             # set the proposed name into the text field, unless it's a broken link
             if not self.brokenLink:
                 self.linkNameInput.setText( proposedLinkName )
-
-
-    def onFilterChange(self):
-        filterStr = self.filterPartList.text().strip()
-        for x in range(self.partList.count()):
-            item = self.partList.item(x)
-            # check the items's text match the filter ignoring the case
-            matchStr =  re.search(filterStr, item.text(), flags=re.IGNORECASE)
-            if filterStr and not matchStr:
-                item.setHidden(True)
-            else:
-                item.setHidden(False)
 
 
     def onCancel(self):
