@@ -184,8 +184,10 @@ class insertLink():
 
     def onFilterChange(self):
         filterStr = self.filterPartList.text().strip()
+
         for x in range(self.partList.count()):
             item = self.partList.item(x)
+
             # check the items's text match the filter ignoring the case
             matchStr =  re.search(filterStr, item.text(), flags=re.IGNORECASE)
             if filterStr and not matchStr:
