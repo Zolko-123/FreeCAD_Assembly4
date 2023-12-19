@@ -81,10 +81,21 @@ class newPart:
             # add stuff if appropriate (not for groups)
             if self.partType in Asm4.containerTypes:
                 # add an LCS at the root of the Part, and attach it to the 'Origin'
-                lcs0 = newPart.newObject('PartDesign::CoordinateSystem','LCS_0')
+                lcs0 = newPart.newObject('PartDesign::CoordinateSystem','LCS_Origin')
                 lcs0.Support = [(newPart.Origin.OriginFeatures[0],'')]
                 lcs0.MapMode = 'ObjectXY'
                 lcs0.MapReversed = False
+                # set nice colors for the Origin planes
+                for origin in App.ActiveDocument.findObjects(Type='App::Origin'):
+                    if origin.getParentGeoFeatureGroup() == newPart:
+                        origin.Visibility = True
+                        index = origin.Name[6:]
+                        App.ActiveDocument.getObject('YZ_Plane'+index).ViewObject.ShapeColor=(1.0, 0.0, 0.0)
+                        App.ActiveDocument.getObject('XZ_Plane'+index).ViewObject.ShapeColor=(0.0, 0.6, 0.0)
+                        App.ActiveDocument.getObject('XY_Plane'+index).ViewObject.ShapeColor=(0.0, 0.0, 0.8)
+                        App.ActiveDocument.getObject('X_Axis'+index).Visibility = False
+                        App.ActiveDocument.getObject('Y_Axis'+index).Visibility = False
+                        App.ActiveDocument.getObject('Z_Axis'+index).Visibility = False
                 # add AttachmentEngine
                 # oooops, no, creates problems because it creates an AttachmentOffset property that collides with Asm4
                 # newPart.addExtension("Part::AttachExtensionPython")
