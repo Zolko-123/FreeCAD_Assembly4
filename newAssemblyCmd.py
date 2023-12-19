@@ -87,7 +87,7 @@ def makeAssembly():
         # set nice colors for the Origin planes
         for origin in App.ActiveDocument.findObjects(Type='App::Origin'):
             if origin.getParentGeoFeatureGroup() == assembly:
-                origin.Visibility = True
+                # origin.Visibility = True
                 index = origin.Name[6:]
                 App.ActiveDocument.getObject('YZ_Plane'+index).ViewObject.ShapeColor=(1.0, 0.0, 0.0)
                 App.ActiveDocument.getObject('XZ_Plane'+index).ViewObject.ShapeColor=(0.0, 0.6, 0.0)

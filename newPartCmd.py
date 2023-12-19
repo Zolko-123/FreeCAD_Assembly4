@@ -88,7 +88,6 @@ class newPart:
                 # set nice colors for the Origin planes
                 for origin in App.ActiveDocument.findObjects(Type='App::Origin'):
                     if origin.getParentGeoFeatureGroup() == newPart:
-                        origin.Visibility = True
                         index = origin.Name[6:]
                         App.ActiveDocument.getObject('YZ_Plane'+index).ViewObject.ShapeColor=(1.0, 0.0, 0.0)
                         App.ActiveDocument.getObject('XZ_Plane'+index).ViewObject.ShapeColor=(0.0, 0.6, 0.0)
@@ -96,6 +95,9 @@ class newPart:
                         App.ActiveDocument.getObject('X_Axis'+index).Visibility = False
                         App.ActiveDocument.getObject('Y_Axis'+index).Visibility = False
                         App.ActiveDocument.getObject('Z_Axis'+index).Visibility = False
+                        # but only show it for PartDesign Bodies
+                        if self.partType=='PartDesign::Body':
+                            origin.Visibility = True
                 # add AttachmentEngine
                 # oooops, no, creates problems because it creates an AttachmentOffset property that collides with Asm4
                 # newPart.addExtension("Part::AttachExtensionPython")
