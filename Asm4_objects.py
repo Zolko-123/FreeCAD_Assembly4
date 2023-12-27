@@ -20,6 +20,8 @@ from FreeCAD import Console as FCC
 import Asm4_libs as Asm4
 
 
+FREECAD_0_22 = (int(App.Version()[0]), int(App.Version()[1])) >= (0, 22)
+
 
 """
     +-----------------------------------------------+
@@ -51,12 +53,20 @@ class VariantLink( object ):
     def __init__(self):
         FCC.PrintMessage('Initialising ...\n')
         self.Object = None
-    
-    def __getstate__(self):
-        return
 
-    def __setstate__(self,_state):
-        return
+
+    if FREECAD_0_22:
+        def loads(self, state):
+            return None
+
+        def dumps(self):
+            return None
+    else: 
+        def __getstate__(self):
+            return None
+
+        def __setstate__(self, _state):
+            return None
     
     # new Python API for overriding C++ view provider of the binding object
     def getViewProviderName(self,_obj):
@@ -237,11 +247,18 @@ class ViewProviderVariant(object):
             iconPath = os.path.join( Asm4.iconPath, 'Variant_Link.svg' )
         return iconPath
                 
-    def __getstate__(self):
-        return None
+    if FREECAD_0_22:
+        def loads(self, state):
+            return None
 
-    def __setstate__(self, _state):
-        return None
+        def dumps(self):
+            return None
+    else: 
+        def __getstate__(self):
+            return None
+
+        def __setstate__(self, _state):
+            return None
     
 
 
@@ -260,12 +277,19 @@ class LinkArray( object ):
     def __init__(self):
         self.Object = None
     
-    def __getstate__(self):
-        return
+    if FREECAD_0_22:
+        def loads(self, state):
+            return None
 
-    def __setstate__(self,_state):
-        return
-    
+        def dumps(self):
+            return None
+    else: 
+        def __getstate__(self):
+            return None
+
+        def __setstate__(self, _state):
+            return None
+   
     # new Python API for overriding C++ view provider of the binding object
     def getViewProviderName(self,_obj):
         return 'Gui::ViewProviderLinkPython'
@@ -355,12 +379,19 @@ class ViewProviderArray(object):
                 iconFile = os.path.join( Asm4.iconPath, 'Asm4_ExpressionArray.svg')
         if iconFile:
             return iconFile
-                
-    def __getstate__(self):
-        return None
 
-    def __setstate__(self, _state):
-        return None
+    if FREECAD_0_22:
+        def loads(self, state):
+            return None
+
+        def dumps(self):
+            return None
+    else: 
+        def __getstate__(self):
+            return None
+
+        def __setstate__(self, _state):
+            return None
     
 
 
