@@ -55,7 +55,13 @@ class VariantLink( object ):
     def __getstate__(self):
         return
 
-    def __setstate__(self,_state):
+    def __setstate__(self, _state):
+        return
+
+    def dumps(self):
+        return
+
+    def loads(self, _state):
         return
     
     # new Python API for overriding C++ view provider of the binding object
@@ -242,6 +248,12 @@ class ViewProviderVariant(object):
 
     def __setstate__(self, _state):
         return None
+
+    def dumps(self):
+        return None
+
+    def loads(self, _state):
+        return None
     
 
 
@@ -263,7 +275,13 @@ class LinkArray( object ):
     def __getstate__(self):
         return
 
-    def __setstate__(self,_state):
+    def __setstate__(self, _state):
+        return
+
+    def dumps(self):
+        return
+
+    def loads(self, _state):
         return
     
     # new Python API for overriding C++ view provider of the binding object
@@ -360,6 +378,12 @@ class ViewProviderArray(object):
         return None
 
     def __setstate__(self, _state):
+        return None
+
+    def dumps(self):
+        return None
+
+    def loads(self, _state):
         return None
     
 
