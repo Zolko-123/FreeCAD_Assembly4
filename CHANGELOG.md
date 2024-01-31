@@ -2,6 +2,12 @@
 
 ## Release notes
 
+* 2024.01.31 (**0.50.7**) :  
+Merged BoM and PartInfo code from JonasThomas (still doesn't seem to work !)  
+Simplyfied globalPlacement for LCS in Asm4_Measure  
+Removed "Donate" button (recieved 55€ altogether, a BIG thank-you to all the donors, but it's not worth the trouble)  
+Show Origin planes for PartDesign Bodies, with colors  
+
 * 2023.12.05 (**0.50.6**) :  
 Fixed measurements with LCS  
 

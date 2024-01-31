@@ -560,33 +560,37 @@ class selectionObserver():
                 subShape = selEx[0].SubObjects[0]
                 # we have selected an LCS, this needs special treatment
                 if selObj.TypeId == 'PartDesign::CoordinateSystem':
+                    globalPlacement = App.Placement()
+                    '''
                     # get the selection hierarchy
                     ( obj, tree ) = Asm4.getSelectionTree()
                     # double-check, should always be true
                     if selObj == obj:
                         # first object is always in the current document
                         doc = App.ActiveDocument
-                        globalPlacement = App.Placement()
                         # we parse the tree and cumulate the Placements
                         for objName in tree:
                             obj = doc.getObject(objName)
                             # Groups don't have Placement properties, ignore
                             if hasattr(obj,'Placement'):
                                 globalPlacement *= obj.Placement
-                            # check whether *this* object is a link to an *external* doc
+                            # if *this* object is a link to an *external* document, switch to that document
+                            # necessary because links can be in the *current* document also
                             if obj.isDerivedFrom('App::Link') and obj.LinkedObject.Document != App.ActiveDocument:
                                 doc = obj.LinkedObject.Document
                             # else, keep the same document
                             else:
                                 pass
-                        # create a point at the origin of the LCS
-                        base = globalPlacement.Base
-                        PtS  = self.drawPoint( App.Vector(base.x,base.y,base.z) )
-                        subShape = PtS.Shape
-                    # something went wrong, shouldn't have happened
-                    else:
-                        subShape = None
-                        FCC.PrintMessage('subShape = None\n')
+                    '''
+                    # from https://forum.freecad.org/viewtopic.php?p=569083#p569083
+                    # retType=3 returns the placement. Check the doc string for more info
+                    # simplyfied version for single selection
+                    path = selEx[0].SubElementNames[0]
+                    globalPlacement = selEx[0].Object.getSubObject(path, retType=3) 
+                    # create a point at the origin of the LCS
+                    base = globalPlacement.Base
+                    PtS  = self.drawPoint( App.Vector(base.x,base.y,base.z) )
+                    subShape = PtS.Shape
                 # if valid selection
                 if subShape.isValid() and ('Face' in str(subShape) or 'Edge' in str(subShape) or 'Vertex' in str(subShape)):
                     # clear the result area

@@ -84,6 +84,17 @@ def makeAssembly():
         lcs0.Support = [(assembly.Origin.OriginFeatures[0],'')]
         lcs0.MapMode = 'ObjectXY'
         lcs0.MapReversed = False
+        # set nice colors for the Origin planes
+        for origin in App.ActiveDocument.findObjects(Type='App::Origin'):
+            if origin.getParentGeoFeatureGroup() == assembly:
+                # origin.Visibility = True
+                index = origin.Name[6:]
+                App.ActiveDocument.getObject('YZ_Plane'+index).ViewObject.ShapeColor=(1.0, 0.0, 0.0)
+                App.ActiveDocument.getObject('XZ_Plane'+index).ViewObject.ShapeColor=(0.0, 0.6, 0.0)
+                App.ActiveDocument.getObject('XY_Plane'+index).ViewObject.ShapeColor=(0.0, 0.0, 0.8)
+                App.ActiveDocument.getObject('X_Axis'+index).Visibility = False
+                App.ActiveDocument.getObject('Y_Axis'+index).Visibility = False
+                App.ActiveDocument.getObject('Z_Axis'+index).Visibility = False
         # create a group Constraints to store future solver constraints there
         assembly.newObject('App::DocumentObjectGroup','Constraints')
         App.ActiveDocument.getObject('Constraints').Visibility = False
