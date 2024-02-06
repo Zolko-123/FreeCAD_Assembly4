@@ -23,15 +23,16 @@
 
 
 import os
-from Asm4_Translate import _atr, QT_TRANSLATE_NOOP
 
 import Asm4_locator
-global Asm4_icon, Asm4_path
-Asm4_path = os.path.dirname( Asm4_locator.__file__ )
-Asm4_icon = os.path.join( Asm4_path , 'Resources/icons/Assembly4.svg' )
 
 # I don't like this being here
 import selectionFilter
+
+global Asm4_icon, Asm4_path, Asm4_trans
+Asm4_path = os.path.dirname(Asm4_locator.__file__)
+Asm4_icon = os.path.join(Asm4_path, "Resources/icons/Assembly4.svg")
+Asm4_trans = os.path.join(Asm4_path, "Resources/translations")
 
 
 """
@@ -43,7 +44,6 @@ class Assembly4Workbench(Workbench):
 
     global Asm4_icon
     global selectionFilter
-    global _atr, QT_TRANSLATE_NOOP
     MenuText = "Assembly 4"
     ToolTip = "Assembly 4 workbench"
     Icon = Asm4_icon
@@ -54,7 +54,7 @@ class Assembly4Workbench(Workbench):
 
     def Activated(self):
         "This function is executed when the workbench is activated"
-        # FreeCAD.Console.PrintMessage(_atr("Asm4", "Activating Assembly4 WorkBench") + '\n')
+        # FreeCAD.Console.PrintMessage(translate("Asm4", "Activating Assembly4 WorkBench") + '\n')
         # make buttons of the selection toolbar checkable
         from PySide import QtGui
         mainwin = Gui.getMainWindow()
@@ -71,7 +71,7 @@ class Assembly4Workbench(Workbench):
     def Deactivated(self):
         "This function is executed when the workbench is deactivated"
         selectionFilter.observerDisable()
-        # FreeCAD.Console.PrintMessage(_atr("Asm4", "Leaving Assembly4 WorkBench") + "\n")
+        # FreeCAD.Console.PrintMessage(translate("Asm4", "Leaving Assembly4 WorkBench") + "\n")
         return
 
     def GetClassName(self):
@@ -83,7 +83,13 @@ class Assembly4Workbench(Workbench):
     |        This is where all is defined           |
     +-----------------------------------------------+
         """
+
     def Initialize(self):
+        from TranslateUtils import translate
+
+        FreeCADGui.addLanguagePath(Asm4_trans)
+        FreeCADGui.updateLocale()
+
         # Assembly4 version info
         # with file package.xml (FreeCAD ≥0.21)
         packageFile  = os.path.join( Asm4_path, 'package.xml' )
@@ -112,8 +118,14 @@ class Assembly4Workbench(Workbench):
             versionFile.close()
             # remove trailing newline
             Asm4_version = version[:-1]    
-        
-        FreeCAD.Console.PrintMessage(_atr("Asm4", "Initializing Assembly4 workbench")+ ' ('+Asm4_version+') .')
+            Asm4_version = version[:-1]
+
+        FreeCAD.Console.PrintMessage(
+            translate("Asm4", "Initializing Assembly4 workbench")
+            + " ("
+            + Asm4_version
+            + ") ."
+        )
         FreeCADGui.updateGui()
         # import all stuff
         import newAssemblyCmd    # created an App::Part container called 'Assembly'
@@ -175,7 +187,7 @@ class Assembly4Workbench(Workbench):
 
         # Define Menus
         # commands to appear in the Assembly4 menu 'Assembly'
-        self.appendMenu(QT_TRANSLATE_NOOP("Workbench", "&Assembly"), self.assemblyMenuItems())
+        self.appendMenu(translate("Workbench", "&Assembly"), self.assemblyMenuItems())
         self.dot()
 
         # put all constraints related commands in a separate menu
@@ -185,21 +197,23 @@ class Assembly4Workbench(Workbench):
         # self.appendMenu("&Geometry",["Asm4_newPart"])
 
         # additional entry in the Help menu
-        self.appendMenu(QT_TRANSLATE_NOOP("Workbench", "&Help"), ["Asm4_Help"])
+        self.appendMenu(translate("Workbench", "&Help"), ["Asm4_Help"])
         self.dot()
 
         # Define Toolbars
         # commands to appear in the Assembly4 toolbar
-        self.appendToolbar(_atr("Asm4", "Assembly"), self.assemblyToolbarItems())
+        self.appendToolbar(translate("Asm4", "Assembly"), self.assemblyToolbarItems())
         self.dot()
 
         # build the selection toolbar
-        self.appendToolbar(_atr("Asm4", "Selection Filter"), self.selectionToolbarItems())
+        self.appendToolbar(
+            translate("Asm4", "Selection Filter"), self.selectionToolbarItems()
+        )
         self.dot()
 
         # self.appendToolbar("Geometry",["Asm4_newPart"])
 
-        FreeCAD.Console.PrintMessage(" " + _atr("Asm4", "done") + ".\n")
+        FreeCAD.Console.PrintMessage(" " + translate("Asm4", "done") + ".\n")
         """
     +-----------------------------------------------+
     |           Initialisation finished             |
@@ -343,8 +357,12 @@ class Assembly4Workbench(Workbench):
 
         self.appendContextMenu("", "Separator")
         self.appendContextMenu("", contextMenu)  # add commands to the context menu
-        self.appendContextMenu(_atr("Asm4", "Assembly"), assemblySubMenu)  # add commands to the context menu
-        self.appendContextMenu(_atr("Asm4", "Create"), createSubMenu)  # add commands to the context menu
+        self.appendContextMenu(
+            translate("Asm4", "Assembly"), assemblySubMenu
+        )  # add commands to the context menu
+        self.appendContextMenu(
+            translate("Asm4", "Create"), createSubMenu
+        )  # add commands to the context menu
         self.appendContextMenu("", "Separator")
 
 
