@@ -5,7 +5,7 @@
   <version>0.50.7</version>
   <date>2024.01.31</date>
   <maintainer email="zolko@zzaero.com">Zolko-123</maintainer>
-  <license file="LICENSE">GPL-2</license>
+  <license file="LICENSE">GPL-2.0-only</license>
   <url type="repository" branch="master">https://github.com/Zolko-123/FreeCAD_Assembly4</url>
   <url type="documentation">https://wiki.freecadweb.org/Assembly4_Workbench</url>
   <url type="readme">https://github.com/Zolko-123/FreeCAD_Assembly4/blob/master/README.md</url>
