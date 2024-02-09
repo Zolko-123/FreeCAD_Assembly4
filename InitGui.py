@@ -175,7 +175,8 @@ class Assembly4Workbench(Workbench):
         # self.appendMenu("&Geometry",["Asm4_newPart"])
 
         # additional entry in the Help menu
-        self.appendMenu(Qtranslate("Workbench", "&Help"), ["Asm4_Help"])
+        # self.appendMenu(Qtranslate("Workbench", "&Help"), ["Asm4_Help"])
+        self.appendMenu( "&Help", ["Asm4_Help"])
         self.dot()
 
         # Define Toolbars
