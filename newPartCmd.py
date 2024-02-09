@@ -17,7 +17,7 @@ import FreeCAD as App
 import Part
 
 import Asm4_libs as Asm4
-
+from TranslateUtils import translate
 
 
 """
@@ -30,22 +30,21 @@ class newPart:
 
     def __init__(self, partName):
         self.partName = partName
-        if self.partName    == 'Part':
-            self.partType    = 'App::Part'
-            self.menutext    = "New Part"
-            self.tooltip     = "Create a new Part"
-            self.icon        = os.path.join( Asm4.iconPath , 'Asm4_Part.svg')
-        elif self.partName  == 'Body':
-            self.partType    = 'PartDesign::Body'
-            self.menutext    = "New Body"
-            self.tooltip     = "Create a new Body"
-            self.icon        = os.path.join( Asm4.iconPath , 'Asm4_Body.svg')
-        elif self.partName  == 'Group':
-            self.partType    = 'App::DocumentObjectGroup'
-            self.menutext    = "New Group"
-            self.tooltip     = "Create a new Group"
-            self.icon        = os.path.join( Asm4.iconPath , 'Asm4_Group.svg')
-
+        if self.partName == "Part":
+            self.partType = "App::Part"
+            self.menutext = translate("Commands1", "New Part")
+            self.tooltip = translate("Commands1", "Create a new Part")
+            self.icon = os.path.join(Asm4.iconPath, "Asm4_Part.svg")
+        elif self.partName == "Body":
+            self.partType = "PartDesign::Body"
+            self.menutext = translate("Commands1", "New Body")
+            self.tooltip = translate("Commands1", "Create a new Body")
+            self.icon = os.path.join(Asm4.iconPath, "Asm4_Body.svg")
+        elif self.partName == "Group":
+            self.partType = "App::DocumentObjectGroup"
+            self.menutext = translate("Commands1", "New Group")
+            self.tooltip = translate("Commands1", "Create a new Group")
+            self.icon = os.path.join(Asm4.iconPath, "Asm4_Group.svg")
 
     def GetResources(self):
         return {"MenuText"   : self.menutext,

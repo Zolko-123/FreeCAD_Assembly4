@@ -9,6 +9,7 @@ import os
 
 import FreeCADGui as Gui
 import FreeCAD as App
+from TranslateUtils import translate
 #from FastenerBase import FSBaseObject
 
 import Asm4_libs as Asm4
@@ -33,19 +34,19 @@ class insertFastener:
         self.fastenerType = fastenerType
         # Screw:
         if self.fastenerType=='Screw':
-            self.menutext = "Insert Screw"
+            self.menutext = translate("Fasteners", "Insert Screw")
             self.icon = os.path.join( Asm4.iconPath , 'Asm4_Screw.svg')
         # Nut:
         elif self.fastenerType=='Nut':
-            self.menutext = "Insert Nut"
+            self.menutext = translate("Fasteners", "Insert Nut")
             self.icon = os.path.join( Asm4.iconPath , 'Asm4_Nut.svg')
         # Washer:
         elif self.fastenerType=='Washer':
-            self.menutext = "Insert Washer"
+            self.menutext = translate("Fasteners", "Insert Washer")
             self.icon = os.path.join( Asm4.iconPath , 'Asm4_Washer.svg')
         # threaded rod:
         elif self.fastenerType=='ThreadedRod':
-            self.menutext = "Insert threaded rod"
+            self.menutext = translate("Fasteners", "Insert threaded rod")
             self.icon = os.path.join( Asm4.iconPath , 'Asm4_Rod.svg')
 
 
