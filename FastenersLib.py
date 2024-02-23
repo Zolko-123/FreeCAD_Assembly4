@@ -20,7 +20,6 @@ import Asm4_libs as Asm4
 from Asm4_Translate import translate
 
 
-
 # icon to show in the Menu, toolbar and widget window
 iconFile = os.path.join( Asm4.iconPath , 'Asm4_mvFastener.svg')
 

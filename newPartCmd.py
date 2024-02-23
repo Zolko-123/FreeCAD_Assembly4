@@ -9,7 +9,7 @@
 
 
 
-import os
+import math, re, os
 
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
