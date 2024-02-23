@@ -1,11 +1,4 @@
-import os
-
-import FreeCAD
-import FreeCADGui as Gui
-
-from TranslateUtils import translate
-
-class BaseCommand(object):
+class BaseCommand():
     """Base class to prepare all the commands."""
 
     def __init__(self):

@@ -9,7 +9,9 @@ import os
 
 import FreeCADGui as Gui
 import FreeCAD as App
-from TranslateUtils import translate
+
+from BaseCommand import BaseCommand
+from Asm4_Translate import translate
 #from FastenerBase import FSBaseObject
 
 import Asm4_libs as Asm4
@@ -29,10 +31,14 @@ from Asm4_Translate import translate
     screwObj = sm.createFastener('ISO7046', 'M6', '20', 'simple', shapeOnly=False)
 """
 
-class insertFastener:
+class insertFastener(BaseCommand):
     "My tool object"
     def __init__(self, fastenerType):
         self.fastenerType = fastenerType
+        self.tooltip = translate("Fasteners",
+            "FastenersWorkbench is not installed.\n \n"
+            "You can install it with the FreeCAD AddonsManager:\n"
+            "Menu Tools > Addon Manager > fasteners")
         # Screw:
         if self.fastenerType=='Screw':
             self.menutext = translate("Fasteners", "Insert Screw")
@@ -73,17 +79,17 @@ class insertFastener:
     |             dummy  placeFastener              |
     +-----------------------------------------------+
 """
-class placeFastenerCmd():
+class placeFastenerCmd(BaseCommand):
     "My tool object"
 
     def __init__(self):
         super(placeFastenerCmd,self).__init__()
-
-    def GetResources(self):
-        return {"MenuText": "Edit Attachment of a Fastener",
-                "ToolTip": 'FastenersWorkbench is not installed.\n \nYou can install it with the FreeCAD AddonsManager:\nMenu Tools > Addon Manager > fasteners',
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_mvFastener.svg')
-                }
+        self.icon = os.path.join( Asm4.iconPath , 'Asm4_mvFastener.svg')
+        self.menutext = translate("Fasteners", "Edit Attachment of a Fastener")
+        self.tooltip = translate("Fasteners",
+            "FastenersWorkbench is not installed.\n \n"
+            "You can install it with the FreeCAD AddonsManager:\n"
+            "Menu Tools > Addon Manager > fasteners")
 
     def IsActive(self):
         # it's a dummy, always inactive
@@ -98,15 +104,13 @@ class placeFastenerCmd():
     |                dummy parameters               |
     +-----------------------------------------------+
 """
-class changeFSparametersCmd():
+class changeFSparametersCmd(BaseCommand):
     def __init__(self):
         super(changeFSparametersCmd,self).__init__()
-
-    def GetResources(self):
-        return {"MenuText": "Change Fastener parameters",
-                "ToolTip": "Change Fastener parameters",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_FSparams.svg')
-                }
+        self.icon = os.path.join( Asm4.iconPath , 'Asm4_FSparams.svg')
+        self.menutext = translate("Fasteners", "Change Fastener parameters")
+        self.tooltip = translate("Fasteners",
+            "Change Fastener parameters")
 
     def IsActive(self):
         # it's a dummy, always inactive
@@ -117,15 +121,10 @@ class changeFSparametersCmd():
 
 
 
-class cloneFastenersToAxesCmd():
+class cloneFastenersToAxesCmd(BaseCommand):
     def __init__(self):
         super(cloneFastenersToAxesCmd,self).__init__()
-
-    def GetResources(self):
-        return {"MenuText": "Clone Fastener to Axes",
-                "ToolTip": 'FastenersWorkbench is not installed.\n \nYou can install it with the FreeCAD AddonsManager:\nMenu Tools > Addon Manager > fasteners',
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_cloneFasteners.svg')
-                }
+        self.pixmap
 
     def IsActive(self):
         # it's a dummy, always inactive
