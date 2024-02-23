@@ -16,6 +16,7 @@ import FreeCAD as App
 import Asm4_libs as Asm4
 
 
+QT_TRANSLATE_NOOP = App.Qt.QT_TRANSLATE_NOOP
 
 # get the Variables feature
 '''
@@ -52,10 +53,11 @@ def is_darkmode() -> bool:
     |               add a new Variable              |
     +-----------------------------------------------+
 """
-class addVariable():
 
+
+class addVariable:
     def __init__(self):
-        super(addVariable,self).__init__()
+        super(addVariable, self).__init__()
         self.UI = QtGui.QDialog()
         self.drawUI()
         self.allowedProperties = [  'App::PropertyBool',
@@ -74,23 +76,23 @@ class addVariable():
                                     'App::PropertyColor',
                                     'App::PropertyFile']
 
-
     def GetResources(self):
-        tooltip  = "<p>Adds a variable into the <i>Variables</i> placeholder in the document. "
-        tooltip += "This variable can then be used in any formula using the <i>ExpressionEngine</i> "
-        tooltip += "of any compatible input field. These are marked with a \"f(x)\" symbol</p>"
-        iconFile = os.path.join( Asm4.iconPath , 'Asm4_addVariable.svg')
-        return {"MenuText": "Add Variable",
-                "ToolTip": tooltip,
-                "Pixmap" : iconFile }
-
+        return {
+            "MenuText": QT_TRANSLATE_NOOP("Asm4_addVariable", "Add Variable"),
+            "ToolTip": QT_TRANSLATE_NOOP(
+                "Asm4_addVariable",
+                "<p>Adds a variable into the <i>Variables</i> placeholder in the document.\n"
+                "This variable can then be used in any formula using the <i>ExpressionEngine</i>\n"
+                'of any compatible input field. These are marked with the "f(x)" symbol</p>',
+            ),
+            "Pixmap": os.path.join(Asm4.iconPath, "Asm4_addVariable.svg"),
+        }
 
     def IsActive(self):
         # if there is an Asm4 Model in the ActiveDocument, or if an App::Part is selected
         if App.ActiveDocument:
             return True
         return False
-   
 
     def Activated(self):
         # retrieve the Variables object
@@ -239,18 +241,20 @@ class addVariable():
     |         delete an existing Variable           |
     +-----------------------------------------------+
 """
-class delVariable():
 
+
+class delVariable:
     def __init__(self):
-        super(delVariable,self).__init__()
+        super(delVariable, self).__init__()
         self.UI = QtGui.QDialog()
         self.drawUI()
 
     def GetResources(self):
-        return {"MenuText": "Delete Variable",
-                "ToolTip": "Delete a Variable",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_delVariable.svg')
-                }
+        return {
+            "MenuText": QT_TRANSLATE_NOOP("Asm4_delVariable", "Delete Variable"),
+            "ToolTip": QT_TRANSLATE_NOOP("Asm4_delVariable", "Delete a Variable"),
+            "Pixmap": os.path.join(Asm4.iconPath, "Asm4_delVariable.svg"),
+        }
 
     def IsActive(self):
         # if there is an Asm4 Model in the ActiveDocument
@@ -369,11 +373,16 @@ class delVariable():
     |       add the command to the workbench        |
     +-----------------------------------------------+
 """
-Gui.addCommand( 'Asm4_addVariable', addVariable() )
-Gui.addCommand( 'Asm4_delVariable', delVariable() )
+Gui.addCommand("Asm4_addVariable", addVariable())
+Gui.addCommand("Asm4_delVariable", delVariable())
 
-variablesCmdList = [ 'Asm4_addVariable', 'Asm4_delVariable' ]
-tooltip  = "Adds a variable into the \"Variables\" placeholder in the document.\n"
-tooltip += "This variable can then be used in any formula using the ExpressionEngine\n"
-tooltip += "of any compatible input field. These are marked with a \"f(x)\" symbol."
-Gui.addCommand( 'Asm4_variablesCmd', Asm4.dropDownCmd( variablesCmdList, 'Variables', tooltip ))
+variablesCmdList = ["Asm4_addVariable", "Asm4_delVariable"]
+tooltip = QT_TRANSLATE_NOOP(
+    "Asm4_variablesCmd",
+    "<p>Adds a variable into the <i>Variables</i> placeholder in the document.\n"
+    "This variable can then be used in any formula using the <i>ExpressionEngine</i>\n"
+    'of any compatible input field. These are marked with the "f(x)" symbol</p>',
+)
+Gui.addCommand(
+    "Asm4_variablesCmd", Asm4.dropDownCmd(variablesCmdList, "Variables", tooltip)
+)

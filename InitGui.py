@@ -25,14 +25,21 @@
 import os
 
 import Asm4_locator
-global Asm4_icon, Asm4_path, Asm4_trans
-Asm4_path = os.path.dirname( Asm4_locator.__file__ )
-Asm4_icon = os.path.join( Asm4_path , 'Resources/icons/Assembly4.svg' )
-Asm4_trans = os.path.join(Asm4_path, "Resources/translations")
 
 
 # I don't like this being here
+import FreeCAD
+import FreeCADGui as Gui
 import selectionFilter
+
+
+global Asm4_icon, Asm4_path, Asm4_trans
+Asm4_path = os.path.dirname(Asm4_locator.__file__)
+Asm4_icon = os.path.join(Asm4_path, "Resources", "icons", "Assembly4.svg")
+Asm4_trans = os.path.join(Asm4_path, "Resources", "translations")
+
+Gui.addLanguagePath(Asm4_trans)
+Gui.updateLocale()
 
 
 """
@@ -40,12 +47,13 @@ import selectionFilter
     |            Initialize the workbench           |
     +-----------------------------------------------+
 """
-class Assembly4Workbench(Workbench):
 
+
+class Assembly4Workbench(Workbench):
     global Asm4_icon
     global selectionFilter
     MenuText = "Assembly 4"
-    ToolTip = "Assembly 4 workbench"
+    ToolTip = FreeCAD.Qt.translate("Workbench", "Assembly 4 workbench")
     Icon = Asm4_icon
 
     def __init__(self):
@@ -53,12 +61,14 @@ class Assembly4Workbench(Workbench):
 
     def Activated(self):
         "This function is executed when the workbench is activated"
+        # FreeCAD.Console.PrintMessage(translate("Workbench", "Activating Assembly4 WorkBench") + '\n')
         # make buttons of the selection toolbar checkable
         from PySide import QtGui
+
         mainwin = Gui.getMainWindow()
         sf_tb = None
         for tb in mainwin.findChildren(QtGui.QToolBar):
-            if tb.objectName()=='Selection Filter':
+            if tb.objectName() == "Selection Filter":
                 sf_tb = tb
         # make all buttons except last one (clear selection filter) checkable
         if sf_tb is not None:
@@ -69,20 +79,21 @@ class Assembly4Workbench(Workbench):
     def Deactivated(self):
         "This function is executed when the workbench is deactivated"
         selectionFilter.observerDisable()
+        # FreeCAD.Console.PrintMessage(translate("Workbench", "Leaving Assembly4 WorkBench") + "\n")
         return
 
     def GetClassName(self):
         # this function is mandatory if this is a full python workbench
         return "Gui::PythonWorkbench"
 
-
         """
     +-----------------------------------------------+
     |        This is where all is defined           |
     +-----------------------------------------------+
         """
-    def Initialize(self):
 
+    def Initialize(self):
+        QT_TRANSLATE_NOOP = FreeCAD.Qt.QT_TRANSLATE_NOOP
         # check for FreeCAD version
         FCver = FreeCAD.Version()
         # print("This is FreeCAD version "+FCver[0]+"."+FCver[1]+"."+FCver[2]+"-"+FCver[3])
@@ -96,271 +107,319 @@ class Assembly4Workbench(Workbench):
                 FreeCAD.Console.PrintWarning("is not backward compatible with FreeCAD v0.21 and earlier\n")
                 FreeCAD.Console.PrintWarning("It is rather suggested to use the stable FreeCAD v0.21 branch\n")
 
-        # Translations
-        # from Asm4_Translate import Qtranslate
-        FreeCADGui.addLanguagePath(Asm4_trans)
-        FreeCADGui.updateLocale()
-
         # Assembly4 version info
         # with file package.xml (FreeCAD ≥0.21)
-        packageFile  = os.path.join( Asm4_path, 'package.xml' )
+        packageFile = os.path.join(Asm4_path, "package.xml")
         try:
-            metadata     = FreeCAD.Metadata(packageFile)
-            Asm4_date    = metadata.Date
+            metadata = FreeCAD.Metadata(packageFile)
+            Asm4_date = metadata.Date
             Asm4_version = metadata.Version
         # with file VERSION (FreeCAD ≤0.20)
         except:
-            versionPath  = os.path.join( Asm4_path, 'VERSION' )
-            versionFile  = open(versionPath,"r")
+            """
+            FCVersion    = App.Version()[0]+'.'+App.Version()[1]
+            if FCVersion=='0.19':
+                FCDate       = " from "+App.Version()[4][0:4]
+            elif FCVersion=='0.20':
+                FCDate       = " from "+App.Version()[5][0:4]
+            else :
+                FCDate       = ""
+            message      = "You seem to be using FreeCAD version "+FCVersion+FCDate+" which is quite old. "
+            message     += "Some functionality of latest versions might be missing\n"
+            FreeCAD.Console.PrintMessage(message)
+            """
+            versionPath = os.path.join(Asm4_path, "VERSION")
+            versionFile = open(versionPath, "r")
             # read second line
             version = versionFile.readlines()[1]
             versionFile.close()
             # remove trailing newline
             Asm4_version = version[:-1]    
-        
-        FreeCAD.Console.PrintMessage("Initializing Assembly4 workbench"+ ' ('+Asm4_version+') .')
-        FreeCADGui.updateGui()
-        # import all stuff
-        import newAssemblyCmd    # created an App::Part container called 'Assembly'
+
+        FreeCAD.Console.PrintMessage(
+            FreeCAD.Qt.translate("Workbench", "Initializing Assembly4 workbench")
+            + f" ({Asm4_version})."
+        )
+
         self.dot()
-        import newDatumCmd         # creates a new LCS in 'Model'
+        import newPartCmd  # creates a new App::Part container called 'Model'
+
         self.dot()
-        import newPartCmd          # creates a new App::Part container called 'Model'
+        import infoPartCmd  # edits part information for BoM
+
         self.dot()
-        import infoPartCmd         # edits part information for BoM
+        import insertLinkCmd  # inserts an App::Link to a 'Model' in another file
+
         self.dot()
-        import insertLinkCmd       # inserts an App::Link to a 'Model' in another file
+        import placeLinkCmd  # places a linked part by snapping LCS (in the Part and in the Assembly)
+
         self.dot()
-        import placeLinkCmd        # places a linked part by snapping LCS (in the Part and in the Assembly)
+        import importDatumCmd  # creates an LCS in assembly and attaches it to an LCS relative to an external file
+
         self.dot()
-        import importDatumCmd      # creates an LCS in assembly and attaches it to an LCS relative to an external file
+        import releaseAttachmentCmd  # creates an LCS in assembly and attaches it to an LCS relative to an external file
+
         self.dot()
-        import releaseAttachmentCmd# creates an LCS in assembly and attaches it to an LCS relative to an external file
+        import makeBinderCmd  # creates an LCS in assembly and attaches it to an LCS relative to an external file
+
         self.dot()
-        import makeBinderCmd       # creates an LCS in assembly and attaches it to an LCS relative to an external file
+        import VariablesLib  # creates an LCS in assembly and attaches it to an LCS relative to an external file
+
         self.dot()
-        import VariablesLib        # creates an LCS in assembly and attaches it to an LCS relative to an external file
+        import AnimationLib  # creates an LCS in assembly and attaches it to an LCS relative to an external file
+
         self.dot()
-        import AnimationLib        # creates an LCS in assembly and attaches it to an LCS relative to an external file
+        import updateAssemblyCmd  # updates all parts and constraints in the assembly
+
         self.dot()
-        import updateAssemblyCmd   # updates all parts and constraints in the assembly
+        import makeArrayCmd  # creates a new array of App::Link
+
         self.dot()
-        import makeArrayCmd        # creates a new array of App::Link
+        import variantLinkCmd  # creates a variant link
+
         self.dot()
-        import variantLinkCmd      # creates a variant link
+        import gotoDocumentCmd  # opens the documentof the selected App::Link
+
         self.dot()
-        import gotoDocumentCmd     # opens the documentof the selected App::Link
+        import Asm4_Measure  # Measure tool in the Task panel
+
         self.dot()
-        import Asm4_Measure        # Measure tool in the Task panel
+        import makeBomCmd  # creates the parts list
+
         self.dot()
-        import makeBomCmd          # creates the parts list
+        import checkInterference  # check interferences btween parts inside the Assembly
+
         self.dot()
-        import checkInterference   # check interferences btween parts inside the Assembly
+        import exportFiles  # creates a hierarchical tree listing of files in an assembly
+
         self.dot()
-        import exportFiles         # creates a hierarchical tree listing of files in an assembly
+        import HelpCmd  # shows a basic help window
+
         self.dot()
-        import HelpCmd             # shows a basic help window
+        import showHideLcsCmd  # shows/hides all the LCSs
+
         self.dot()
-        import showHideLcsCmd      # shows/hides all the LCSs
-        self.dot()
-        import configurationEngine # save/restore configuration
+        import configurationEngine  # save/restore configuration
+
         self.dot()
 
         # Fasteners
-        if self.checkWorkbench('FastenersWorkbench'):
+        if self.checkWorkbench("FastenersWorkbench"):
             # a library to handle fasteners from the FastenersWorkbench
             import FastenersLib
-            self.FastenersCmd = 'Asm4_Fasteners'
+
+            self.FastenersCmd = "Asm4_Fasteners"
         else:
             # a dummy library if the FastenersWorkbench is not installed
             import FastenersDummy
-            self.FastenersCmd = 'Asm4_insertScrew'
-        self.dot()
 
+            self.FastenersCmd = "Asm4_insertScrew"
+        self.dot()
 
         # Define Menus
         # commands to appear in the Assembly4 menu 'Assembly'
-        self.appendMenu("&Assembly", self.assemblyMenuItems())
+        self.appendMenu(
+            QT_TRANSLATE_NOOP("Workbench", "&Assembly"), self.assemblyMenuItems()
+        )
         self.dot()
 
         # put all constraints related commands in a separate menu
-        self.appendMenu("&Constraints", self.constraintsMenuItems())
+        self.appendMenu(
+            QT_TRANSLATE_NOOP("Workbench", "&Constraints"), self.constraintsMenuItems()
+        )
         self.dot()
 
         # self.appendMenu("&Geometry",["Asm4_newPart"])
 
         # additional entry in the Help menu
-        # self.appendMenu(Qtranslate("Workbench", "&Help"), ["Asm4_Help"])
-        self.appendMenu( "&Help", ["Asm4_Help"])
+        # self.appendMenu(QT_TRANSLATE_NOOP("Workbench", "&Help"), ["Asm4_Help"])
+        self.appendMenu(QT_TRANSLATE_NOOP("Workbench", "&Help"), ["Asm4_Help"])
         self.dot()
 
         # Define Toolbars
         # commands to appear in the Assembly4 toolbar
-        self.appendToolbar("Assembly", self.assemblyToolbarItems())
+        self.appendToolbar(
+            QT_TRANSLATE_NOOP("Workbench", "Assembly"), self.assemblyToolbarItems()
+        )
         self.dot()
 
         # build the selection toolbar
-        self.appendToolbar("Selection Filter", self.selectionToolbarItems())
+        self.appendToolbar(
+            QT_TRANSLATE_NOOP("Workbench", "Selection Filter"),
+            self.selectionToolbarItems(),
+        )
         self.dot()
 
         # self.appendToolbar("Geometry",["Asm4_newPart"])
 
-        FreeCAD.Console.PrintMessage(" " + "done" + ".\n")
+        FreeCAD.Console.PrintMessage(
+            " " + FreeCAD.Qt.translate("Workbench", "done") + ".\n"
+        )
         """
     +-----------------------------------------------+
     |           Initialisation finished             |
     +-----------------------------------------------+
         """
 
-
-
     """
     +-----------------------------------------------+
     |            Assembly Menu & Toolbar            |
     +-----------------------------------------------+
     """
+
     def assemblyMenuItems(self):
-        commandList = [ "Asm4_newAssembly",
-                        "Asm4_newPart",
-                        "Asm4_newBody",
-                        "Asm4_newGroup",
-                        "Asm4_newSketch",
-                        'Asm4_createDatum',
-                        self.FastenersCmd,
-                        "Separator",
-                        "Asm4_insertLink",
-                        "Asm4_mirrorArray",
-                        "Asm4_linearArray",
-                        "Asm4_circularArray",
-                        "Asm4_expressionArray",
-                        "Asm4_variantLink",
-                        "Separator",
-                        "Asm4_cloneFastenersToAxes",
-                        "Asm4_importDatum",
-                        "Asm4_shapeBinder",
-                        "Separator",
-                        "Asm4_infoPart",
-                        "Asm4_makeLocalBOM",
-                        "Asm4_makeBOM",
-                        "Asm4_listLinkedFiles",
-                        "Asm4_checkInterference",
-                        "Asm4_Measure",
-                        'Asm4_showLcs',
-                        'Asm4_hideLcs',
-                        "Asm4_addVariable",
-                        "Asm4_delVariable",
-                        "Asm4_Animate",
-                        "Asm4_openConfigurations"
-                        ]
+        commandList = [
+            "Asm4_newAssembly",
+            "Asm4_newPart",
+            "Asm4_newBody",
+            "Asm4_newGroup",
+            "Asm4_newSketch",
+            "Asm4_createDatum",
+            self.FastenersCmd,
+            "Separator",
+            "Asm4_insertLink",
+            "Asm4_mirrorArray",
+            "Asm4_linearArray",
+            "Asm4_circularArray",
+            "Asm4_expressionArray",
+            "Asm4_variantLink",
+            "Separator",
+            "Asm4_cloneFastenersToAxes",
+            "Asm4_importDatum",
+            "Asm4_shapeBinder",
+            "Separator",
+            "Asm4_infoPart",
+            "Asm4_makeLocalBOM",
+            "Asm4_makeBOM",
+            "Asm4_listLinkedFiles",
+            "Asm4_checkInterference",
+            "Asm4_Measure",
+            "Asm4_showLcs",
+            "Asm4_hideLcs",
+            "Asm4_addVariable",
+            "Asm4_delVariable",
+            "Asm4_Animate",
+            "Asm4_openConfigurations",
+        ]
         return commandList
 
     def constraintsMenuItems(self):
-        commandList = [ "Asm4_placeLink",
-                        "Asm4_releaseAttachment",
-                        "Separator",
-                        "Asm4_updateAssembly",
-                        "Separator",
-                        ]
+        commandList = [
+            "Asm4_placeLink",
+            "Asm4_releaseAttachment",
+            "Separator",
+            "Asm4_updateAssembly",
+            "Separator",
+        ]
         return commandList
 
     def assemblyToolbarItems(self):
-        commandList = [ "Asm4_newAssembly",
-                        "Asm4_newPart",
-                        "Asm4_newBody",
-                        "Asm4_newGroup",
-                        "Asm4_infoPart",
-                        "Asm4_insertLink",
-                        "Asm4_variantLink",
-                        self.FastenersCmd,
-                        "Separator",
-                        "Asm4_newSketch",
-                        'Asm4_createDatum',
-                        "Asm4_importDatum",
-                        "Asm4_shapeBinder",
-                        "Separator",
-                        "Asm4_placeLink",
-                        "Asm4_releaseAttachment",
-                        "Asm4_updateAssembly",
-                        "Separator",
-                        "Asm4_mirrorArray",
-                        "Asm4_linearArray",
-                        "Asm4_circularArray",
-                        "Asm4_expressionArray",
-                        "Asm4_variablesCmd",
-                        "Separator",
-                        "Asm4_Animate",
-                        "Asm4_Measure",
-                        "Asm4_makeBOM",
-                        "Asm4_listLinkedFiles",
-                        'Asm4_showLcs',
-                        'Asm4_hideLcs',
-                        "Asm4_checkInterference",
-                        "Asm4_openConfigurations"
-                        ]
+        commandList = [
+            "Asm4_newAssembly",
+            "Asm4_newPart",
+            "Asm4_newBody",
+            "Asm4_newGroup",
+            "Asm4_infoPart",
+            "Asm4_insertLink",
+            "Asm4_variantLink",
+            self.FastenersCmd,
+            "Separator",
+            "Asm4_newSketch",
+            "Asm4_createDatum",
+            "Asm4_importDatum",
+            "Asm4_shapeBinder",
+            "Separator",
+            "Asm4_placeLink",
+            "Asm4_releaseAttachment",
+            "Asm4_updateAssembly",
+            "Separator",
+            "Asm4_mirrorArray",
+            "Asm4_linearArray",
+            "Asm4_circularArray",
+            "Asm4_expressionArray",
+            "Asm4_variablesCmd",
+            "Separator",
+            "Asm4_Animate",
+            "Asm4_Measure",
+            "Asm4_makeBOM",
+            "Asm4_listLinkedFiles",
+            "Asm4_showLcs",
+            "Asm4_hideLcs",
+            "Asm4_checkInterference",
+            "Asm4_openConfigurations",
+        ]
         return commandList
-
 
     """
     +-----------------------------------------------+
     |                 Selection Toolbar             |
     +-----------------------------------------------+
     """
+
     def selectionToolbarItems(self):
         # commands to appear in the Selection toolbar
-        commandList =  ["Asm4_SelectionFilterVertexCmd",
-                        "Asm4_SelectionFilterEdgeCmd",
-                        "Asm4_SelectionFilterFaceCmd",
-                        "Asm4_selObserver3DViewCmd" ,
-                        "Asm4_SelectionFilterClearCmd"]
+        commandList = [
+            "Asm4_SelectionFilterVertexCmd",
+            "Asm4_SelectionFilterEdgeCmd",
+            "Asm4_SelectionFilterFaceCmd",
+            "Asm4_selObserver3DViewCmd",
+            "Asm4_SelectionFilterClearCmd",
+        ]
         return commandList
-
 
     """
     +-----------------------------------------------+
     |                Contextual Menus               |
     +-----------------------------------------------+
     """
+
     def ContextMenu(self, recipient):
+        QT_TRANSLATE_NOOP = FreeCAD.Qt.QT_TRANSLATE_NOOP
         # This is executed whenever the user right-clicks on screen"
         # "recipient" will be either "view" or "tree"
-        contextMenu  = ['Asm4_gotoDocument'  ,
-                        'Asm4_showLcs'       ,
-                        'Asm4_hideLcs'       ]
+        contextMenu = ["Asm4_gotoDocument", "Asm4_showLcs", "Asm4_hideLcs"]
         # commands to appear in the 'Assembly' sub-menu in the contextual menu (right-click)
-        assemblySubMenu =[ "Asm4_insertLink" ,
-                        "Asm4_placeLink"     ,
-                        "Asm4_importDatum"   ,
-                        'Asm4_FSparameters'  ,
-                        'Separator'          ,
-                        'Asm4_applyConfiguration']
+        assemblySubMenu = [
+            "Asm4_insertLink",
+            "Asm4_placeLink",
+            "Asm4_importDatum",
+            "Asm4_FSparameters",
+            "Separator",
+            "Asm4_applyConfiguration",
+        ]
         # commands to appear in the 'Create' sub-menu in the contextual menu (right-click)
-        createSubMenu =["Asm4_newSketch",
-                        "Asm4_newBody",
-                        "Asm4_newLCS",
-                        "Asm4_newAxis",
-                        "Asm4_newPlane",
-                        "Asm4_newPoint",
-                        "Asm4_newHole",
-                        "Asm4_insertScrew",
-                        "Asm4_insertNut",
-                        "Asm4_insertWasher",
-                        'Separator',
-                        'Asm4_newConfiguration']
+        createSubMenu = [
+            "Asm4_newSketch",
+            "Asm4_newBody",
+            "Asm4_newLCS",
+            "Asm4_newAxis",
+            "Asm4_newPlane",
+            "Asm4_newPoint",
+            "Asm4_newHole",
+            "Asm4_insertScrew",
+            "Asm4_insertNut",
+            "Asm4_insertWasher",
+            "Separator",
+            "Asm4_newConfiguration",
+        ]
 
         self.appendContextMenu("", "Separator")
         self.appendContextMenu("", contextMenu)  # add commands to the context menu
-        self.appendContextMenu("Assembly", assemblySubMenu)  # add commands to the context menu
-        self.appendContextMenu("Create", createSubMenu)  # add commands to the context menu
+        self.appendContextMenu(
+            QT_TRANSLATE_NOOP("Workbench", "Assembly"), assemblySubMenu
+        )  # add commands to the context menu
+        self.appendContextMenu(
+            QT_TRANSLATE_NOOP("Workbench", "Create"), createSubMenu
+        )  # add commands to the context menu
         self.appendContextMenu("", "Separator")
-
-
 
     """
     +-----------------------------------------------+
     |               helper functions                |
     +-----------------------------------------------+
     """
-    def checkWorkbench( self, workbench ):
+
+    def checkWorkbench(self, workbench):
         # checks whether the specified workbench (a 'string') is installed
         listWB = Gui.listWorkbenches()
         hasWB = False
@@ -372,10 +431,7 @@ class Assembly4Workbench(Workbench):
     # prints a dot in the consome window to show progress
     def dot(self):
         FreeCAD.Console.PrintMessage(".")
-        FreeCADGui.updateGui()
-
-
-
+        Gui.updateGui()
 
 
 """

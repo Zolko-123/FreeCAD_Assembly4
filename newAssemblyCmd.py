@@ -7,7 +7,6 @@
 # Copyright HUBERT Zoltán
 
 
-
 import os
 
 from PySide import QtGui, QtCore
@@ -15,8 +14,8 @@ import FreeCADGui as Gui
 import FreeCAD as App
 
 import Asm4_libs as Asm4
-from Asm4_Translate import translate
 
+QT_TRANSLATE_NOOP = App.Qt.QT_TRANSLATE_NOOP
 
 
 class newAssemblyCmd:
@@ -36,11 +35,15 @@ def makeAssembly():
     return assembly
 
     """
-    def GetResources(self):
-        tooltip  = translate("Commands", "<p>Create a new Assembly container</p>")
-        iconFile = os.path.join( Asm4.iconPath , 'Asm4_Model.svg')
-        return {"MenuText": "New Assembly", "ToolTip": tooltip, "Pixmap" : iconFile }
 
+    def GetResources(self):
+        return {
+            "MenuText": QT_TRANSLATE_NOOP("Asm4_newAssembly", "New Assembly"),
+            "ToolTip": QT_TRANSLATE_NOOP(
+                "Asm4_newAssembly", "<p>Create a new Assembly container</p>"
+            ),
+            "Pixmap": os.path.join(Asm4.iconPath, "Asm4_Model.svg"),
+        }
 
     def IsActive(self):
         if App.ActiveDocument:

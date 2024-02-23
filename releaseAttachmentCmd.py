@@ -16,6 +16,7 @@ import Part
 
 import Asm4_libs as Asm4
 
+QT_TRANSLATE_NOOP = App.Qt.QT_TRANSLATE_NOOP
 
 
 """
@@ -23,19 +24,24 @@ import Asm4_libs as Asm4
     |                  main class                   |
     +-----------------------------------------------+
 """
-class releaseAttachment:
 
+
+class releaseAttachment:
     def __init__(self):
-        super(releaseAttachment,self).__init__()
+        super(releaseAttachment, self).__init__()
         self.selectedObj = []
 
-
     def GetResources(self):
-        return {"MenuText": "Release from Attachment",
-                "ToolTip": "Release an object from all attachments to any geometry",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_releaseAttachment.svg')
-                }
-
+        return {
+            "MenuText": QT_TRANSLATE_NOOP(
+                "Asm4_releaseAttachment", "Release from Attachment"
+            ),
+            "ToolTip": QT_TRANSLATE_NOOP(
+                "Asm4_releaseAttachment",
+                "Release an object from all attachments to any geometry",
+            ),
+            "Pixmap": os.path.join(Asm4.iconPath, "Asm4_releaseAttachment.svg"),
+        }
 
     def IsActive(self):
         # is there an active document ?

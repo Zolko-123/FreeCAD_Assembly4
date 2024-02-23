@@ -30,30 +30,31 @@ from FreeCAD import Console as FCC
 
 import Asm4_libs as Asm4
 
-'''
+QT_TRANSLATE_NOOP = App.Qt.QT_TRANSLATE_NOOP
+
+
+"""
 has_anytree = False
 try:
     from anytree import Node, RenderTree
     has_anytree = True
 except ImportError:
     FCC.PrintMessage("\nINFO : Pylib anytree is missing, exportFiles is not available\n")
-'''
+"""
 
 # lists the parts and linked parts of the selected container
 class listLinkedFiles():
 
     def GetResources(self):
-        menutext = "Structure tree of the assembly"
-        tooltip  = "<p>Show the hierarchical tree structure of parts and sub-assemblies in the assembly. "
-        tooltip += "The tree is displayed with ASCII art</p>"
-        tooltip += "<p><b>Usage</b>: select an entity and click the command</p>"
-        iconFile = os.path.join(Asm4.iconPath, 'Asm4_List_Liked_Files_Tree.svg')
-        return {
-            "MenuText": menutext,
-            "ToolTip" : tooltip,
-            "Pixmap"  : iconFile
-        }
-
+        menutext = QT_TRANSLATE_NOOP("Asm4_listLinkedFiles", "Structure tree of the assembly")
+        tooltip = QT_TRANSLATE_NOOP(
+            "Asm4_listLinkedFiles",
+            "<p>Show the hierarchical tree structure of parts and sub-assemblies in the assembly. "
+            "The tree is displayed with ASCII art</p>"
+            "<p><b>Usage</b>: select an entity and click the command</p>",
+        )
+        iconFile = os.path.join(Asm4.iconPath, "Asm4_List_Liked_Files_Tree.svg")
+        return {"MenuText": menutext, "ToolTip": tooltip, "Pixmap": iconFile}
 
     def IsActive(self):
         if App.ActiveDocument and len(Gui.Selection.getSelection())==1:

@@ -9,7 +9,7 @@
 
 
 
-import os
+import math, re, os
 
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
@@ -17,8 +17,8 @@ import FreeCAD as App
 import Part
 
 import Asm4_libs as Asm4
-from Asm4_Translate import translate
 
+QT_TRANSLATE_NOOP = App.Qt.QT_TRANSLATE_NOOP
 
 """
     +-----------------------------------------------+
@@ -32,26 +32,22 @@ class newPart:
         self.partName = partName
         if self.partName == "Part":
             self.partType = "App::Part"
-            self.menutext = "New Part"
-            self.tooltip = translate("Commands1", "Create a new Part")
+            self.menutext = QT_TRANSLATE_NOOP("Asm4_newPart", "New Part")
+            self.tooltip = QT_TRANSLATE_NOOP("Asm4_newPart", "Create a new Part")
             self.icon = os.path.join(Asm4.iconPath, "Asm4_Part.svg")
         elif self.partName == "Body":
             self.partType = "PartDesign::Body"
-            self.menutext = "New Body"
-            self.tooltip = translate("Commands1", "Create a new Body")
+            self.menutext = QT_TRANSLATE_NOOP("Asm4_newBody", "New Body")
+            self.tooltip = QT_TRANSLATE_NOOP("Asm4_newBody", "Create a new Body")
             self.icon = os.path.join(Asm4.iconPath, "Asm4_Body.svg")
         elif self.partName == "Group":
             self.partType = "App::DocumentObjectGroup"
-            self.menutext = "New Group"
-            self.tooltip = translate("Commands1", "Create a new Group")
+            self.menutext = QT_TRANSLATE_NOOP("Asm4_newGroup", "New Group")
+            self.tooltip = QT_TRANSLATE_NOOP("Asm4_newGroup", "Create a new Group")
             self.icon = os.path.join(Asm4.iconPath, "Asm4_Group.svg")
 
     def GetResources(self):
-        return {"MenuText"   : self.menutext,
-                "ToolTip"    : self.tooltip,
-                "Pixmap"     : self.icon 
-                }
-
+        return {"MenuText": self.menutext, "ToolTip": self.tooltip, "Pixmap": self.icon}
 
     def IsActive(self):
         if App.ActiveDocument:

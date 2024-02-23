@@ -18,6 +18,7 @@ import Asm4_libs as Asm4
 from Asm4_objects import VariantLink, ViewProviderVariant
 
 
+QT_TRANSLATE_NOOP = App.Qt.QT_TRANSLATE_NOOP
 
 
 """
@@ -28,20 +29,23 @@ from Asm4_objects import VariantLink, ViewProviderVariant
 var = App.ActiveDocument.addObject("Part::FeaturePython", 'varLink', VariantLink(),None,True)
 
 """
-class makeVariantLink():
+
+
+class makeVariantLink:
     def __init__(self):
-        super(makeVariantLink,self).__init__()
-        #pass
+        super(makeVariantLink, self).__init__()
 
     def GetResources(self):
-        tooltip  = "EXPERIMENTAL !!!\n"
-        tooltip += "Create a variant link to a part\n"
-        tooltip += "Select a part containing a \"Variables\" property container"
-        iconFile = 'Variant_Link.svg'
-        return {"MenuText" : "Create a variant Part", 
-                "ToolTip"  :  tooltip, 
-                "Pixmap"   :  os.path.join( Asm4.iconPath, iconFile ) 
-                }
+        return {
+            "MenuText": QT_TRANSLATE_NOOP("Asm4_variantLink", "Create a variant Part"),
+            "ToolTip": QT_TRANSLATE_NOOP(
+                "Asm4_variantLink",
+                "EXPERIMENTAL !!!\n"
+                "Create a variant link to a part\n"
+                'Select a part containing a "Variables" property container',
+            ),
+            "Pixmap": os.path.join(Asm4.iconPath, "Variant_Link.svg"),
+        }
 
     def IsActive(self):
         # we only insert variant links into assemblies and root parts 

@@ -23,22 +23,22 @@ import Asm4_libs as Asm4
 import showHideLcsCmd as lcs
 import Part
 
-class checkInterference:
+QT_TRANSLATE_NOOP = App.Qt.QT_TRANSLATE_NOOP
 
+
+class checkInterference:
     def __init__(self):
         super(checkInterference, self).__init__()
 
-
     def GetResources(self):
-        menutext = "Check Intereferences"
-        tooltip  = "Check interferences among assembled objects (may take time)"
-        iconFile = os.path.join(Asm4.iconPath, 'Asm4_Interference_Check.svg')
         return {
-            "MenuText": menutext,
-            "ToolTip": tooltip,
-            "Pixmap": iconFile
+            "MenuText": QT_TRANSLATE_NOOP("Asm4_checkInterference", "Check Interferences"),
+            "ToolTip": QT_TRANSLATE_NOOP(
+                "Asm4_checkInterference",
+                "Check interferences among assembled objects (may take time)",
+            ),
+            "Pixmap": os.path.join(Asm4.iconPath, "Asm4_Interference_Check.svg"),
         }
-
 
     def IsActive(self):
         if Asm4.getAssembly() is None:

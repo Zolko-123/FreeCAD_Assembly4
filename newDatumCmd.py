@@ -16,62 +16,63 @@ from FreeCAD import Console as FCC
 
 import Asm4_libs as Asm4
 
-
-
+QT_TRANSLATE_NOOP = App.Qt.QT_TRANSLATE_NOOP
 
 """
     +-----------------------------------------------+
     |      a class to create all Datum objects      |
     +-----------------------------------------------+
 """
+
+
 class newDatum:
     "My tool object"
+
     def __init__(self, datumName):
         self.datumName = datumName
         # recognised containers (not the same as Asm4.containerTypes !)
-        self.containers = [ 'App::Part', 'PartDesign::Body', 'App::DocumentObjectGroup']
-        if self.datumName   == 'Point':
-            self.datumType   = 'PartDesign::Point'
-            self.menutext    = "New Point"
-            self.tooltip     = "Create a new Datum Point in a Part"
-            self.icon        = os.path.join( Asm4.iconPath , 'Asm4_Point.svg')
-            self.datumColor  = (0.00,0.00,0.00)
-            self.datumAlpha  = []
-        elif self.datumName == 'Axis':
-            self.datumType   = 'PartDesign::Line'
-            self.menutext    = "New Axis"
-            self.tooltip     = "Create a new Datum Axis in a Part"
-            self.icon        = os.path.join( Asm4.iconPath , 'Asm4_Axis.svg')
-            self.datumColor  = (0.00,0.00,0.50)
-            self.datumAlpha  = []
-        elif self.datumName == 'Plane':
-            self.datumType   = 'PartDesign::Plane'
-            self.menutext    = "New Plane"
-            self.tooltip     = "Create a new Datum Plane in a Part"
-            self.icon        = os.path.join( Asm4.iconPath , 'Asm4_Plane.svg')
-            self.datumColor  = (0.50,0.50,0.50)
-            self.datumAlpha  = 80
-        elif self.datumName == 'LCS':
-            self.datumType   = 'PartDesign::CoordinateSystem'
-            self.menutext    = "New Coordinate System"
-            self.tooltip     = "Create a new Coordinate System in a Part"
-            self.icon        = os.path.join( Asm4.iconPath , 'Asm4_CoordinateSystem.svg')
-            self.datumColor  = []
-            self.datumAlpha  = []
-        elif self.datumName == 'Sketch':
-            self.datumType   = 'Sketcher::SketchObject'
-            self.menutext    = "New Sketch"
-            self.tooltip     = "Create a new Sketch in a Part"
-            self.icon        = os.path.join( Asm4.iconPath , 'Asm4_Sketch.svg')
-            self.datumColor  = []
-            self.datumAlpha  = []
 
+        self.containers = ["App::Part", "PartDesign::Body", "App::DocumentObjectGroup"]
+        if self.datumName == "Point":
+            self.datumType = "PartDesign::Point"
+            self.menutext = QT_TRANSLATE_NOOP("Asm4_newPoint", "New Point")
+            self.tooltip = QT_TRANSLATE_NOOP("Asm4_newPoint", "Create a new Datum Point in a Part")
+            self.pixmap = os.path.join(Asm4.iconPath, "Asm4_Point.svg")
+            self.datumColor = (0.00, 0.00, 0.00)
+            self.datumAlpha = []
+        elif self.datumName == "Axis":
+            self.datumType = "PartDesign::Line"
+            self.menutext = QT_TRANSLATE_NOOP("Asm4_newAxis", "New Axis")
+            self.tooltip = QT_TRANSLATE_NOOP("Asm4_newAxis", "Create a new Datum Axis in a Part")
+            self.pixmap = os.path.join(Asm4.iconPath, "Asm4_Axis.svg")
+            self.datumColor = (0.00, 0.00, 0.50)
+            self.datumAlpha = []
+        elif self.datumName == "Plane":
+            self.datumType = "PartDesign::Plane"
+            self.menutext = QT_TRANSLATE_NOOP("Asm4_newPlane", "New Plane")
+            self.tooltip = QT_TRANSLATE_NOOP("Asm4_newPlane", "Create a new Datum Plane in a Part")
+            self.pixmap = os.path.join(Asm4.iconPath, "Asm4_Plane.svg")
+            self.datumColor = (0.50, 0.50, 0.50)
+            self.datumAlpha = 80
+        elif self.datumName == "LCS":
+            self.datumType = "PartDesign::CoordinateSystem"
+            self.menutext = QT_TRANSLATE_NOOP("Asm4_newLCS", "New Coordinate System")
+            self.tooltip = QT_TRANSLATE_NOOP(
+                "Asm4_newLCS", "Create a new Coordinate System in a Part"
+            )
+            self.pixmap = os.path.join(Asm4.iconPath, "Asm4_CoordinateSystem.svg")
+            self.datumColor = []
+            self.datumAlpha = []
+        elif self.datumName == "Sketch":
+            self.datumType = "Sketcher::SketchObject"
+            self.menutext = QT_TRANSLATE_NOOP("Asm4_newSketch", "New Sketch")
+            self.tooltip = QT_TRANSLATE_NOOP("Asm4_newSketch", "Create a new Sketch in a Part")
+            self.pixmap = os.path.join(Asm4.iconPath, "Asm4_Sketch.svg")
+            self.datumColor = []
+            self.datumAlpha = []
 
     def GetResources(self):
-        return {"MenuText": self.menutext,
-                "ToolTip": self.tooltip,
-                "Pixmap" : self.icon }
-
+        return {"MenuText": self.menutext, "ToolTip": self.tooltip, "Pixmap": self.icon}
 
     def IsActive(self):
         if App.ActiveDocument:
@@ -172,10 +173,11 @@ class newDatum:
 """
 class newHole:
     def GetResources(self):
-        return {"MenuText": "New Hole Axis",
-                "ToolTip": "Create a Datum Axis attached to a hole",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_Hole.svg')
-                }
+        return {
+            "MenuText": QT_TRANSLATE_NOOP("Asm4_newHole", "New Hole Axis"),
+            "ToolTip": QT_TRANSLATE_NOOP("Asm4_newHole", "Create a Datum Axis attached to a hole"),
+            "Pixmap": os.path.join(Asm4.iconPath, "Asm4_Hole.svg"),
+        }
 
     def IsActive(self):
         selection = self.getSelectedEdges()

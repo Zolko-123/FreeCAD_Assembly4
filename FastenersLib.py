@@ -4,8 +4,6 @@
 # FastenersLib.py
 
 
-
-
 import os
 
 from PySide import QtGui, QtCore
@@ -17,14 +15,11 @@ from ScrewMaker import screwTables
 import FastenersCmd as FS
 
 import Asm4_libs as Asm4
-from Asm4_Translate import translate
 
-
+QT_TRANSLATE_NOOP = App.Qt.QT_TRANSLATE_NOOP
 
 # icon to show in the Menu, toolbar and widget window
-iconFile = os.path.join( Asm4.iconPath , 'Asm4_mvFastener.svg')
-
-
+iconFile = os.path.join(Asm4.iconPath, "Asm4_mvFastener.svg")
 
 
 """
@@ -49,8 +44,10 @@ Gui.runCommand('FSChangeParams')
     
 """
 
+
 class insertFastener:
     "My tool object"
+
     def __init__(self, fastenerType):
         self.FSclass = fastenerType
         self.FScolor = {'Screw' : (0.3, 0.6, 0.7),
@@ -59,40 +56,46 @@ class insertFastener:
                         'ThreadedRod':(0.3, 0.5, 0.75)
                         }
         # Screw
-        if  self.FSclass      == 'Screw':
-            self.menutext     = translate("Fasteners", "Insert Screw")
-            self.tooltip      = "<p>Insert a Screw into the Assembly</p>"
-            self.tooltip     += "<p>If another fastener is selected, a new fastener of the same type is created in the same assembly."
-            self.tooltip     += "If an axis or LCS is selected, the new fastener will be attached to it."
-            self.tooltip     += "If an assembly is selected, the new fastener will be inside that assembly.</p>"
-            self.icon         = os.path.join( Asm4.iconPath , 'Asm4_Screw.svg')
+        if self.FSclass == "Screw":
+            self.pixmap = os.path.join(Asm4.iconPath, "Asm4_Screw.svg")
+            self.menutext = QT_TRANSLATE_NOOP("Asm4_insertScrew", "Insert Screw")
+            self.tooltip = QT_TRANSLATE_NOOP(
+                "Asm4_insertScrew",
+                "<p>Insert a Screw into the Assembly</p>\n"
+                "<p>If another fastener is selected, a new fastener of the same type is created in the same assembly.\n"
+                "If an axis or LCS is selected, the new fastener will be attached to it.\n"
+                "If an assembly is selected, the new fastener will be inside that assembly.</p>",
+            )
         # Nut
-        elif self.FSclass     == 'Nut':
-            self.menutext     = translate("Fasteners", "Insert Nut")
-            self.tooltip      = "<p>Insert a Nut into the Assembly</p>"
-            self.tooltip     += "<p>If another fastener is selected, a new fastener of the same type is created in the same assembly."
-            self.tooltip     += "If an axis or LCS is selected, the new fastener will be attached to it."
-            self.tooltip     += "If an assembly is selected, the new fastener will be inside that assembly.</p>"
-            self.icon         = os.path.join( Asm4.iconPath , 'Asm4_Nut.svg')
+        elif self.FSclass == "Nut":
+            self.pixmap = os.path.join(Asm4.iconPath, "Asm4_Nut.svg")
+            self.menutext = QT_TRANSLATE_NOOP("Asm4_insertNut", "Insert Nut")
+            self.tooltip = QT_TRANSLATE_NOOP(
+                "Asm4_insertNut",
+                "<p>Insert a Nut into the Assembly</p>\n"
+                "<p>If another fastener is selected, a new fastener of the same type is created in the same assembly.\n"
+                "If an axis or LCS is selected, the new fastener will be attached to it.\n"
+                "If an assembly is selected, the new fastener will be inside that assembly.</p>",
+            )
         # Washer
-        elif self.FSclass     == 'Washer':
-            self.menutext     = translate("Fasteners", "Insert Washer")
-            self.tooltip      = "<p>Insert a Washer into the Assembly</p>"
-            self.tooltip     += "<p>If another fastener is selected, a new fastener of the same type is created in the same assembly."
-            self.tooltip     += "If an axis or LCS is selected, the new fastener will be attached to it."
-            self.tooltip     += "If an assembly is selected, the new fastener will be inside that assembly.</p>"
-            self.icon         = os.path.join( Asm4.iconPath , 'Asm4_Washer.svg')
+        elif self.FSclass == "Washer":
+            self.pixmap = os.path.join(Asm4.iconPath, "Asm4_Washer.svg")
+            self.menutext = QT_TRANSLATE_NOOP("Asm4_insertWasher", "Insert Washer")
+            self.tooltip = QT_TRANSLATE_NOOP(
+                "Asm4_insertWasher",
+                "<p>Insert a Washer into the Assembly</p>\n"
+                "<p>If another fastener is selected, a new fastener of the same type is created in the same assembly.\n"
+                "If an axis or LCS is selected, the new fastener will be attached to it.\n"
+                "If an assembly is selected, the new fastener will be inside that assembly.</p>",
+            )
         # Threaded Rod (makes errors)
-        elif self.FSclass     == 'ThreadedRod':
-            self.menutext     = translate("Fasteners", "Insert threaded rod")
-            self.tooltip      = "Insert threaded rod"
-            self.icon         = os.path.join( Asm4.iconPath , 'Asm4_Rod.svg')
-
+        elif self.FSclass == "ThreadedRod":
+            self.pixmap = os.path.join(Asm4.iconPath, "Asm4_Rod.svg")
+            self.menutext = QT_TRANSLATE_NOOP("Asm4_insertRod", "Insert threaded rod")
+            self.tooltip = QT_TRANSLATE_NOOP("Asm4_insertRod", "Insert threaded rod")
 
     def GetResources(self):
-        return {"MenuText": self.menutext,
-                "ToolTip" : self.tooltip,
-                "Pixmap"  : self.icon }
+        return {"MenuText": self.menutext, "ToolTip": self.tooltip, "Pixmap": self.pixmap}
 
     def IsActive(self):
         # if Asm4.getAssembly():
@@ -216,16 +219,18 @@ class insertFastener:
     |         wrapper for FSChangeParams            |
     +-----------------------------------------------+
 """
-class changeFSparametersCmd():
 
+
+class changeFSparametersCmd:
     def __init__(self):
-        super(changeFSparametersCmd,self).__init__()
+        super(changeFSparametersCmd, self).__init__()
 
     def GetResources(self):
-        return {"MenuText": "Change Fastener parameters",
-                "ToolTip": "Change Fastener parameters",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_FSparams.svg')
-                }
+        return {
+            "MenuText": QT_TRANSLATE_NOOP("Asm4_FSparameters", "Change Fastener parameters"),
+            "ToolTip": QT_TRANSLATE_NOOP("Asm4_FSparameters", "Change Fastener parameters"),
+            "Pixmap": os.path.join(Asm4.iconPath, "Asm4_FSparams.svg"),
+        }
 
     def IsActive(self):
         if App.ActiveDocument and getSelectionFS():
@@ -275,26 +280,27 @@ def isFastener(obj):
     return False
 
 
-
 """
     +-----------------------------------------------+
     |         clone per App::Link fasteners         |
     +-----------------------------------------------+
-    
+
     Select a fastener and several datum axes and the fastener will
     be cloned (as App::Link) and attached to those axes
 """
-class cloneFastenersToAxesCmd():
-    
+
+
+class cloneFastenersToAxesCmd:
     def __init__(self):
-        super(cloneFastenersToAxesCmd,self).__init__()
-    
+        super(cloneFastenersToAxesCmd, self).__init__()
+
     def GetResources(self):
-        return {"MenuText": "Clone Fastener to Axes",
-                "ToolTip": "Clone Fastener to Axes",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_cloneFasteners.svg')
-                }
-    
+        return {
+            "MenuText": QT_TRANSLATE_NOOP("Asm4_cloneFastenersToAxes", "Clone Fastener to Axes"),
+            "ToolTip": QT_TRANSLATE_NOOP("Asm4_cloneFastenersToAxes", "Clone Fastener to Axes"),
+            "Pixmap": os.path.join(Asm4.iconPath, "Asm4_cloneFasteners.svg"),
+        }
+
     def IsActive(self):
         self.selection = self.getSelectedAxes()
         if Asm4.getAssembly() and self.selection:
@@ -318,7 +324,7 @@ class cloneFastenersToAxesCmd():
                                 if axis and axis.Document:
                                     newFstnr = Asm4.cloneObject(fstnr)
                                     Asm4.placeObjectToLCS(newFstnr, axisData[2], axis.Document.Name, axisData[3])
-                                    
+
             Gui.Selection.clearSelection()
             self.rootAssembly = Asm4.getAssembly()
             if self.rootAssembly:
@@ -329,7 +335,7 @@ class cloneFastenersToAxesCmd():
         holeAxes = []
         fstnr = None
         selection = Gui.Selection.getSelectionEx('', 0)
-        
+
         if selection:
             for s in selection:
                 for seNames in s.SubElementNames:

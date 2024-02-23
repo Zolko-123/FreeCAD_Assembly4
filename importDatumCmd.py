@@ -17,26 +17,31 @@ from FreeCAD import Console as FCC
 import Asm4_libs as Asm4
 
 
-
+QT_TRANSLATE_NOOP = App.Qt.QT_TRANSLATE_NOOP
 
 """
     +-----------------------------------------------+
     |                  The command                  |
     +-----------------------------------------------+
 """
-class importDatumCmd():
+
+
+class importDatumCmd:
     def __init__(self):
-        super(importDatumCmd,self).__init__()
+        super(importDatumCmd, self).__init__()
 
     def GetResources(self):
-        tooltip  = "Imports the selected Datum object(s) from a sub-part into the root assembly.\n"
-        tooltip += "This creates a new datum of the same type, and with the same global placement\n\n"
-        tooltip += "This command can also be used to override the placement of an existing datum :\n"
-        tooltip += "select a second datum in the same root container as the first selected datum"
-        iconFile = os.path.join( Asm4.iconPath , 'Import_Datum.svg')
-        return {"MenuText": "Import Datum object",
-                "ToolTip" : tooltip,
-                "Pixmap"  : iconFile }
+        return {
+            "MenuText": QT_TRANSLATE_NOOP("Asm4_importDatum", "Import Datum object"),
+            "ToolTip": QT_TRANSLATE_NOOP(
+                "Asm4_importDatum",
+                "Imports the selected Datum object(s) from a sub-part into the root assembly.\n"
+                "This creates a new datum of the same type, and with the same global placement\n\n"
+                "This command can also be used to override the placement of an existing datum :\n"
+                "select a second datum in the same root container as the first selected datum",
+            ),
+            "Pixmap": os.path.join(Asm4.iconPath, "Import_Datum.svg"),
+        }
 
     def IsActive(self):
         if App.ActiveDocument and self.getSelectedDatums():
@@ -59,6 +64,7 @@ class importDatumCmd():
     |                 the real stuff                |
     +-----------------------------------------------+
     """
+
     def Activated(self):
         ( selDatum, selTree ) = Asm4.getSelectionTree()
         if selTree:
