@@ -20,11 +20,8 @@ import Asm4_libs as Asm4
 from Asm4_Translate import translate
 
 
-
 # icon to show in the Menu, toolbar and widget window
-iconFile = os.path.join( Asm4.iconPath , 'Asm4_mvFastener.svg')
-
-
+iconFile = os.path.join(Asm4.iconPath, "Asm4_mvFastener.svg")
 
 
 """
@@ -48,6 +45,7 @@ Gui.Selection.addSelection(fs)
 Gui.runCommand('FSChangeParams')
     
 """
+
 
 class insertFastener(BaseCommand):
     "My tool object"
@@ -219,11 +217,12 @@ class insertFastener(BaseCommand):
     |         wrapper for FSChangeParams            |
     +-----------------------------------------------+
 """
-class changeFSparametersCmd(BaseCommand):
 
+
+class changeFSparametersCmd(BaseCommand):
     def __init__(self):
-        super(changeFSparametersCmd,self).__init__()
-        self.pixmap = os.path.join( Asm4.iconPath , 'Asm4_FSparams.svg')
+        super(changeFSparametersCmd, self).__init__()
+        self.pixmap = os.path.join(Asm4.iconPath, "Asm4_FSparams.svg")
         self.menutext = translate("Fasteners", "Change Fastener parameters")
         self.tooltip = translate("Fasteners", "Change Fastener parameters")
 
