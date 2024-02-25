@@ -14,6 +14,9 @@ import FreeCAD as App
 from FreeCAD import Console as FCC
 
 import Asm4_libs as Asm4
+from BaseCommand import BaseCommand
+from Asm4_Translate import translate
+
 
 ASM4_CONFIG_TYPE        = 'Asm4::ConfigurationTable'
 HEADER_CELL             = 'A1'
@@ -29,7 +32,6 @@ OFFSET_ROT_YAW_COL      = 'G'
 OFFSET_ROT_PITCH_COL    = 'H'
 OFFSET_ROT_ROLL_COL     = 'I'
 NAME_COL_WIDTH          = 250
-
 
 
 """
@@ -72,15 +74,18 @@ def createConfig(name, description):
     |           Apply configuration command         |
     +-----------------------------------------------+
 """
-class applyConfigurationCmd:
-    def __init__(self):
-        super(applyConfigurationCmd,self).__init__()
 
-    def GetResources(self):
-        return {"MenuText": "Apply configuration",
-                "ToolTip": "Applies selected configuration\nConfigurations allow to set visibilities and offsets of parts",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_applyConfig.svg')
-                }
+
+class applyConfigurationCmd(BaseCommand):
+    def __init__(self):
+        super(applyConfigurationCmd, self).__init__()
+        self.menutext = "Apply configuration"
+        self.tooltip = translate(
+            "Commands5",
+            "Applies selected configuration\n"
+            "Configurations allow to set visibilities and offsets of parts",
+        )
+        self.pixmap = os.path.join(Asm4.iconPath, "Asm4_applyConfig.svg")
 
     def IsActive(self):
         # if a spreadsheet in a Group called "Configuration" is selected
@@ -103,15 +108,16 @@ class applyConfigurationCmd:
     |         General configuration Task UI         |
     +-----------------------------------------------+
 """
-class openConfigurationsCmd:
-    def __init__(self):
-        super(openConfigurationsCmd,self).__init__()
 
-    def GetResources(self):
-        return {"MenuText": "Open configurations panel",
-                "ToolTip": "Configurations allow to set visibilities and offsets of parts",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_Configurations.svg')
-                }
+
+class openConfigurationsCmd(BaseCommand):
+    def __init__(self):
+        super(openConfigurationsCmd, self).__init__()
+        self.menutext = "Open configurations panel"
+        self.tooltip = translate(
+            "Commands5", "Configurations allow to set visibilities and offsets of parts"
+        )
+        self.pixmap = os.path.join(Asm4.iconPath, "Asm4_Configurations.svg")
 
     def IsActive(self):
         # Will handle LCSs only for the Assembly4 model
@@ -273,18 +279,18 @@ class openConfigurationsUI():
     |        Create new configuration Button        |
     +-----------------------------------------------+
 """
-class newConfigurationCmd:
+
+
+class newConfigurationCmd(BaseCommand):
     def __init__(self):
-        super(newConfigurationCmd,self).__init__()
+        super(newConfigurationCmd, self).__init__()
         self.UI = QtGui.QDialog()
         self.drawUI()
-
-    def GetResources(self):
-        return {"MenuText": "New configuration",
-                "ToolTip": "Create a new configuration of the assembly",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_applyConfig.svg')
-                }
-
+        self.menutext = "New configuration"
+        self.tooltip = translate(
+            "Commands5", "Create a new configuration of the assembly"
+        )
+        self.pixmap = os.path.join(Asm4.iconPath, "Asm4_applyConfig.svg")
 
     def IsActive(self):
         # is there an active document ?
