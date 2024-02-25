@@ -17,6 +17,8 @@ from Asm4_objects import (
     ExpressionArray,
     findAxisPlacement,
 )
+from BaseCommand import BaseCommand
+from Asm4_Translate import translate
 
 
 """
@@ -26,30 +28,24 @@ from Asm4_objects import (
 """
 
 
-class makeExpressionArray:
-
-    iconFileName = 'Asm4_ExpressionArray.svg'
-    menuText = 'Create an expression driven Array'
-    arrayType = 'Expression Array'
-    namePrefix = 'XArray_'
-    tooltip = """Create an array of the selected object where the placement of each element is calculated using expressions and an Index property.<br>
-        Select a source object to array and optionally an Axis that transformation will be related to.<br>
-        Without axis the transformations relates to the source object internal Z axis.<br>
-        <br>
-        <b>Count :</b> The amount of elements in the array.<br>
-        <b>Index :</b> Hidden but Placer use it in expressions to calculating the Placements. Increments for each element starting with 0.<br>
-        <b>Placer :</b> Set an expression for the entire placement or its sub-properties.<br>
-           By opening Placer property in Tasks panel it is possible to set expressions for euler angles too.<br>
-        Also see tooltips in Property view
-        """
-
-    def GetResources(self):
-        iconFile = os.path.join(Asm4.iconPath, self.iconFileName)
-        return {
-            'MenuText': self.menuText,
-            'ToolTip': self.tooltip,
-            'Pixmap': iconFile,
-        }
+class makeExpressionArray(BaseCommand):
+    def __init__(self):
+        self.arrayType = "Expression Array"
+        self.namePrefix = "XArray_"
+        self.pixmap = os.path.join(Asm4.iconPath, "Asm4_ExpressionArray.svg")
+        self.menutext = "Create an expression driven Array"
+        self.tooltip = translate(
+            "Commands4",
+            "Create an array of the selected object where the placement of each element is calculated using expressions and an Index property.<br>\n"
+            "Select a source object to array and optionally an Axis that transformation will be related to.<br>\n"
+            "Without axis the transformations relates to the source object internal Z axis.<br>\n"
+            "<br>\n"
+            "<b>Count :</b> The amount of elements in the array.<br>\n"
+            "<b>Index :</b> Hidden but Placer use it in expressions to calculating the Placements. Increments for each element starting with 0.<br>\n"
+            "<b>Placer :</b> Set an expression for the entire placement or its sub-properties.<br>\n"
+            "   By opening Placer property in Tasks panel it is possible to set expressions for euler angles too.<br>\n"
+            "Also see tooltips in Property view",
+        )
 
     def _cacheSelectionInfo(self):
         """Check axis and caches useful data for selected items.
@@ -124,16 +120,20 @@ class makeExpressionArray:
     +-----------------------------------------------+
 """
 
-class makeCircularArray(makeExpressionArray):
 
-    iconFileName = 'Asm4_PolarArray.svg'
-    menuText = 'Create a circular array'
-    arrayType = 'Circular Array'
-    namePrefix = 'Circular_'
-    tooltip = """<p>Create a circular (polar) array around an axis. 
-                Supported axis objects are axis or plane from an origin, datum line, LCS axes, straight line segments, arcs and circles</p>
-                <p><b>Usage</b>: Select an object and the axis (hold CTRL key to select second object)</p>"""
- 
+class makeCircularArray(BaseCommand):
+    def __init__(self):
+        self.arrayType = "Circular Array"
+        self.namePrefix = "Circular_"
+        self.pixmap = os.path.join(Asm4.iconPath, "Asm4_PolarArray.svg")
+        self.menutext = "Create a circular array"
+        self.tooltip = translate(
+            "Commands4",
+            "<p>Create a circular (polar) array around an axis.\n"
+            "Supported axis objects are axis or plane from an origin, datum line, LCS axes, straight line segments, arcs and circles</p>\n"
+            "<p><b>Usage</b>: Select an object and an axis (hold CTRL key to select second object)</p>",
+        )
+
     def IsActive(self):
         self._cacheSelectionInfo()
         return self._selectionInfo[2] is not None
@@ -156,15 +156,19 @@ class makeCircularArray(makeExpressionArray):
     +-----------------------------------------------+
 """
 
-class makeLinearArray(makeExpressionArray):
 
-    iconFileName = 'Asm4_LinearArray.svg'
-    menuText = 'Create a linear array'
-    arrayType = 'Linear Array'
-    namePrefix = 'Linear_'
-    tooltip = """<p>Create a linear array along an axis. 
-                Supported axis objects are axis or plane from an origin, datum line, LCS axes, straight line segments, arcs and circles</p>
-                <p><b>Usage</b>: Select an object and an axis for the direction (hold CTRL key to select second object)</p>"""
+class makeLinearArray(BaseCommand):
+    def __init__(self):
+        self.arrayType = "Linear Array"
+        self.namePrefix = "Linear_"
+        self.pixmap = os.path.join(Asm4.iconPath, "Asm4_LinearArray.svg")
+        self.menutext = "Create a linear array"
+        self.tooltip = translate(
+            "Commands4",
+            "<p>Create a linear array along an axis.\n"
+            "Supported axis objects are axis or plane from an origin, datum line, LCS axes, straight line segments, arcs and circles</p>\n"
+            "<p><b>Usage</b>: Select an object and an axis for the direction (hold CTRL key to select second object)</p>",
+        )
 
     def IsActive(self):
         self._cacheSelectionInfo()
@@ -187,15 +191,21 @@ class makeLinearArray(makeExpressionArray):
     |     a mirror link array class and command     |
     +-----------------------------------------------+
 """
-class makeMirrorArray(makeExpressionArray):
 
-    iconFileName = 'Asm4_Mirror.svg'
-    menuText = 'Create mirror'
-    arrayType = 'Mirror Array'
-    namePrefix = 'Mirror_'
-    tooltip = """<p>Create a mirror of a part. 
-                Supported axis objects are axis or plane from an origin, datum line, LCS axes, straight line segments, arcs and circles</p>
-                <p><b>Usage</b>: Select a source object and a mirror plane or a normal to a plane (hold CTRL key to select second object)</p>"""
+
+class makeMirrorArray(BaseCommand):
+    def __init__(self) -> None:
+        super().__init__()
+        self.arrayType = "Mirror Array"
+        self.namePrefix = "Mirror_"
+        self.pixmap = os.path.join(Asm4.iconPath, "Asm4_Mirror.svg")
+        self.menutext = "Create mirror"
+        self.tooltip = translate(
+            "Commands4",
+            "<p>Create a mirror of a part.\n"
+            "Supported axis objects are axis or plane from an origin, datum line, LCS axes, straight line segments, arcs and circles</p>\n"
+            "<p><b>Usage</b>: Select a source object and a mirror plane or a normal to a plane (hold CTRL key to select second object)</p>",
+        )
 
     def IsActive(self):
         self._cacheSelectionInfo()
