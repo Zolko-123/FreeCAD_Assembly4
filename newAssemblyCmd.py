@@ -19,7 +19,7 @@ from Asm4_Translate import translate
 
 
 
-from TranslateUtils import translate
+from Asm4_Translate import translate
 
 class newAssemblyCmd:
     """

@@ -29,10 +29,15 @@ import Asm4_locator
 # I don't like this being here
 import selectionFilter
 
+from Asm4_Translate import translate
+
 global Asm4_icon, Asm4_path, Asm4_trans
 Asm4_path = os.path.dirname(Asm4_locator.__file__)
 Asm4_icon = os.path.join(Asm4_path, "Resources/icons/Assembly4.svg")
 Asm4_trans = os.path.join(Asm4_path, "Resources/translations")
+
+FreeCADGui.addLanguagePath(Asm4_trans)
+FreeCADGui.updateLocale()
 
 
 """
@@ -43,10 +48,12 @@ Asm4_trans = os.path.join(Asm4_path, "Resources/translations")
 
 
 class Assembly4Workbench(Workbench):
+    from TranslateUtils import translate
+
     global Asm4_icon
     global selectionFilter
     MenuText = "Assembly 4"
-    ToolTip = "Assembly 4 workbench"
+    ToolTip = translate("Asm4", "Assembly 4 workbench")
     Icon = Asm4_icon
 
     def __init__(self):
@@ -116,11 +123,6 @@ class Assembly4Workbench(Workbench):
         except:
             pass
         '''
-
-        # Translations
-        # from Asm4_Translate import translate
-        FreeCADGui.addLanguagePath(Asm4_trans)
-        FreeCADGui.updateLocale()
 
         # Assembly4 version info
         # with file package.xml (FreeCAD ≥0.21)
@@ -230,18 +232,18 @@ class Assembly4Workbench(Workbench):
 
         # Define Menus
         # commands to appear in the Assembly4 menu 'Assembly'
-        self.appendMenu(translate("Workbench", "&Assembly"), self.assemblyMenuItems())
+        self.appendMenu(translate("Asm4", "&Assembly"), self.assemblyMenuItems())
         self.dot()
 
         # put all constraints related commands in a separate menu
-        self.appendMenu("&Constraints", self.constraintsMenuItems())
+        self.appendMenu(translate("Asm4", "&Constraints"), self.constraintsMenuItems())
         self.dot()
 
         # self.appendMenu("&Geometry",["Asm4_newPart"])
 
         # additional entry in the Help menu
-        # self.appendMenu(translate("Workbench", "&Help"), ["Asm4_Help"])
-        self.appendMenu("&Help", ["Asm4_Help"])
+        # self.appendMenu(translate("Asm4", "&Help"), ["Asm4_Help"])
+        self.appendMenu(translate("Asm4", "&Help"), ["Asm4_Help"])
         self.dot()
 
         # Define Toolbars
