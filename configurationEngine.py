@@ -433,7 +433,7 @@ def SaveSubObjects(conf, container):
 
 def SaveObject(conf, obj):
     # parse App::Part containers, and only those
-    if obj.TypeId == 'App::Part':
+    if obj.TypeId == 'App::Part'  or obj.TypeId == 'App::DocumentObjectGroup' or obj.TypeId == 'Part::FeaturePython':
         SaveSubObjects(conf, obj)
 
     parentObj, objFullName = obj.Parents[0]
@@ -513,7 +513,7 @@ def restoreSubObjects(conf, container):
 
 def restoreObject(conf, obj):
     # parse App::Part containers and group subobjects
-    if obj.TypeId == 'App::Part' or obj.TypeId == 'App::DocumentObjectGroup':
+    if obj.TypeId == 'App::Part' or obj.TypeId == 'App::DocumentObjectGroup' or obj.TypeId == 'Part::FeaturePython':
         restoreSubObjects(conf, obj)
 
     parentObj, objFullName = obj.Parents[0]
