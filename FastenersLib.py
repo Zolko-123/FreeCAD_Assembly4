@@ -17,7 +17,7 @@ from ScrewMaker import screwTables
 import FastenersCmd as FS
 
 import Asm4_libs as Asm4
-
+from Asm4_Translate import Qtranslate
 
 
 
@@ -60,7 +60,7 @@ class insertFastener:
                         }
         # Screw
         if  self.FSclass      == 'Screw':
-            self.menutext     = "Insert Screw"
+            self.menutext     = Qtranslate("Fasteners", "Insert Screw")
             self.tooltip      = "<p>Insert a Screw into the Assembly</p>"
             self.tooltip     += "<p>If another fastener is selected, a new fastener of the same type is created in the same assembly."
             self.tooltip     += "If an axis or LCS is selected, the new fastener will be attached to it."
@@ -68,7 +68,7 @@ class insertFastener:
             self.icon         = os.path.join( Asm4.iconPath , 'Asm4_Screw.svg')
         # Nut
         elif self.FSclass     == 'Nut':
-            self.menutext     = "Insert Nut"
+            self.menutext     = Qtranslate("Fasteners", "Insert Nut")
             self.tooltip      = "<p>Insert a Nut into the Assembly</p>"
             self.tooltip     += "<p>If another fastener is selected, a new fastener of the same type is created in the same assembly."
             self.tooltip     += "If an axis or LCS is selected, the new fastener will be attached to it."
@@ -76,7 +76,7 @@ class insertFastener:
             self.icon         = os.path.join( Asm4.iconPath , 'Asm4_Nut.svg')
         # Washer
         elif self.FSclass     == 'Washer':
-            self.menutext     = "Insert Washer"
+            self.menutext     = Qtranslate("Fasteners", "Insert Washer")
             self.tooltip      = "<p>Insert a Washer into the Assembly</p>"
             self.tooltip     += "<p>If another fastener is selected, a new fastener of the same type is created in the same assembly."
             self.tooltip     += "If an axis or LCS is selected, the new fastener will be attached to it."
@@ -84,7 +84,7 @@ class insertFastener:
             self.icon         = os.path.join( Asm4.iconPath , 'Asm4_Washer.svg')
         # Threaded Rod (makes errors)
         elif self.FSclass     == 'ThreadedRod':
-            self.menutext     = "Insert threaded rod"
+            self.menutext     = Qtranslate("Fasteners", "Insert threaded rod")
             self.tooltip      = "Insert threaded rod"
             self.icon         = os.path.join( Asm4.iconPath , 'Asm4_Rod.svg')
 

@@ -6,11 +6,12 @@
 #
 # HelpCmd.py
 
-import os
-import webbrowser
-import Asm4_libs as Asm4
-from Asm4_Translate import QT_TRANSLATE_NOOP as Qtranslate
+import os, webbrowser
+
 import FreeCADGui as Gui
+
+import Asm4_libs as Asm4
+from Asm4_Translate import Qtranslate
 
 
 """

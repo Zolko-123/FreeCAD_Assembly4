@@ -532,6 +532,7 @@ def warningBox( text ):
     msgBox = QtGui.QMessageBox()
     msgBox.setWindowTitle( 'FreeCAD Warning' )
     msgBox.setIcon( QtGui.QMessageBox.Critical )
+    msgBox.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
     msgBox.setText( text )
     msgBox.exec_()
     return
@@ -541,6 +542,7 @@ def confirmBox( text ):
     msgBox = QtGui.QMessageBox()
     msgBox.setWindowTitle('FreeCAD Warning')
     msgBox.setIcon(QtGui.QMessageBox.Warning)
+    msgBox.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
     msgBox.setText(text)
     msgBox.setInformativeText('Are you sure you want to proceed ?')
     msgBox.setStandardButtons(QtGui.QMessageBox.Cancel | QtGui.QMessageBox.Ok)

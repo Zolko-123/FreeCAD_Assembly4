@@ -9,7 +9,7 @@ import FreeCADGui as Gui
 import FreeCAD as App
 
 import Asm4_libs as Asm4
-from Asm4_Translate import QT_TRANSLATE_NOOP as Qtranslate
+from Asm4_Translate import Qtranslate
 
 
 

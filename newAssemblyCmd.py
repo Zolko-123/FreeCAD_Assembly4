@@ -15,7 +15,7 @@ import FreeCADGui as Gui
 import FreeCAD as App
 
 import Asm4_libs as Asm4
-
+from Asm4_Translate import Qtranslate
 
 
 
@@ -37,7 +37,7 @@ def makeAssembly():
 
     """
     def GetResources(self):
-        tooltip  = "<p>Create a new Assembly container</p>"
+        tooltip  = Qtranslate("Commands", "<p>Create a new Assembly container</p>")
         iconFile = os.path.join( Asm4.iconPath , 'Asm4_Model.svg')
         return {"MenuText": "New Assembly", "ToolTip": tooltip, "Pixmap" : iconFile }
 
