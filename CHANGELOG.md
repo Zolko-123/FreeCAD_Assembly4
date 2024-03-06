@@ -2,6 +2,11 @@
 
 ## Release notes
 
+* 2024.03.06 (**0.50.8**) :  
+Improved error handling for OpenCV library in animations  
+Translations  
+Minor fixes  
+
 * 2024.01.31 (**0.50.7**) :  
 Merged BoM and PartInfo code from JonasThomas (still doesn't seem to work !)  
 Simplyfied globalPlacement for LCS in Asm4_Measure  
