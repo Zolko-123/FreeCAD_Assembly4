@@ -100,6 +100,13 @@ def cloneObject(obj):
         result.Document.recompute()
     return result
 
+def newLCS(parent, objType, objName, attSupport):
+    result = parent.newObject(objType, objName)
+    if hasattr(result, 'AttachmentSupport'):
+        result.AttachmentSupport = attSupport
+    else:
+        result.Support = attSupport
+    return result
 
 def placeObjectToLCS( attObj, attLink, attDoc, attLCS ):
     expr = makeExpressionDatum( attLink, attDoc, attLCS )

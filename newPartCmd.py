@@ -80,8 +80,7 @@ class newPart:
             # add stuff if appropriate (not for groups)
             if self.partType in Asm4.containerTypes:
                 # add an LCS at the root of the Part, and attach it to the 'Origin'
-                lcs0 = newPart.newObject('PartDesign::CoordinateSystem','LCS_Origin')
-                lcs0.Support = [(newPart.Origin.OriginFeatures[0],'')]
+                lcs0 = Asm4.newLCS(newPart, 'PartDesign::CoordinateSystem', 'LCS_Origin', [(newPart.Origin.OriginFeatures[0],'')])
                 lcs0.MapMode = 'ObjectXY'
                 lcs0.MapReversed = False
                 # set nice colors for the Origin planes
