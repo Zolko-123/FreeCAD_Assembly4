@@ -838,6 +838,9 @@ class animationHints():
         if "AnimationHintList" not in variables.PropertiesList:
             variables.addProperty("App::PropertyPythonObject", "AnimationHintList", "AnimationHints", "The hintfield for the animation dialog").AnimationHintList = {}
             variables.setPropertyStatus("AnimationHintList", "Hidden")
+            # see https://forum.freecad.org/viewtopic.php?p=745163#p700080
+            if variables.getPropertyByName("AnimationHintList") == None:
+                variables.AnimationHintList = {}
         return variables.getPropertyByName("AnimationHintList")
 
 

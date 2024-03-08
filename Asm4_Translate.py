@@ -16,7 +16,7 @@ def QT_TRANSLATE_NOOP(context, text):
 
 # use latest available translate function
 if hasattr(App, "Qt"):
-    Qtranslate = App.Qt.translate
+    translate = App.Qt.translate
 else:
     print("Translations will not be available")
     
