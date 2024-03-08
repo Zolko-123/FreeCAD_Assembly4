@@ -2,6 +2,9 @@
 
 ## Release notes
 
+* 2024.03.08 (**0.50.9**) :  
+fixed some translation code errors  
+
 * 2024.03.06 (**0.50.8**) :  
 Improved error handling for OpenCV library in animations  
 Translations  
