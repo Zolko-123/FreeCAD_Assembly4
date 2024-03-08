@@ -15,7 +15,7 @@ import FreeCADGui as Gui
 import FreeCAD as App
 
 import Asm4_libs as Asm4
-from TranslateUtils import translate
+from Asm4_Translate import translate
 
 
 

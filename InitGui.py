@@ -82,7 +82,7 @@ class Assembly4Workbench(Workbench):
         """
     def Initialize(self):
         # Translations
-        from Asm4_Translate import Qtranslate
+        # from Asm4_Translate import Qtranslate
         FreeCADGui.addLanguagePath(Asm4_trans)
         FreeCADGui.updateLocale()
 
@@ -103,7 +103,7 @@ class Assembly4Workbench(Workbench):
             # remove trailing newline
             Asm4_version = version[:-1]    
         
-        FreeCAD.Console.PrintMessage(Qtranslate("Asm4", "Initializing Assembly4 workbench")+ ' ('+Asm4_version+') .')
+        FreeCAD.Console.PrintMessage("Initializing Assembly4 workbench"+ ' ('+Asm4_version+') .')
         FreeCADGui.updateGui()
         # import all stuff
         import newAssemblyCmd    # created an App::Part container called 'Assembly'
@@ -190,7 +190,7 @@ class Assembly4Workbench(Workbench):
 
         # self.appendToolbar("Geometry",["Asm4_newPart"])
 
-        FreeCAD.Console.PrintMessage(" " + Qtranslate("Asm4", "done") + ".\n")
+        FreeCAD.Console.PrintMessage(" " + "done" + ".\n")
         """
     +-----------------------------------------------+
     |           Initialisation finished             |
@@ -335,7 +335,7 @@ class Assembly4Workbench(Workbench):
         self.appendContextMenu("", "Separator")
         self.appendContextMenu("", contextMenu)  # add commands to the context menu
         self.appendContextMenu("Assembly", assemblySubMenu)  # add commands to the context menu
-        self.appendContextMenu(Qtranslate("Asm4", "Create"), createSubMenu)  # add commands to the context menu
+        self.appendContextMenu("Create", createSubMenu)  # add commands to the context menu
         self.appendContextMenu("", "Separator")
 
 
