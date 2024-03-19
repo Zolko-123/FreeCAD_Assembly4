@@ -2,6 +2,9 @@
 
 ## Release notes
 
+* 2024.03.19 (**0.50.12**) :  
+Re-added warning for incompatible FreeCAD version  
+
 * 2024.03.19 (**0.50.11**) :  
 Fixed a silly ? left over  
 Removed version check (needs more testing)  
