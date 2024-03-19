@@ -2,6 +2,9 @@
 
 ## Release notes
 
+* 2024.03.19 (**0.50.10**) :  
+Added warning for incompatible FreeCAD development version  
+
 * 2024.03.08 (**0.50.9**) :  
 fixed some translation code errors  
 
