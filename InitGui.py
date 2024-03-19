@@ -51,12 +51,16 @@ class Assembly4Workbench(Workbench):
         "This function is executed when FreeCAD starts"
         # check for FreeCAD version
         FCver = FreeCAD.Version()
-        git = int(FCver[3][0:5])
-        # print("This is FreeCAD version "+FCver[0]+"."+FCver[1]+"."+FCver[2]+"-"+FCver[3])
-        if FCver[0]=='0' and FCver[1]=='22' and git>35594:
-            print("This version of FreeCAD ("+FCver[0]+"."+FCver[1]+"-"+str(git)+") is not compatible with Assembly4")
-            print("You may encounter erors, it is rather suggested to use the stable 0.21 branch")
-        pass
+        '''
+        try:
+            git = int(FCver[3][0:5])
+            # print("This is FreeCAD version "+FCver[0]+"."+FCver[1]+"."+FCver[2]+"-"+FCver[3])
+            if FCver[0]=='0' and FCver[1]=='22' and git>35594:
+                print("This version of FreeCAD ("+FCver[0]+"."+FCver[1]+"-"+str(git)+") is not compatible with Assembly4")
+                print("You may encounter erors, it is rather suggested to use the stable 0.21 branch")
+        except:
+            pass
+        '''
 
     def Activated(self):
         "This function is executed when the workbench is activated"
@@ -90,17 +94,22 @@ class Assembly4Workbench(Workbench):
     def Initialize(self):
         # check for FreeCAD version
         FCver = FreeCAD.Version()
-        git = int(FCver[3][0:5])
-        if FCver[0]=='0' and FCver[1]=='22' and git>35594:
-            from PySide import QtGui
-            msgBox = QtGui.QMessageBox()
-            msgBox.setWindowTitle( 'FreeCAD Warning' )
-            msgBox.setIcon( QtGui.QMessageBox.Critical )
-            msgBox.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
-            text = "This version of FreeCAD ("+FCver[0]+"."+FCver[1]+"-"+str(git)+") is not compatible with Assembly4. "
-            text +="You may encounter erors, it is rather suggested to use the stable 0.21 branch" 
-            msgBox.setText( text )
-            msgBox.exec_()
+        '''
+        try:
+            git = int(FCver[3][0:5])
+            if FCver[0]=='0' and FCver[1]=='22' and git>35594:
+                from PySide import QtGui
+                msgBox = QtGui.QMessageBox()
+                msgBox.setWindowTitle( 'FreeCAD Warning' )
+                msgBox.setIcon( QtGui.QMessageBox.Critical )
+                msgBox.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
+                text = "This version of FreeCAD ("+FCver[0]+"."+FCver[1]+"-"+str(git)+") is not compatible with Assembly4. "
+                text +="You may encounter erors, it is rather suggested to use the stable 0.21 branch" 
+                msgBox.setText( text )
+                msgBox.exec_()
+        except:
+            pass
+        '''
 
         # Translations
         # from Asm4_Translate import Qtranslate
