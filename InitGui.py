@@ -95,7 +95,7 @@ class Assembly4Workbench(Workbench):
             if isinstance(git, int) and git>35594 :
                 from PySide import QtGui
                 msgBox = QtGui.QMessageBox()
-                msgBox.setWindowTitle( 'FreeCAD Warning' )
+                msgBox.setWindowTitle( 'Warning' )
                 msgBox.setIcon( QtGui.QMessageBox.Critical )
                 msgBox.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
                 text = "This version of FreeCAD ("+FCver[0]+"."+FCver[1]+"-"+str(git)+") is not compatible with Assembly4. "
