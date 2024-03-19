@@ -209,6 +209,8 @@ class makeMirrorArray(makeExpressionArray):
         obj.setExpression('.Placer.Rotation.Angle', '180 * (Index % 2)')
         obj.setPropertyStatus('Placer', 'Hidden')
         obj.setPropertyStatus('Scaler', 'Hidden')
+        # https://github.com/Zolko-123/FreeCAD_Assembly4/issues/474
+        Asm4.makeAsmProperties(obj) ?
 
         # Count property could be hidden but predefined Link properties goes back to
         # visible again after reopening document
