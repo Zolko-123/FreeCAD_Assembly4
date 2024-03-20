@@ -7,22 +7,19 @@ Current version 0.50.12
 
 This assembly workbench allows to assemble into a single assembly container other FreeCAD objects, and place them relative to the assembly and to each-other. The parts in the assembly can be in the same document as the assembly or in an external document. When parts are modified in their original document, they are instantly updated in the assembly.
 
+An Assembly4 _Assembly_ is a standard FreeCAD `App::Part` container, therefore it is compatible and can be manipulated with any FreeCAD tool handling `App::Part` objects. In particular, it can be inserted into another _Assembly_ to create nested assemblies to any level. It can also contain solids, datum objects and sketches. A document can contain only 1 _Assembly_. Native FreeCAD _Part_ and _Body_ containers can be used as "part" to be inserted. 
+
 Parts are placed relative to each-other by matching features inside them. Specifically, in Assembly4, these _features_ are virtual objects called LCS (for Local Coordinate System, also called datum coordinate system) and are attached using FreeCAD's built-in `Part::Attacher` and `ExpressionEngine`. No geometry is used to place and constrain parts relative to each other, thus avoiding a lot of the topological naming problems.
 
-An Assembly4 _Assembly_ is a standard FreeCAD `App::Part` container, therefore it is compatible and can be manipulated with any FreeCAD tool handling `App::Part` objects. In particular, it can be inserted into another _Assembly_ to create nested assemblies to any level. It can also contain solids, datum objects and sketches. A document can contain only 1 _Assembly_.
+**WARNING:** FreeCAD introduced a [new data format](https://github.com/FreeCAD/FreeCAD/pull/12714) during the 0.22 development cycle that is incompatible with previous FreeCAD versions ! If you open a file made with the latest v0.22 development version with stable v0.21, all attachments are irreversibly lost. 
 
 
-![](Resources/media/Asm4_wb1.png)
-
-**Please Note:** only objects open in the current session can be freshly inserted into an assembly. Documents of previously inserted objects will be opened in the background, no need to open them manually.
+![](Resources/media/LaserCutter.png)
 
 **Please Note:** only _Part_ and _Body_ containers at the root of a document can be inserted. Objects nested inside containers cannot be used directly by Assembly4.
 
 **Please Note:** objects in the same document as the linked part but outside the `App::Part` container will **not** be inserted.
 
-**Important Note:** version v0.11.5 had a hidden nasty bug that also corrupted the parts that were *created* with it. Unfortunately, these parts cannot be automatically fixed, they must be re-created. Only parts *created* with v0.11.5 are affected, not those that where merely *used* with it.
-
-To work around this issue, wrap the affected part in an `App::Part` container. Copy any local coordinate systems to the container Part.
 
 ## Installation
 
