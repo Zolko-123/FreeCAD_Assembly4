@@ -9,6 +9,7 @@ import FreeCADGui as Gui
 import FreeCAD as App
 
 import Asm4_libs as Asm4
+from BaseCommand import BaseCommand
 from Asm4_Translate import translate
 
 
@@ -19,16 +20,16 @@ from Asm4_Translate import translate
     |                    Show                       |
     +-----------------------------------------------+
 """
-class showLcsCmd:
 
+
+class showLcsCmd(BaseCommand):
     def __init__(self):
-        super(showLcsCmd,self).__init__()
-
-    def GetResources(self):
-        return {"MenuText": translate("Asm4_showLcs", "Show LCS"),
-                "ToolTip": translate("Asm4_showLcs", "Show LCS and Datums of selected part and its children"),
-                "Pixmap": os.path.join(Asm4.iconPath, 'Asm4_showLCS.svg')
-                }
+        super(showLcsCmd, self).__init__()
+        self.menutext = "Show LCS"
+        self.tooltip = translate(
+            "Commands5", "Show LCS and Datums of selected part and its children"
+        )
+        self.pixmap = os.path.join(Asm4.iconPath, "Asm4_showLCS.svg")
 
     def IsActive(self):
         # if something is selected or an Asm4 assembly present
@@ -47,15 +48,16 @@ class showLcsCmd:
     |                      Hide                     |
     +-----------------------------------------------+
 """
-class hideLcsCmd:
-    def __init__(self):
-        super(hideLcsCmd,self).__init__()
 
-    def GetResources(self):
-        return {"MenuText": translate("Asm4_hideLcs", "Hide LCS"),
-                "ToolTip": translate("Asm4_hideLcs", "Hide LCS and Datums of selected part and its children"),
-                "Pixmap": os.path.join(Asm4.iconPath, 'Asm4_hideLCS.svg')
-                }
+
+class hideLcsCmd(BaseCommand):
+    def __init__(self):
+        super(hideLcsCmd, self).__init__()
+        self.menutext = "Hide LCS"
+        self.tooltip = translate(
+            "Commands5", "Hide LCS and Datums of selected part and its children"
+        )
+        self.pixmap = os.path.join(Asm4.iconPath, "Asm4_hideLCS.svg")
 
     def IsActive(self):
         # if something is selected or an Asm4 assembly present

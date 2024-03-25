@@ -18,9 +18,8 @@ import Asm4_libs as Asm4
 from placeLinkUI import placeLinkUI
 from placePartUI import placePartUI
 import selectionFilter
-
-
-
+from BaseCommand import BaseCommand
+from Asm4_Translate import translate
 
 
 """
@@ -28,15 +27,14 @@ import selectionFilter
     |                  The command                  |
     +-----------------------------------------------+
 """
-class placeLinkCmd():
-    def __init__(self):
-        super(placeLinkCmd,self).__init__()
 
-    def GetResources(self):
-        return {"MenuText": "Edit Placement of a Part",
-                "ToolTip": "Move/Attach a Part in the assembly",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Place_Link.svg')
-                }
+
+class placeLinkCmd(BaseCommand):
+    def __init__(self):
+        super(placeLinkCmd, self).__init__()
+        self.menutext = "Edit Placement of a Part"
+        self.tooltip = translate("Commands3", "Move/Attach a Part in the assembly")
+        self.pixmap = os.path.join(Asm4.iconPath, "Place_Link.svg")
 
     def IsActive(self):
         # We only insert a link into an Asm4  Model

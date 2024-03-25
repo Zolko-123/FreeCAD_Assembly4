@@ -29,71 +29,73 @@ import FreeCAD as App
 from FreeCAD import Console as FCC
 
 import Asm4_libs as Asm4
+from BaseCommand import BaseCommand
+from Asm4_Translate import translate
 
-'''
+"""
 has_anytree = False
 try:
     from anytree import Node, RenderTree
     has_anytree = True
 except ImportError:
     FCC.PrintMessage("\nINFO : Pylib anytree is missing, exportFiles is not available\n")
-'''
+"""
+
 
 # lists the parts and linked parts of the selected container
-class listLinkedFiles():
-
-    def GetResources(self):
-        menutext = "Structure tree of the assembly"
-        tooltip  = "<p>Show the hierarchical tree structure of parts and sub-assemblies in the assembly. "
-        tooltip += "The tree is displayed with ASCII art</p>"
-        tooltip += "<p><b>Usage</b>: select an entity and click the command</p>"
-        iconFile = os.path.join(Asm4.iconPath, 'Asm4_List_Liked_Files_Tree.svg')
-        return {
-            "MenuText": menutext,
-            "ToolTip" : tooltip,
-            "Pixmap"  : iconFile
-        }
-
+class listLinkedFiles(BaseCommand):
+    def __init__(self):
+        super(listLinkedFiles, self).__init__()
+        # types of objects to be included in the listing
+        # links and derivatives are also included
+        self.DEF_TYPES = [
+            "App::Part",
+            "PartDesign::Body",
+            "Part::FeaturePython",
+            "App::DocumentObjectGroup",
+        ]
+        # visual ASCII art
+        self.TAB = "    "
+        self.BRANCH = " │  "
+        self.FORK = " ├─ "
+        self.LAST = " └─ "
+        # where we write stuff
+        self.ascii_tree = ""
+        self.root_path = ""
+        # the UI
+        self.UI = QtGui.QDialog()
+        self.drawUI()
+        self.menutext = "Tree of Linked Files"
+        self.tooltip = translate(
+            "Commands5",
+            "<p>Show the hierarchical tree structure of parts in the selected container.\n"
+            "The tree is displayed with ASCII art</p>\n"
+            "<p><b>Usage</b>: select an entity and click the command</p>",
+        )
+        self.pixmap = os.path.join(Asm4.iconPath, "Asm4_List_Liked_Files_Tree.svg")
 
     def IsActive(self):
-        if App.ActiveDocument and len(Gui.Selection.getSelection())==1:
+        if App.ActiveDocument and len(Gui.Selection.getSelection()) == 1:
             return True
         elif App.ActiveDocument and Asm4.getAssembly():
             return True
         else:
             return False
 
-
-    def __init__(self):
-        super(listLinkedFiles, self).__init__()
-        # types of objects to be included in the listing
-        # links and derivatives are also included
-        self.DEF_TYPES = ['App::Part', 'PartDesign::Body', 'Part::FeaturePython', 'App::DocumentObjectGroup']
-        # visual ASCII art
-        self.TAB    = '    '
-        self.BRANCH = ' │  '
-        self.FORK   = ' ├─ '
-        self.LAST   = ' └─ '
-        # where we write stuff
-        self.ascii_tree = ""
-        self.root_path  = ""
-        # the UI
-        self.UI = QtGui.QDialog()
-        self.drawUI()
-
-
     def Activated(self):
         # clear stuff
         self.ascii_tree = ""
-        self.root_path  = ""
+        self.root_path = ""
         self.tree_view.clear()
         #
-        if len(Gui.Selection.getSelection())==1:
+        if len(Gui.Selection.getSelection()) == 1:
             objects = Gui.Selection.getSelection()
         elif Asm4.getAssembly():
-            objects = [ Asm4.getAssembly() ]
+            objects = [Asm4.getAssembly()]
         else:
-            FCC.PrintWarning("Oups, you shouldn't see this message, something went wrong")
+            FCC.PrintWarning(
+                "Oups, you shouldn't see this message, something went wrong"
+            )
         # get the directory path of the selected object
         filename = objects[0].Document.Name
         self.root_path = objects[0].Document.FileName.partition(filename)[0]
@@ -103,14 +105,13 @@ class listLinkedFiles():
         self.UI.show()
         self.tree_view.setPlainText(self.ascii_tree)
 
-
     # this is where the magic happens. Copied from TreeToAscii macro
     # Build ASCII tree by recursive call
-    def printChildren(self, objs=None, level=0, baseline=''):
-        for cnt, obj in enumerate(objs,1):
+    def printChildren(self, objs=None, level=0, baseline=""):
+        for cnt, obj in enumerate(objs, 1):
             # find the filepath
-            filepath = ''
-            if obj.isDerivedFrom('App::Link'):
+            filepath = ""
+            if obj.isDerivedFrom("App::Link"):
                 target = obj.LinkedObject
             else:
                 target = obj
@@ -118,84 +119,84 @@ class listLinkedFiles():
             if self.root_path:
                 filepath = target.Document.FileName.partition(self.root_path)[2]
             # ... else absolute
-            if filepath =='':
+            if filepath == "":
                 filepath = target.Document.FileName
             # make the data
             data = {
-                "LBL"  : obj.Label,
-                "NAME" : '('+obj.Name+')' if obj.Label!=obj.Name else '',
-                "DOC"  : filepath,
-                "TARG" : obj.LinkedObject.Name if obj.isDerivedFrom('App::Link') else ''
+                "LBL": obj.Label,
+                "NAME": "(" + obj.Name + ")" if obj.Label != obj.Name else "",
+                "DOC": filepath,
+                "TARG": obj.LinkedObject.Name if obj.isDerivedFrom("App::Link") else "",
             }
             # print the line
             if cnt == len(objs):
-                if level>0:
+                if level > 0:
                     self.ascii_tree += baseline + self.LAST
             else:
                 self.ascii_tree += baseline + self.FORK
             # new data print
-            if obj.isDerivedFrom('App::Link'):
-                pattern = '{LBL} => {TARG} @ {DOC}'
+            if obj.isDerivedFrom("App::Link"):
+                pattern = "{LBL} => {TARG} @ {DOC}"
             else:
-                pattern = '{LBL} {NAME}'
+                pattern = "{LBL} {NAME}"
             self.ascii_tree += pattern.format(**data)
             # we add the filename for the first element
-            if level==0 and target.Document.FileName != '' :
-                self.ascii_tree += ' @ '+target.Document.FileName
-            self.ascii_tree += '\n'
+            if level == 0 and target.Document.FileName != "":
+                self.ascii_tree += " @ " + target.Document.FileName
+            self.ascii_tree += "\n"
             # for the next line
             if cnt == len(objs):
-                if level>0:
+                if level > 0:
                     baselinenext = baseline + self.TAB
                 else:
-                    baselinenext = ''
+                    baselinenext = ""
             else:
                 baselinenext = baseline + self.BRANCH
             # table of children to be listed next
             children = []
             for child in obj.ViewObject.claimChildren():
-                if child.TypeId in self.DEF_TYPES or child.isDerivedFrom('App::Link'):
+                if child.TypeId in self.DEF_TYPES or child.isDerivedFrom("App::Link"):
                     children.append(child)
             self.printChildren(children, level + 1, baselinenext)
-
 
     def copyToClip(self):
         """Copies ASCII tree to clipboard"""
         self.tree_view.selectAll()
         self.tree_view.copy()
         self.tree_view.setPlainText("Copied to clipboard")
-        QtCore.QTimer.singleShot(3000, lambda:self.tree_view.setPlainText(self.ascii_tree))
-
+        QtCore.QTimer.singleShot(
+            3000, lambda: self.tree_view.setPlainText(self.ascii_tree)
+        )
 
     # defines the UI, only static elements
     def drawUI(self):
         # Our main window will be a QDialog
         # make this dialog stay above the others, always visible
-        self.UI.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
-        self.UI.setWindowTitle('Tree structure of the selected object')
-        self.UI.setWindowIcon( QtGui.QIcon( os.path.join( Asm4.iconPath , 'FreeCad.svg' ) ) )
+        self.UI.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
+        self.UI.setWindowTitle("Tree structure of the selected object")
+        self.UI.setWindowIcon(QtGui.QIcon(os.path.join(Asm4.iconPath, "FreeCad.svg")))
         self.UI.setMinimumWidth(470)
-        self.UI.resize(470,300)
+        self.UI.resize(470, 300)
         self.UI.setModal(False)
         # the layout for the main window is vertical (top to down)
         mainLayout = QtGui.QVBoxLayout(self.UI)
         # from TreeToAscii macro
         self.tree_view = QtGui.QPlainTextEdit(self.ascii_tree)
         self.tree_view.setReadOnly(True)
-        self.tree_view.setMinimumWidth(Gui.getMainWindow().width()/2)
-        self.tree_view.setMinimumHeight(Gui.getMainWindow().height()/2)
+        self.tree_view.setMinimumWidth(Gui.getMainWindow().width() / 2)
+        self.tree_view.setMinimumHeight(Gui.getMainWindow().height() / 2)
         self.tree_view.setLineWrapMode(QtGui.QPlainTextEdit.NoWrap)
-        f = QtGui.QFont("unexistent");
-        f.setStyleHint(QtGui.QFont.Monospace);
-        self.tree_view.setFont(f);
+        f = QtGui.QFont("unexistent")
+        f.setStyleHint(QtGui.QFont.Monospace)
+        self.tree_view.setFont(f)
         button_box = QtGui.QDialogButtonBox()
         copy_clip_but = QtGui.QPushButton("Copy to clipboard", button_box)
         button_box.addButton(copy_clip_but, QtGui.QDialogButtonBox.ActionRole)
-        #button_box.addStretch()
+        # button_box.addStretch()
         close_dlg_but = QtGui.QPushButton("Close", button_box)
         button_box.addButton(close_dlg_but, QtGui.QDialogButtonBox.RejectRole)
-        #button_box.addButton(QtGui.QDialogButtonBox.Close)
-        #button_box.button(QtGui.QDialogButtonBox.Close).setDefault(True)
+        # button_box.addButton(QtGui.QDialogButtonBox.Close)
+        # button_box.button(QtGui.QDialogButtonBox.Close).setDefault(True)
         mainLayout.addWidget(self.tree_view)
         mainLayout.addWidget(button_box)
         # actions
@@ -311,5 +312,4 @@ class exportFiles:
 '''
 
 # Add the command in the workbench
-Gui.addCommand('Asm4_listLinkedFiles', listLinkedFiles())
-
+Gui.addCommand("Asm4_listLinkedFiles", listLinkedFiles())

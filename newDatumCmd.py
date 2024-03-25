@@ -15,8 +15,8 @@ import FreeCAD as App
 from FreeCAD import Console as FCC
 
 import Asm4_libs as Asm4
-
-
+from BaseCommand import BaseCommand
+from Asm4_Translate import translate
 
 
 """
@@ -24,54 +24,52 @@ import Asm4_libs as Asm4
     |      a class to create all Datum objects      |
     +-----------------------------------------------+
 """
-class newDatum:
+
+
+class newDatum(BaseCommand):
     "My tool object"
+
     def __init__(self, datumName):
         self.datumName = datumName
         # recognised containers (not the same as Asm4.containerTypes !)
-        self.containers = [ 'App::Part', 'PartDesign::Body', 'App::DocumentObjectGroup']
-        if self.datumName   == 'Point':
-            self.datumType   = 'PartDesign::Point'
-            self.menutext    = "New Point"
-            self.tooltip     = "Create a new Datum Point in a Part"
-            self.icon        = os.path.join( Asm4.iconPath , 'Asm4_Point.svg')
-            self.datumColor  = (0.00,0.00,0.00)
-            self.datumAlpha  = []
-        elif self.datumName == 'Axis':
-            self.datumType   = 'PartDesign::Line'
-            self.menutext    = "New Axis"
-            self.tooltip     = "Create a new Datum Axis in a Part"
-            self.icon        = os.path.join( Asm4.iconPath , 'Asm4_Axis.svg')
-            self.datumColor  = (0.00,0.00,0.50)
-            self.datumAlpha  = []
-        elif self.datumName == 'Plane':
-            self.datumType   = 'PartDesign::Plane'
-            self.menutext    = "New Plane"
-            self.tooltip     = "Create a new Datum Plane in a Part"
-            self.icon        = os.path.join( Asm4.iconPath , 'Asm4_Plane.svg')
-            self.datumColor  = (0.50,0.50,0.50)
-            self.datumAlpha  = 80
-        elif self.datumName == 'LCS':
-            self.datumType   = 'PartDesign::CoordinateSystem'
-            self.menutext    = "New Coordinate System"
-            self.tooltip     = "Create a new Coordinate System in a Part"
-            self.icon        = os.path.join( Asm4.iconPath , 'Asm4_CoordinateSystem.svg')
-            self.datumColor  = []
-            self.datumAlpha  = []
-        elif self.datumName == 'Sketch':
-            self.datumType   = 'Sketcher::SketchObject'
-            self.menutext    = "New Sketch"
-            self.tooltip     = "Create a new Sketch in a Part"
-            self.icon        = os.path.join( Asm4.iconPath , 'Asm4_Sketch.svg')
-            self.datumColor  = []
-            self.datumAlpha  = []
-
-
-    def GetResources(self):
-        return {"MenuText": self.menutext,
-                "ToolTip": self.tooltip,
-                "Pixmap" : self.icon }
-
+        self.containers = ["App::Part", "PartDesign::Body", "App::DocumentObjectGroup"]
+        if self.datumName == "Point":
+            self.datumType = "PartDesign::Point"
+            self.menutext = "New Point"
+            self.tooltip = translate("Commands2", "Create a new Datum Point in a Part")
+            self.pixmap = os.path.join(Asm4.iconPath, "Asm4_Point.svg")
+            self.datumColor = (0.00, 0.00, 0.00)
+            self.datumAlpha = []
+        elif self.datumName == "Axis":
+            self.datumType = "PartDesign::Line"
+            self.menutext = "New Axis"
+            self.tooltip = translate("Commands2", "Create a new Datum Axis in a Part")
+            self.pixmap = os.path.join(Asm4.iconPath, "Asm4_Axis.svg")
+            self.datumColor = (0.00, 0.00, 0.50)
+            self.datumAlpha = []
+        elif self.datumName == "Plane":
+            self.datumType = "PartDesign::Plane"
+            self.menutext = "New Plane"
+            self.tooltip = translate("Commands2", "Create a new Datum Plane in a Part")
+            self.pixmap = os.path.join(Asm4.iconPath, "Asm4_Plane.svg")
+            self.datumColor = (0.50, 0.50, 0.50)
+            self.datumAlpha = 80
+        elif self.datumName == "LCS":
+            self.datumType = "PartDesign::CoordinateSystem"
+            self.menutext = "New Coordinate System"
+            self.tooltip = translate(
+                "Commands2", "Create a new Coordinate System in a Part"
+            )
+            self.pixmap = os.path.join(Asm4.iconPath, "Asm4_CoordinateSystem.svg")
+            self.datumColor = []
+            self.datumAlpha = []
+        elif self.datumName == "Sketch":
+            self.datumType = "Sketcher::SketchObject"
+            self.menutext = "New Sketch"
+            self.tooltip = translate("Commands2", "Create a new Sketch in a Part")
+            self.pixmap = os.path.join(Asm4.iconPath, "Asm4_Sketch.svg")
+            self.datumColor = []
+            self.datumAlpha = []
 
     def IsActive(self):
         if App.ActiveDocument:

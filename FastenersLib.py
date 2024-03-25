@@ -20,11 +20,8 @@ import Asm4_libs as Asm4
 from Asm4_Translate import translate
 
 
-
 # icon to show in the Menu, toolbar and widget window
-iconFile = os.path.join( Asm4.iconPath , 'Asm4_mvFastener.svg')
-
-
+iconFile = os.path.join(Asm4.iconPath, "Asm4_mvFastener.svg")
 
 
 """
@@ -49,7 +46,8 @@ Gui.runCommand('FSChangeParams')
     
 """
 
-class insertFastener:
+
+class insertFastener(BaseCommand):
     "My tool object"
     def __init__(self, fastenerType):
         self.FSclass = fastenerType
@@ -59,40 +57,43 @@ class insertFastener:
                         'ThreadedRod':(0.3, 0.5, 0.75)
                         }
         # Screw
-        if  self.FSclass      == 'Screw':
-            self.menutext     = translate("Fasteners", "Insert Screw")
-            self.tooltip      = "<p>Insert a Screw into the Assembly</p>"
-            self.tooltip     += "<p>If another fastener is selected, a new fastener of the same type is created in the same assembly."
-            self.tooltip     += "If an axis or LCS is selected, the new fastener will be attached to it."
-            self.tooltip     += "If an assembly is selected, the new fastener will be inside that assembly.</p>"
-            self.icon         = os.path.join( Asm4.iconPath , 'Asm4_Screw.svg')
+        if self.FSclass == "Screw":
+            self.pixmap = os.path.join(Asm4.iconPath, "Asm4_Screw.svg")
+            self.menutext = translate("Fasteners", "Insert Screw")
+            self.tooltip = translate(
+                "Fasteners",
+                "<p>Insert a Screw into the Assembly</p>\n"
+                "<p>If another fastener is selected, a new fastener of the same type is created in the same assembly.\n"
+                "If an axis or LCS is selected, the new fastener will be attached to it.\n"
+                "If an assembly is selected, the new fastener will be inside that assembly.</p>",
+            )
         # Nut
-        elif self.FSclass     == 'Nut':
-            self.menutext     = translate("Fasteners", "Insert Nut")
-            self.tooltip      = "<p>Insert a Nut into the Assembly</p>"
-            self.tooltip     += "<p>If another fastener is selected, a new fastener of the same type is created in the same assembly."
-            self.tooltip     += "If an axis or LCS is selected, the new fastener will be attached to it."
-            self.tooltip     += "If an assembly is selected, the new fastener will be inside that assembly.</p>"
-            self.icon         = os.path.join( Asm4.iconPath , 'Asm4_Nut.svg')
+        elif self.FSclass == "Nut":
+            self.pixmap = os.path.join(Asm4.iconPath, "Asm4_Nut.svg")
+            self.menutext = translate("Fasteners", "Insert Nut")
+            self.tooltip = translate(
+                "Fasteners",
+                "<p>Insert a Nut into the Assembly</p>\n"
+                "<p>If another fastener is selected, a new fastener of the same type is created in the same assembly.\n"
+                "If an axis or LCS is selected, the new fastener will be attached to it.\n"
+                "If an assembly is selected, the new fastener will be inside that assembly.</p>",
+            )
         # Washer
-        elif self.FSclass     == 'Washer':
-            self.menutext     = translate("Fasteners", "Insert Washer")
-            self.tooltip      = "<p>Insert a Washer into the Assembly</p>"
-            self.tooltip     += "<p>If another fastener is selected, a new fastener of the same type is created in the same assembly."
-            self.tooltip     += "If an axis or LCS is selected, the new fastener will be attached to it."
-            self.tooltip     += "If an assembly is selected, the new fastener will be inside that assembly.</p>"
-            self.icon         = os.path.join( Asm4.iconPath , 'Asm4_Washer.svg')
+        elif self.FSclass == "Washer":
+            self.pixmap = os.path.join(Asm4.iconPath, "Asm4_Washer.svg")
+            self.menutext = translate("Fasteners", "Insert Washer")
+            self.tooltip = translate(
+                "Fasteners",
+                "<p>Insert a Washer into the Assembly</p>\n"
+                "<p>If another fastener is selected, a new fastener of the same type is created in the same assembly.\n"
+                "If an axis or LCS is selected, the new fastener will be attached to it.\n"
+                "If an assembly is selected, the new fastener will be inside that assembly.</p>",
+            )
         # Threaded Rod (makes errors)
-        elif self.FSclass     == 'ThreadedRod':
-            self.menutext     = translate("Fasteners", "Insert threaded rod")
-            self.tooltip      = "Insert threaded rod"
-            self.icon         = os.path.join( Asm4.iconPath , 'Asm4_Rod.svg')
-
-
-    def GetResources(self):
-        return {"MenuText": self.menutext,
-                "ToolTip" : self.tooltip,
-                "Pixmap"  : self.icon }
+        elif self.FSclass == "ThreadedRod":
+            self.pixmap = os.path.join(Asm4.iconPath, "Asm4_Rod.svg")
+            self.menutext = translate("Fasteners", "Insert threaded rod")
+            self.tooltip = translate("Fasteners", "Insert threaded rod")
 
     def IsActive(self):
         # if Asm4.getAssembly():
@@ -216,16 +217,14 @@ class insertFastener:
     |         wrapper for FSChangeParams            |
     +-----------------------------------------------+
 """
-class changeFSparametersCmd():
 
+
+class changeFSparametersCmd(BaseCommand):
     def __init__(self):
-        super(changeFSparametersCmd,self).__init__()
-
-    def GetResources(self):
-        return {"MenuText": "Change Fastener parameters",
-                "ToolTip": "Change Fastener parameters",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_FSparams.svg')
-                }
+        super(changeFSparametersCmd, self).__init__()
+        self.pixmap = os.path.join(Asm4.iconPath, "Asm4_FSparams.svg")
+        self.menutext = translate("Fasteners", "Change Fastener parameters")
+        self.tooltip = translate("Fasteners", "Change Fastener parameters")
 
     def IsActive(self):
         if App.ActiveDocument and getSelectionFS():
@@ -278,21 +277,18 @@ def isFastener(obj):
     +-----------------------------------------------+
     |         clone per App::Link fasteners         |
     +-----------------------------------------------+
-    
+
     Select a fastener and several datum axes and the fastener will
     be cloned (as App::Link) and attached to those axes
 """
-class cloneFastenersToAxesCmd():
-    
+class cloneFastenersToAxesCmd(BaseCommand):
+
     def __init__(self):
         super(cloneFastenersToAxesCmd,self).__init__()
-    
-    def GetResources(self):
-        return {"MenuText": "Clone Fastener to Axes",
-                "ToolTip": "Clone Fastener to Axes",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_cloneFasteners.svg')
-                }
-    
+        self.pixmap = os.path.join( Asm4.iconPath , 'Asm4_cloneFasteners.svg')
+        self.menutext = translate("Fasteners", "Clone Fastener to Axes")
+        self.tooltip = translate("Fasteners", "Clone Fastener to Axes")
+
     def IsActive(self):
         self.selection = self.getSelectedAxes()
         if Asm4.getAssembly() and self.selection:
@@ -316,7 +312,7 @@ class cloneFastenersToAxesCmd():
                                 if axis and axis.Document:
                                     newFstnr = Asm4.cloneObject(fstnr)
                                     Asm4.placeObjectToLCS(newFstnr, axisData[2], axis.Document.Name, axisData[3])
-                                    
+
             Gui.Selection.clearSelection()
             self.rootAssembly = Asm4.getAssembly()
             if self.rootAssembly:
@@ -327,7 +323,7 @@ class cloneFastenersToAxesCmd():
         holeAxes = []
         fstnr = None
         selection = Gui.Selection.getSelectionEx('', 0)
-        
+
         if selection:
             for s in selection:
                 for seNames in s.SubElementNames:

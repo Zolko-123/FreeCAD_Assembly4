@@ -17,7 +17,8 @@ from FreeCAD import Console as FCC
 
 import Asm4_libs as Asm4
 
-
+from BaseCommand import BaseCommand
+from Asm4_Translate import translate
 
 
 """
@@ -25,17 +26,19 @@ import Asm4_libs as Asm4
     |    a circular link array class and command    |
     +-----------------------------------------------+
 """
-class makeShapeBinder():
-    def __init__(self):
-        pass
 
-    def GetResources(self):
-        tooltip  = "Create a reference to an external shape\n"
-        tooltip += "This creates a SubShapeBinder of the selected shapes\n"
-        tooltip += "(face, edge, point) in the root assembly\n"
-        tooltip += "Only shapes belonging to the same part can be imported in a single step"
-        iconFile = os.path.join( Asm4.iconPath, 'Asm4_shapeBinder.svg' )
-        return {"MenuText": "Create a shape binder", "ToolTip":  tooltip, "Pixmap": iconFile}
+
+class makeShapeBinder(BaseCommand):
+    def __init__(self):
+        self.pixmap = os.path.join(Asm4.iconPath, "Asm4_shapeBinder.svg")
+        self.menutext = "Create a shape binder"
+        self.tooltip = translate(
+            "Commands2",
+            "Create a reference to an external shape\n"
+            "This creates a SubShapeBinder of the selected shapes\n"
+            "(face, edge, point) in the root assembly\n"
+            "Only shapes belonging to the same part can be imported in a single step",
+        )
 
     def IsActive(self):
         # only do this for assembly objects and all selected shapes must be in the same part

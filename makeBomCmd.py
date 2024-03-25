@@ -15,8 +15,10 @@ import FreeCAD as App
 
 import Asm4_libs as Asm4
 import infoPartCmd
-#import infoKeys
-#All infor from infoKeys is process by infoPartCmd shouldn't need to
+from BaseCommand import BaseCommand
+from Asm4_Translate import translate
+# import infoKeys
+# All infor from infoKeys is process by infoPartCmd shouldn't need to
 
 
 crea = infoPartCmd.infoPartUI.makePartInfo
@@ -52,33 +54,31 @@ file.close()
 '''
 
 
-class makeBOM:
 
+class makeBOM(BaseCommand):
     def __init__(self, follow_subassemblies=True):
-        #super().__init__()
+        # super().__init__()
         self.follow_subassemblies = follow_subassemblies
-        '''
+        """
         file = open(ConfUserFilejson, 'r')
         self.infoKeysUser = json.load(file).copy()
         file.close()
-        '''
-
-    def GetResources(self):
-
-        if self.follow_subassemblies == True:
-            menutext = "Bill of Materials"
-            tooltip  = "Create the Bill of Materials of the Assembly including sub-assemblies"
-            iconFile = os.path.join( Asm4.iconPath, 'Asm4_PartsList_Subassemblies.svg' )
+        """
+        if self.follow_subassemblies:
+            self.menutext = "Bill of Materials"
+            self.tooltip = translate(
+                "Commands5",
+                "Create the Bill of Materials of the Assembly including sub-assemblies",
+            )
+            self.pixmap = os.path.join(
+                Asm4.iconPath, "Asm4_PartsList_Subassemblies.svg"
+            )
         else:
-            menutext = "Local Bill of Materials"
-            tooltip  = "Create the Bill of Materials of the Assembly"
-            iconFile = os.path.join( Asm4.iconPath, 'Asm4_PartsList.svg' )
-
-        return {
-            "MenuText": menutext,
-            "ToolTip": tooltip,
-            "Pixmap": iconFile
-        }
+            self.menutext = "Local Bill of Materials"
+            self.tooltip = translate(
+                "Commands5", "Create the Bill of Materials of the Assembly"
+            )
+            self.pixmap = os.path.join(Asm4.iconPath, "Asm4_PartsList.svg")
 
     def IsActive(self):
         if Asm4.getAssembly() is None:
