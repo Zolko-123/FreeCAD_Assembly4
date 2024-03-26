@@ -1483,7 +1483,7 @@ You must re-create the attachment datums in the resulting part</source>
     </message>
     <message>
         <source>Create new </source>
-        <translation>建立一個新的 </translation>
+        <translation>建立新的 </translation>
     </message>
     <message>
         <source>Enter </source>
