@@ -484,7 +484,7 @@ class infoPartUI():
         Gui.Control.closeDialog()
 
     def getStandardButtons(self):
-        return int(QtGui.QDialogButtonBox.Cancel | QtGui.QDialogButtonBox.Ok)
+        return QtGui.QDialogButtonBox.Cancel | QtGui.QDialogButtonBox.Ok
 
     def reject(self):
         self.finish()
@@ -569,7 +569,7 @@ class infoPartConfUI():
         Gui.Control.closeDialog()
 
     def getStandardButtons(self):
-        return int(QtGui.QDialogButtonBox.Cancel | QtGui.QDialogButtonBox.Ok)
+        return QtGui.QDialogButtonBox.Cancel | QtGui.QDialogButtonBox.Ok
 
     def reject(self):
         self.finish()
