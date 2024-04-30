@@ -153,9 +153,7 @@ class MeasureUI():
 
     # standard FreeCAD Task panel buttons
     def getStandardButtons(self):
-        return int(   QtGui.QDialogButtonBox.Cancel
-                    | QtGui.QDialogButtonBox.Reset
-                    | QtGui.QDialogButtonBox.Ok )
+        return QtGui.QDialogButtonBox.Cancel | QtGui.QDialogButtonBox.Reset | QtGui.QDialogButtonBox.Ok
 
     # OK button
     def accept(self):

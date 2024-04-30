@@ -228,9 +228,7 @@ class placeLinkUI():
 
     # standard FreeCAD Task panel buttons
     def getStandardButtons(self):
-        return int(QtGui.QDialogButtonBox.Cancel
-                   | QtGui.QDialogButtonBox.Ok
-                   | QtGui.QDialogButtonBox.Ignore)
+        return QtGui.QDialogButtonBox.Cancel | QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Ignore
 
 
     # OK

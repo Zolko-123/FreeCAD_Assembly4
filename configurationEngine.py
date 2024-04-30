@@ -138,8 +138,8 @@ class openConfigurationsUI():
 
     # standard FreeCAD Task panel buttons
     def getStandardButtons(self):
-        # return int(QtGui.QDialogButtonBox.Cancel | QtGui.QDialogButtonBox.Apply | QtGui.QDialogButtonBox.Ok)
-        return int( QtGui.QDialogButtonBox.Close | QtGui.QDialogButtonBox.Apply )
+        # return QtGui.QDialogButtonBox.Cancel | QtGui.QDialogButtonBox.Apply | QtGui.QDialogButtonBox.Ok
+        return QtGui.QDialogButtonBox.Close | QtGui.QDialogButtonBox.Apply
 
     # OK = apply and close
     def accept(self):
