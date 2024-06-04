@@ -33,7 +33,6 @@ Asm4_trans = os.path.join(Asm4_path, "Resources/translations")
 # I don't like this being here
 import selectionFilter
 
-
 """
     +-----------------------------------------------+
     |            Initialize the workbench           |
@@ -55,8 +54,8 @@ class Assembly4Workbench(Workbench):
         if FCver[0]=='0' and FCver[1]=='22':
             git = int(FCver[3][0:5])
             if isinstance(git, int) and git>35594 :
-                print("This version of FreeCAD ("+FCver[0]+"."+FCver[1]+"-"+str(git)+") is not compatible with Assembly4")
-                print("You may encounter erors, it is rather suggested to use the stable 0.21 branch")
+                print("Assembly4 is not fully compatible with FreeCAD "+FCver[0]+"."+FCver[1]+"-"+str(git)+" yet.")
+                print("You may encounter erors. It is rather suggested to use the stable FreeCAD 0.21.")
 
     def Activated(self):
         "This function is executed when the workbench is activated"
@@ -90,7 +89,9 @@ class Assembly4Workbench(Workbench):
     def Initialize(self):
         # check for FreeCAD version
         FCver = FreeCAD.Version()
-        if FCver[0]=='0' and FCver[1]=='22':
+        MODDIR = os.path.join(App.ConfigGet("UserAppData"), "Mod")
+        popup_disable_filename = os.path.join(MODDIR, "asm4_disable_version_check_popup") # TODO: REMOVE IN THE FUTURE
+        if FCver[0]=='0' and FCver[1]=='22' and not os.path.exists(popup_disable_filename):
             git = int(FCver[3][0:5])
             if isinstance(git, int) and git>35594 :
                 from PySide import QtGui
@@ -98,8 +99,9 @@ class Assembly4Workbench(Workbench):
                 msgBox.setWindowTitle( 'Warning' )
                 msgBox.setIcon( QtGui.QMessageBox.Critical )
                 msgBox.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
-                text = "This version of FreeCAD ("+FCver[0]+"."+FCver[1]+"-"+str(git)+") is not compatible with Assembly4. "
-                text +="You may encounter erors, it is rather suggested to use the stable 0.21 branch" 
+                text = "Assembly4 is not fully compatible with FreeCAD version "+FCver[0]+"."+FCver[1]+"-"+str(git)+" yet.\n\n"
+                text +="You may encounter erors.\nIt is rather suggested to use the stable FreeCAD 0.21.\n\n"
+                text +="To disable this popup create the following file:\n"+popup_disable_filename
                 msgBox.setText( text )
                 msgBox.exec_()
 
