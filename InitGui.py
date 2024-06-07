@@ -372,19 +372,6 @@ class Assembly4Workbench(Workbench):
         FreeCADGui.updateGui()
 
 
-    # FreeCAD version check
-    def Asm4_v22_popup(self):
-        FCver = FreeCAD.Version()
-        from PySide import QtGui, QtCore
-        msgBox = QtGui.QMessageBox()
-        msgBox.setWindowTitle( 'Warning' )
-        msgBox.setIcon( QtGui.QMessageBox.Critical )
-        msgBox.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
-        text = "This version of FreeCAD ("+FCver[0]+"."+FCver[1]+"."+FCver[2]+") is not compatible with Assembly4. "
-        text +="You may encounter erors, it is rather suggested to use the stable FreeCAD v0.21 branch" 
-        msgBox.setText( text )
-        msgBox.exec_()
-
 
 
 
