@@ -30,6 +30,7 @@ Asm4_path = os.path.dirname( Asm4_locator.__file__ )
 Asm4_icon = os.path.join( Asm4_path , 'Resources/icons/Assembly4.svg' )
 Asm4_trans = os.path.join(Asm4_path, "Resources/translations")
 
+
 # I don't like this being here
 import selectionFilter
 
@@ -49,14 +50,6 @@ class Assembly4Workbench(Workbench):
 
     def __init__(self):
         "This function is executed when FreeCAD starts"
-        # check for FreeCAD version
-        FCver = FreeCAD.Version()
-        # print("This is FreeCAD version "+FCver[0]+"."+FCver[1]+"."+FCver[2]+"-"+FCver[3])
-        if FCver[0]=='0' and FCver[1]=='22':
-            git = int(FCver[3][0:5])
-            if isinstance(git, int) and git>35594 :
-                print("This version of FreeCAD ("+FCver[0]+"."+FCver[1]+"-"+str(git)+") is not compatible with Assembly4")
-                print("You may encounter erors, it is rather suggested to use the stable 0.21 branch")
 
     def Activated(self):
         "This function is executed when the workbench is activated"
@@ -82,26 +75,23 @@ class Assembly4Workbench(Workbench):
         # this function is mandatory if this is a full python workbench
         return "Gui::PythonWorkbench"
 
+
         """
     +-----------------------------------------------+
     |        This is where all is defined           |
     +-----------------------------------------------+
         """
     def Initialize(self):
+
         # check for FreeCAD version
         FCver = FreeCAD.Version()
+        # print("This is FreeCAD version "+FCver[0]+"."+FCver[1]+"."+FCver[2]+"-"+FCver[3])
         if FCver[0]=='0' and FCver[1]=='22':
             git = int(FCver[3][0:5])
             if isinstance(git, int) and git>35594 :
-                from PySide import QtGui
-                msgBox = QtGui.QMessageBox()
-                msgBox.setWindowTitle( 'Warning' )
-                msgBox.setIcon( QtGui.QMessageBox.Critical )
-                msgBox.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
-                text = "This version of FreeCAD ("+FCver[0]+"."+FCver[1]+"-"+str(git)+") is not compatible with Assembly4. "
-                text +="You may encounter erors, it is rather suggested to use the stable 0.21 branch" 
-                msgBox.setText( text )
-                msgBox.exec_()
+                FreeCAD.Console.PrintWarning("This version of FreeCAD ("+FCver[0]+"."+FCver[1]+"."+FCver[2]+"-"+str(git)+") ")
+                FreeCAD.Console.PrintWarning("is not backward compatible with FreeCAD v0.21 and earlier\n")
+                FreeCAD.Console.PrintWarning("It is rather suggested to use the stable FreeCAD v0.21 branch\n")
 
         # Translations
         # from Asm4_Translate import Qtranslate
@@ -380,6 +370,9 @@ class Assembly4Workbench(Workbench):
     def dot(self):
         FreeCAD.Console.PrintMessage(".")
         FreeCADGui.updateGui()
+
+
+
 
 
 """

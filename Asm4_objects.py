@@ -49,15 +49,15 @@ tmpDoc.addObject('App::Part
 """
 class VariantLink( object ):
     def __init__(self):
-        FCC.PrintMessage('Initialising ...\n')
+        FCC.PrintMessage('Initialising variantLink ...\n')
         self.Object = None
-    
+
     def __getstate__(self):
         return
 
     def __setstate__(self,_state):
         return
-    
+
     # new Python API for overriding C++ view provider of the binding object
     def getViewProviderName(self,_obj):
         return 'Gui::ViewProviderLinkPython'

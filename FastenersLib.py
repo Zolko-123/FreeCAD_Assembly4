@@ -102,7 +102,7 @@ class insertFastener:
 
     def Activated(self):
         # check that the Fasteners WB has been loaded before:
-        if not 'FSChangeParams' in Gui.listCommands():
+        if not 'Fasteners_ChangeParameters' in Gui.listCommands():
             Gui.activateWorkbench('FastenersWorkbench')
             Gui.activateWorkbench('Assembly4Workbench')
         # if something is selected
@@ -234,14 +234,16 @@ class changeFSparametersCmd():
 
     def Activated(self):
         # check that the Fasteners WB has been loaded before:
-        if not 'FSChangeParams' in Gui.listCommands():
+        if not 'Fasteners_ChangeParameters' in Gui.listCommands():
             Gui.activateWorkbench('FastenersWorkbench')
             Gui.activateWorkbench('Assembly4Workbench')
         # check that we have selected a Fastener from the Fastener WB
         selection = getSelectionFS()
         if selection:
-            Gui.runCommand('FSChangeParams')
-
+            try:
+                Gui.runCommand('Fasteners_ChangeParameters')
+            except:
+                Gui.runCommand('FSChangeParams')
 
 
 """

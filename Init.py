@@ -44,4 +44,13 @@ except:
     # remove trailing newline
     Asm4_version = version[:-1]
 
+# check for FreeCAD version
+FCver = FreeCAD.Version()
+if FCver[0]=='0' and FCver[1]=='22':
+    git = int(FCver[3][0:5])
+    if isinstance(git, int) and git>35594 :
+        pass
+        # print("This version of FreeCAD ("+FCver[0]+"."+FCver[1]+"-"+str(git)+") is not compatible with Assembly4, you may encounter erors")
+
+
 # print("Assembly4 workbench ("+Asm4_version+") loaded")
