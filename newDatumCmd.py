@@ -222,8 +222,7 @@ class newHole:
                     instanceNum = 1
                     while parentDoc.getObject( 'HoleAxis_'+str(instanceNum) ):
                         instanceNum += 1
-                    axis             = parentPart.newObject('PartDesign::Line','HoleAxis_'+str(instanceNum))
-                    axis.Support     = [( selectedObj, (edgeName,) )]
+                    axis = Asm4.newLCS(parentPart, 'PartDesign::Line', 'HoleAxis_'+str(instanceNum), [( selectedObj, (edgeName,) )])
                     axis.MapMode     = 'AxisOfCurvature'
                     axis.MapReversed = False
                     axis.ResizeMode  = 'Manual'

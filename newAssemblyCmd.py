@@ -80,8 +80,7 @@ def makeAssembly():
         assembly.addProperty( 'App::PropertyString', 'AssemblyType', 'Assembly' )
         assembly.AssemblyType = 'Part::Link'
         # add an LCS at the root of the Model, and attach it to the 'Origin'
-        lcs0 = assembly.newObject('PartDesign::CoordinateSystem','LCS_Origin')
-        lcs0.Support = [(assembly.Origin.OriginFeatures[0],'')]
+        lcs0 = Asm4.newLCS(assembly, 'PartDesign::CoordinateSystem', 'LCS_Origin', [(assembly.Origin.OriginFeatures[0],'')])
         lcs0.MapMode = 'ObjectXY'
         lcs0.MapReversed = False
         # set nice colors for the Origin planes
