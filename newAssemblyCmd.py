@@ -19,6 +19,8 @@ from Asm4_Translate import translate
 
 
 
+from Asm4_Translate import translate
+
 class newAssemblyCmd:
     """
     +-----------------------------------------------+
@@ -39,7 +41,7 @@ def makeAssembly():
     def GetResources(self):
         tooltip  = translate("Commands", "<p>Create a new Assembly container</p>")
         iconFile = os.path.join( Asm4.iconPath , 'Asm4_Model.svg')
-        return {"MenuText": "New Assembly", "ToolTip": tooltip, "Pixmap" : iconFile }
+        return {"MenuText": translate("Commands", "New Assembly"), "ToolTip": tooltip, "Pixmap" : iconFile }
 
 
     def IsActive(self):

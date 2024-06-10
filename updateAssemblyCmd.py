@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # coding: utf-8
-# 
-# updateAssembly.py 
+#
+# updateAssembly.py
 
 
 import math, re, os
@@ -12,17 +12,15 @@ import FreeCAD as App
 import Part
 
 import Asm4_libs as Asm4
+from BaseCommand import BaseCommand
+from Asm4_Translate import translate
 
 
-
-class updateAssembly:
-
-    def GetResources(self):
-        return {"MenuText": "Solve and Update Assembly",
-                "ToolTip": "Update Assembly",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_Solver.svg')
-                }
-
+class updateAssembly(BaseCommand):
+    def __init__(self):
+        self.menutext = "Solve and Update Assembly"
+        self.tooltip = translate("Commands3", "Update Assembly")
+        self.pixmap = os.path.join(Asm4.iconPath, "Asm4_Solver.svg")
 
     def IsActive(self):
         if App.ActiveDocument:

@@ -15,7 +15,8 @@ import FreeCAD as App
 import Part
 
 import Asm4_libs as Asm4
-
+from BaseCommand import BaseCommand
+from Asm4_Translate import translate
 
 
 """
@@ -23,19 +24,17 @@ import Asm4_libs as Asm4
     |                  main class                   |
     +-----------------------------------------------+
 """
-class releaseAttachment:
 
+
+class releaseAttachment(BaseCommand):
     def __init__(self):
-        super(releaseAttachment,self).__init__()
+        super(releaseAttachment, self).__init__()
         self.selectedObj = []
-
-
-    def GetResources(self):
-        return {"MenuText": "Release from Attachment",
-                "ToolTip": "Release an object from all attachments to any geometry",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_releaseAttachment.svg')
-                }
-
+        self.menutext = "Release from Attachment"
+        self.tooltip = translate(
+            "Commands3", "Release an object from all attachments to any geometry"
+        )
+        self.pixmap = os.path.join(Asm4.iconPath, "Asm4_releaseAttachment.svg")
 
     def IsActive(self):
         # is there an active document ?

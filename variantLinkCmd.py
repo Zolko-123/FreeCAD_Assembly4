@@ -18,6 +18,9 @@ import Asm4_libs as Asm4
 from Asm4_objects import VariantLink, ViewProviderVariant
 
 
+from BaseCommand import BaseCommand
+from Asm4_Translate import translate
+
 
 
 """
@@ -28,20 +31,15 @@ from Asm4_objects import VariantLink, ViewProviderVariant
 var = App.ActiveDocument.addObject("Part::FeaturePython", 'varLink', VariantLink(),None,True)
 
 """
-class makeVariantLink():
+class makeVariantLink(BaseCommand):
     def __init__(self):
         super(makeVariantLink,self).__init__()
-        #pass
-
-    def GetResources(self):
-        tooltip  = "EXPERIMENTAL !!!\n"
-        tooltip += "Create a variant link to a part\n"
-        tooltip += "Select a part containing a \"Variables\" property container"
-        iconFile = 'Variant_Link.svg'
-        return {"MenuText" : "Create a variant Part", 
-                "ToolTip"  :  tooltip, 
-                "Pixmap"   :  os.path.join( Asm4.iconPath, iconFile ) 
-                }
+        self.pixmap = os.path.join(Asm4.iconPath, 'Variant_Link.svg')
+        self.menutext = "Create a variant Part"
+        self.tooltip = translate("Commands",
+            "EXPERIMENTAL !!!\n"
+            "Create a variant link to a part\n"
+            "Select a part containing a \"Variables\" property container")
 
     def IsActive(self):
         # we only insert variant links into assemblies and root parts 

@@ -17,6 +17,8 @@ import FreeCAD as App
 
 import Asm4_libs as Asm4
 
+from BaseCommand import BaseCommand
+from Asm4_Translate import translate
 
 
 """
@@ -24,7 +26,7 @@ import Asm4_libs as Asm4
     |                  main class                   |
     +-----------------------------------------------+
 """
-class insertLink():
+class insertLink(BaseCommand):
     "My tool object"
 
     def __init__(self):
@@ -32,22 +34,16 @@ class insertLink():
         # the GUI objects are defined later down
         # self.UI = QtGui.QDialog()
         # self.drawUI()
-
-
-    def GetResources(self):
-        tooltip  = "<p>Insert a Part into the assembly. "
-        tooltip += "This will create a dynamic link to the part, "
-        tooltip += "which can be in this document or in another document "
-        tooltip += "that is open in the current session</p>"
-        tooltip += "<p><b>Usage</b>: the part must be open in the current session</p>"
-        tooltip += "<p>This command also enables to repair broken/missing links. "
-        tooltip += "Select the broken link, launch this command, and select a new target part in the list</p>"
-        iconFile = 'Link_Part.svg'
-        return {"MenuText" : "Insert Part", 
-                "ToolTip"  : tooltip, 
-                "Pixmap"   : os.path.join( Asm4.iconPath , iconFile )
-                }
-
+        self.pixmap = os.path.join(Asm4.iconPath, 'Link_Part.svg')
+        self.menutext = "Insert Part"
+        self.tooltip = translate("Commands",
+            "<p>Insert a Part into the assembly.\n"
+            "This will create a dynamic link to the part,\n"
+            "which can be in this document or in another document\n"
+            "that is open in the current session</p>\n"
+            "<p><b>Usage</b>: the part must be open in the current session</p>\n"
+            "<p>This command also enables to repair broken/missing links.\n"
+            "Select the broken link, launch this command, and select a new target part in the list</p>")
 
     def IsActive(self):
         # if an App::Link is selected, even a broken one
