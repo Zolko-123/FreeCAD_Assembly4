@@ -447,7 +447,7 @@ class exportDialog(QtGui.QDialog):
 
         # The Gui-related things
         self.setWindowTitle('Animation Export Preview')
-        self.setWindowIcon(QtGui.QIcon(os.path.join(Asm4.iconPath, 'FreeCad.svg')))
+        self.setWindowIcon(QtGui.QIcon(os.path.join(Asm4.iconPath, 'freecad.svg')))
         self.setMinimumWidth(640)
         self.setMinimumHeight(480)
         self.setModal(False)
