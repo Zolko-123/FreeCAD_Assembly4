@@ -7,7 +7,7 @@
    id="svg3140"
    sodipodi:version="0.32"
    inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
-   sodipodi:docname="freecad.svg"
+   sodipodi:docname="flycad.svg"
    inkscape:output_extension="org.inkscape.output.svg.inkscape"
    version="1.1"
    inkscape:export-filename="/home/hubertz/FlyCAD.png"
@@ -518,20 +518,20 @@
        inkscape:collect="always"
        xlink:href="#linearGradient3682-0"
        id="linearGradient2651"
-       x1="18.808334"
-       y1="31.056297"
-       x2="23.328514"
-       y2="4.0415173"
+       x1="32.971436"
+       y1="30.912895"
+       x2="32.485809"
+       y2="3.841429"
        gradientUnits="userSpaceOnUse" />
     <linearGradient
        inkscape:collect="always"
        xlink:href="#linearGradient3682-0"
        id="linearGradient2959"
        gradientUnits="userSpaceOnUse"
-       x1="24.810783"
-       y1="30.772322"
-       x2="32.853634"
-       y2="4.2137032" />
+       x1="29.911734"
+       y1="29.11307"
+       x2="32.485809"
+       y2="3.841429" />
     <linearGradient
        id="_Linear22-3-1"
        x1="0"
@@ -563,8 +563,8 @@
        xlink:href="#linearGradient3682-0"
        id="linearGradient1043"
        gradientUnits="userSpaceOnUse"
-       x1="25.920565"
-       y1="30.688698"
+       x1="32.971436"
+       y1="30.912895"
        x2="32.485809"
        y2="3.841429" />
   </defs>
@@ -576,7 +576,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="10"
-     inkscape:cx="18.2"
+     inkscape:cx="20"
      inkscape:cy="32"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -616,7 +616,7 @@
      inkscape:groupmode="layer">
     <g
        id="g948"
-       transform="translate(-0.400147,1.0000014)">
+       transform="translate(-0.18726974,0.99987888)">
       <g
          id="g2005"
          transform="matrix(0.94312085,0,0,0.94312085,58.647713,2.4600827)"
@@ -652,32 +652,29 @@
        style="clip-rule:evenodd;fill:none;fill-rule:evenodd;stroke-width:1.08913;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:100"
        id="rect294" />
     <g
-       id="g3045"
-       transform="translate(2,-0.887931)">
-      <g
-         id="Base10-6"
-         serif:id="Base"
-         transform="matrix(1.1112193,0,0,1.1112193,-4.870074,-1.967434)"
-         style="clip-rule:evenodd;fill:url(#linearGradient2651);fill-opacity:1;fill-rule:evenodd;stroke:#280000;stroke-width:1.79982;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:100;stroke-dasharray:none;stroke-opacity:1">
-        <path
-           d="M 52.849,5.003 52.707,5.837 C 51.811,11.128 47.228,15 41.862,15 H 26.671 c -3.53,0 -6.508,2.629 -6.946,6.132 l -0.342,2.736 C 18.946,27.371 15.968,30 12.438,30 H 8.633 L 11.21,9.382 C 11.523,6.88 13.65,5.003 16.171,5.003 Z"
-           style="fill:url(#linearGradient2959);fill-opacity:1;stroke:#280000;stroke-width:1.79982;stroke-miterlimit:100;stroke-dasharray:none;stroke-opacity:1"
-           id="path378-2" />
-      </g>
-      <g
-         id="Base10"
-         serif:id="Base"
-         transform="matrix(1.1112193,0,0,1.1112193,-4.870074,-1.967434)"
-         style="clip-rule:evenodd;fill:none;fill-rule:evenodd;stroke:#ef2929;stroke-width:1.79982;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:100;stroke-dasharray:none;stroke-opacity:1">
-        <path
-           id="path378"
-           style="fill:none;stroke:#ef2929;stroke-width:1.79982;stroke-miterlimit:100;stroke-dasharray:none;stroke-opacity:1"
-           d="m 15.857422,6.8203125 c -1.688417,0.123273 -2.941291,1.7114865 -2.933105,3.3574675 -0.750814,6.007146 -1.501628,12.014293 -2.252442,18.021439 1.656931,0.04733 3.467897,0.086 4.839844,-1.007813 1.48278,-1.03298 2.13806,-2.835716 2.215654,-4.582144 0.173337,-2.04746 0.559526,-4.172619 1.866153,-5.828098 1.768084,-2.477476 4.869531,-3.789197 7.878349,-3.581945 5.066339,-0.02304 10.135316,0.04635 15.2,-0.03516 3.610806,-0.272952 6.889095,-2.89853 7.951172,-6.3593745 -11.588418,0.01042 -23.177786,-0.02084 -34.765625,0.01563 z" />
-      </g>
+       id="Base10-6"
+       serif:id="Base"
+       transform="matrix(1.1112193,0,0,1.1112193,-2.870074,-2.855365)"
+       style="clip-rule:evenodd;fill:url(#linearGradient2651);fill-opacity:1;fill-rule:evenodd;stroke:#280000;stroke-width:1.79982;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:100;stroke-dasharray:none;stroke-opacity:1">
+      <path
+         d="M 52.849,5.003 52.707,5.837 C 51.811,11.128 47.228,15 41.862,15 H 26.671 c -3.53,0 -6.508,2.629 -6.946,6.132 l -0.116919,0.935981 c -0.437,3.503 -3.415,6.132 -6.945,6.132 H 8.8580807 L 11.21,9.382 C 11.523,6.88 13.65,5.003 16.171,5.003 Z"
+         style="fill:url(#linearGradient2959);fill-opacity:1;stroke:#280000;stroke-width:1.79982;stroke-miterlimit:100;stroke-dasharray:none;stroke-opacity:1"
+         id="path378-2"
+         sodipodi:nodetypes="ccssccsccsc" />
+    </g>
+    <g
+       id="Base10-6-0"
+       serif:id="Base"
+       transform="matrix(1.1112193,0,0,1.1112193,-2.870074,-2.855365)"
+       style="clip-rule:evenodd;fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#ef2929;stroke-width:1.79982;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:100;stroke-dasharray:none;stroke-opacity:1">
+      <path
+         id="path378-2-8"
+         style="fill:none;fill-opacity:1;stroke:#ef2929;stroke-width:1.79982;stroke-miterlimit:100;stroke-dasharray:none;stroke-opacity:1"
+         d="m 15.857422,6.8203125 c -1.688425,0.1232718 -2.941275,1.711489 -2.933118,3.3574665 -0.67594,5.406886 -1.35188,10.813772 -2.02782,16.220659 1.656797,0.04766 3.467086,0.08532 4.839844,-1.00586 1.459467,-1.023943 2.133351,-2.79583 2.208984,-4.52539 0.443225,-3.892787 3.779617,-7.205794 7.680879,-7.599415 2.542031,-0.15911 5.098275,-0.02367 7.645684,-0.06855 3.198868,-0.03614 6.403599,0.07356 9.598777,-0.05724 3.535821,-0.341408 6.708283,-2.944405 7.752395,-6.3372885 -11.588418,0.010423 -23.177786,-0.020842 -34.765625,0.015625 z" />
     </g>
     <g
        id="g4809"
-       transform="translate(40)">
+       transform="translate(40.177)">
       <g
          id="Base10-6-9"
          serif:id="Base"
