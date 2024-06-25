@@ -2,6 +2,10 @@
 
 ## Release notes
 
+* 2024.06.07 (**0.50.14**) :  
+Adapted to work with FreeCAD development version v0.22 … hopefully  
+Introduced a nice new FreeCAD logo  
+
 * 2024.06.07 (**0.50.13**) :  
 Corrected command name for Fasteners change parameters  
 Updated version check  
