@@ -71,8 +71,7 @@ class mirrorPartCmd:
             # create Part
             symPart = App.ActiveDocument.addObject( 'App::Part', symPartName )
             # add an LCS at the root of the Part, and attach it to the 'Origin'
-            lcs = symPart.newObject('PartDesign::CoordinateSystem','LCS_'+symPart.Name)
-            lcs.Support = [(symPart.Origin.OriginFeatures[0],'')]
+            lcs = Asm4.newLCS(symPart, 'PartDesign::CoordinateSystem', 'LCS_'+symPart.Name, [(symPart.Origin.OriginFeatures[0],'')])
             lcs.MapMode = 'ObjectXY'
             lcs.MapReversed = False
             # if there is a Parts group, put the symmetrical part there

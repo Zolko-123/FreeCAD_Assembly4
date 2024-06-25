@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.50.13
+Current version 0.50.14
 
 
 ## Overview
@@ -29,7 +29,7 @@ Assembly 4 is available through the FreeCAD Addon Manager (menu **Tools > Addon 
 
 **Important Note:** Assembly 4 needs FreeCAD v0.19 or above. Assembly4 is **not** compatible with FreeCAD v0.18 and before.
 
-**Important Note:** FreeCAD introduced a [new data format](https://github.com/FreeCAD/FreeCAD/pull/12714) during the 0.22 development cycle that is incompatible with previous FreeCAD versions : if you open a file made with the latest v0.22 development version with stable v0.21, all attachments are irreversibly lost. This is a FreeCAD regression independent from Assembly4.
+**Important Note:** FreeCAD introduced a [change in property name](https://github.com/FreeCAD/FreeCAD/pull/12714) during the 0.22 development cycle that is not backward compatible with previous FreeCAD versions! If you open a file made with the latest v0.22 development version with stable v0.21, all attachments are lost and if you save that file it is permanent. Use a [macro for conversion](https://wiki.freecad.org/Macro_Convert_021) to v0.21 and earlier.
 
 
 ### Manual Installation

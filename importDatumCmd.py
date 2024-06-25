@@ -159,7 +159,10 @@ class importDatumCmd():
     def setupTargetDatum(self, targetDatum, expression):
         # unset Attachment
         targetDatum.MapMode = 'Deactivated'
-        targetDatum.Support = None
+        if hasattr(targetDatum, 'AttachmentSupport'):
+            targetDatum.AttachmentSupport = None
+        else:
+            targetDatum.Support = None
         # Set Asm4 properties
         Asm4.makeAsmProperties( targetDatum, reset=True )
         targetDatum.AttachedBy = 'Origin'
