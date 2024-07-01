@@ -29,7 +29,7 @@ Assembly 4 is available through the FreeCAD Addon Manager (menu **Tools > Addon 
 
 **Important Note:** Assembly 4 needs FreeCAD v0.19 or above, v0.21.1 is recommended
 
-**Important Note:** FreeCAD introduced a [change in the data format](https://github.com/FreeCAD/FreeCAD/pull/12714) during the 0.22 development cycle. While this is compatible with Assembly4, it is not compatible with earlier FreeCAD versions and you might lose your data ! Use a [macro for conversion](https://wiki.freecad.org/Macro_Convert_021) to v0.21 and earlier.
+**Important Note:** FreeCAD introduced a [change in the data format](https://github.com/FreeCAD/FreeCAD/pull/12714) during the 0.22 development cycle. 
 
 
 ### Manual Installation
