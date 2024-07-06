@@ -2,6 +2,9 @@
 
 ## Release notes
 
+* 2024.mm.dd (**0.50.15**) :  
+Added loads and dumps methods to all Asm4_objects (without version checks) to be compatible with all Python versions  
+
 * 2024.06.07 (**0.50.14**) :  
 Adapted to work with FreeCAD development version v0.22 … hopefully  
 Introduced a nice new FreeCAD logo  

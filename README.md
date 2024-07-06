@@ -27,9 +27,9 @@ Parts are placed relative to each-other by matching features inside them. Specif
 
 Assembly 4 is available through the FreeCAD Addon Manager (menu **Tools > Addon Manager**). It is called _Assembly4_ in the Addon Repository.
 
-**Important Note:** Assembly 4 needs FreeCAD v0.19 or above, v0.21.1 is recommended
+**Important Note:** Assembly 4 recommends to use the stable FreeCAD v0.21 branch
 
-**Important Note:** FreeCAD introduced a [change in the data format](https://github.com/FreeCAD/FreeCAD/pull/12714) during the 0.22 development cycle. 
+**Important Note:** FreeCAD introduced a [change in the data format](https://github.com/FreeCAD/FreeCAD/pull/12714) during the 0.22 development cycle
 
 
 ### Manual Installation
