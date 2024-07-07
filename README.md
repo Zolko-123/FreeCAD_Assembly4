@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.50.14
+Current version 0.50.15
 
 
 ## Overview
@@ -27,9 +27,9 @@ Parts are placed relative to each-other by matching features inside them. Specif
 
 Assembly 4 is available through the FreeCAD Addon Manager (menu **Tools > Addon Manager**). It is called _Assembly4_ in the Addon Repository.
 
-**Important Note:** Assembly 4 needs FreeCAD v0.19 or above, v0.21.1 is recommended
+**Important Note:** Assembly 4 recommends to use the stable FreeCAD v0.21 branch
 
-**Important Note:** FreeCAD introduced a [change in the data format](https://github.com/FreeCAD/FreeCAD/pull/12714) during the 0.22 development cycle. 
+**Important Note:** FreeCAD introduced a [change in the data format](https://github.com/FreeCAD/FreeCAD/pull/12714) during the 0.22 development cycle
 
 
 ### Manual Installation
@@ -48,16 +48,25 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 * [a Lego assembly](https://github.com/Zolko-123/FreeCAD_Examples/blob/master/Asm4_Tutorial3/README.md)
 * [Some examples to play with](https://github.com/Zolko-123/FreeCAD_Examples)
 
+
 ## Discussion
 Please offer feedback or connect with the developers in the [Discussions](https://github.com/Zolko-123/FreeCAD_Assembly4/discussions) section.
+
 
 ## Addon Repository
 This addon is hosted on a [GitHub repository](https://github.com/Zolko-123/FreeCAD_Assembly4).
 
+
 ## Release notes
 Release notes can be found in the [CHANGELOG.md](CHANGELOG.md) file.
 
-## License
-LGPLv2.1 (see [LICENSE](LICENSE))
 
+## License
+Assembly4 is released under the same open-source licens as FreeCAD : LGPLv2.1 (see [LICENSE](LICENSE))
+
+
+## Support
+You can provide your financial support for the continuing development of this open-source tool [here](https://www.paypal.com/donate/?hosted_button_id=LBA6ZAV9QSQT8) :
+
+<a href="https://www.paypal.com/donate/?hosted_button_id=LBA6ZAV9QSQT8"><img src="Resources/media/Donate_button.png" alt="Donate" height="60"/></a>
 

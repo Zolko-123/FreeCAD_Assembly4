@@ -51,11 +51,17 @@ class VariantLink( object ):
     def __init__(self):
         FCC.PrintMessage('Initialising variantLink ...\n')
         self.Object = None
-
+    # for Python version ≤3.10
     def __getstate__(self):
         return
 
     def __setstate__(self,_state):
+        return
+    # for Python version ≥3.11
+    def dumps(self):
+        return
+
+    def loads(self,_state):
         return
 
     # new Python API for overriding C++ view provider of the binding object
@@ -242,7 +248,13 @@ class ViewProviderVariant(object):
 
     def __setstate__(self, _state):
         return None
-    
+
+    def dumps(self):
+        return None
+
+    def loads(self, _state):
+        return None
+
 
 
 
@@ -265,7 +277,13 @@ class LinkArray( object ):
 
     def __setstate__(self,_state):
         return
-    
+
+    def dumps(self):
+        return
+
+    def loads(self,_state):
+        return
+
     # new Python API for overriding C++ view provider of the binding object
     def getViewProviderName(self,_obj):
         return 'Gui::ViewProviderLinkPython'
@@ -361,7 +379,12 @@ class ViewProviderArray(object):
 
     def __setstate__(self, _state):
         return None
-    
+
+    def dumps(self):
+        return None
+
+    def loads(self, _state):
+        return None
 
 
 """

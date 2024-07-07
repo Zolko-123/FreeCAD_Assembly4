@@ -2,6 +2,11 @@
 
 ## Release notes
 
+* 2024.07.07 (**0.50.15**) :  
+Added loads and dumps methods to all Asm4_objects (without version checks) to be compatible with all Python and v0.21 versions  
+Begun moving the Python code to subdirectory "Code" for repo clarity  
+Added PayPal donate button  
+
 * 2024.06.07 (**0.50.14**) :  
 Adapted to work with FreeCAD development version v0.22 … hopefully  
 Introduced a nice new FreeCAD logo  
