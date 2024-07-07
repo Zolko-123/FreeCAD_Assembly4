@@ -67,6 +67,6 @@ LGPLv2.1 (see [LICENSE](LICENSE))
 
 ## Support
 You can provide your financial support for the development of this open-source tool [here](https://www.paypal.com/donate/?hosted_button_id=8HUJTHTZNZHP8) :
-![PayPal_Donnate](Resources/media/Paypal-Donate-Button.png =x70)
-
+![PayPal_Donnate](Resources/media/Paypal-Donate-Button.png)
+<img src="Resources/media/Paypal-Donate-Button.png" alt="Donate" height="70"/>
 
