@@ -48,16 +48,25 @@ You can get more information in the [user instructions](INSTRUCTIONS.md), the [t
 * [a Lego assembly](https://github.com/Zolko-123/FreeCAD_Examples/blob/master/Asm4_Tutorial3/README.md)
 * [Some examples to play with](https://github.com/Zolko-123/FreeCAD_Examples)
 
+
 ## Discussion
 Please offer feedback or connect with the developers in the [Discussions](https://github.com/Zolko-123/FreeCAD_Assembly4/discussions) section.
+
 
 ## Addon Repository
 This addon is hosted on a [GitHub repository](https://github.com/Zolko-123/FreeCAD_Assembly4).
 
+
 ## Release notes
 Release notes can be found in the [CHANGELOG.md](CHANGELOG.md) file.
 
+
 ## License
 LGPLv2.1 (see [LICENSE](LICENSE))
+
+
+## Support
+You can provide your financial support for the development of this open-source tool [here](https://www.paypal.com/donate/?hosted_button_id=8HUJTHTZNZHP8) :
+![PayPal_Donnate](Resources/media/Paypal-Donate-Button.png)
 
 
