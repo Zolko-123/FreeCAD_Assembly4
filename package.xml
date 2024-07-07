@@ -2,8 +2,8 @@
 <package format="1">
   <name>Assembly4</name>
   <description>This assembly workbench allows you to assemble various FreeCAD parts (of type Part or Body) into a standard assembly container using links, and place them relative to the assembly and to each other.</description>
-  <version>0.50.14</version>
-  <date>2024.06.25</date>
+  <version>0.50.15</version>
+  <date>2024.07.07</date>
   <maintainer email="zolko@zzaero.com">Zolko-123</maintainer>
   <license file="LICENSE">LGPL-2.1-only</license>
   <url type="repository" branch="master">https://github.com/Zolko-123/FreeCAD_Assembly4</url>

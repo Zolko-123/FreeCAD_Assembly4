@@ -1,6 +1,6 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.50.14
+Current version 0.50.15
 
 
 ## Overview
@@ -62,11 +62,11 @@ Release notes can be found in the [CHANGELOG.md](CHANGELOG.md) file.
 
 
 ## License
-LGPLv2.1 (see [LICENSE](LICENSE))
+Assembly4 is released under the same open-source licens as FreeCAD : LGPLv2.1 (see [LICENSE](LICENSE))
 
 
 ## Support
-You can provide your financial support for the development of this open-source tool [here](https://www.paypal.com/donate/?hosted_button_id=LBA6ZAV9QSQT8) :
+You can provide your financial support for the continuing development of this open-source tool [here](https://www.paypal.com/donate/?hosted_button_id=LBA6ZAV9QSQT8) :
 
 <a href="https://www.paypal.com/donate/?hosted_button_id=LBA6ZAV9QSQT8"><img src="Resources/media/Donate_button.png" alt="Donate" height="60"/></a>
 
