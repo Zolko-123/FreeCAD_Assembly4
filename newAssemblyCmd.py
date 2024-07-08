@@ -72,7 +72,8 @@ def makeAssembly():
         # must be done before creating the assembly
         partsGroup = App.ActiveDocument.getObject('Parts')
         if partsGroup is None:
-            partsGroup = App.ActiveDocument.addObject( 'App::DocumentObjectGroup', 'Parts' )
+            # partsGroup = App.ActiveDocument.addObject( 'App::DocumentObjectGroup', 'Parts' )
+            pass
         # create a new App::Part called 'Assembly'
         assembly = App.ActiveDocument.addObject('App::Part','Assembly')
         # set the type as a "proof" that it's an Assembly
@@ -105,12 +106,10 @@ def makeAssembly():
         
         # move existing parts and bodies at the document root to the Parts group
         # not nested inside other parts, to keep hierarchy
-        if partsGroup.TypeId=='App::DocumentObjectGroup':
+        if hasattr(partsGroup,'TypeId') and partsGroup.TypeId=='App::DocumentObjectGroup':
             for obj in App.ActiveDocument.Objects:
                 if obj.TypeId in Asm4.containerTypes and obj.Name!='Assembly' and obj.getParentGeoFeatureGroup() is None:
                     partsGroup.addObject(obj)
-        else:
-            Asm4.warningBox( 'There seems to already be a Parts object, you might get unexpected behaviour' )
 
         # recompute to get rid of the small overlays
         assembly.recompute()

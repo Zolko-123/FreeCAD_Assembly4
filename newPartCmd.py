@@ -109,10 +109,11 @@ class newPart:
                 elif Asm4.getAssembly():
                     # if there is a Parts group:
                     partsGroup = App.ActiveDocument.getObject('Parts')
-                    if partsGroup and partsGroup.TypeId=='App::DocumentObjectGroup' and newPart.TypeId in Asm4.containerTypes:
+                    if partsGroup and partsGroup.TypeId=='App::DocumentObjectGroup' and newPart.TypeId != 'App::DocumentObjectGroup':
                         container = partsGroup
                     else:
-                        container = Asm4.getAssembly()
+                        # container = Asm4.getAssembly()
+                        pass
                 if container :
                     container.addObject(newPart)
             # recompute
