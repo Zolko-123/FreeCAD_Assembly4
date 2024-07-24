@@ -8,11 +8,12 @@
 
 
 
-import os
+import math, re, os
 
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
+import Part
 
 import Asm4_libs as Asm4
 from Asm4_Translate import translate

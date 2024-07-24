@@ -6,12 +6,11 @@
 #
 # HelpCmd.py
 
-import os, webbrowser
-
-import FreeCADGui as Gui
-
+import os
+import webbrowser
 import Asm4_libs as Asm4
 from Asm4_Translate import translate
+import FreeCADGui as Gui
 
 
 """

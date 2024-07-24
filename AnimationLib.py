@@ -16,6 +16,7 @@ import FreeCADGui as Gui
 import FreeCAD as App
 
 import Asm4_libs as Asm4
+from Asm4_Translate import translate
 
 # from AnimationProvider import animationProvider
 
@@ -121,11 +122,11 @@ class animateVariable(animationProvider):
 
 
     def GetResources(self):
-        return {"MenuText": "Animate Assembly",
-                "ToolTip": "Animate Assembly",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_GearsAnimate.svg')
-                }
-
+        return {
+            "MenuText": "Animate Assembly",
+            "ToolTip": translate("Commands5", "Animate Assembly"),
+            "Pixmap": os.path.join(Asm4.iconPath, "Asm4_GearsAnimate.svg"),
+        }
 
     def IsActive(self):
         # is there an active document ?

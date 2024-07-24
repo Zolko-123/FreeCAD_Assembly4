@@ -42,8 +42,8 @@ import Part
 # only needed for icons
 import Asm4_libs as Asm4
 import selectionFilter
-
-
+from BaseCommand import BaseCommand
+from Asm4_Translate import translate
 
 
 """
@@ -88,15 +88,14 @@ class setCustomIcon():
     |         The menu and toolbar command          |
     +-----------------------------------------------+
 """
-class MeasureCmd():
-    def __init__(self):
-        super(MeasureCmd,self).__init__()
 
-    def GetResources(self):
-        return {"MenuText": "Measure",
-                "ToolTip": "Measure Tool",
-                "Pixmap" : os.path.join( iconDir , 'Part_Measure.svg')
-                }
+
+class MeasureCmd(BaseCommand):
+    def __init__(self):
+        super(MeasureCmd, self).__init__()
+        self.pixmap = os.path.join(iconDir, "Part_Measure.svg")
+        self.menutext = "Measure"
+        self.tooltip = translate("Commands5", "Measure Tool")
 
     def IsActive(self):
         if App.ActiveDocument:

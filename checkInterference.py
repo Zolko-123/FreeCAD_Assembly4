@@ -22,23 +22,18 @@ import FreeCAD as App
 import Asm4_libs as Asm4
 import showHideLcsCmd as lcs
 import Part
+from BaseCommand import BaseCommand
+from Asm4_Translate import translate
 
-class checkInterference:
 
+class checkInterference(BaseCommand):
     def __init__(self):
         super(checkInterference, self).__init__()
-
-
-    def GetResources(self):
-        menutext = "Check Intereferences"
-        tooltip  = "Check interferences among assembled objects (may take time)"
-        iconFile = os.path.join(Asm4.iconPath, 'Asm4_Interference_Check.svg')
-        return {
-            "MenuText": menutext,
-            "ToolTip": tooltip,
-            "Pixmap": iconFile
-        }
-
+        self.menutext = "Check Interferences"
+        self.tooltip = translate(
+            "Commands5", "Check interferences among assembled objects (may take time)"
+        )
+        self.pixmap = os.path.join(Asm4.iconPath, "Asm4_Interference_Check.svg")
 
     def IsActive(self):
         if Asm4.getAssembly() is None:

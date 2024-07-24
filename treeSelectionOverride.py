@@ -12,7 +12,7 @@ import FreeCAD as App
 from FreeCAD import Console as FCC
 
 import Asm4_libs as Asm4
-
+from Asm4_Translate import translate
 
 
 observer = None
@@ -22,17 +22,23 @@ observer = None
     |                  main class                   |
     +-----------------------------------------------+
 """
-class treeSelectionOverrideCmd( QtGui.QDialog):
+
+
+class treeSelectionOverrideCmd(QtGui.QDialog):
     def __init__(self):
-        super(treeSelectionOverrideCmd,self).__init__()
+        super(treeSelectionOverrideCmd, self).__init__()
 
     def GetResources(self):
-        return {"MenuText": "Enable/Disable 3D View selection mode",
-                "ToolTip": "Enable/Disable 3D View selection mode\n\n"    + \
-                "Allows to select a Link object in the 3D view\n" + \
+        return {
+            "MenuText": "Enable/Disable 3D View selection mode",
+            "ToolTip": translate(
+                "Commands6",
+                "Enable/Disable 3D View selection mode\n\n"
+                "Allows to select a Link object in the 3D view\n"
                 "window instead of the Model tree",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_enableLinkSelection.svg')
-                }
+            ),
+            "Pixmap": os.path.join(Asm4.iconPath, "Asm4_enableLinkSelection.svg"),
+        }
 
     def IsActive(self):
         return True
