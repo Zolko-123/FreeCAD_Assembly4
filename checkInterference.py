@@ -506,6 +506,7 @@ class checkInterference:
         self.log_number_of_objects()
         self.log_number_of_comparisons()
         self.cancel_abort_button.setText("Close")
+        self.Assembly.Visibility = True
 
 
     def on_allow_touching_faces(self, state):
@@ -626,7 +627,7 @@ class checkInterference:
         self.main_layout.addLayout(self.button_layout)
 
         # Cancel button
-        self.cancel_abort_button = QtGui.QPushButton('Cancel')
+        self.cancel_abort_button = QtGui.QPushButton('Close')
         self.cancel_abort_button.setDefault(True)
         self.button_layout.addWidget(self.cancel_abort_button)
         self.main_layout.addLayout(self.button_layout)
