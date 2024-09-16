@@ -240,12 +240,8 @@ class checkInterference:
                             # When the 1st object was compared before but not with the 2nd object
                             if not obj2.Label in checked_dict[obj1.Label]:
 
-                                    if self.check_fasteners:
-                                        padding = len(str(self.total_comparisons))
-                                    else:
-                                        padding = len(str(self.total_comparisons_without_fasteners))
-
-                                    self.log_write("\n{count}. {obj1} vs {obj2}".format(count=str(c).rjust(padding), obj1=obj1.Label, obj2=obj2.Label))
+                                    indent = self.width_of_number_of_objects()
+                                    self.log_write("\n{count}. {obj1} vs {obj2}".format(count=str(c).rjust(indent), obj1=obj1.Label, obj2=obj2.Label))
 
                                     c += 1
 
@@ -274,6 +270,8 @@ class checkInterference:
                                             g = rnd.random()
                                             b = rnd.random()
                                             common.ViewObject.ShapeColor = (r, g, b)
+                                            common.ViewObject.LineColor = (0, 0, 0)
+                                            common.ViewObject.DisplayMode = 'Flat Lines'
                                             Intersections.addObject(common)
                                             self.interference_count += 1
                                             self.Document.recompute()
@@ -288,7 +286,7 @@ class checkInterference:
                             else:
                                 if self.verbose:
                                     self.log_write("{count: {width}}. {obj1} vs {obj2}".format(count=c, width=self.width_of_number_of_objects(), obj1=obj1.Label, obj2=obj2.Label))
-                                    indent = " " * (self.width_of_number_of_objects() + 3)
+                                    indent = " " * (self.width_of_number_of_objects() + 2)
                                     self.log_write("{}| Step already processed".format(indent))
                                     self.log_write("{}| See {} vs {}".format(indent, obj2.Label, obj1.Label))
 
@@ -334,7 +332,7 @@ class checkInterference:
 
         shape_missing = 0
 
-        indent = " " * (self.width_of_number_of_objects() + 3)
+        indent = " " * (self.width_of_number_of_objects() + 2)
 
         if not obj1.Shape.Solids:
             self.log_write("{}| {} does not have shape.".format(indent, obj1.Label))
@@ -382,7 +380,7 @@ class checkInterference:
 
     def remove_common_if_empty(self, obj, count):
 
-        indent = " " * (self.width_of_number_of_objects() + 3)
+        indent = " " * (self.width_of_number_of_objects() + 2)
 
         try:
             if obj.Shape:
@@ -590,18 +588,26 @@ class checkInterference:
         self.progress_bar.setValue(0)
         self.main_layout.addWidget(self.progress_bar)
 
-        self.log_view = QtGui.QPlainTextEdit()
-        self.log_view.setLineWrapMode(QtGui.QPlainTextEdit.NoWrap)
+        self.log_view = QtGui.QTextEdit()
+        self.log_view.setLineWrapMode(QtGui.QTextEdit.NoWrap)
         self.log_view.setMinimumWidth(Gui.getMainWindow().width()/2)
         self.log_view.setMinimumHeight(Gui.getMainWindow().height()/3)
         self.log_view.ensureCursorVisible()
         self.log_view.moveCursor(QtGui.QTextCursor.End)
         self.log_view.verticalScrollBar().setValue(self.log_view.verticalScrollBar().maximum())
 
+        text_color = Gui.getMainWindow().palette().text().color()
+        text_bg = Gui.getMainWindow().palette().background().color()
+
+        self.log_view.setStyleSheet("QTextEdit:!editable{color: white, background-color: black};")
+
         f = QtGui.QFont("unexistent");
         f.setStyleHint(QtGui.QFont.Monospace);
         self.log_view.setFont(f);
+
         self.main_layout.addWidget(self.log_view)
+
+        # self.log_view.TextColor = text_color
 
         # The button row definition
         self.button_layout = QtGui.QHBoxLayout()
