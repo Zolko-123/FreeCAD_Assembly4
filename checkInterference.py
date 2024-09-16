@@ -270,7 +270,7 @@ class checkInterference:
                                             g = rnd.random()
                                             b = rnd.random()
                                             common.ViewObject.ShapeColor = (r, g, b)
-                                            common.ViewObject.LineColor = (0, 0, 0)
+                                            # common.ViewObject.LineColor = (0, 0, 0)
                                             common.ViewObject.DisplayMode = 'Flat Lines'
                                             Intersections.addObject(common)
                                             self.interference_count += 1
@@ -505,6 +505,7 @@ class checkInterference:
         self.log_clear()
         self.log_number_of_objects()
         self.log_number_of_comparisons()
+        self.cancel_abort_button.setText("Close")
 
 
     def on_allow_touching_faces(self, state):
