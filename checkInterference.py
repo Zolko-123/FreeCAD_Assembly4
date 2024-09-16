@@ -300,7 +300,7 @@ class checkInterference:
 
         # Remove the intersections folder if there is no intersections
         if not Intersections.Group:
-            self.log_write("\n>>> {} is clean! <<<".format(self.Assembly.Label))
+            self.log_write("\n>>> No interferences were found. The {} is clean! <<<".format(self.Assembly.Label))
             self.remove_interference_folder()
             self.Assembly.Visibility = True
             Gui.updateGui()
