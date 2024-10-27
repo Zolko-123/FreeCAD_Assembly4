@@ -39,6 +39,13 @@ def checkPart():
             retval = selectedObj
     return retval
 
+def is_darkmode() -> bool:
+    """Determine if we are in a darkmode stylesheet"""
+    pg = App.ParamGet("User parameter:BaseApp/Preferences/MainWindow")
+    if re.search('dark', pg.GetString("StyleSheet"), re.IGNORECASE):
+        return True
+    else:
+        return False
 
 """
     +-----------------------------------------------+
@@ -151,20 +158,23 @@ class addVariable():
         self.UI.close()
 
 
+
     # Verify and handle bad names similar to the spreadsheet workbench
     def onNameEdited(self):
         pattern = re.compile("^[A-Za-z][_A-Za-z0-9]*$")
+        normal_color = "rgb(255,255,255)" if is_darkmode() else "rgb(0,0,0)"
+        red_color = "rgb(255,105,97)" if is_darkmode() else "rgb(215,0,21)"
         if pattern.match(self.varName.text()):
             try:
                 App.Units.parseQuantity(self.varName.text())
             except:
-                self.varName.setStyleSheet("color: black;")
+                self.varName.setStyleSheet("color:" + normal_color + ";")
                 self.OkButton.setEnabled(True)
             else:
-                self.varName.setStyleSheet("color: red;")
+                self.varName.setStyleSheet("color:" + red_color + ";")
                 self.OkButton.setEnabled(False)
         else:
-            self.varName.setStyleSheet("color: red;")
+            self.varName.setStyleSheet("color:" + red_color + ";")
             self.OkButton.setEnabled(False)
 
 
