@@ -27,9 +27,8 @@ Parts are placed relative to each-other by matching features inside them. Specif
 
 Assembly 4 is available through the FreeCAD Addon Manager (menu **Tools > Addon Manager**). It is called _Assembly4_ in the Addon Repository.
 
-**Important Note:** Assembly 4 recommends to use the stable FreeCAD v0.21 branch
+**Important Note:** Assembly4 recommends to use the stable FreeCAD v0.21 branch
 
-**Important Note:** FreeCAD introduced a [change in the data format](https://github.com/FreeCAD/FreeCAD/pull/12714) during the 0.22 development cycle
 
 
 ### Manual Installation
@@ -62,7 +61,7 @@ Release notes can be found in the [CHANGELOG.md](CHANGELOG.md) file.
 
 
 ## License
-Assembly4 is released under the same open-source licens as FreeCAD : LGPLv2.1 (see [LICENSE](LICENSE))
+Assembly4 is released under the open-source license LGPLv2.1 (see [LICENSE](LICENSE))
 
 
 ## Support
