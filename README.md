@@ -1,22 +1,21 @@
 # FreeCAD Assembly 4 workbench
 
-Current version 0.50.15
+Current version 0.50.16
 
 
 ## Overview
 
 This assembly workbench allows to assemble into a single assembly container other FreeCAD objects, and place them relative to the assembly and to each-other. The parts in the assembly can be in the same document as the assembly or in an external document. When parts are modified in their original document, they are instantly updated in the assembly.
 
-An Assembly4 _Assembly_ is a standard FreeCAD `App::Part` container, therefore it is compatible and can be manipulated with any FreeCAD tool handling `App::Part` objects. In particular, it can be inserted into another _Assembly_ to create nested assemblies to any level. It can also contain solids, datum objects and sketches. A document can contain only 1 _Assembly_. Native FreeCAD _Part_ and _Body_ containers can be used as "part" to be inserted. 
+An Assembly4 _Assembly_ is a standard FreeCAD `App::Part` container, therefore it is compatible and can be manipulated with any FreeCAD tool handling `App::Part` objects. In particular, it can be inserted into another _Assembly_ to create nested assemblies to any level. It can also contain solids, datum objects and sketches. A document can contain only 1 _Assembly_. Native FreeCAD _Part_ and _Body_ containers can be used as "part" to be inserted. Being built on standard FreeCAD objects, all Assembly4 assemblies are fully compatible with all standard FreeCAD tools. 
 
-Parts are placed relative to each-other by matching features inside them. Specifically, in Assembly4, these _features_ are virtual objects called LCS (for Local Coordinate System, also called datum coordinate system) and are attached using FreeCAD's built-in `Part::Attacher` and `ExpressionEngine`. No geometry is used to place and constrain parts relative to each other, thus avoiding a lot of the topological naming problems.
+Parts are placed relative to each-other by matching features inside them. Specifically, in Assembly4, these _features_ are virtual objects called LCS (for Local Coordinate System, also called datum coordinate system) and are attached using FreeCAD's built-in `Part::Attacher` and `ExpressionEngine`. No geometry is used to place and constrain parts relative to each other, thus avoiding a lot of the topological naming problems. These built-in tools are also very fast, efficient and stable allowing very large assemblies with many levels of nested sub-assemblies.
 
 
 ![](Resources/media/LaserCutter.png)
 
 **Please Note:** only _Part_ and _Body_ containers at the root of a document can be inserted. Objects nested inside containers cannot be used directly by Assembly4.
 
-**Please Note:** objects in the same document as the linked part but outside the `App::Part` container will **not** be inserted.
 
 
 ## Installation

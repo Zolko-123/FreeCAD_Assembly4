@@ -58,7 +58,7 @@ Commands are activated with relevant selection. If a command is inactive (grayed
 
 . Icon .|Tool|Description 
 :---|:---|:---
-![](Resources/icons/Asm4_Model.svg)|**New Model**|creates an Assembly4 *Model*, which is a FreeCAD `App::Part` called *Model* and with some extra additions. This can be used to design a stand-alone part or be the container for an assembly. One document can only contain one Assembly4 Model.
+![](Resources/icons/Asm4_Model.svg)|**New Assembly**|creates an assembly, which is a FreeCAD `App::Part` called *Assembly* and with some extra additions. This can be used to design a stand-alone part or be the container for an assembly. One document can only contain one assembly container.
 ![](Resources/icons/Asm4_Body.svg)|**New Body**|creates FreeCAD `PartDesign::Body` in the selected `App::Part`. This Body can then be used with FreeCAD's PartDesign workbench. If you create such a `PartDesign::Body` with the PartDesign workbench, it will be placed at the root of the document, outside any `App::Part`.
 ![](Resources/icons/Asm4_Part.svg)|**New Part**|creates FreeCAD `App::Part` in the current document and allows to give it a name. A document can contain many parts.
 ![](Resources/icons/Asm4_Group.svg)|**New Group**|creates FreeCAD `App::DocumentObjectGroup` in the current document and allows to give it a name. A group has no other function than as an organizer in the Tree view.
@@ -125,7 +125,7 @@ The basic workflow for creating a part is the following:
 
 The basic workflow for creating a part is the following:
 
-* Create a new document, create a new 'Model'
+* Create a new document, create a new 'Assembly'
 * Create a new sketch with the 'New Sketch' tool. Attach it to whatever is useful, and draw the skeleton of the assembly, placing vertices and lines where useful
 * Create new LCS (with the 'New Coordinate System' tool) and place them on the correct vertices of the sketch (using MapMode)
 * Save document

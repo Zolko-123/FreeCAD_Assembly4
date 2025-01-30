@@ -2,6 +2,10 @@
 
 ## Release notes
 
+* 2025.01.29 (**0.50.16**) :  
+Don't create a _Parts_ folder for Assemblies by default  
+Added LiberaPay button  
+
 * 2024.07.07 (**0.50.15**) :  
 Added loads and dumps methods to all Asm4_objects (without version checks) to be compatible with all Python and v0.21 versions  
 Begun moving the Python code to subdirectory "Code" for repo clarity  
