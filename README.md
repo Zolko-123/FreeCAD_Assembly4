@@ -65,7 +65,7 @@ Assembly4 is released under the open-source license LGPLv2.1 (see [LICENSE](LICE
 
 
 ## Support
-You can provide your financial support for the continuing development of this open-source tool [here](https://www.paypal.com/donate/?hosted_button_id=LBA6ZAV9QSQT8) :
+You can provide your financial support for the continuing development of this open-source tool :
 
 <a href="https://www.paypal.com/donate/?hosted_button_id=LBA6ZAV9QSQT8" target="_blank"><img src="Resources/media/PayPal_Donate.svg" height="36" alt="PayPal Donate"/></a>
 <a href="https://liberapay.com/Zolko/donate" target="_blank"><img src="Resources/media/LiberaPay_donate.svg" height="36" alt="LiberaPay Donate"></a>
