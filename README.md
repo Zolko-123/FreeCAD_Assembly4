@@ -68,7 +68,6 @@ Assembly4 is released under the same open-source licens as FreeCAD : LGPLv2.1 (s
 ## Support
 You can provide your financial support for the continuing development of this open-source tool [here](https://www.paypal.com/donate/?hosted_button_id=LBA6ZAV9QSQT8) :
 
-<a href="https://www.paypal.com/donate/?hosted_button_id=LBA6ZAV9QSQT8"><img src="Resources/media/PayPal_Donate.svg" alt="PayPal Donate"/></a>
-
-<a href="https://liberapay.com/Zolko/donate"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg"></a>
+<a href="https://www.paypal.com/donate/?hosted_button_id=LBA6ZAV9QSQT8"><img src="Resources/media/PayPal_Donate.svg" height="36" alt="PayPal Donate"/></a>
+<a href="https://liberapay.com/Zolko/donate"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg" height="36" alt="LiberaPay Donate"></a>
 
