@@ -31,8 +31,8 @@
      inkscape:cy="17.85"
      inkscape:window-width="1793"
      inkscape:window-height="981"
-     inkscape:window-x="51"
-     inkscape:window-y="0"
+     inkscape:window-x="373"
+     inkscape:window-y="39"
      inkscape:window-maximized="0"
      inkscape:current-layer="svg30"
      width="99px"
@@ -95,17 +95,18 @@
      id="rect16"
      style="fill:url(#s);stroke-width:0.81653"
      x="0.32530975"
-     y="0.15178299" />
+     y="0.15178299"
+     ry="3.8" />
   <text
      aria-hidden="true"
      x="755"
      y="150"
      fill="#010101"
      fill-opacity=".3"
-     transform="matrix(0.1,0,0,0.1,-32.702863,-0.04844141)"
+     transform="matrix(0.1,0,0,0.1,-32.602863,0.05155859)"
      textLength="370"
      id="text24"
-     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:110px;font-family:Verdana, Geneva, 'DejaVu Sans', sans-serif;-inkscape-font-specification:'Verdana, Geneva, DejaVu Sans, sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-anchor:middle;fill:#010101;fill-opacity:0.3;text-rendering:geometricPrecision"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:110px;font-family:Verdana, Geneva, 'DejaVu Sans', sans-serif;-inkscape-font-specification:'Verdana, Geneva, DejaVu Sans, sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-anchor:middle;fill:#010101;fill-opacity:0.634047;text-rendering:geometricPrecision"
      lengthAdjust="spacing"><tspan
        sodipodi:role="line"
        id="tspan929"
@@ -118,7 +119,7 @@
      fill="#fff"
      textLength="370"
      id="text26"
-     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:110px;font-family:Verdana, Geneva, 'DejaVu Sans', sans-serif;-inkscape-font-specification:'Verdana, Geneva, DejaVu Sans, sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-anchor:middle;fill:#ff5900;fill-opacity:1;text-rendering:geometricPrecision"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:110px;font-family:Verdana, Geneva, 'DejaVu Sans', sans-serif;-inkscape-font-specification:'Verdana, Geneva, DejaVu Sans, sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-anchor:middle;fill:#ffffff;fill-opacity:1;text-rendering:geometricPrecision"
      lengthAdjust="spacing"><tspan
        sodipodi:role="line"
        id="tspan909"
