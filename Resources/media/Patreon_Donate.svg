@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
-   width="100"
-   height="20"
+   width="66.997383"
+   height="20.249372"
    role="img"
    aria-label="patreon: donate"
    version="1.1"
@@ -11,7 +11,10 @@
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg">
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
   <defs
      id="defs34" />
   <sodipodi:namedview
@@ -24,20 +27,29 @@
      inkscape:pagecheckerboard="0"
      showgrid="false"
      inkscape:zoom="10"
-     inkscape:cx="49.95"
-     inkscape:cy="10.05"
+     inkscape:cx="32.15"
+     inkscape:cy="9.85"
      inkscape:window-width="1793"
-     inkscape:window-height="787"
+     inkscape:window-height="981"
      inkscape:window-x="119"
-     inkscape:window-y="41"
+     inkscape:window-y="39"
      inkscape:window-maximized="0"
-     inkscape:current-layer="svg30" />
+     inkscape:current-layer="svg30"
+     width="99px"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0" />
   <title
      id="title2">patreon: donate</title>
   <linearGradient
      id="s"
      x2="0"
-     y2="100%">
+     y2="44.721359"
+     gradientTransform="matrix(1.4908329,0,0,0.4472136,0.32530712,0.151782)"
+     x1="0"
+     y1="0"
+     gradientUnits="userSpaceOnUse">
     <stop
        offset="0"
        stop-color="#bbb"
@@ -54,79 +66,76 @@
        width="100"
        height="20"
        rx="3"
-       fill="#fff"
-       id="rect9" />
+       fill="#ffffff"
+       id="rect9"
+       x="0"
+       y="0" />
   </clipPath>
-  <g
-     clip-path="url(#r)"
-     id="g18">
-    <rect
-       width="53"
-       height="20"
-       fill="#555"
-       id="rect12" />
-    <rect
-       x="53"
-       width="47"
-       height="20"
-       fill="#007ec6"
-       id="rect14" />
-    <rect
-       width="100"
-       height="20"
-       fill="url(#s)"
-       id="rect16" />
-  </g>
-  <g
+  <rect
+     x="1.5408897"
+     width="65.456001"
+     height="20"
+     fill="#007ec6"
+     id="rect14"
+     y="0.15178299"
+     ry="4.7027712"
+     style="fill:#aaaaaa;fill-opacity:1;stroke:none" />
+  <rect
+     style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.824862;stroke-linecap:round;stroke-linejoin:round;stop-color:#000000"
+     id="rect1412"
+     width="21.14538"
+     height="20.249372"
+     x="0"
+     y="0"
+     ry="0" />
+  <rect
+     width="66.672073"
+     height="20"
+     fill="url(#s)"
+     id="rect16"
+     style="fill:url(#s);stroke-width:0.81653"
+     x="0.32530975"
+     y="0.15178299"
+     ry="3.8" />
+  <text
+     aria-hidden="true"
+     x="755"
+     y="150"
+     fill="#010101"
+     fill-opacity=".3"
+     transform="matrix(0.1,0,0,0.1,-32.602863,0.05155859)"
+     textLength="370"
+     id="text24"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:110px;font-family:Verdana, Geneva, 'DejaVu Sans', sans-serif;-inkscape-font-specification:'Verdana, Geneva, DejaVu Sans, sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-anchor:middle;fill:#010101;fill-opacity:0.634047;text-rendering:geometricPrecision"
+     lengthAdjust="spacing"><tspan
+       sodipodi:role="line"
+       id="tspan929"
+       x="755"
+       y="150">Donate</tspan></text>
+  <text
+     x="755"
+     y="140"
+     transform="matrix(0.1,0,0,0.1,-33.002617,0.151782)"
      fill="#fff"
-     text-anchor="middle"
-     font-family="Verdana,Geneva,DejaVu Sans,sans-serif"
-     text-rendering="geometricPrecision"
-     font-size="110"
-     id="g28">
-    <text
-       aria-hidden="true"
-       x="275"
-       y="150"
-       fill="#010101"
-       fill-opacity=".3"
-       transform="scale(.1)"
-       textLength="430"
-       id="text20"
-       style="-inkscape-font-specification:'Verdana, Geneva, DejaVu Sans, sans-serif, Normal';font-family:Verdana, Geneva, 'DejaVu Sans', sans-serif;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:110px;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#010101;fill-opacity:0.3"><tspan
-         sodipodi:role="line"
-         id="tspan889">Patreon</tspan></text>
-    <text
-       x="275"
-       y="140"
-       transform="scale(.1)"
-       fill="#fff"
-       textLength="430"
-       id="text22"
-       style="-inkscape-font-specification:'Verdana, Geneva, DejaVu Sans, sans-serif, Normal';font-family:Verdana, Geneva, 'DejaVu Sans', sans-serif;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:110px;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff"><tspan
-         sodipodi:role="line"
-         id="tspan869">Patreon</tspan></text>
-    <text
-       aria-hidden="true"
+     textLength="370"
+     id="text26"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:110px;font-family:Verdana, Geneva, 'DejaVu Sans', sans-serif;-inkscape-font-specification:'Verdana, Geneva, DejaVu Sans, sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-anchor:middle;fill:#ffffff;fill-opacity:1;text-rendering:geometricPrecision"
+     lengthAdjust="spacing"><tspan
+       sodipodi:role="line"
+       id="tspan909"
        x="755"
-       y="150"
-       fill="#010101"
-       fill-opacity=".3"
-       transform="scale(.1)"
-       textLength="370"
-       id="text24"
-       style="-inkscape-font-specification:'Verdana, Geneva, DejaVu Sans, sans-serif, Normal';font-family:Verdana, Geneva, 'DejaVu Sans', sans-serif;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:110px;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#010101;fill-opacity:0.3"><tspan
-         sodipodi:role="line"
-         id="tspan929">Donate</tspan></text>
-    <text
-       x="755"
-       y="140"
-       transform="scale(.1)"
-       fill="#fff"
-       textLength="370"
-       id="text26"
-       style="-inkscape-font-specification:'Verdana, Geneva, DejaVu Sans, sans-serif, Normal';font-family:Verdana, Geneva, 'DejaVu Sans', sans-serif;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:110px;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff"><tspan
-         sodipodi:role="line"
-         id="tspan909">Donate</tspan></text>
-  </g>
+       y="140">Donate</tspan></text>
+  <path
+     style="fill:#ff5900;stroke-width:0.031279"
+     d="m 10.841707,2.0456642 c -4.3187849,0 -7.8195619,3.5007769 -7.8195619,7.8195623 V 17.681035 H 4.8373593 V 9.8652265 c 0,-3.3159181 2.6883988,-6.0044732 6.0044737,-6.0044732 3.316074,0 6.004473,2.6883987 6.004473,6.0044732 0,3.2226125 -2.539542,5.8516755 -5.726309,5.9969665 -1.012533,-0.0083 -1.8757707,-0.172629 -2.2538712,-0.405282 v -2.580643 c 0.5643044,0.369499 1.2392422,0.584917 1.9641332,0.584917 1.982651,0 3.589735,-1.607115 3.589735,-3.589734 0,-1.9826507 -1.607115,-3.5906102 -3.589735,-3.5906102 -1.9826504,0 -3.5897341,1.6080221 -3.5897341,3.5906102 v 7.809741 c 1.1848172,-0.0011 2.4433903,0.0016 3.6015891,0 4.318754,-3.2e-5 7.819531,-3.497337 7.819531,-7.8158404 -2.81e-4,-4.3190669 -3.501371,-7.8198438 -7.819844,-7.8198438 z"
+     id="path296" />
+  <metadata
+     id="metadata1710">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:title>patreon: donate</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
 </svg>

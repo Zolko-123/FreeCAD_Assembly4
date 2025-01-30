@@ -87,7 +87,10 @@ class Assembly4Workbench(Workbench):
         FCver = FreeCAD.Version()
         # print("This is FreeCAD version "+FCver[0]+"."+FCver[1]+"."+FCver[2]+"-"+FCver[3])
         if FCver[0]=='0' and FCver[1]=='22':
-            git = int(FCver[3][0:5])
+            try:
+                git = int(FCver[3][0:5])
+            except:
+                git=666
             if isinstance(git, int) and git>35594 :
                 FreeCAD.Console.PrintWarning("This version of FreeCAD ("+FCver[0]+"."+FCver[1]+"."+FCver[2]+"-"+str(git)+") ")
                 FreeCAD.Console.PrintWarning("is not backward compatible with FreeCAD v0.21 and earlier\n")

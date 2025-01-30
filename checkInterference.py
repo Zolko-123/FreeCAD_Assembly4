@@ -42,7 +42,6 @@ class checkInterference:
 
     def IsActive(self):
         if Asm4.getAssembly() is None:
-            # print("Check interference works with Asm4 Assemblies and there is none in this file")
             return False
         else:
             return True
@@ -101,19 +100,28 @@ class checkInterference:
             if obj.Visibility == True and (obj.TypeId == 'App::Link'):
                 self.n_objects_without_fasteners += 1
         if self.check_fasteners:
-            self.log_write("{} has {} objects. (with fasteners)".format(self.Assembly.Label, self.n_objects))
+            self.log_write("The {} has {} objects. (with fasteners)".format(self.Assembly.Label, self.n_objects))
         else:
-            self.log_write("{} has {} objects.".format(self.Assembly.Label, self.n_objects_without_fasteners))
+            self.log_write("The {} has {} objects.".format(self.Assembly.Label, self.n_objects_without_fasteners))
 
 
     def log_number_of_comparisons(self):
-        self.total_comparisons = (int) (math.factorial(self.n_objects) / (math.factorial(2) * math.factorial(self.n_objects - 2)))
-        self.total_comparisons_without_fasteners = (int) (math.factorial(self.n_objects_without_fasteners) / (math.factorial(2) * math.factorial(self.n_objects_without_fasteners - 2)))
+
+        if self.n_objects > 2:
+            self.total_comparisons = (int) (math.factorial(self.n_objects) / (math.factorial(2) * math.factorial(self.n_objects - 2)))
+        else:
+            self.total_comparisons = 0
+
+        if self.n_objects_without_fasteners > 2:
+            self.total_comparisons_without_fasteners = (int) (math.factorial(self.n_objects_without_fasteners) / (math.factorial(2) * math.factorial(self.n_objects_without_fasteners - 2)))
+        else:
+            self.total_comparisons_without_fasteners = 0
+
         if self.check_fasteners:
             self.log_write("Totaling {} possible comparisons (with fasteners)".format(self.total_comparisons))
         else:
             self.log_write("Totaling {} possible comparisons".format(self.total_comparisons_without_fasteners))
-        self.log_write("Checking interferences may take time, hold on.")
+        self.log_write("Interferences check may take time.")
 
 
     def log_elapsed_time(self, start_time_s, end_time_s):
@@ -155,18 +163,22 @@ class checkInterference:
         else:
             self.progress_bar.setMaximum(self.total_comparisons_without_fasteners)
 
-        self.log_write("\nStarting checking interferences...")
+        self.log_write("\n>>> Starting to check for interferences... <<<")
 
         start_time_s = timer()
 
         doc = App.ActiveDocument
         self.Assembly.Visibility = False
-        self.Document.Parts.Visibility = False
-        for obj in self.Document.Parts.Group:
-            try:
-                obj.Visibility = False
-            except:
-                pass
+
+        try:
+            self.Document.Parts.Visibility = False
+            for obj in self.Document.Parts.Group:
+                try:
+                    obj.Visibility = False
+                except:
+                    pass
+        except:
+            pass
 
         # Main folder
         Interferences = self.Document.addObject('App::DocumentObjectGroup', 'Interferences')
@@ -228,7 +240,8 @@ class checkInterference:
                             # When the 1st object was compared before but not with the 2nd object
                             if not obj2.Label in checked_dict[obj1.Label]:
 
-                                    self.log_write("{count: {width}}. {obj1} vs {obj2}".format(count=c, width=self.width_of_number_of_objects(), obj1=obj1.Label, obj2=obj2.Label))
+                                    indent = self.width_of_number_of_objects()
+                                    self.log_write("\n{count}. {obj1} vs {obj2}".format(count=str(c).rjust(indent), obj1=obj1.Label, obj2=obj2.Label))
 
                                     c += 1
 
@@ -257,18 +270,23 @@ class checkInterference:
                                             g = rnd.random()
                                             b = rnd.random()
                                             common.ViewObject.ShapeColor = (r, g, b)
+                                            # common.ViewObject.LineColor = (0, 0, 0)
+                                            common.ViewObject.DisplayMode = 'Flat Lines'
                                             Intersections.addObject(common)
                                             self.interference_count += 1
                                             self.Document.recompute()
                                         else:
-                                            self.Document.removeObject(common.Name)
+                                            try:
+                                                self.Document.removeObject(common.Name)
+                                            except:
+                                                pass
 
                                     self.progress_bar_progress()
 
                             else:
                                 if self.verbose:
                                     self.log_write("{count: {width}}. {obj1} vs {obj2}".format(count=c, width=self.width_of_number_of_objects(), obj1=obj1.Label, obj2=obj2.Label))
-                                    indent = " " * (self.width_of_number_of_objects() + 3)
+                                    indent = " " * (self.width_of_number_of_objects() + 2)
                                     self.log_write("{}| Step already processed".format(indent))
                                     self.log_write("{}| See {} vs {}".format(indent, obj2.Label, obj1.Label))
 
@@ -282,7 +300,7 @@ class checkInterference:
 
         # Remove the intersections folder if there is no intersections
         if not Intersections.Group:
-            self.log_write("\n>>> {} is clean! <<<".format(self.Assembly.Label))
+            self.log_write("\n>>> No interferences were found. The {} is clean! <<<".format(self.Assembly.Label))
             self.remove_interference_folder()
             self.Assembly.Visibility = True
             Gui.updateGui()
@@ -314,7 +332,7 @@ class checkInterference:
 
         shape_missing = 0
 
-        indent = " " * (self.width_of_number_of_objects() + 3)
+        indent = " " * (self.width_of_number_of_objects() + 2)
 
         if not obj1.Shape.Solids:
             self.log_write("{}| {} does not have shape.".format(indent, obj1.Label))
@@ -345,31 +363,32 @@ class checkInterference:
         obj.ViewObject.DisplayMode = "Shaded"
         doc.recompute()
 
-        # Sometimes there are no shapes.
-        # try:
-        obj.Label2 = "Volume = {:4f}".format(obj.Shape.Volume)
-        if obj.Shape.Volume > self.min_volume_allowed:
-            return obj
-        else:
-            # Avoiding the following issue:
-            # <Part> ViewProviderExt.cpp(1266): Cannot compute Inventor representation for the shape of <OBJECTNAME>: Bnd_Box is void
-            self.Document.removeObject(obj1.Name)
-            self.Document.removeObject(obj2.Name)
-            self.Document.removeObject(obj.Name)
+        # When objects dont intersect there are no shapes..
+        try:
+            obj.Label2 = "Volume = {:2f}".format(obj.Shape.Volume)
+            if obj.Shape.Volume > self.min_volume_allowed:
+                return obj
+            else:
+                # Avoiding the following issue:
+                # <Part> ViewProviderExt.cpp(1266): Cannot compute Inventor representation for the shape of <OBJECTNAME>: Bnd_Box is void
+                self.Document.removeObject(obj1.Name)
+                self.Document.removeObject(obj2.Name)
+                self.Document.removeObject(obj.Name)
+                return
+        except:
             return
-        # except:
-        #     return
 
     def remove_common_if_empty(self, obj, count):
 
-        indent = " " * (self.width_of_number_of_objects() + 3)
+        indent = " " * (self.width_of_number_of_objects() + 2)
 
         try:
             if obj.Shape:
                 try:
-                    self.log_write("{}| Collision detected".format(indent))
+                    self.log_write("{}| COLLISION DETECTED".format(indent))
                     self.log_write("{}| Object = {}".format(indent, obj.Label))
-                    self.log_write("{}| Shape volume = {}".format(indent, obj.Shape.Volume))
+                    self.log_write("{}| Overlaping volume = {:.2f}".format(indent, obj.Shape.Volume))
+
                     if obj.Shape.Volume > self.min_volume_allowed:
                         return False
                     else:
@@ -399,12 +418,17 @@ class checkInterference:
 
     # Remove Interferences folder recursively
     def remove_interference_folder(self):
-        self.Document.Parts.Visibility = True
-        for obj in self.Document.Parts.Group:
-            try:
-                obj.Visibility = False
-            except:
-                pass
+
+        try:
+            self.Document.Parts.Visibility = True
+            for obj in self.Document.Parts.Group:
+                try:
+                    obj.Visibility = False
+                except:
+                    pass
+        except:
+            pass
+
         try:
             existing_folder = self.Document.getObject("Interferences")
             for obj in existing_folder.Group:
@@ -469,7 +493,11 @@ class checkInterference:
             self.abort_processing = True
             self.log_write("\nAborting the current processing...")
             self.Assembly.Visibility = True
-            self.Document.Parts.Visibility = True
+
+            try:
+                self.Document.Parts.Visibility = True
+            except:
+                pass
 
 
     def on_clear(self):
@@ -477,6 +505,8 @@ class checkInterference:
         self.log_clear()
         self.log_number_of_objects()
         self.log_number_of_comparisons()
+        self.cancel_abort_button.setText("Close")
+        self.Assembly.Visibility = True
 
 
     def on_allow_touching_faces(self, state):
@@ -560,18 +590,26 @@ class checkInterference:
         self.progress_bar.setValue(0)
         self.main_layout.addWidget(self.progress_bar)
 
-        self.log_view = QtGui.QPlainTextEdit()
-        self.log_view.setLineWrapMode(QtGui.QPlainTextEdit.NoWrap)
+        self.log_view = QtGui.QTextEdit()
+        self.log_view.setLineWrapMode(QtGui.QTextEdit.NoWrap)
         self.log_view.setMinimumWidth(Gui.getMainWindow().width()/2)
         self.log_view.setMinimumHeight(Gui.getMainWindow().height()/3)
         self.log_view.ensureCursorVisible()
         self.log_view.moveCursor(QtGui.QTextCursor.End)
         self.log_view.verticalScrollBar().setValue(self.log_view.verticalScrollBar().maximum())
 
+        text_color = Gui.getMainWindow().palette().text().color()
+        text_bg = Gui.getMainWindow().palette().background().color()
+
+        self.log_view.setStyleSheet("QTextEdit:!editable{color: white, background-color: black};")
+
         f = QtGui.QFont("unexistent");
         f.setStyleHint(QtGui.QFont.Monospace);
         self.log_view.setFont(f);
+
         self.main_layout.addWidget(self.log_view)
+
+        # self.log_view.TextColor = text_color
 
         # The button row definition
         self.button_layout = QtGui.QHBoxLayout()
@@ -589,7 +627,7 @@ class checkInterference:
         self.main_layout.addLayout(self.button_layout)
 
         # Cancel button
-        self.cancel_abort_button = QtGui.QPushButton('Cancel')
+        self.cancel_abort_button = QtGui.QPushButton('Close')
         self.cancel_abort_button.setDefault(True)
         self.button_layout.addWidget(self.cancel_abort_button)
         self.main_layout.addLayout(self.button_layout)
