@@ -18,6 +18,7 @@ import cv2
 import FreeCADGui as Gui
 import FreeCAD as App
 import Asm4_libs as Asm4
+from Asm4_Translate import _atr, QT_TRANSLATE_NOOP
 
 from AnimationLib import animationProvider
 
@@ -227,7 +228,7 @@ class animationExporter():
 
     # progress dialog creation helper
     def createProgressDlg(self):
-        pDlg = QtGui.QProgressDialog("Capturing and Exporting...", "Cancel", 0, 100)
+        pDlg = QtGui.QProgressDialog(_atr("Asm4_Animate", "Capturing and Exporting..."), _atr("Asm4_Animate", "Cancel"), 0, 100)
         pDlg.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         pDlg.setModal(True)
         pDlg.setMinimumDuration(1)
@@ -446,7 +447,7 @@ class exportDialog(QtGui.QDialog):
         self.pilImage = None
 
         # The Gui-related things
-        self.setWindowTitle('Animation Export Preview')
+        self.setWindowTitle(_atr("Asm4_Animate", 'Animation Export Preview'))
         self.setWindowIcon(QtGui.QIcon(os.path.join(Asm4.iconPath, 'FreeCad.svg')))
         self.setMinimumWidth(640)
         self.setMinimumHeight(480)
@@ -455,8 +456,8 @@ class exportDialog(QtGui.QDialog):
 
         # add and layout widgets
         # upper part
-        self.gpbPreview = QtGui.QGroupBox("Preview", self)
-        self.lblPreview = QtGui.QLabel('TheImageLabel', self.gpbPreview)
+        self.gpbPreview = QtGui.QGroupBox(_atr("Asm4_Animate", "Preview"), self)
+        self.lblPreview = QtGui.QLabel(_atr("Asm4_Animate", 'TheImageLabel'), self.gpbPreview)
         self.sbPreviewScale = QtGui.QSpinBox()
         self.sbPreviewScale.setRange(1, 100)
         self.sbPreviewScale.setValue(70)
@@ -465,7 +466,7 @@ class exportDialog(QtGui.QDialog):
 
         self.prevHL = QtGui.QHBoxLayout()
         self.prevHL.addStretch()
-        self.prevHL.addWidget(QtGui.QLabel("Preview Scale:"))
+        self.prevHL.addWidget(QtGui.QLabel(_atr("Asm4_Animate", "Preview Scale:")))
         self.prevHL.addWidget(self.sbPreviewScale)
 
         self.prevVL = QtGui.QVBoxLayout()
@@ -478,9 +479,9 @@ class exportDialog(QtGui.QDialog):
         # # # Output Group Box # # #
         self.outputVLayout = QtGui.QVBoxLayout()
         self.gpbOutput = QtGui.QGroupBox("Output", self)
-        self.outputFileSel = fileSelectorWidget("save", self.gpbOutput)
-        tt = 'Choose a file\n'
-        tt+= 'Supported extensions are *.gif *.mp4 *.avi *.mov *.mkv'
+        self.outputFileSel = fileSelectorWidget(_atr("Asm4_Animate", "save"), self.gpbOutput)
+        tt = _atr("Asm4_Animate", 'Choose a file\n'
+            + 'Supported extensions are *.gif *.mp4 *.avi *.mov *.mkv')
         self.outputFileSel.setToolTip(tt)
 
         self.sbOutWidth = QtGui.QSpinBox()
@@ -507,21 +508,21 @@ class exportDialog(QtGui.QDialog):
         self.outputVLayout.addWidget(self.outputFileSel)
 
         self.outputHL2 = QtGui.QHBoxLayout()
-        self.outputHL2.addWidget(QtGui.QLabel("Width:"))
+        self.outputHL2.addWidget(QtGui.QLabel(_atr("Asm4_Animate", "Width:")))
         self.outputHL2.addWidget(self.sbOutWidth)
-        self.outputHL2.addWidget(QtGui.QLabel("Height:"))
+        self.outputHL2.addWidget(QtGui.QLabel(_atr("Asm4_Animate", "Height:")))
         self.outputHL2.addWidget(self.sbOutHeight)
         self.outputVLayout.addLayout(self.outputHL2)
 
         self.outputHL3 = QtGui.QHBoxLayout()
-        self.outputHL3.addWidget(QtGui.QLabel("FPS:"))
+        self.outputHL3.addWidget(QtGui.QLabel(_atr("Asm4_Animate", "FPS:")))
         self.outputHL3.addWidget(self.sbOutFPS)
-        self.outputHL3.addWidget(QtGui.QLabel("Loops:"))
+        self.outputHL3.addWidget(QtGui.QLabel(_atr("Asm4_Animate", "Loops:")))
         self.outputHL3.addWidget(self.sbOutLoops)
         self.outputVLayout.addLayout(self.outputHL3)
 
         self.outputHL4 = QtGui.QHBoxLayout()
-        self.outputHL4.addWidget(QtGui.QLabel("Smoothen:"))
+        self.outputHL4.addWidget(QtGui.QLabel(_atr("Asm4_Animate", "Smoothen:")))
         self.outputHL4.addWidget(self.sbSmoothFactor)
         self.outputVLayout.addLayout(self.outputHL4)
 
@@ -531,9 +532,9 @@ class exportDialog(QtGui.QDialog):
         self.gpbBG = QtGui.QGroupBox("Background", self)
         self.gpbBG.setCheckable(True)
         self.gpbBG.setChecked(False)
-        self.bgImgFileSel = fileSelectorWidget("read", self.gpbBG)
-        tt = 'Choose an image file\n'
-        tt+= 'Supported extensions are *.png *.jpg *.jpeg *.gif'
+        self.bgImgFileSel = fileSelectorWidget(_atr("Asm4_Animate", "read"), self.gpbBG)
+        tt = _atr("Asm4_Animate", 'Choose an image file\n'
+            + 'Supported extensions are *.png *.jpg *.jpeg *.gif')
         self.bgImgFileSel.setToolTip(tt)
         self.bgColorSel = colorSelectorWidget((255, 255, 255, 255), self.gpbBG)
 
@@ -545,10 +546,10 @@ class exportDialog(QtGui.QDialog):
 
         # # # Logo Group Box # # #
         self.gpbLogo = QtGui.QGroupBox("Logo", self)
-        self.logoFileSel = fileSelectorWidget("read", self.gpbLogo)
+        self.logoFileSel = fileSelectorWidget(_atr("Asm4_Animate", "read"), self.gpbLogo)
         self.logoFileSel.setFile(os.path.join(Asm4.iconPath, 'FreeCad.png'))
-        tt = 'Choose an image file\n'
-        tt+= 'Supported extensions are *.png *.jpg *.jpeg *.gif'
+        tt = _atr("Asm4_Animate", 'Choose an image file\n'
+            + 'Supported extensions are *.png *.jpg *.jpeg *.gif')
         self.logoFileSel.setToolTip(tt)
 
         self.sbLogoWidth = QtGui.QSpinBox()
@@ -577,16 +578,16 @@ class exportDialog(QtGui.QDialog):
         self.LogoVLayout.addWidget(self.logoFileSel)
 
         self.LogoHL2 = QtGui.QHBoxLayout()
-        self.LogoHL2.addWidget(QtGui.QLabel("Width:"))
+        self.LogoHL2.addWidget(QtGui.QLabel(_atr("Asm4_Animate", "Width:")))
         self.LogoHL2.addWidget(self.sbLogoWidth)
-        self.LogoHL2.addWidget(QtGui.QLabel("Height:"))
+        self.LogoHL2.addWidget(QtGui.QLabel(_atr("Asm4_Animate", "Height:")))
         self.LogoHL2.addWidget(self.sbLogoHeight)
         self.LogoVLayout.addLayout(self.LogoHL2)
 
         self.LogoHL3 = QtGui.QHBoxLayout()
-        self.LogoHL3.addWidget(QtGui.QLabel("X-Offset:"))
+        self.LogoHL3.addWidget(QtGui.QLabel(_atr("Asm4_Animate", "X-Offset:")))
         self.LogoHL3.addWidget(self.sbLogoX)
-        self.LogoHL3.addWidget(QtGui.QLabel("Y-Offset:"))
+        self.LogoHL3.addWidget(QtGui.QLabel(_atr("Asm4_Animate", "Y-Offset:")))
         self.LogoHL3.addWidget(self.sbLogoY)
         self.LogoVLayout.addLayout(self.LogoHL3)
 
@@ -606,10 +607,10 @@ class exportDialog(QtGui.QDialog):
         self.upperHLayout.addLayout(self.upperRHVLayout)
 
     # # # buttons incl. lower layout # # #
-        self.pbClose = QtGui.QPushButton("Close")
-        self.pbRefreshPreview = QtGui.QPushButton("Refresh Preview")
-        self.pbCreateAndSave = QtGui.QPushButton("Create and Save")
-        self.pbDummy = QtGui.QPushButton("Dummy")
+        self.pbClose = QtGui.QPushButton(_atr("Asm4_Animate", "Close"))
+        self.pbRefreshPreview = QtGui.QPushButton(_atr("Asm4_Animate", "Refresh Preview"))
+        self.pbCreateAndSave = QtGui.QPushButton(_atr("Asm4_Animate", "Create and Save"))
+        self.pbDummy = QtGui.QPushButton(_atr("Asm4_Animate", "Dummy"))
         self.pbDummy.setDefault(True)
         self.pbDummy.setVisible(False)
 
@@ -669,9 +670,9 @@ class fileSelectorWidget(QtGui.QWidget):
     def __init__(self, type="read", parent=None):
         super().__init__(parent)
 
-        self.label = QtGui.QLabel("File:", parent)
+        self.label = QtGui.QLabel(_atr("Asm4_Animate", "File:"), parent)
         self.leFilename = QtGui.QLineEdit(parent)
-        self.pbSelectFile = QtGui.QPushButton("Select", parent)
+        self.pbSelectFile = QtGui.QPushButton(_atr("Asm4_Animate", "Select"), parent)
         #self.pbSelectFile.resize(50, self.pbSelectFile.height())
         #self.pbSelectFile.setFixedWidth(50)
 
@@ -682,8 +683,8 @@ class fileSelectorWidget(QtGui.QWidget):
         self.setLayout(self.lowerButtonHLayout)
 
         self.type = type
-        self.title = "Select File"
-        self.filter = "Image Files (*.png *.jpg *.jpeg *.gif)" if self.type=="read" else "Supported Files (*.mp4 *.avi *.mov *.mkv *.gif *.png)"
+        self.title = _atr("Asm4_Animate", "Select File")
+        self.filter = _atr("Asm4_Animate", "Image Files (*.png *.jpg *.jpeg *.gif)") if self.type=="read" else _atr("Asm4_Animate", "Supported Files (*.mp4 *.avi *.mov *.mkv *.gif *.png)")
 
         self.pbSelectFile.clicked.connect(self.selectFile)
 
@@ -723,10 +724,10 @@ class colorSelectorWidget(QtGui.QWidget):
     def __init__(self, initialColor=(255, 255, 255, 255), parent=None):
         super().__init__(parent)
 
-        self.label = QtGui.QLabel("Color:", parent)
+        self.label = QtGui.QLabel(_atr("Asm4_Animate", "Color:"), parent)
         self.leColor = QtGui.QLineEdit(parent)
         self.leColor.setReadOnly(True)
-        self.pbSelect = QtGui.QPushButton("Select", parent)
+        self.pbSelect = QtGui.QPushButton(_atr("Asm4_Animate", "Select"), parent)
         #self.pbSelect.resize(50, self.pbSelect.height())
         #self.pbSelect.setFixedWidth(50)
 

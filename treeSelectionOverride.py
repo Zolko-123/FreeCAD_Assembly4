@@ -10,6 +10,7 @@ from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
 from FreeCAD import Console as FCC
+from Asm4_Translate import _atr, QT_TRANSLATE_NOOP, translate
 
 import Asm4_libs as Asm4
 
@@ -27,10 +28,10 @@ class treeSelectionOverrideCmd( QtGui.QDialog):
         super(treeSelectionOverrideCmd,self).__init__()
 
     def GetResources(self):
-        return {"MenuText": "Enable/Disable 3D View selection mode",
-                "ToolTip": "Enable/Disable 3D View selection mode\n\n"    + \
+        return {"MenuText": translate("Asm4_treeSelectionOverride", "Enable/Disable 3D View selection mode"),
+                "ToolTip": translate("Asm4_treeSelectionOverride", "Enable/Disable 3D View selection mode\n\n"    + \
                 "Allows to select a Link object in the 3D view\n" + \
-                "window instead of the Model tree",
+                "window instead of the Model tree"),
                 "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_enableLinkSelection.svg')
                 }
 
@@ -77,7 +78,7 @@ def Enable():
     # add the listener, 0 forces to resolve the links
     Gui.Selection.addObserver(observer, 0)
     #print("3D view link selection mode is now enabled")
-    FCC.PrintMessage("3D view link selection mode is now ENABLED\n")
+    FCC.PrintMessage(translate("Asm4_treeSelectionOverride", "3D view link selection mode is now ENABLED\n"))
 
 
 def Disable():
@@ -91,7 +92,7 @@ def Disable():
     observer = None
     #print("3D view link selection mode is now disabled")
     if print_disable:
-        FCC.PrintMessage("3D view link selection mode is now DISABLED\n")
+        FCC.PrintMessage(translate("Asm4_treeSelectionOverride", "3D view link selection mode is now DISABLED\n"))
 
 
 

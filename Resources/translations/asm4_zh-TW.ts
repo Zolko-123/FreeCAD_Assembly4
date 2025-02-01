@@ -25,14 +25,28 @@
 <context>
     <name>Asm4</name>
     <message>
-        <location filename="../InitGui.py" line="57"/>
-        <source>Activating Assembly4 WorkBench</source>
-        <translation>啟用 零件組合四 工作台</translation>
+        <location filename="../../Asm4_Measure.py" line="97"/>
+        <location filename="../../Asm4_Measure.py" line="125"/>
+        <source>Measure</source>
+        <translation>測量</translation>
     </message>
     <message>
-        <location filename="../InitGui.py" line="75"/>
-        <source>Leaving Assembly4 WorkBench</source>
-        <translation>離開 零件組合四 工作台</translation>
+        <location filename="../../Asm4_Measure.py" line="98"/>
+        <source>Measure Tool</source>
+        <translation>測量工具</translation>
+    </message>
+    <message>
+        <location filename="../../Asm4_Measure.py" line="180"/>
+        <source>closing ... </source>
+        <translation>關閉中... </translation>
+    </message>
+    <message>
+        <location filename="../../Asm4_Measure.py" line="184"/>
+        <location filename="../../Asm4_Measure.py" line="220"/>
+        <source> done
+</source>
+        <translation> 完成
+</translation>
     </message>
     <message>
         <location filename="../../InitGui.py" line="122"/>
@@ -55,6 +69,14 @@
         <translation>求助說明(&amp;H)</translation>
     </message>
     <message>
+        <location filename="../../InitGui.py" line="206"/>
+        <location filename="../../InitGui.py" line="362"/>
+        <location filename="../../../../../../../../home/Benson/.local/share/FreeCAD/Mod/Assembly4/InitGui.py" line="197"/>
+        <location filename="../../../../../../../../home/Benson/.local/share/FreeCAD/Mod/Assembly4/InitGui.py" line="350"/>
+        <source>Assembly</source>
+        <translation>零件組合</translation>
+    </message>
+    <message>
         <location filename="../../InitGui.py" line="211"/>
         <location filename="../../../../../../../../home/Benson/.local/share/FreeCAD/Mod/Assembly4/InitGui.py" line="201"/>
         <source>Selection Filter</source>
@@ -66,18 +88,20 @@
         <translation>完成</translation>
     </message>
     <message>
-        <location filename="../../InitGui.py" line="206"/>
-        <location filename="../../InitGui.py" line="362"/>
-        <location filename="../../../../../../../../home/Benson/.local/share/FreeCAD/Mod/Assembly4/InitGui.py" line="197"/>
-        <location filename="../../../../../../../../home/Benson/.local/share/FreeCAD/Mod/Assembly4/InitGui.py" line="350"/>
-        <source>Assembly</source>
-        <translation>零件組合</translation>
-    </message>
-    <message>
         <location filename="../../../../../../../../home/Benson/.local/share/FreeCAD/Mod/Assembly4/InitGui.py" line="351"/>
         <location filename="../../InitGui.py" line="364"/>
         <source>Create</source>
         <translation>建立</translation>
+    </message>
+    <message>
+        <location filename="../InitGui.py" line="57"/>
+        <source>Activating Assembly4 WorkBench</source>
+        <translation>啟用 零件組合四 工作台</translation>
+    </message>
+    <message>
+        <location filename="../InitGui.py" line="75"/>
+        <source>Leaving Assembly4 WorkBench</source>
+        <translation>離開 零件組合四 工作台</translation>
     </message>
     <message>
         <location filename="../../AnimationLib.py" line="177"/>
@@ -120,19 +144,6 @@
         <translation>您確定要繼續嗎?</translation>
     </message>
     <message>
-        <location filename="../../Asm4_Measure.py" line="180"/>
-        <source>closing ... </source>
-        <translation>關閉中... </translation>
-    </message>
-    <message>
-        <location filename="../../Asm4_Measure.py" line="184"/>
-        <location filename="../../Asm4_Measure.py" line="220"/>
-        <source> done
-</source>
-        <translation> 完成
-</translation>
-    </message>
-    <message>
         <location filename="../../Asm4_objects.py" line="107"/>
         <source>100 temporary variant documents are already in use, not creating a new one.
 </source>
@@ -142,6 +153,11 @@
 </context>
 <context>
     <name>Asm4_Animate</name>
+    <message>
+        <location filename="../../AnimationLib.py" line="39"/>
+        <source>animationProvider.nextFrame not implemented.</source>
+        <translation>animationProvider.nextFrame 未達成.</translation>
+    </message>
     <message>
         <location filename="../../AnimationLib.py" line="96"/>
         <source>Variable name invalid</source>
@@ -158,6 +174,18 @@
         <translation>&quot; 是無效的. 請選擇一個現有變數.</translation>
     </message>
     <message>
+        <location filename="../../AnimationLib.py" line="132"/>
+        <location filename="../../AnimationLib.py" line="133"/>
+        <location filename="../../AnimationLib.py" line="522"/>
+        <source>Animate Assembly</source>
+        <translation>零件組合動畫</translation>
+    </message>
+    <message>
+        <location filename="../../AnimationLib.py" line="334"/>
+        <source>Unknown State/Transition</source>
+        <translation>未知狀態/轉換</translation>
+    </message>
+    <message>
         <location filename="../../AnimationLib.py" line="485"/>
         <source>The Python module &quot;OpenCV&quot; is not installed</source>
         <translation>Python模組 &quot;OpenCV&quot; 尚未安裝</translation>
@@ -168,14 +196,90 @@
         <translation>文件</translation>
     </message>
     <message>
+        <location filename="../../AnimationLib.py" line="539"/>
+        <location filename="../../AnimationLib.py" line="575"/>
+        <source>Variable</source>
+        <translation>變量</translation>
+    </message>
+    <message>
+        <location filename="../../AnimationLib.py" line="546"/>
+        <source>Range Begin</source>
+        <translation>範圍開始</translation>
+    </message>
+    <message>
+        <location filename="../../AnimationLib.py" line="552"/>
+        <source>Range End</source>
+        <translation>範圍結束</translation>
+    </message>
+    <message>
+        <location filename="../../AnimationLib.py" line="559"/>
+        <source>Step Size</source>
+        <translation>步進大小</translation>
+    </message>
+    <message>
+        <location filename="../../AnimationLib.py" line="568"/>
+        <source>Sleep (s)</source>
+        <translation>暫停(秒)</translation>
+    </message>
+    <message>
+        <location filename="../../AnimationLib.py" line="577"/>
+        <source>Current Value:</source>
+        <translation>目前值:</translation>
+    </message>
+    <message>
+        <location filename="../../AnimationLib.py" line="589"/>
+        <source>Begin</source>
+        <translation>開始</translation>
+    </message>
+    <message>
+        <location filename="../../AnimationLib.py" line="590"/>
+        <source>End</source>
+        <translation>結束</translation>
+    </message>
+    <message>
+        <location filename="../../AnimationLib.py" line="605"/>
+        <source>Force GUI to update on every step.</source>
+        <translation>強制 GUI 到每一步更新動作.</translation>
+    </message>
+    <message>
+        <location filename="../../AnimationLib.py" line="607"/>
+        <source>Force-render every step</source>
+        <translation>強制渲染每一步動作</translation>
+    </message>
+    <message>
+        <location filename="../../AnimationLib.py" line="610"/>
+        <source>The last reachable variable value with the given stepping. Flagged red in case this is not equal to the intended value. The last step of the animation will be reduced to stay inside the configured limits.</source>
+        <translation>具有給定步進的最後一個可到達變數值. 如果此值不等於預期值，則標記為紅色. 動畫的最後一步將被減少，以保持在設定的限制內.</translation>
+    </message>
+    <message>
+        <location filename="../../AnimationLib.py" line="612"/>
+        <source>Infinite Loop</source>
+        <translation>無限循環</translation>
+    </message>
+    <message>
+        <location filename="../../AnimationLib.py" line="613"/>
+        <source>Loop</source>
+        <translation>循環</translation>
+    </message>
+    <message>
         <location filename="../../AnimationLib.py" line="619"/>
         <source>Options Box</source>
         <translation>選項對話框</translation>
     </message>
     <message>
+        <location filename="../../AnimationLib.py" line="619"/>
+        <source>Back-and-forth pendulum</source>
+        <translation>來回擺動</translation>
+    </message>
+    <message>
         <location filename="../../AnimationLib.py" line="620"/>
         <source>Options</source>
         <translation>選項</translation>
+    </message>
+    <message>
+        <location filename="../../AnimationLib.py" line="620"/>
+        <source>Pendulum</source>
+        <translation>擺動</translation>
     </message>
     <message>
         <location filename="../../AnimationLib.py" line="621"/>
@@ -196,6 +300,16 @@
         <location filename="../../AnimationLib.py" line="640"/>
         <source>Save this sequence as video</source>
         <translation>將此序列儲存為影片</translation>
+    </message>
+    <message>
+        <location filename="../../AnimationLib.py" line="644"/>
+        <source>Stop</source>
+        <translation>停止</translation>
+    </message>
+    <message>
+        <location filename="../../AnimationLib.py" line="649"/>
+        <source>Run</source>
+        <translation>執行</translation>
     </message>
     <message>
         <location filename="../../AnimationLib.py" line="666"/>
@@ -234,118 +348,9 @@ it is advisable to try with 10 frames</source>
         <translation>選擇變量 (只有浮動)</translation>
     </message>
     <message>
-        <location filename="../../AnimationLib.py" line="334"/>
-        <source>Unknown State/Transition</source>
-        <translation>未知狀態/轉換</translation>
-    </message>
-    <message>
-        <location filename="../../AnimationLib.py" line="132"/>
-        <location filename="../../AnimationLib.py" line="133"/>
-        <location filename="../../AnimationLib.py" line="522"/>
-        <source>Animate Assembly</source>
-        <translation>零件組合動畫</translation>
-    </message>
-    <message>
-        <location filename="../../AnimationLib.py" line="546"/>
-        <source>Range Begin</source>
-        <translation>範圍開始</translation>
-    </message>
-    <message>
-        <location filename="../../AnimationLib.py" line="552"/>
-        <source>Range End</source>
-        <translation>範圍結束</translation>
-    </message>
-    <message>
-        <location filename="../../AnimationLib.py" line="559"/>
-        <source>Step Size</source>
-        <translation>步進大小</translation>
-    </message>
-    <message>
-        <location filename="../../AnimationLib.py" line="568"/>
-        <source>Sleep (s)</source>
-        <translation>暫停(秒)</translation>
-    </message>
-    <message>
-        <location filename="../../AnimationLib.py" line="539"/>
-        <location filename="../../AnimationLib.py" line="575"/>
-        <source>Variable</source>
-        <translation>變量</translation>
-    </message>
-    <message>
-        <location filename="../../AnimationLib.py" line="577"/>
-        <source>Current Value:</source>
-        <translation>目前值:</translation>
-    </message>
-    <message>
-        <location filename="../../AnimationLib.py" line="589"/>
-        <source>Begin</source>
-        <translation>開始</translation>
-    </message>
-    <message>
-        <location filename="../../AnimationLib.py" line="590"/>
-        <source>End</source>
-        <translation>結束</translation>
-    </message>
-    <message>
-        <location filename="../../AnimationLib.py" line="610"/>
-        <source>The last reachable variable value with the given stepping. Flagged red in case this is not equal to the intended value. The last step of the animation will be reduced to stay inside the configured limits.</source>
-        <translation>具有給定步進的最後一個可到達變數值. 如果此值不等於預期值，則標記為紅色. 動畫的最後一步將被減少，以保持在設定的限制內.</translation>
-    </message>
-    <message>
-        <location filename="../../AnimationLib.py" line="605"/>
-        <source>Force GUI to update on every step.</source>
-        <translation>強制 GUI 到每一步更新動作.</translation>
-    </message>
-    <message>
-        <location filename="../../AnimationLib.py" line="607"/>
-        <source>Force-render every step</source>
-        <translation>強制渲染每一步動作</translation>
-    </message>
-    <message>
-        <location filename="../../AnimationLib.py" line="612"/>
-        <source>Infinite Loop</source>
-        <translation>無限循環</translation>
-    </message>
-    <message>
-        <location filename="../../AnimationLib.py" line="613"/>
-        <source>Loop</source>
-        <translation>循環</translation>
-    </message>
-    <message>
-        <location filename="../../AnimationLib.py" line="619"/>
-        <source>Back-and-forth pendulum</source>
-        <translation>來回擺動</translation>
-    </message>
-    <message>
-        <location filename="../../AnimationLib.py" line="620"/>
-        <source>Pendulum</source>
-        <translation>擺動</translation>
-    </message>
-    <message>
-        <location filename="../../AnimationExportLib.py" line="622"/>
-        <location filename="../../AnimationLib.py" line="633"/>
-        <source>Close</source>
-        <translation>關閉</translation>
-    </message>
-    <message>
         <location filename="../AnimationLib.py" line="565"/>
         <source>Export</source>
         <translation>匯出</translation>
-    </message>
-    <message>
-        <location filename="../../AnimationLib.py" line="644"/>
-        <source>Stop</source>
-        <translation>停止</translation>
-    </message>
-    <message>
-        <location filename="../../AnimationLib.py" line="649"/>
-        <source>Run</source>
-        <translation>執行</translation>
-    </message>
-    <message>
-        <location filename="../../AnimationLib.py" line="39"/>
-        <source>animationProvider.nextFrame not implemented.</source>
-        <translation>animationProvider.nextFrame 未達成.</translation>
     </message>
     <message>
         <location filename="../../AnimationExportLib.py" line="203"/>
@@ -451,6 +456,12 @@ Supported extensions are *.png *.jpg *.jpeg *.gif</source>
         <location filename="../../AnimationExportLib.py" line="603"/>
         <source>Y-Offset:</source>
         <translation>偏移 Y:</translation>
+    </message>
+    <message>
+        <location filename="../../AnimationExportLib.py" line="622"/>
+        <location filename="../../AnimationLib.py" line="633"/>
+        <source>Close</source>
+        <translation>關閉</translation>
     </message>
     <message>
         <location filename="../../AnimationExportLib.py" line="624"/>
@@ -843,6 +854,36 @@ Menu Tools &gt; Addon Manager &gt; fasteners</source>
 <context>
     <name>Asm4_InfoPart</name>
     <message>
+        <location filename="../../infoKeys.py" line="32"/>
+        <source>File Name</source>
+        <translation>檔案名稱</translation>
+    </message>
+    <message>
+        <location filename="../../infoKeys.py" line="55"/>
+        <source>Function not implemented yet</source>
+        <translation>功能尚未實現</translation>
+    </message>
+    <message>
+        <location filename="../../infoKeys.py" line="89"/>
+        <source>Base Part ID:</source>
+        <translation>基礎零件ID:</translation>
+    </message>
+    <message>
+        <location filename="../../infoKeys.py" line="90"/>
+        <source>Revision:</source>
+        <translation>修訂版本:</translation>
+    </message>
+    <message>
+        <location filename="../../infoKeys.py" line="139"/>
+        <source>Multi Body Part(Not implemented)</source>
+        <translation>多重實體零件(未實現)</translation>
+    </message>
+    <message>
+        <location filename="../../infoPartCmd.py" line="31"/>
+        <source>BomKey</source>
+        <translation>物料清單索引</translation>
+    </message>
+    <message>
         <location filename="../../infoPartCmd.py" line="32"/>
         <source>Document or File name</source>
         <translation>文件或檔案名稱</translation>
@@ -883,14 +924,19 @@ Menu Tools &gt; Addon Manager &gt; fasteners</source>
         <translation>已有一個零件組合</translation>
     </message>
     <message>
+        <location filename="../../infoPartCmd.py" line="153"/>
+        <source>Part does not contain a single PartDesign::Body.</source>
+        <translation>零件不包含單一零件設計實體(PartDesign::Body).</translation>
+    </message>
+    <message>
         <location filename="../../infoPartCmd.py" line="152"/>
         <source>Need to develop logic for something that is neither a part or an assembly</source>
         <translation>需要為既不是零件也不是零件組合的開發邏輯</translation>
     </message>
     <message>
-        <location filename="../../infoPartCmd.py" line="153"/>
-        <source>Part does not contain a single PartDesign::Body.</source>
-        <translation>零件不包含單一零件設計實體(PartDesign::Body).</translation>
+        <location filename="../../infoPartCmd.py" line="243"/>
+        <source>&lt;p&gt;Edit Part information&lt;/p&gt;&lt;p&gt;User-supplied information can be added to a part&lt;/p&gt;</source>
+        <translation>&lt;p&gt;編輯零件資訊&lt;/p&gt;&lt;p&gt;可以將使用者提供的資訊加入零件中&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../../infoPartCmd.py" line="254"/>
@@ -971,31 +1017,6 @@ Menu Tools &gt; Addon Manager &gt; fasteners</source>
         <location filename="../../infoPartCmd.py" line="838"/>
         <source>Update</source>
         <translation>更新</translation>
-    </message>
-    <message>
-        <location filename="../../infoKeys.py" line="32"/>
-        <source>File Name</source>
-        <translation>檔案名稱</translation>
-    </message>
-    <message>
-        <location filename="../../infoKeys.py" line="55"/>
-        <source>Function not implemented yet</source>
-        <translation>功能尚未實現</translation>
-    </message>
-    <message>
-        <location filename="../../infoKeys.py" line="89"/>
-        <source>Base Part ID:</source>
-        <translation>基礎零件ID:</translation>
-    </message>
-    <message>
-        <location filename="../../infoKeys.py" line="90"/>
-        <source>Revision:</source>
-        <translation>修訂版本:</translation>
-    </message>
-    <message>
-        <location filename="../../infoKeys.py" line="139"/>
-        <source>Multi Body Part(Not implemented)</source>
-        <translation>多重實體零件(未實現)</translation>
     </message>
 </context>
 <context>
@@ -1576,6 +1597,11 @@ There seems to be some conflicts between parts
         <translation>新增座標系統</translation>
     </message>
     <message>
+        <location filename="../../newDatumCmd.py" line="59"/>
+        <source>Create a new Coordinate System in a Part</source>
+        <translation>在零件中建立新座標系統</translation>
+    </message>
+    <message>
         <location filename="../../newDatumCmd.py" line="71"/>
         <source>New Sketch</source>
         <translation>新增草圖</translation>
@@ -1621,6 +1647,11 @@ There seems to be some conflicts between parts
         <translation>建立附加到孔的基準軸</translation>
     </message>
     <message>
+        <location filename="../../newDatumCmd.py" line="237"/>
+        <source>Datum objects can only be created inside Part or Body containers</source>
+        <translation>基準物體只能在「零件」或「實體」容器內建立</translation>
+    </message>
+    <message>
         <location filename="../../newDatumCmd.py" line="269"/>
         <source>Create Datum Object</source>
         <translation>建立基準物體</translation>
@@ -1655,6 +1686,19 @@ There seems to be some conflicts between parts
 <context>
     <name>Asm4_importDatum</name>
     <message>
+        <location filename="../../importDatumCmd.py" line="37"/>
+        <source>Imports the selected Datum object(s) from a sub-part into the root assembly.
+This creates a new datum of the same type, and with the same global placement
+
+This command can also be used to override the placement of an existing datum :
+select a second datum in the same root container as the first selected datum</source>
+        <translation>將選取的基準物體從子零件匯入到根組合體中.
+這將建立相同類型且具有相同全域位置的新基準
+
+此命令也可用於涵蓋現有基準的放置:
+在與第一個選定基準相同的根容器中選擇第二個基準</translation>
+    </message>
+    <message>
         <location filename="../../importDatumCmd.py" line="38"/>
         <source>Import Datum object</source>
         <translation>匯入基準</translation>
@@ -1665,6 +1709,12 @@ There seems to be some conflicts between parts
         <translation>這將疊加 </translation>
     </message>
     <message>
+        <location filename="../../importDatumCmd.py" line="87"/>
+        <location filename="../../importDatumCmd.py" line="121"/>
+        <source> in </source>
+        <translation> 於 </translation>
+    </message>
+    <message>
         <location filename="../../importDatumCmd.py" line="80"/>
         <source> on:
 
@@ -1672,12 +1722,6 @@ There seems to be some conflicts between parts
         <translation> 在:
 
 </translation>
-    </message>
-    <message>
-        <location filename="../../importDatumCmd.py" line="87"/>
-        <location filename="../../importDatumCmd.py" line="121"/>
-        <source> in </source>
-        <translation> 於 </translation>
     </message>
     <message>
         <location filename="../../importDatumCmd.py" line="89"/>
@@ -1710,6 +1754,19 @@ superimposed on:
 </translation>
     </message>
     <message>
+        <location filename="../../importDatumCmd.py" line="131"/>
+        <source> selected datum objects will be imported into the root assembly
+with their default names such as: 
+</source>
+        <translation> 選定的基準將以其預設名稱匯入到根零件組合中，例如: 
+</translation>
+    </message>
+    <message>
+        <location filename="../../importDatumCmd.py" line="115"/>
+        <source>&gt; </source>
+        <translation>&gt; </translation>
+    </message>
+    <message>
         <location filename="../../importDatumCmd.py" line="125"/>
         <source>
 Enter name for this datum :</source>
@@ -1717,11 +1774,16 @@ Enter name for this datum :</source>
 輸入該基準資料的名稱:</translation>
     </message>
     <message>
-        <location filename="../../importDatumCmd.py" line="131"/>
+        <location filename="../../importDatumCmd.py" line="117"/>
+        <source>Import Datum</source>
+        <translation>匯入基準</translation>
+    </message>
+    <message>
+        <location filename="../../importDatumCmd.py" line="120"/>
         <source> selected datum objects will be imported into the root assembly
-with their default names such as: 
+with their default names such as:
 </source>
-        <translation> 選定的基準將以其預設名稱匯入到根零件組合中，例如: 
+        <translation> 選定的基準將以其預設名稱匯入到根零件組合中. 例如:
 </translation>
     </message>
 </context>
@@ -2007,6 +2069,15 @@ It uses the Parts&apos; info to generate entries on BOM, unless autofill is set.
         <translation>檢視&lt;a href=&apos;https://github.com/Zolko-123/FreeCAD_Assembly4/tree/master/Examples/ConfigBOM/README.md&apos;&gt;BOM 教學&lt;/a&gt;</translation>
     </message>
     <message>
+        <location filename="../../makeBomCmd.py" line="495"/>
+        <source>
+
+Report:</source>
+        <translation>
+
+報表:</translation>
+    </message>
+    <message>
         <location filename="../../makeBomCmd.py" line="534"/>
         <source>OK</source>
         <translation>確定</translation>
@@ -2265,31 +2336,6 @@ on Position.X: Index*30</source>
         <translation>請在零件組合模型中選擇一個物體.</translation>
     </message>
     <message>
-        <location filename="../../placePartUI.py" line="35"/>
-        <source>Place a Part in the assembly</source>
-        <translation>將零件放置在零件組合件中</translation>
-    </message>
-    <message>
-        <location filename="../../placePartUI.py" line="48"/>
-        <source>Please select ab object with a Placement property</source>
-        <translation>請選擇具有放置位置(Placement) 屬性的物體</translation>
-    </message>
-    <message>
-        <location filename="../../placePartUI.py" line="343"/>
-        <source>selection: </source>
-        <translation>選擇: </translation>
-    </message>
-    <message>
-        <location filename="../../placePartUI.py" line="437"/>
-        <source>Selected Object :</source>
-        <translation>選擇的物體:</translation>
-    </message>
-    <message>
-        <location filename="../../placePartUI.py" line="453"/>
-        <source>Select attachment LCS in parent Part :</source>
-        <translation>在上層零件中選擇附件區域座標系統(LCS):</translation>
-    </message>
-    <message>
         <location filename="../../placeLinkUI.py" line="72"/>
         <source>WARNING : unsupported Assembly/Solver/Part combination, you shouldn&apos;t be seeing this
 </source>
@@ -2460,6 +2506,31 @@ coordinate system is to be found</source>
         <source>Rotate 90 deg around Z axis</source>
         <translation>繞Z軸旋轉90°</translation>
     </message>
+    <message>
+        <location filename="../../placePartUI.py" line="35"/>
+        <source>Place a Part in the assembly</source>
+        <translation>將零件放置在零件組合件中</translation>
+    </message>
+    <message>
+        <location filename="../../placePartUI.py" line="48"/>
+        <source>Please select ab object with a Placement property</source>
+        <translation>請選擇具有放置位置(Placement) 屬性的物體</translation>
+    </message>
+    <message>
+        <location filename="../../placePartUI.py" line="343"/>
+        <source>selection: </source>
+        <translation>選擇: </translation>
+    </message>
+    <message>
+        <location filename="../../placePartUI.py" line="437"/>
+        <source>Selected Object :</source>
+        <translation>選擇的物體:</translation>
+    </message>
+    <message>
+        <location filename="../../placePartUI.py" line="453"/>
+        <source>Select attachment LCS in parent Part :</source>
+        <translation>在上層零件中選擇附件區域座標系統(LCS):</translation>
+    </message>
 </context>
 <context>
     <name>Asm4_releaseAttachment</name>
@@ -2482,6 +2553,69 @@ coordinate system is to be found</source>
         <location filename="../../releaseAttachmentCmd.py" line="82"/>
         <source> and set it to manual positioning in its current location.</source>
         <translation> 並將其設定為手動定位在目前位置.</translation>
+    </message>
+</context>
+<context>
+    <name>Asm4_selectionFilter</name>
+    <message>
+        <location filename="../../selectionFilter.py" line="39"/>
+        <location filename="../../selectionFilter.py" line="40"/>
+        <source>Clear all selection filters</source>
+        <translation>清除所有選擇過濾器</translation>
+    </message>
+    <message>
+        <location filename="../../selectionFilter.py" line="50"/>
+        <source>All selection filters cleared
+</source>
+        <translation>已清除所有選擇過濾器
+</translation>
+    </message>
+    <message>
+        <location filename="../../selectionFilter.py" line="55"/>
+        <location filename="../../selectionFilter.py" line="56"/>
+        <source>Select only Vertices</source>
+        <translation>僅選擇頂點</translation>
+    </message>
+    <message>
+        <location filename="../../selectionFilter.py" line="72"/>
+        <location filename="../../selectionFilter.py" line="73"/>
+        <source>Select only Edges</source>
+        <translation>僅選擇邊緣</translation>
+    </message>
+    <message>
+        <location filename="../../selectionFilter.py" line="89"/>
+        <location filename="../../selectionFilter.py" line="90"/>
+        <source>Select only Faces</source>
+        <translation>僅選擇平面</translation>
+    </message>
+    <message>
+        <location filename="../../selectionFilter.py" line="174"/>
+        <source>Enable/Disable 3D View selection mode</source>
+        <translation>啟用/禁用 3D視圖連結選擇模式</translation>
+    </message>
+    <message>
+        <location filename="../../selectionFilter.py" line="177"/>
+        <source>Enable/Disable 3D View selection mode
+
+Allows to select a Link object in the 3D view
+window instead of the Model tree</source>
+        <translation>啟用/停用 3D 視圖選擇模式
+
+允許在 3D 視圖視窗中選擇連結物體而不是模型樹</translation>
+    </message>
+    <message>
+        <location filename="../../selectionFilter.py" line="237"/>
+        <source>Asm4 3D view selection mode is now ENABLED
+</source>
+        <translation>零件組合 3D視圖連結選擇模式現已啟用
+</translation>
+    </message>
+    <message>
+        <location filename="../../selectionFilter.py" line="246"/>
+        <source>Asm4 3D view selection mode is now DISABLED
+</source>
+        <translation>零件組合 3D視圖連結選擇模式現已停用
+</translation>
     </message>
 </context>
 <context>
@@ -2714,6 +2848,11 @@ Select a part containing a &quot;Variables&quot; property container</source>
 <context>
     <name>Commands</name>
     <message>
+        <location filename="../../gotoDocumentCmd.py" line="35"/>
+        <source>Open Document</source>
+        <translation>開啟文件</translation>
+    </message>
+    <message>
         <location filename="../../gotoDocumentCmd.py" line="36"/>
         <source>Activates the document of the selected linked part</source>
         <translation>啟用所選連結零件的檔案</translation>
@@ -2779,19 +2918,51 @@ Menu Tools &gt; Addon Manager &gt; fasteners</source>
 您可以使用 FreeCAD 附加元件管理員 安裝它:
 功能表工具 &gt; 附加元件管理器 &gt; fasteners</translation>
     </message>
+    <message>
+        <location filename="../../FastenersDummy.py" line="82"/>
+        <source>Edit Attachment of a Fastener</source>
+        <translation>編輯緊固件的連接</translation>
+    </message>
+    <message>
+        <location filename="../../FastenersDummy.py" line="105"/>
+        <location filename="../../FastenersDummy.py" line="106"/>
+        <location filename="../../FastenersLib.py" line="225"/>
+        <location filename="../../FastenersLib.py" line="226"/>
+        <source>Change Fastener parameters</source>
+        <translation>更改緊固件參數</translation>
+    </message>
+    <message>
+        <location filename="../../FastenersDummy.py" line="124"/>
+        <location filename="../../FastenersLib.py" line="293"/>
+        <location filename="../../FastenersLib.py" line="294"/>
+        <source>Clone Fastener to Axes</source>
+        <translation>將緊固件複製到軸</translation>
+    </message>
+    <message>
+        <location filename="../../FastenersLib.py" line="68"/>
+        <source>&lt;p&gt;Insert a Screw into the Assembly&lt;/p&gt;&lt;p&gt;If another fastener is selected, a new fastener of the same type is created in the same assembly.If an axis or LCS is selected, the new fastener will be attached to it.If an assembly is selected, the new fastener will be inside that assembly.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;將螺絲插入緊固件&lt;/p&gt;&lt;p&gt;如果選擇了另一個緊固件，則會在同一緊固件中建立相同類型的新緊固件。如果選擇了軸或區域座標系統(LCS)，如果選擇了某個緊固件則會附加新緊固件，新的緊固件將位於該緊固件內.&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../FastenersLib.py" line="76"/>
+        <source>&lt;p&gt;Insert a Nut into the Assembly&lt;/p&gt;&lt;p&gt;If another fastener is selected, a new fastener of the same type is created in the same assembly.If an axis or LCS is selected, the new fastener will be attached to it.If an assembly is selected, the new fastener will be inside that assembly.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;將螺帽插入零件組合&lt;/p&gt;&lt;p&gt;如果選擇了另一個緊固件，則會在同一零件組合中建立相同類型的新緊固件。如果選擇了軸或LCS，如果選擇了某個零件組合則會附加新緊固件，新的緊固件將位於該零件組合內.&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../FastenersLib.py" line="84"/>
+        <source>&lt;p&gt;Insert a Washer into the Assembly&lt;/p&gt;&lt;p&gt;If another fastener is selected, a new fastener of the same type is created in the same assembly.If an axis or LCS is selected, the new fastener will be attached to it.If an assembly is selected, the new fastener will be inside that assembly.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;將墊圈插入零件組合&lt;/p&gt;&lt;p&gt;如果選擇了另一個緊固件，則會在同一零件組合中建立相同類型的新緊固件。如果選擇了軸或LCS，如果選擇了某個零件組合則會附加新緊固件，新的緊固件將位於該零件組合內.&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../FastenersLib.py" line="133"/>
+        <source>Selected object doesn&apos;t seem to be a valid fastener, ignoring
+</source>
+        <translation>所選物體似乎不是有效的緊固件，忽略
+</translation>
+    </message>
 </context>
 <context>
     <name>Workbench</name>
-    <message>
-        <location filename="../InitGui.py" line="145"/>
-        <source>&amp;Assembly</source>
-        <translation>零件組合(&amp;A)</translation>
-    </message>
-    <message>
-        <location filename="../InitGui.py" line="151"/>
-        <source>&amp;Help</source>
-        <translation>求助說明(&amp;H)</translation>
-    </message>
     <message>
         <location filename="../../../../../../../../home/Benson/.local/share/FreeCAD/Mod/Assembly4/InitGui.py" line="49"/>
         <source>Assembly 4</source>
@@ -2801,6 +2972,16 @@ Menu Tools &gt; Addon Manager &gt; fasteners</source>
         <location filename="../../../../../../../../home/Benson/.local/share/FreeCAD/Mod/Assembly4/InitGui.py" line="50"/>
         <source>Assembly 4 workbench</source>
         <translation>零件組合 4 工作台</translation>
+    </message>
+    <message>
+        <location filename="../InitGui.py" line="145"/>
+        <source>&amp;Assembly</source>
+        <translation>零件組合(&amp;A)</translation>
+    </message>
+    <message>
+        <location filename="../InitGui.py" line="151"/>
+        <source>&amp;Help</source>
+        <translation>求助說明(&amp;H)</translation>
     </message>
 </context>
 </TS>

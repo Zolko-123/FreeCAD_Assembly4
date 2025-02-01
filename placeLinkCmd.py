@@ -13,6 +13,7 @@ from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
 from FreeCAD import Console as FCC
+from Asm4_Translate import _atr, QT_TRANSLATE_NOOP, translate
 
 import Asm4_libs as Asm4
 from placeLinkUI import placeLinkUI
@@ -33,8 +34,8 @@ class placeLinkCmd():
         super(placeLinkCmd,self).__init__()
 
     def GetResources(self):
-        return {"MenuText": "Edit Placement of a Part",
-                "ToolTip": "Move/Attach a Part in the assembly",
+        return {"MenuText": translate("Asm4_placePart", "Edit Placement of a Part"),
+                "ToolTip": translate("Asm4_placePart", "Move/Attach a Part in the assembly"),
                 "Pixmap" : os.path.join( Asm4.iconPath , 'Place_Link.svg')
                 }
 
@@ -66,21 +67,21 @@ class placeLinkCmd():
                 if Asm4.isAsm4EE(selection):
                     # BUGFIX: if the part was corrupted by Assembly4 v0.11.5:
                     if hasattr(selection,'MapMode'):
-                        Asm4.warningBox("This Part has the Attachment extension, it can only be placed manually")
+                        Asm4.warningBox(translate("Asm4_placePart", "This Part has the Attachment extension, it can only be placed manually"))
                     else:
                         # launch the UI in the task panel
                         ui = placeLinkUI()
                         Gui.Control.showDialog(ui)
                 # else try to convert it
                 else:
-                    convert = Asm4.confirmBox("This Part wasn't assembled with this Assembly4 WorkBench, but I can convert it.")
+                    convert = Asm4.confirmBox(translate("Asm4_placePart", "This Part wasn't assembled with this Assembly4 WorkBench, but I can convert it."))
                     if convert:
                         Asm4.makeAsmProperties( selection, reset=True )
                         # launch the UI in the task panel
                         ui = placeLinkUI()
                         Gui.Control.showDialog(ui)
             else:
-                Asm4.warningBox('Please select a link in the assembly Model.')
+                Asm4.warningBox(translate("Asm4_placePart", 'Please select a link in the assembly Model.'))
         else:
             # or any part that has a Placement ?
             if len(Gui.Selection.getSelection())==1:
@@ -105,7 +106,7 @@ class placeLinkCmd():
                                 Gui.Control.showDialog(ui)
                             # else try to convert it
                             else:
-                                convert = Asm4.confirmBox("This Part wasn't assembled with this Assembly4 WorkBench, but I can convert it.")
+                                convert = Asm4.confirmBox(translate("Asm4_placePart", "This Part wasn't assembled with this Assembly4 WorkBench, but I can convert it."))
                                 if convert:
                                     Asm4.makeAsmProperties( selection, reset=True )
                                     # launch the UI in the task panel
@@ -113,7 +114,7 @@ class placeLinkCmd():
                                     Gui.Control.showDialog(ui)
                         # the selected object doesn't belong to the root assembly
                         else:
-                            Asm4.warningBox('Please select an object in the assembly Model.')
+                            Asm4.warningBox(translate("Asm4_placePart", 'Please select an object in the assembly Model.'))
                             return
 
     

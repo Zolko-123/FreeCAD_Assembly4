@@ -13,6 +13,7 @@ from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
 from FreeCAD import Console as FCC
+from Asm4_Translate import _atr, QT_TRANSLATE_NOOP, translate
 
 import Asm4_libs as Asm4
 from placePartUI import placePartUI
@@ -67,7 +68,7 @@ class placeLinkUI():
             self.old_linkLCS = self.selectedObj.AttachedBy[1:]
         else:
             # this shouldn't happen
-            FCC.PrintWarning("WARNING : unsupported Assembly/Solver/Part combination, you shouldn't be seeing this\n")
+            FCC.PrintWarning(translate("Asm4_placePart", "WARNING : unsupported Assembly/Solver/Part combination, you shouldn't be seeing this\n"))
             Asm4.makeAsmProperties(self.selectedObj)
             self.old_AO = []
             self.old_linkLCS = ''
@@ -79,7 +80,7 @@ class placeLinkUI():
         self.form = QtGui.QWidget()
         iconFile = os.path.join( Asm4.iconPath , 'Place_Link.svg')
         self.form.setWindowIcon(QtGui.QIcon( iconFile ))
-        self.form.setWindowTitle('Place linked Part')
+        self.form.setWindowTitle(translate("Asm4_placePart", 'Place linked Part'))
         self.drawUI()
 
         #save original AttachmentOffset of linked part
@@ -237,7 +238,7 @@ class placeLinkUI():
             # highlight in the 3D window the object we placed
             self.finish()
         else:
-            FCC.PrintWarning("Problem in selections\n")
+            FCC.PrintWarning(translate("Asm4_placePart", "Problem in selections\n"))
             return
 
 
@@ -262,7 +263,7 @@ class placeLinkUI():
             # see whether the ExpressionEngine field is filled
             if self.selectedObj.ExpressionEngine :
                 # if yes, then ask for confirmation
-                confirmed = Asm4.confirmBox('This command will release all attachments on '+msgName+' and set it to manual positioning in its current location.')
+                confirmed = Asm4.confirmBox(translate("Asm4_placePart", 'This command will release all attachments on ')+msgName+translate("Asm4_placePart", ' and set it to manual positioning in its current location.'))
                 # if not, then it's useless to bother the user
             else:
                 confirmed = True
@@ -272,10 +273,10 @@ class placeLinkUI():
                 # reset the assembly properties
                 Asm4.makeAsmProperties( self.selectedObj, reset=True )
                 # finish
-                FCC.PrintMessage("Part is now manually placed\n")
+                FCC.PrintMessage(translate("Asm4_placePart", "Part is now manually placed\n"))
                 self.finish()
             else:
-                FCC.PrintMessage("Part untouched\n")
+                FCC.PrintMessage(translate("Asm4_placePart", "Part untouched\n"))
                 self.finish()
 
 
@@ -346,7 +347,7 @@ class placeLinkUI():
             self.rootAssembly.recompute(True)
             return True
         else:
-            FCC.PrintWarning("Problem in selections\n")
+            FCC.PrintWarning(translate("Asm4_placePart", "Problem in selections\n"))
             return False
 
 
@@ -664,10 +665,10 @@ class placeLinkUI():
         self.parentTable = []
         self.parentList.clear()
         self.parentTable.append( [] )
-        self.parentList.addItem('Please select')
+        self.parentList.addItem(translate("Asm4_placePart", 'Please select'))
         self.parentTable.append( self.rootAssembly )
         parentIcon = self.rootAssembly.ViewObject.Icon
-        self.parentList.addItem( parentIcon, 'Parent Assembly', self.rootAssembly )
+        self.parentList.addItem( parentIcon, translate("Asm4_placePart", 'Parent Assembly'), self.rootAssembly )
         # set the old position values
         self.XtranslSpinBox.setValue(self.old_LinkPosition[0])
         self.YtranslSpinBox.setValue(self.old_LinkPosition[1])
@@ -685,14 +686,14 @@ class placeLinkUI():
         # Selected Link (the name as seen in the tree of the selected link)
         self.linkName = QtGui.QLineEdit()
         self.linkName.setReadOnly(True)
-        self.formLayout.addRow(QtGui.QLabel('Selected Link :'),self.linkName)
+        self.formLayout.addRow(QtGui.QLabel(translate("Asm4_placePart", 'Selected Link :')),self.linkName)
 
         # combobox showing all available App::Link
         self.parentList = QtGui.QComboBox()
         self.parentList.setMaximumWidth(300)
-        self.parentList.setToolTip('Choose the part in which the attachment\ncoordinate system is to be found')
+        self.parentList.setToolTip(translate("Asm4_placePart", 'Choose the part in which the attachment\ncoordinate system is to be found'))
         # the parent assembly is hardcoded, and made the first real element
-        self.formLayout.addRow(QtGui.QLabel('Attach to :'),self.parentList)
+        self.formLayout.addRow(QtGui.QLabel(translate("Asm4_placePart", 'Attach to :')),self.parentList)
         self.mainLayout.addLayout(self.formLayout)
 
         # with 2 columns
@@ -702,31 +703,31 @@ class placeLinkUI():
         # Part, left side
         #
         # the document containing the linked part
-        self.leftLayout.addWidget(QtGui.QLabel("Linked Part :"))
+        self.leftLayout.addWidget(QtGui.QLabel(translate("Asm4_placePart", "Linked Part :")))
         self.linkedDoc = QtGui.QLineEdit()
         self.linkedDoc.setReadOnly(True)
         self.leftLayout.addWidget(self.linkedDoc)
 
         # The list of all LCS in the part is a QListWidget
-        self.leftLayout.addWidget(QtGui.QLabel("Select LCS in Part :"))
+        self.leftLayout.addWidget(QtGui.QLabel(translate("Asm4_placePart", "Select LCS in Part :")))
         self.partLCSlist = QtGui.QListWidget(self.form)
         self.partLCSlist.setMinimumHeight(200)
-        self.partLCSlist.setToolTip('Select a coordinate system from the list')
+        self.partLCSlist.setToolTip(translate("Asm4_placePart", 'Select a coordinate system from the list'))
         self.leftLayout.addWidget(self.partLCSlist)
 
         # Assembly, Right side
         #
         # the document containing the linked object
-        self.rightLayout.addWidget(QtGui.QLabel("Parent Part :"))
+        self.rightLayout.addWidget(QtGui.QLabel(translate("Asm4_placePart", "Parent Part :")))
         self.parentDoc = QtGui.QLineEdit()
         self.parentDoc.setReadOnly(True)
         self.rightLayout.addWidget(self.parentDoc)
         # The list of all attachment LCS in the assembly is a QListWidget
         # it is populated only when the parent combo-box is activated
-        self.rightLayout.addWidget(QtGui.QLabel("Select LCS in Parent :"))
+        self.rightLayout.addWidget(QtGui.QLabel(translate("Asm4_placePart", "Select LCS in Parent :")))
         self.attLCSlist = QtGui.QListWidget(self.form)
         self.attLCSlist.setMinimumHeight(200)
-        self.attLCSlist.setToolTip('Select a coordinate system from the list')
+        self.attLCSlist.setToolTip(translate("Asm4_placePart", 'Select a coordinate system from the list'))
         self.rightLayout.addWidget(self.attLCSlist)
 
         # add the 2 columns
@@ -739,13 +740,13 @@ class placeLinkUI():
 
         # X Translation Value
         self.XoffsetLayout = QtGui.QHBoxLayout()
-        self.XtranslSpinBoxLabel = self.XoffsetLayout.addWidget(QtGui.QLabel("X Translation :"))
+        self.XtranslSpinBoxLabel = self.XoffsetLayout.addWidget(QtGui.QLabel(translate("Asm4_placePart", "X Translation :")))
         self.XtranslSpinBox = Asm4.QUnitSpinBox()
         self.XtranslSpinBox.setRange(-999999.00, 999999.00)
         self.XtranslSpinBox.setDecimals(numberOfDecimals)
-        self.XtranslSpinBox.setToolTip("Translation along X axis")
-        self.RotXButton = QtGui.QPushButton('Rotate X +90°')
-        self.RotXButton.setToolTip("Rotate 90 deg around X axis")
+        self.XtranslSpinBox.setToolTip(translate("Asm4_placePart", "Translation along X axis"))
+        self.RotXButton = QtGui.QPushButton(translate("Asm4_placePart", 'Rotate X +90°'))
+        self.RotXButton.setToolTip(translate("Asm4_placePart", "Rotate 90 deg around X axis"))
         # add the QLDoubleSpinBox
         self.XoffsetLayout.addWidget(self.XtranslSpinBox)
         self.XoffsetLayout.addStretch()
@@ -754,13 +755,13 @@ class placeLinkUI():
 
         # Y Translation Value
         self.YoffsetLayout = QtGui.QHBoxLayout()
-        self.YtranslSpinBoxLabel = self.YoffsetLayout.addWidget(QtGui.QLabel("Y Translation :"))
+        self.YtranslSpinBoxLabel = self.YoffsetLayout.addWidget(QtGui.QLabel(translate("Asm4_placePart", "Y Translation :")))
         self.YtranslSpinBox = Asm4.QUnitSpinBox()
         self.YtranslSpinBox.setRange(-999999.00, 999999.00)
         self.YtranslSpinBox.setDecimals(numberOfDecimals)
-        self.YtranslSpinBox.setToolTip("Translation along Y")
-        self.RotYButton = QtGui.QPushButton('Rotate Y +90°')
-        self.RotYButton.setToolTip("Rotate 90 deg around Y axis")
+        self.YtranslSpinBox.setToolTip(translate("Asm4_placePart", "Translation along Y"))
+        self.RotYButton = QtGui.QPushButton(translate("Asm4_placePart", 'Rotate Y +90°'))
+        self.RotYButton.setToolTip(translate("Asm4_placePart", "Rotate 90 deg around Y axis"))
         # add the QLDoubleSpinBox
         self.YoffsetLayout.addWidget(self.YtranslSpinBox)
         self.YoffsetLayout.addStretch()
@@ -769,13 +770,13 @@ class placeLinkUI():
 
         # Z Translation Value
         self.ZoffsetLayout = QtGui.QHBoxLayout()
-        self.ZtranslSpinBoxLabel = self.ZoffsetLayout.addWidget(QtGui.QLabel("Z Translation :"))
+        self.ZtranslSpinBoxLabel = self.ZoffsetLayout.addWidget(QtGui.QLabel(translate("Asm4_placePart", "Z Translation :")))
         self.ZtranslSpinBox = Asm4.QUnitSpinBox()
         self.ZtranslSpinBox.setRange(-999999.00, 999999.00)
         self.ZtranslSpinBox.setDecimals(numberOfDecimals)
-        self.ZtranslSpinBox.setToolTip("Translation along Z:")
-        self.RotZButton = QtGui.QPushButton('Rotate Z +90°')
-        self.RotZButton.setToolTip("Rotate 90 deg around Z axis")
+        self.ZtranslSpinBox.setToolTip(translate("Asm4_placePart", "Translation along Z:"))
+        self.RotZButton = QtGui.QPushButton(translate("Asm4_placePart", 'Rotate Z +90°'))
+        self.RotZButton.setToolTip(translate("Asm4_placePart", "Rotate 90 deg around Z axis"))
         # add to the layout
         self.ZoffsetLayout.addWidget(self.ZtranslSpinBox)
         self.ZoffsetLayout.addStretch()

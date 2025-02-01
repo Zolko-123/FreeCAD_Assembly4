@@ -13,6 +13,7 @@ from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
 import Part
+from Asm4_Translate import _atr, QT_TRANSLATE_NOOP, translate
 
 import Asm4_libs as Asm4
 
@@ -31,8 +32,8 @@ class releaseAttachment:
 
 
     def GetResources(self):
-        return {"MenuText": "Release from Attachment",
-                "ToolTip": "Release an object from all attachments to any geometry",
+        return {"MenuText": translate("Asm4_releaseAttachment", "Release from Attachment"),
+                "ToolTip": translate("Asm4_releaseAttachment", "Release an object from all attachments to any geometry"),
                 "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_releaseAttachment.svg')
                 }
 
@@ -75,8 +76,7 @@ class releaseAttachment:
         objType  = selectedObj.TypeId
 
         # ask for confirmation before resetting everything
-        confirmText = 'This command will release all attachments on '+Asm4.labelName(selectedObj) \
-                    +' and set it to manual positioning in its current location.'
+        confirmText = translate("Asm4_releaseAttachment", 'This command will release all attachments on ')+Asm4.labelName(selectedObj) + translate("Asm4_releaseAttachment", ' and set it to manual positioning in its current location.')
         if not Asm4.confirmBox(confirmText):
             # don't do anything
             return

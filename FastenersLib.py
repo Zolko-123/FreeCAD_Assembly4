@@ -61,31 +61,31 @@ class insertFastener:
         # Screw
         if  self.FSclass      == 'Screw':
             self.menutext     = translate("Fasteners", "Insert Screw")
-            self.tooltip      = "<p>Insert a Screw into the Assembly</p>"
-            self.tooltip     += "<p>If another fastener is selected, a new fastener of the same type is created in the same assembly."
-            self.tooltip     += "If an axis or LCS is selected, the new fastener will be attached to it."
-            self.tooltip     += "If an assembly is selected, the new fastener will be inside that assembly.</p>"
+            self.tooltip      = translate("Fasteners", "<p>Insert a Screw into the Assembly</p>"
+            + "<p>If another fastener is selected, a new fastener of the same type is created in the same assembly."
+            + "If an axis or LCS is selected, the new fastener will be attached to it."
+            + "If an assembly is selected, the new fastener will be inside that assembly.</p>")
             self.icon         = os.path.join( Asm4.iconPath , 'Asm4_Screw.svg')
         # Nut
         elif self.FSclass     == 'Nut':
             self.menutext     = translate("Fasteners", "Insert Nut")
-            self.tooltip      = "<p>Insert a Nut into the Assembly</p>"
-            self.tooltip     += "<p>If another fastener is selected, a new fastener of the same type is created in the same assembly."
-            self.tooltip     += "If an axis or LCS is selected, the new fastener will be attached to it."
-            self.tooltip     += "If an assembly is selected, the new fastener will be inside that assembly.</p>"
+            self.tooltip      = translate("Fasteners", "<p>Insert a Nut into the Assembly</p>"
+            + "<p>If another fastener is selected, a new fastener of the same type is created in the same assembly."
+            + "If an axis or LCS is selected, the new fastener will be attached to it."
+            + "If an assembly is selected, the new fastener will be inside that assembly.</p>")
             self.icon         = os.path.join( Asm4.iconPath , 'Asm4_Nut.svg')
         # Washer
         elif self.FSclass     == 'Washer':
             self.menutext     = translate("Fasteners", "Insert Washer")
-            self.tooltip      = "<p>Insert a Washer into the Assembly</p>"
-            self.tooltip     += "<p>If another fastener is selected, a new fastener of the same type is created in the same assembly."
-            self.tooltip     += "If an axis or LCS is selected, the new fastener will be attached to it."
-            self.tooltip     += "If an assembly is selected, the new fastener will be inside that assembly.</p>"
+            self.tooltip      = translate("Fasteners", "<p>Insert a Washer into the Assembly</p>"
+            + "<p>If another fastener is selected, a new fastener of the same type is created in the same assembly."
+            + "If an axis or LCS is selected, the new fastener will be attached to it."
+            + "If an assembly is selected, the new fastener will be inside that assembly.</p>")
             self.icon         = os.path.join( Asm4.iconPath , 'Asm4_Washer.svg')
         # Threaded Rod (makes errors)
         elif self.FSclass     == 'ThreadedRod':
             self.menutext     = translate("Fasteners", "Insert threaded rod")
-            self.tooltip      = "Insert threaded rod"
+            self.tooltip      = translate("Fasteners", "Insert threaded rod")
             self.icon         = os.path.join( Asm4.iconPath , 'Asm4_Rod.svg')
 
 
@@ -130,7 +130,7 @@ class insertFastener:
                         fsType    = selObj.type
                         container = selObj.getParentGeoFeatureGroup()
                 except:
-                    FCC.PrintMessage("Selected object doesn't seem to be a valid fastener, ignoring\n")
+                    FCC.PrintMessage(translate("Fasteners", "Selected object doesn't seem to be a valid fastener, ignoring\n"))
             # if it's a datum we place the fasteners on it
             elif selObj.TypeId in Asm4.datumTypes:
                 # the datum is in the same document
@@ -222,8 +222,8 @@ class changeFSparametersCmd():
         super(changeFSparametersCmd,self).__init__()
 
     def GetResources(self):
-        return {"MenuText": "Change Fastener parameters",
-                "ToolTip": "Change Fastener parameters",
+        return {"MenuText": translate("Fasteners", "Change Fastener parameters"),
+                "ToolTip": translate("Fasteners", "Change Fastener parameters"),
                 "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_FSparams.svg')
                 }
 
@@ -290,8 +290,8 @@ class cloneFastenersToAxesCmd():
         super(cloneFastenersToAxesCmd,self).__init__()
     
     def GetResources(self):
-        return {"MenuText": "Clone Fastener to Axes",
-                "ToolTip": "Clone Fastener to Axes",
+        return {"MenuText": translate("Fasteners", "Clone Fastener to Axes"),
+                "ToolTip": translate("Fasteners", "Clone Fastener to Axes"),
                 "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_cloneFasteners.svg')
                 }
     

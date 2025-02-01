@@ -32,6 +32,7 @@ import base64
 
 from PySide import QtGui, QtCore
 from pivy import coin
+from Asm4_Translate import _atr, QT_TRANSLATE_NOOP
 
 import FreeCADGui as Gui
 import FreeCAD as App
@@ -93,8 +94,8 @@ class MeasureCmd():
         super(MeasureCmd,self).__init__()
 
     def GetResources(self):
-        return {"MenuText": "Measure",
-                "ToolTip": "Measure Tool",
+        return {"MenuText": App.Qt.translate("Asm4", "Measure"),
+                "ToolTip": App.Qt.translate("Asm4", "Measure Tool"),
                 "Pixmap" : os.path.join( iconDir , 'Part_Measure.svg')
                 }
 
@@ -121,7 +122,7 @@ class MeasureUI():
         self.form = self.base
         iconFile = os.path.join( iconDir , 'Part_Measure.svg')
         self.form.setWindowIcon(QtGui.QIcon( iconFile ))
-        self.form.setWindowTitle('Measure')
+        self.form.setWindowTitle(App.Qt.translate("Asm4", 'Measure'))
 
         # remove selectionFilter
         global Asm4_3DselObserver
@@ -285,7 +286,7 @@ class MeasureUI():
 
         # the layout for the main window is vertical (top to down)
         self.mainLayout = QtGui.QVBoxLayout(self.form)
-        self.mainLayout.addWidget(QtGui.QLabel('Controls'))
+        self.mainLayout.addWidget(QtGui.QLabel(_atr("Asm4_Measure", 'Controls')))
 
         # measurement type
         self.measureGroup = QtGui.QFrame(self.form)
@@ -298,7 +299,7 @@ class MeasureUI():
         pm.loadFromData(base64.b64decode(Dim_Radius_b64))
         self.rbRadius = QtGui.QRadioButton(self.measureGroup)
         self.rbRadius.setObjectName("rbRadius")
-        self.rbRadius.setToolTip("Measure Radius of Arc or Circle\nMeasure Length of Edge")
+        self.rbRadius.setToolTip(_atr("Asm4_Measure", "Measure Radius of Arc or Circle\nMeasure Length of Edge"))
         self.rbRadius.setIconSize(QtCore.QSize(btn_md_sizeX,btn_md_sizeY))
         self.rbRadius.setIcon(QtGui.QIcon(pm))
         self.rbRadius.setChecked(True)
@@ -307,7 +308,7 @@ class MeasureUI():
         pm.loadFromData(base64.b64decode(Dim_Length_b64))
         self.rbDistance = QtGui.QRadioButton(self.measureGroup)
         self.rbDistance.setObjectName("rbDistance")
-        self.rbDistance.setToolTip("Measure Distance")
+        self.rbDistance.setToolTip(_atr("Asm4_Measure", "Measure Distance"))
         self.rbDistance.setIconSize(QtCore.QSize(btn_md_sizeX,btn_md_sizeY))
         self.rbDistance.setIcon(QtGui.QIcon(pm))
         self.measureGrid.addWidget(self.rbDistance, 0, 1 )
@@ -315,7 +316,7 @@ class MeasureUI():
         pm.loadFromData(base64.b64decode(Dim_Angle_b64))
         self.rbAngle = QtGui.QRadioButton(self.measureGroup)
         self.rbAngle.setObjectName("rbAngle")
-        self.rbAngle.setToolTip("Measure Angle")
+        self.rbAngle.setToolTip(_atr("Asm4_Measure", "Measure Angle"))
         self.rbAngle.setIconSize(QtCore.QSize(btn_md_sizeX,btn_md_sizeY))
         self.rbAngle.setIcon(QtGui.QIcon(pm))
         self.measureGrid.addWidget(self.rbAngle, 0, 2 )
@@ -333,7 +334,7 @@ class MeasureUI():
         pm.loadFromData(base64.b64decode(Snap_Options_b64))
         self.rbSnap = QtGui.QRadioButton(self.snapGroup)
         self.rbSnap.setObjectName("rbSnap")
-        self.rbSnap.setToolTip("Snap to EndPoint, MiddlePoint, Center")
+        self.rbSnap.setToolTip(_atr("Asm4_Measure", "Snap to EndPoint, MiddlePoint, Center"))
         self.rbSnap.setIconSize(QtCore.QSize(3*btn_md_sizeX,btn_md_sizeY))
         self.rbSnap.setIcon(QtGui.QIcon(pm))
         self.rbSnap.setChecked(False)
@@ -343,7 +344,7 @@ class MeasureUI():
         pm.loadFromData(base64.b64decode(Center_Mass_b64))
         self.rbShape = QtGui.QRadioButton(self.snapGroup)
         self.rbShape.setObjectName("rbShape")
-        self.rbShape.setToolTip("Select Shape")
+        self.rbShape.setToolTip(_atr("Asm4_Measure", "Select Shape"))
         self.rbShape.setIconSize(QtCore.QSize(btn_md_sizeX,btn_md_sizeY))
         self.rbShape.setIcon(QtGui.QIcon(pm))
         self.rbShape.setChecked(True)
@@ -425,7 +426,7 @@ class MeasureUI():
         self.selectGrid = QtGui.QGridLayout()
         # first element
         self.Selection1 = QtGui.QPushButton('Selection 1')
-        self.Selection1.setToolTip("Select First Element")
+        self.Selection1.setToolTip(_atr("Asm4_Measure", "Select First Element"))
         self.Selection1.setMaximumWidth(150)
         self.Selection1.setCheckable(True)
         self.Selection1.setChecked(False)
@@ -443,8 +444,8 @@ class MeasureUI():
         self.selectGrid.addWidget(self.sel1Icon,   0,2)
 
         # second element
-        self.Selection2 = QtGui.QPushButton('Selection 2')
-        self.Selection2.setToolTip("Select Second Element")
+        self.Selection2 = QtGui.QPushButton(_atr("Asm4_Measure", 'Selection 2'))
+        self.Selection2.setToolTip(_atr("Asm4_Measure", "Select Second Element"))
         self.Selection2.setMaximumWidth(150)
         self.Selection2.setEnabled(False)
         self.Selection2.setChecked(False)
@@ -467,21 +468,21 @@ class MeasureUI():
         # draw annotation in the GUI window
         self.bLabel = QtGui.QCheckBox()
         self.bLabel.setObjectName("bLabel")
-        self.bLabel.setToolTip("Enable extra Label")
-        self.bLabel.setText("Show Label in 3D view")
+        self.bLabel.setToolTip(_atr("Asm4_Measure", "Enable extra Label"))
+        self.bLabel.setText(_atr("Asm4_Measure", "Show Label in 3D view"))
         self.bLabel.setChecked(True)
         self.mainLayout.addWidget(self.bLabel)
 
         # draw X-Y-Z components
         self.Components = QtGui.QCheckBox()
         self.Components.setObjectName("Components")
-        self.Components.setToolTip("Show all dimension components")
-        self.Components.setText("Show Components")
+        self.Components.setToolTip(_atr("Asm4_Measure", "Show all dimension components"))
+        self.Components.setText(_atr("Asm4_Measure", "Show Components"))
         self.Components.setChecked(False)
         self.mainLayout.addWidget(self.Components)
 
         # Results
-        self.mainLayout.addWidget(QtGui.QLabel('Results'))
+        self.mainLayout.addWidget(QtGui.QLabel(_atr("Asm4_Measure", 'Results')))
         self.resultText = QtGui.QTextEdit()
         self.resultText.setMinimumSize(200, 200)
         self.resultText.setReadOnly(True)
@@ -644,7 +645,7 @@ class selectionObserver():
                                 # a straight line segment
                                 #elif hasattr(self.Shp1,'Curve') and self.Shp1.Curve.TypeId=='Part::GeomLine':
                                 elif self.isSegment(self.Shp1):
-                                    taskUI.sel1Name.setText('Segment')
+                                    taskUI.sel1Name.setText(_atr("Asm4_Measure", 'Segment'))
                                     self.measureLine( self.Shp1 )
                                 # dunno what that stuff is
                                 else:
@@ -787,7 +788,7 @@ class selectionObserver():
             dy = pt1[1]-pt2[1]
             dz = pt1[2]-pt2[2]
             length = line.Length
-            text = 'Length = '+self.render_distance(length)+'\n'
+            text = _atr("Asm4_Measure", 'Length = ')+self.render_distance(length)+'\n'
             text += "ΔX = "+self.render_distance(dx)+"\n"
             text += 'ΔY = '+self.render_distance(dy)+'\n'
             text += 'ΔZ = '+self.render_distance(dz)
@@ -815,7 +816,7 @@ class selectionObserver():
             dy = pt1[1]-pt2[1]
             dz = pt1[2]-pt2[2]
             dist = math.sqrt(dx*dx + dy*dy + dz*dz)
-            text = 'Distance = '+self.render_distance(dist)+'\n'
+            text = _atr("Asm4_Measure", 'Distance = ')+self.render_distance(dist)+'\n'
             text += "ΔX : "+self.render_distance(dx)+"\n"
             text += 'ΔY : '+self.render_distance(dy)+'\n'
             text += 'ΔZ : '+self.render_distance(dz)
@@ -840,12 +841,12 @@ class selectionObserver():
             axis   = circle.Curve.Axis
             Gui.Selection.clearSelection()
             self.drawCircle( radius, center, axis )
-            text = 'Radius : '+self.render_distance(radius)+"\n"
+            text = _atr("Asm4_Measure", 'Radius : ')+self.render_distance(radius)+"\n"
             # if annotation is checked, show label with R = radius
-            text += "Diameter : "+self.render_distance(radius*2)+"\n"
-            text += 'Center : \n'
+            text += _atr("Asm4_Measure", "Diameter : ")+self.render_distance(radius*2)+"\n"
+            text += _atr("Asm4_Measure", 'Center : \n')
             text += '  ( '+self.arrondi(center.x)+", "+self.arrondi(center.y)+", "+self.arrondi(center.z)+" )\n"
-            text += 'Axis : \n'
+            text += _atr("Asm4_Measure", 'Axis : \n')
             text += "  ( "+self.arrondi(axis.x)+", "+self.arrondi(axis.y)+", "+self.arrondi(axis.z)+" )"
             self.printResult(text)
             if taskUI.bLabel.isChecked():
@@ -915,7 +916,7 @@ class selectionObserver():
         if point:
             #self.printResult( 'Measuring coordinates of\n'+str(vertex) )
             anno = ['Coordinates :', 'X : '+self.arrondi(point.x), 'Y : '+self.arrondi(point.y), 'Z : '+self.arrondi(point.z)]
-            text =  'Coordinates :\n'
+            text =  _atr("Asm4_Measure", 'Coordinates :\n')
             text += "X : "+str(point.x)+"\n"
             text += 'Y : '+str(point.y)+'\n'
             text += 'Z : '+str(point.z)
@@ -935,16 +936,16 @@ class selectionObserver():
 
 
     def printDims(self, ds, dx, dy, dz, dimType='Distance'):
-        text = dimType+' : '+str(ds)
+        text = _atr("Asm4_Measure", dimType)+' : '+str(ds)
         text += "\nΔX = "+str(dx)+"\nΔY = "+str(dy)+"\nΔZ = "+str(dz)
         self.printResult(text)
 
     def printAngle(self, angle, distance=-1 ):
         global taskUI
         taskUI.resultText.clear()
-        text = 'Angle : '+str(angle)+'°\n'
+        text = _atr("Asm4_Measure", 'Angle : ')+str(angle)+'°\n'
         if distance != -1:
-            text += 'Distance // '+str(distance)
+            text += _atr("Asm4_Measure", 'Distance // ')+str(distance)
         taskUI.resultText.setPlainText(text)
 
     # print the result in the text field of the UI
@@ -1036,7 +1037,7 @@ class selectionObserver():
         if distance == -1 or taskUI.Components.isChecked()==False :
             anno.LabelText = [self.arrondi(angle)+'°']
         else:
-            anno.LabelText = ['Angle: '+self.arrondi(angle)+'°', 'Distance // '+self.arrondi(distance)]
+            anno.LabelText = [_atr("Asm4_Measure", 'Angle: ')+self.arrondi(angle)+'°', _atr("Asm4_Measure", 'Distance // ')+self.arrondi(distance)]
         annoG = Gui.ActiveDocument.getObject(anno.Name)
         annoG.FontSize = annoFontSize
         self.addToDims(anno)
