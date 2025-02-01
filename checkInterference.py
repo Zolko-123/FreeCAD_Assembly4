@@ -13,6 +13,7 @@ import math
 import logging
 import time
 from timeit import default_timer as timer
+from Asm4_Translate import _atr, QT_TRANSLATE_NOOP
 
 from PySide import QtGui, QtCore
 
@@ -30,8 +31,8 @@ class checkInterference:
 
 
     def GetResources(self):
-        menutext = "Check Intereferences"
-        tooltip  = "Check interferences among assembled objects (may take time)"
+        menutext = _atr("Asm4_checkInterference", "Check Intereferences")
+        tooltip  = _atr("Asm4_checkInterference", "Check interferences among assembled objects (may take time)")
         iconFile = os.path.join(Asm4.iconPath, 'Asm4_Interference_Check.svg')
         return {
             "MenuText": menutext,
@@ -482,7 +483,7 @@ class checkInterference:
         self.processing = False
         self.abort_processing = False
         self.enable_elements(True)
-        self.cancel_abort_button.setText("Close")
+        self.cancel_abort_button.setText(_atr("Asm4", "Close"))
         self.Assembly.recompute()
 
 
@@ -505,7 +506,7 @@ class checkInterference:
         self.log_clear()
         self.log_number_of_objects()
         self.log_number_of_comparisons()
-        self.cancel_abort_button.setText("Close")
+        self.cancel_abort_button.setText(_atr("Asm4", "Close"))
         self.Assembly.Visibility = True
 
 
@@ -551,16 +552,16 @@ class checkInterference:
     def drawUI(self):
 
         # Main Window (QDialog)
-        self.UI.setWindowTitle('Interference Checks')
+        self.UI.setWindowTitle(_atr("Asm4_checkInterference", 'Interference Checks'))
         self.UI.setWindowIcon(QtGui.QIcon(os.path.join(Asm4.iconPath , 'FreeCad.svg')))
         self.UI.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         self.UI.setModal(False)
         self.main_layout = QtGui.QVBoxLayout(self.UI)
 
         # Checkboxes
-        self.touching_faces_checkbox = QtGui.QCheckBox("Allow faces touching")
-        self.include_fasteners_checkbox = QtGui.QCheckBox("Include fasteners")
-        self.verbose_checkbox = QtGui.QCheckBox("Verbose")
+        self.touching_faces_checkbox = QtGui.QCheckBox(_atr("Asm4_checkInterference", "Allow faces touching"))
+        self.include_fasteners_checkbox = QtGui.QCheckBox(_atr("Asm4_checkInterference", "Include fasteners"))
+        self.verbose_checkbox = QtGui.QCheckBox(_atr("Asm4_checkInterference", "Verbose"))
         self.touching_faces_checkbox.setChecked(True)
         self.include_fasteners_checkbox.setChecked(False)
         self.verbose_checkbox.setChecked(False)
@@ -569,7 +570,7 @@ class checkInterference:
         self.verbose_checkbox.stateChanged.connect(self.on_verbosity)
 
         self.form_layout = QtGui.QFormLayout()
-        self.min_volume_label = QtGui.QLabel("Minimum interference volume:")
+        self.min_volume_label = QtGui.QLabel(_atr("Asm4_checkInterference", "Minimum interference volume:"))
         self.min_volume_input = QtGui.QLineEdit()
         self.min_volume_input.setFixedWidth(10)
         self.min_volume_input.setText(str(self.min_volume_allowed))
@@ -615,19 +616,19 @@ class checkInterference:
         self.button_layout = QtGui.QHBoxLayout()
 
         # Delete Interferences folder
-        self.clear_button = QtGui.QPushButton('Clear Checks')
+        self.clear_button = QtGui.QPushButton(_atr("Asm4_checkInterference", 'Clear Checks'))
         self.clear_button.setDefault(True)
         self.button_layout.addWidget(self.clear_button)
         self.main_layout.addLayout(self.button_layout)
 
         # Start button
-        self.check_button = QtGui.QPushButton('Check Interferences')
+        self.check_button = QtGui.QPushButton(_atr("Asm4_checkInterference", 'Check Interferences'))
         self.check_button.setDefault(True)
         self.button_layout.addWidget(self.check_button)
         self.main_layout.addLayout(self.button_layout)
 
         # Cancel button
-        self.cancel_abort_button = QtGui.QPushButton('Close')
+        self.cancel_abort_button = QtGui.QPushButton(_atr("Asm4_checkInterference", 'Close'))
         self.cancel_abort_button.setDefault(True)
         self.button_layout.addWidget(self.cancel_abort_button)
         self.main_layout.addLayout(self.button_layout)

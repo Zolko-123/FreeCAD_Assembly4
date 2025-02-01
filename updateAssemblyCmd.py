@@ -10,6 +10,7 @@ from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
 import Part
+from Asm4_Translate import _atr, QT_TRANSLATE_NOOP, translate
 
 import Asm4_libs as Asm4
 
@@ -18,8 +19,8 @@ import Asm4_libs as Asm4
 class updateAssembly:
 
     def GetResources(self):
-        return {"MenuText": "Solve and Update Assembly",
-                "ToolTip": "Update Assembly",
+        return {"MenuText": translate("Asm4_updateAssembly", "Solve and Update Assembly"),
+                "ToolTip": translate("Asm4_updateAssembly", "Update Assembly"),
                 "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_Solver.svg')
                 }
 

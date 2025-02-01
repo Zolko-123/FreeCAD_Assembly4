@@ -13,6 +13,7 @@ from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
 from FreeCAD import Console as FCC
+from Asm4_Translate import _atr, QT_TRANSLATE_NOOP, translate
 
 import Asm4_libs as Asm4
 
@@ -32,36 +33,36 @@ class newDatum:
         self.containers = [ 'App::Part', 'PartDesign::Body', 'App::DocumentObjectGroup']
         if self.datumName   == 'Point':
             self.datumType   = 'PartDesign::Point'
-            self.menutext    = "New Point"
-            self.tooltip     = "Create a new Datum Point in a Part"
+            self.menutext    = translate("Asm4_createDatum", "New Point")
+            self.tooltip     = translate("Asm4_createDatum", "Create a new Datum Point in a Part")
             self.icon        = os.path.join( Asm4.iconPath , 'Asm4_Point.svg')
             self.datumColor  = (0.00,0.00,0.00)
             self.datumAlpha  = []
         elif self.datumName == 'Axis':
             self.datumType   = 'PartDesign::Line'
-            self.menutext    = "New Axis"
-            self.tooltip     = "Create a new Datum Axis in a Part"
+            self.menutext    = translate("Asm4_createDatum", "New Axis")
+            self.tooltip     = translate("Asm4_createDatum", "Create a new Datum Axis in a Part")
             self.icon        = os.path.join( Asm4.iconPath , 'Asm4_Axis.svg')
             self.datumColor  = (0.00,0.00,0.50)
             self.datumAlpha  = []
         elif self.datumName == 'Plane':
             self.datumType   = 'PartDesign::Plane'
-            self.menutext    = "New Plane"
-            self.tooltip     = "Create a new Datum Plane in a Part"
+            self.menutext    = translate("Asm4_createDatum", "New Plane")
+            self.tooltip     = translate("Asm4_createDatum", "Create a new Datum Plane in a Part")
             self.icon        = os.path.join( Asm4.iconPath , 'Asm4_Plane.svg')
             self.datumColor  = (0.50,0.50,0.50)
             self.datumAlpha  = 80
         elif self.datumName == 'LCS':
             self.datumType   = 'PartDesign::CoordinateSystem'
-            self.menutext    = "New Coordinate System"
-            self.tooltip     = "Create a new Coordinate System in a Part"
+            self.menutext    = translate("Asm4_createDatum", "New Coordinate System")
+            self.tooltip     = translate("Asm4_createDatum", "Create a new Coordinate System in a Part")
             self.icon        = os.path.join( Asm4.iconPath , 'Asm4_CoordinateSystem.svg')
             self.datumColor  = []
             self.datumAlpha  = []
         elif self.datumName == 'Sketch':
             self.datumType   = 'Sketcher::SketchObject'
-            self.menutext    = "New Sketch"
-            self.tooltip     = "Create a new Sketch in a Part"
+            self.menutext    = translate("Asm4_createDatum", "New Sketch")
+            self.tooltip     = translate("Asm4_createDatum", "Create a new Sketch in a Part")
             self.icon        = os.path.join( Asm4.iconPath , 'Asm4_Sketch.svg')
             self.datumColor  = []
             self.datumAlpha  = []
@@ -127,7 +128,7 @@ class newDatum:
             parentContainer = Asm4.getAssembly()
         # something went wrong
         else:
-            Asm4.warningBox("Can't create a "+self.datumType+" with the current selections")
+            Asm4.warningBox(translate("Asm4_createDatum", "I can't create a ")+self.datumType+translate("Asm4_createDatum", " with the current selections"))
             
         # check whether there is already a similar datum, and increment the instance number 
         # instanceNum = 1
@@ -172,8 +173,8 @@ class newDatum:
 """
 class newHole:
     def GetResources(self):
-        return {"MenuText": "New Hole Axis",
-                "ToolTip": "Create a Datum Axis attached to a hole",
+        return {"MenuText": translate("Asm4_createDatum", "New Hole Axis"),
+                "ToolTip": translate("Asm4_createDatum", "Create a Datum Axis attached to a hole"),
                 "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_Hole.svg')
                 }
 
@@ -237,7 +238,7 @@ class newHole:
                     parentPart.recompute()
             # 
             else:
-                FCC.PrintMessage('Datum objects can only be created inside Part or Body containers')
+                FCC.PrintMessage(translate("Asm4_createDatum", 'Datum objects can only be created inside Part or Body containers'))
 
 
 

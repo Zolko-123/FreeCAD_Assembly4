@@ -12,6 +12,7 @@ from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
 from FreeCAD import Console as FCC
+from Asm4_Translate import _atr, QT_TRANSLATE_NOOP
 
 import Asm4_libs as Asm4
 
@@ -77,8 +78,8 @@ class applyConfigurationCmd:
         super(applyConfigurationCmd,self).__init__()
 
     def GetResources(self):
-        return {"MenuText": "Apply configuration",
-                "ToolTip": "Applies selected configuration\nConfigurations allow to set visibilities and offsets of parts",
+        return {"MenuText": _atr("Asm4_Configurations", "Apply configuration"),
+                "ToolTip": _atr("Asm4_Configurations", "Applies selected configuration\nConfigurations allow to set visibilities and offsets of parts"),
                 "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_applyConfig.svg')
                 }
 
@@ -108,8 +109,8 @@ class openConfigurationsCmd:
         super(openConfigurationsCmd,self).__init__()
 
     def GetResources(self):
-        return {"MenuText": "Open configurations panel",
-                "ToolTip": "Configurations allow to set visibilities and offsets of parts",
+        return {"MenuText": _atr("Asm4_Configurations", "Open configurations panel"),
+                "ToolTip": _atr("Asm4_Configurations", "Configurations allow to set visibilities and offsets of parts"),
                 "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_Configurations.svg')
                 }
 
@@ -130,7 +131,7 @@ class openConfigurationsUI():
         self.form = QtGui.QWidget()
         iconFile = os.path.join( Asm4.iconPath , 'Asm4_Variables.svg')
         self.form.setWindowIcon(QtGui.QIcon( iconFile ))
-        self.form.setWindowTitle('Assembly Configurations')
+        self.form.setWindowTitle(_atr("Asm4_Configurations", 'Assembly Configurations'))
 
         # draw the GUI, objects are defined later down
         self.drawUI()
@@ -162,7 +163,7 @@ class openConfigurationsUI():
     def Restore(self):
         selectedItems = self.configList.selectedItems()
         if len(selectedItems) != 1:
-            Asm4.warningBox('Please select a configuration in the list')
+            Asm4.warningBox(_atr("Asm4_Configurations", 'Please select a configuration in the list'))
             return
         confName = self.configList.currentItem().name
         restoreConfiguration(confName)
@@ -174,7 +175,7 @@ class openConfigurationsUI():
             confName = self.configList.currentItem().name
             conf = getConfig(confName)
             if isAsm4Config(conf):
-                confirm = Asm4.confirmBox('This will delete configuration "' + confName + '"?')
+                confirm = Asm4.confirmBox(_atr("Asm4_Configurations", 'This will delete configuration "') + confName + '"?')
                 if confirm:
                     App.ActiveDocument.removeObject(confName)
                 else:
@@ -236,21 +237,21 @@ class openConfigurationsUI():
         self.mainLayout = QtGui.QVBoxLayout(self.form)
 
         # List of configurations
-        self.mainLayout.addWidget(QtGui.QLabel("Available configurations:"))
+        self.mainLayout.addWidget(QtGui.QLabel(_atr("Asm4_Configurations", "Available configurations:")))
         self.configList = QtGui.QListWidget()
         self.configList.setMinimumHeight(100)
         self.mainLayout.addWidget(self.configList)
         # Descriptions
-        self.mainLayout.addWidget(QtGui.QLabel("Description:"))
+        self.mainLayout.addWidget(QtGui.QLabel(_atr("Asm4_Configurations", "Description:")))
         self.configDescription = QtGui.QTextEdit()
         self.configDescription.setMinimumHeight(100)
         self.configDescription.setReadOnly(True)
         self.mainLayout.addWidget(self.configDescription)
         # Buttons
         self.buttonLayout = QtGui.QHBoxLayout()
-        self.newButton = QtGui.QPushButton('New')
-        self.deleteButton = QtGui.QPushButton('Delete')
-        self.overwriteButton = QtGui.QPushButton('Overwrite')
+        self.newButton = QtGui.QPushButton(_atr("Asm4_Configurations", 'New'))
+        self.deleteButton = QtGui.QPushButton(_atr("Asm4_Configurations", 'Delete'))
+        self.overwriteButton = QtGui.QPushButton(_atr("Asm4_Configurations", 'Overwrite'))
         # the button layout
         self.buttonLayout.addWidget(self.newButton)
         self.buttonLayout.addStretch()
@@ -280,8 +281,8 @@ class newConfigurationCmd:
         self.drawUI()
 
     def GetResources(self):
-        return {"MenuText": "New configuration",
-                "ToolTip": "Create a new configuration of the assembly",
+        return {"MenuText": _atr("Asm4_Configurations", "New configuration"),
+                "ToolTip": _atr("Asm4_Configurations", "Create a new configuration of the assembly"),
                 "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_applyConfig.svg')
                 }
 
@@ -315,7 +316,7 @@ class newConfigurationCmd:
         confName = self.configName.text().strip()
         confDescr = self.configDescription.toPlainText().strip()
         if confName == '':
-            Asm4.warningBox('Please specify configuration name!')
+            Asm4.warningBox(_atr("Asm4_Configurations", 'Please specify configuration name!'))
             self.configName.setFocus()
             return
         # if no description provided, give a single space to avoid errors
@@ -343,7 +344,7 @@ class newConfigurationCmd:
     # defines the UI, only static elements
     def drawUI(self):
         # Our main window will be a QDialog
-        self.UI.setWindowTitle('Create a new assembly configuration')
+        self.UI.setWindowTitle(_atr("Asm4_Configurations", 'Create a new assembly configuration'))
         self.UI.setWindowIcon( QtGui.QIcon( os.path.join( Asm4.iconPath , 'FreeCad.svg' ) ) )
         self.UI.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
         self.UI.setMinimumWidth(400)
@@ -352,16 +353,16 @@ class newConfigurationCmd:
         self.mainLayout = QtGui.QVBoxLayout(self.UI)
 
         # Configuration name
-        self.mainLayout.addWidget(QtGui.QLabel("Enter configuration name:"))
+        self.mainLayout.addWidget(QtGui.QLabel(_atr("Asm4_Configurations", "Enter configuration name:")))
         self.configName = QtGui.QLineEdit()
         self.mainLayout.addWidget(self.configName)
         # Configuration description
-        self.mainLayout.addWidget(QtGui.QLabel("Description (optional):"))
+        self.mainLayout.addWidget(QtGui.QLabel(_atr("Asm4_Configurations", "Description (optional):")))
         self.configDescription = QtGui.QTextEdit()
         self.configDescription.setMinimumHeight(100)
         self.mainLayout.addWidget(self.configDescription)
         # List of configurations
-        self.mainLayout.addWidget(QtGui.QLabel("Existing configurations:"))
+        self.mainLayout.addWidget(QtGui.QLabel(_atr("Asm4_Configurations", "Existing configurations:")))
         self.configList = QtGui.QListWidget()
         self.configList.setMinimumHeight(100)
         self.mainLayout.addWidget(self.configList)
@@ -369,9 +370,9 @@ class newConfigurationCmd:
         # Buttons
         self.buttonLayout = QtGui.QHBoxLayout()
         # Cancel button
-        self.CancelButton = QtGui.QPushButton('Cancel')
+        self.CancelButton = QtGui.QPushButton(_atr("Asm4_Configurations", 'Cancel'))
         # OK button
-        self.OkButton = QtGui.QPushButton('OK')
+        self.OkButton = QtGui.QPushButton(_atr("Asm4_Configurations", 'OK'))
         self.OkButton.setDefault(True)
         # the button layout
         self.buttonLayout.addWidget(self.CancelButton)
@@ -402,9 +403,9 @@ def SaveConfiguration(confName, description):
     #conf = getConfig(confName, 'Configurations')
     conf = getConfig(confName)
     if conf and isAsm4Config(conf):
-        confirm = Asm4.confirmBox('This will overwrite existing configuration "' + confName + '"')
+        confirm = Asm4.confirmBox(_atr("Asm4_Configurations", 'This will overwrite existing configuration "') + confName + '"')
         if not confirm:
-            FCC.PrintMessage('Cancel save of configuration "' + confName + '"\n')
+            FCC.PrintMessage(_atr("Asm4_Configurations", 'Cancel save of configuration "') + confName + '"\n')
             return
         else:
             setConfigDescription(conf, description)

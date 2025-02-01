@@ -12,6 +12,7 @@ import os, re
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
+from Asm4_Translate import _atr, QT_TRANSLATE_NOOP, translate
 
 import Asm4_libs as Asm4
 
@@ -76,11 +77,11 @@ class addVariable():
 
 
     def GetResources(self):
-        tooltip  = "<p>Adds a variable into the <i>Variables</i> placeholder in the document. "
-        tooltip += "This variable can then be used in any formula using the <i>ExpressionEngine</i> "
-        tooltip += "of any compatible input field. These are marked with a \"f(x)\" symbol</p>"
+        tooltip  = translate("Asm4_variables", "<p>Adds a variable into the <i>Variables</i> placeholder in the document. " + \
+        "This variable can then be used in any formula using the <i>ExpressionEngine</i> " + \
+        "of any compatible input field. These are marked with a \"f(x)\" symbol</p>")
         iconFile = os.path.join( Asm4.iconPath , 'Asm4_addVariable.svg')
-        return {"MenuText": "Add Variable",
+        return {"MenuText": translate("Asm4_variables", "Add Variable"),
                 "ToolTip": tooltip,
                 "Pixmap" : iconFile }
 
@@ -183,7 +184,7 @@ class addVariable():
         # Our main window will be a QDialog
         # make this dialog stay above the others, always visible
         self.UI.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
-        self.UI.setWindowTitle('Add Variable')
+        self.UI.setWindowTitle(translate("Asm4_variables", 'Add Variable'))
         self.UI.setWindowIcon( QtGui.QIcon( os.path.join( Asm4.iconPath , 'FreeCad.svg' ) ) )
         self.UI.setMinimumWidth(470)
         self.UI.resize(470,300)
@@ -195,18 +196,18 @@ class addVariable():
         self.formLayout = QtGui.QFormLayout()
         # Variable Type, combobox showing all available App::PropertyType
         self.typeList = QtGui.QComboBox()
-        self.formLayout.addRow(QtGui.QLabel('Type'),self.typeList)
+        self.formLayout.addRow(QtGui.QLabel(translate("Asm4_variables", 'Type')),self.typeList)
         # Variable Name
         self.varName = QtGui.QLineEdit()
-        self.formLayout.addRow(QtGui.QLabel('Name'),self.varName)
+        self.formLayout.addRow(QtGui.QLabel(translate("Asm4_variables", 'Name')),self.varName)
         # Variable Value
         self.varValue = QtGui.QDoubleSpinBox()
         self.varValue.setRange( -1000000.0, 1000000.0 )
         self.varValue.setDecimals( 6 )
-        self.formLayout.addRow(QtGui.QLabel('Value'),self.varValue)
+        self.formLayout.addRow(QtGui.QLabel(translate("Asm4_variables", 'Value')),self.varValue)
         # Documentation
         self.description = QtGui.QTextEdit()
-        self.formLayout.addRow(QtGui.QLabel('Description'),self.description)
+        self.formLayout.addRow(QtGui.QLabel(translate("Asm4_variables", 'Description')),self.description)
         # apply the layout
         self.mainLayout.addLayout(self.formLayout)
         self.mainLayout.addStretch()
@@ -214,9 +215,9 @@ class addVariable():
         # Buttons
         self.buttonLayout = QtGui.QHBoxLayout()
         # Cancel button
-        self.CancelButton = QtGui.QPushButton('Cancel')
+        self.CancelButton = QtGui.QPushButton(translate("Asm4_variables", 'Cancel'))
         # OK button
-        self.OkButton = QtGui.QPushButton('OK')
+        self.OkButton = QtGui.QPushButton(translate("Asm4_variables", 'OK'))
         self.OkButton.setDefault(True)
         # the button layout
         self.buttonLayout.addWidget(self.CancelButton)
@@ -247,8 +248,8 @@ class delVariable():
         self.drawUI()
 
     def GetResources(self):
-        return {"MenuText": "Delete Variable",
-                "ToolTip": "Delete a Variable",
+        return {"MenuText": translate("Asm4_variables", "Delete Variable"),
+                "ToolTip": translate("Asm4_variables", "Delete a Variable"),
                 "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_delVariable.svg')
                 }
 
@@ -265,7 +266,7 @@ class delVariable():
         self.Variables = App.ActiveDocument.getObject('Variables')
         # if it doesn't exist then create it (for older Asm4 documents)
         if not self.Variables:
-            Asm4.messageBox('There are no variables here')
+            Asm4.messageBox(translate("Asm4_variables", 'There are no variables here'))
             return
         # (re-)initialise the UI
         self.UI.show()
@@ -302,7 +303,7 @@ class delVariable():
         self.varValue.clear()
         self.description.clear()
         self.varList.clear()
-        self.varList.addItem('Please choose')
+        self.varList.addItem(translate("Asm4_variables", 'Please choose'))
         for var in self.Variables.PropertiesList:
             if self.Variables.getGroupOfProperty(var)=='Variables' :
                 self.varList.addItem(var)
@@ -313,7 +314,7 @@ class delVariable():
         # Our main window will be a QDialog
         # make this dialog stay above the others, always visible
         self.UI.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
-        self.UI.setWindowTitle('Delete Variable')
+        self.UI.setWindowTitle(translate("Asm4_variables", 'Delete Variable'))
         self.UI.setWindowIcon( QtGui.QIcon( os.path.join( Asm4.iconPath , 'FreeCad.svg' ) ) )
         self.UI.setMinimumWidth(470)
         self.UI.resize(470,300)
@@ -325,16 +326,16 @@ class delVariable():
         self.formLayout = QtGui.QFormLayout()
         # existing Variable
         self.varList = QtGui.QComboBox()
-        self.formLayout.addRow(QtGui.QLabel('Variable'),self.varList)
+        self.formLayout.addRow(QtGui.QLabel(translate("Asm4_variables", 'Variable')),self.varList)
         # Variable Name
         self.varName = QtGui.QLineEdit()
-        self.formLayout.addRow(QtGui.QLabel('Name'),self.varName)
+        self.formLayout.addRow(QtGui.QLabel(translate("Asm4_variables", 'Name')),self.varName)
         # Variable Value
         self.varValue = QtGui.QLineEdit()
-        self.formLayout.addRow(QtGui.QLabel('Value'),self.varValue)
+        self.formLayout.addRow(QtGui.QLabel(translate("Asm4_variables", 'Value')),self.varValue)
         # Documentation
         self.description = QtGui.QTextEdit()
-        self.formLayout.addRow(QtGui.QLabel('Description'),self.description)
+        self.formLayout.addRow(QtGui.QLabel(translate("Asm4_variables", 'Description')),self.description)
         # apply the layout
         self.mainLayout.addLayout(self.formLayout)
         self.mainLayout.addStretch()
@@ -342,9 +343,9 @@ class delVariable():
         # Buttons
         self.buttonLayout = QtGui.QHBoxLayout()
         # Cancel button
-        self.CancelButton = QtGui.QPushButton('Cancel')
+        self.CancelButton = QtGui.QPushButton(translate("Asm4_variables", 'Cancel'))
         # Delete button
-        self.DelButton = QtGui.QPushButton('Delete')
+        self.DelButton = QtGui.QPushButton(translate("Asm4_variables", 'Delete'))
         self.DelButton.setDefault(True)
         # the button layout
         self.buttonLayout.addWidget(self.CancelButton)
@@ -373,7 +374,7 @@ Gui.addCommand( 'Asm4_addVariable', addVariable() )
 Gui.addCommand( 'Asm4_delVariable', delVariable() )
 
 variablesCmdList = [ 'Asm4_addVariable', 'Asm4_delVariable' ]
-tooltip  = "Adds a variable into the \"Variables\" placeholder in the document.\n"
-tooltip += "This variable can then be used in any formula using the ExpressionEngine\n"
-tooltip += "of any compatible input field. These are marked with a \"f(x)\" symbol."
+tooltip  = translate("Asm4_variables", "Adds a variable into the \"Variables\" placeholder in the document.\n" + \
+	"This variable can then be used in any formula using the ExpressionEngine\n" + \
+	"of any compatible input field. These are marked with a \"f(x)\" symbol.")
 Gui.addCommand( 'Asm4_variablesCmd', Asm4.dropDownCmd( variablesCmdList, 'Variables', tooltip ))

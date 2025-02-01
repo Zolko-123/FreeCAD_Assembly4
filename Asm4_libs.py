@@ -23,6 +23,7 @@ from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
 from FreeCAD import Console as FCC
+from Asm4_Translate import _atr, QT_TRANSLATE_NOOP
 
 
 
@@ -537,7 +538,7 @@ def isAsm4Model(obj):
 """
 def warningBox( text ):
     msgBox = QtGui.QMessageBox()
-    msgBox.setWindowTitle( 'FreeCAD Warning' )
+    msgBox.setWindowTitle( _atr("Asm4", 'FreeCAD Warning' ))
     msgBox.setIcon( QtGui.QMessageBox.Critical )
     msgBox.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
     msgBox.setText( text )
@@ -547,11 +548,11 @@ def warningBox( text ):
 
 def confirmBox( text ):
     msgBox = QtGui.QMessageBox()
-    msgBox.setWindowTitle('FreeCAD Warning')
+    msgBox.setWindowTitle(_atr("Asm4", 'FreeCAD Warning'))
     msgBox.setIcon(QtGui.QMessageBox.Warning)
     msgBox.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
     msgBox.setText(text)
-    msgBox.setInformativeText('Are you sure you want to proceed ?')
+    msgBox.setInformativeText( _atr("Asm4", 'Are you sure you want to proceed ?'))
     msgBox.setStandardButtons(QtGui.QMessageBox.Cancel | QtGui.QMessageBox.Ok)
     msgBox.setEscapeButton(QtGui.QMessageBox.Cancel)
     msgBox.setDefaultButton(QtGui.QMessageBox.Ok)
@@ -584,7 +585,7 @@ class dropDownCmd:
         return tuple(self.cmdlist)
 
     def GetResources(self):
-        return { 'MenuText': self.menu, 'ToolTip': self.tooltip }
+        return { 'MenuText': self.menu, 'ToolTip': App.Qt.translate("Asm4", self.tooltip) }
 
 
 

@@ -32,17 +32,17 @@ class newPart:
         self.partName = partName
         if self.partName == "Part":
             self.partType = "App::Part"
-            self.menutext = "New Part"
+            self.menutext = translate("Asm4_newPart", "New Part")
             self.tooltip = translate("Commands1", "Create a new Part")
             self.icon = os.path.join(Asm4.iconPath, "Asm4_Part.svg")
         elif self.partName == "Body":
             self.partType = "PartDesign::Body"
-            self.menutext = "New Body"
+            self.menutext = translate("Asm4_newPart", "New Body")
             self.tooltip = translate("Commands1", "Create a new Body")
             self.icon = os.path.join(Asm4.iconPath, "Asm4_Body.svg")
         elif self.partName == "Group":
             self.partType = "App::DocumentObjectGroup"
-            self.menutext = "New Group"
+            self.menutext = translate("Asm4_newPart", "New Group")
             self.tooltip = translate("Commands1", "Create a new Group")
             self.icon = os.path.join(Asm4.iconPath, "Asm4_Group.svg")
 
@@ -72,7 +72,7 @@ class newPart:
 
     def Activated(self):
         instanceName = Asm4.nextInstance( self.partName )
-        text,ok = QtGui.QInputDialog.getText(None, self.tooltip, 'Enter new '+self.partName+' name :'+' '*30, text = instanceName)
+        text,ok = QtGui.QInputDialog.getText(None, self.tooltip, translate("Asm4_newPart", 'Enter new ')+self.partName+translate("Asm4_newPart", ' name :')+' '*30, text = instanceName)
         if ok and text:
             # create Part
             newPart = App.ActiveDocument.addObject(self.partType,text)

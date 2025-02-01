@@ -14,6 +14,7 @@ from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
 from FreeCAD import Console as FCC
+from Asm4_Translate import _atr, QT_TRANSLATE_NOOP, translate
 
 import Asm4_libs as Asm4
 
@@ -30,12 +31,12 @@ class makeShapeBinder():
         pass
 
     def GetResources(self):
-        tooltip  = "Create a reference to an external shape\n"
-        tooltip += "This creates a SubShapeBinder of the selected shapes\n"
-        tooltip += "(face, edge, point) in the root assembly\n"
-        tooltip += "Only shapes belonging to the same part can be imported in a single step"
+        tooltip  = translate("Asm4_shapeBinder", "Create a reference to an external shape\n" + \
+        "This creates a SubShapeBinder of the selected shapes\n" + \
+        "(face, edge, point) in the root assembly\n" + \
+        "Only shapes belonging to the same part can be imported in a single step")
         iconFile = os.path.join( Asm4.iconPath, 'Asm4_shapeBinder.svg' )
-        return {"MenuText": "Create a shape binder", "ToolTip":  tooltip, "Pixmap": iconFile}
+        return {"MenuText": translate("Asm4_shapeBinder", "Create a shape binder"), "ToolTip":  tooltip, "Pixmap": iconFile}
 
     def IsActive(self):
         # only do this for assembly objects and all selected shapes must be in the same part

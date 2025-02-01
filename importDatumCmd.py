@@ -15,6 +15,7 @@ import FreeCAD as App
 from FreeCAD import Console as FCC
 
 import Asm4_libs as Asm4
+from Asm4_Translate import _atr, QT_TRANSLATE_NOOP, translate
 
 
 
@@ -29,12 +30,12 @@ class importDatumCmd():
         super(importDatumCmd,self).__init__()
 
     def GetResources(self):
-        tooltip  = "Imports the selected Datum object(s) from a sub-part into the root assembly.\n"
-        tooltip += "This creates a new datum of the same type, and with the same global placement\n\n"
-        tooltip += "This command can also be used to override the placement of an existing datum :\n"
-        tooltip += "select a second datum in the same root container as the first selected datum"
+        tooltip  = translate("Asm4_importDatum", "Imports the selected Datum object(s) from a sub-part into the root assembly.\n" + \
+        "This creates a new datum of the same type, and with the same global placement\n\n" + \
+        "This command can also be used to override the placement of an existing datum :\n" + \
+        "select a second datum in the same root container as the first selected datum")
         iconFile = os.path.join( Asm4.iconPath , 'Import_Datum.svg')
-        return {"MenuText": "Import Datum object",
+        return {"MenuText": translate("Asm4_importDatum", "Import Datum object"),
                 "ToolTip" : tooltip,
                 "Pixmap"  : iconFile }
 
@@ -73,7 +74,7 @@ class importDatumCmd():
                 ( targetDatum, selTree ) = Asm4.getSelectionTree(1)
                 # target datum is free
                 if selDatum.MapMode == 'Deactivated':
-                    message = 'This will superimpose '+Asm4.labelName(selDatum)+' in '+Asm4.labelName(rootContainer)+' on:\n\n'
+                    message = translate("Asm4_importDatum", 'This will superimpose ')+Asm4.labelName(selDatum)+translate("Asm4_importDatum", ' in ')+Asm4.labelName(rootContainer)+translate("Asm4_importDatum", ' on:\n\n')
                     for objName in selTree[1:-1]:
                         message += '> '+objName+'\n'
                     message += '> '+Asm4.labelName(selDatum)
@@ -81,8 +82,7 @@ class importDatumCmd():
                     confirm = True
                 # selected datum is attached
                 else:
-                    message = Asm4.labelName(selDatum)+' in '+Asm4.labelName(rootContainer)+' is already attached to some geometry. '
-                    message += 'This will superimpose its Placement on:\n\n'
+                    message = Asm4.labelName(selDatum)+translate("Asm4_importDatum", ' in ')+Asm4.labelName(rootContainer)+translate("Asm4_importDatum", ' is already attached to some geometry. This will superimpose its Placement on:\n\n')
                     for objName in selTree[1:-1]:
                         message += '> '+objName+'\n'
                     message += '> '+Asm4.labelName(selDatum)
@@ -101,7 +101,7 @@ class importDatumCmd():
 
             # the selected datum is not deep enough
             if len(selTree)<3:
-                message = selDatum.Name + ' is already at the top-level and cannot be imported'
+                message = selDatum.Name + translate("Asm4_importDatum", ' is already at the top-level and cannot be imported')
                 Asm4.warningBox(message)
                 return
 
@@ -110,16 +110,14 @@ class importDatumCmd():
         proposedName = selTree[-2]+'_'+selDatum.Label
 
         if len(selection) == 1:
-            message = 'Create a new '+selDatum.TypeId+' in '+Asm4.labelName(rootContainer)+' \nsuperimposed on:\n\n'
+            message = translate("Asm4_importDatum", 'Create a new ')+selDatum.TypeId+translate("Asm4_importDatum", ' in ')+Asm4.labelName(rootContainer)+translate("Asm4_importDatum", ' \nsuperimposed on:\n\n')
             for objName in selTree[1:]:
-                message += '> '+objName+'\n'
-            message += '\nEnter name for this datum :'+' '*40
-            userSpecifiedName,confirm = QtGui.QInputDialog.getText(None,'Import Datum',
+                message += translate("Asm4_importDatum", '> ')+objName+'\n'
+            message += translate("Asm4_importDatum", '\nEnter name for this datum :')+' '*40
+            userSpecifiedName,confirm = QtGui.QInputDialog.getText(None,translate("Asm4_importDatum", 'Import Datum'),
                     message, text = proposedName)
         else:
-            message = str(len(selection)) + " selected datum objects will be imported into the root assembly\n"
-            message += "with their default names such as:\n"
-            message += proposedName
+            message = str(len(selection)) + translate("Asm4_importDatum", " selected datum objects will be imported into the root assembly\nwith their default names such as:\n") + proposedName
             confirm = Asm4.confirmBox(message)
 
         if confirm:

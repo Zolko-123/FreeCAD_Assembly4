@@ -10,6 +10,7 @@ from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
 from FreeCAD import Console as FCC
+from Asm4_Translate import _atr, QT_TRANSLATE_NOOP, translate
 
 import Asm4_libs as Asm4
 from Asm4_objects import (
@@ -29,10 +30,10 @@ from Asm4_objects import (
 class makeExpressionArray:
 
     iconFileName = 'Asm4_ExpressionArray.svg'
-    menuText = 'Create an expression driven Array'
+    menuText = translate("Asm4_makeArray", 'Create an expression driven Array')
     arrayType = 'Expression Array'
     namePrefix = 'XArray_'
-    tooltip = """Create an array of the selected object where the placement of each element is calculated using expressions and an Index property.<br>
+    tooltip = translate("Asm4_makeArray", """Create an array of the selected object where the placement of each element is calculated using expressions and an Index property.<br>
         Select a source object to array and optionally an Axis that transformation will be related to.<br>
         Without axis the transformations relates to the source object internal Z axis.<br>
         <br>
@@ -41,7 +42,7 @@ class makeExpressionArray:
         <b>Placer :</b> Set an expression for the entire placement or its sub-properties.<br>
            By opening Placer property in Tasks panel it is possible to set expressions for euler angles too.<br>
         Also see tooltips in Property view
-        """
+        """)
 
     def GetResources(self):
         iconFile = os.path.join(Asm4.iconPath, self.iconFileName)
@@ -127,12 +128,12 @@ class makeExpressionArray:
 class makeCircularArray(makeExpressionArray):
 
     iconFileName = 'Asm4_PolarArray.svg'
-    menuText = 'Create a circular array'
+    menuText = translate("Asm4_makeArray", 'Create a circular array')
     arrayType = 'Circular Array'
     namePrefix = 'Circular_'
-    tooltip = """<p>Create a circular (polar) array around an axis. 
+    tooltip = translate("Asm4_makeArray", """<p>Create a circular (polar) array around an axis.
                 Supported axis objects are axis or plane from an origin, datum line, LCS axes, straight line segments, arcs and circles</p>
-                <p><b>Usage</b>: Select an object and the axis (hold CTRL key to select second object)</p>"""
+                <p><b>Usage</b>: Select an object and the axis (hold CTRL key to select second object)</p>""")
  
     def IsActive(self):
         self._cacheSelectionInfo()
@@ -159,12 +160,12 @@ class makeCircularArray(makeExpressionArray):
 class makeLinearArray(makeExpressionArray):
 
     iconFileName = 'Asm4_LinearArray.svg'
-    menuText = 'Create a linear array'
+    menuText = translate("Asm4_makeArray", 'Create a linear array')
     arrayType = 'Linear Array'
     namePrefix = 'Linear_'
-    tooltip = """<p>Create a linear array along an axis. 
+    tooltip = translate("Asm4_makeArray", """<p>Create a linear array along an axis.
                 Supported axis objects are axis or plane from an origin, datum line, LCS axes, straight line segments, arcs and circles</p>
-                <p><b>Usage</b>: Select an object and an axis for the direction (hold CTRL key to select second object)</p>"""
+                <p><b>Usage</b>: Select an object and an axis for the direction (hold CTRL key to select second object)</p>""")
 
     def IsActive(self):
         self._cacheSelectionInfo()
@@ -190,12 +191,12 @@ class makeLinearArray(makeExpressionArray):
 class makeMirrorArray(makeExpressionArray):
 
     iconFileName = 'Asm4_Mirror.svg'
-    menuText = 'Create mirror'
+    menuText = translate("Asm4_makeArray", 'Create mirror')
     arrayType = 'Mirror Array'
     namePrefix = 'Mirror_'
-    tooltip = """<p>Create a mirror of a part. 
+    tooltip = translate("Asm4_makeArray", """<p>Create a mirror of a part.
                 Supported axis objects are axis or plane from an origin, datum line, LCS axes, straight line segments, arcs and circles</p>
-                <p><b>Usage</b>: Select a source object and a mirror plane or a normal to a plane (hold CTRL key to select second object)</p>"""
+                <p><b>Usage</b>: Select a source object and a mirror plane or a normal to a plane (hold CTRL key to select second object)</p>""")
 
     def IsActive(self):
         self._cacheSelectionInfo()

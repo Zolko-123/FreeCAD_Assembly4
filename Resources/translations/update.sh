@@ -27,7 +27,7 @@ do
       # Creation of pyfiles.ts file from ../*.py files
       lupdate-qt6 ../../*.py -ts pyfiles.ts -verbose
       # Join uifiles.ts and pyfiles.ts files to Asm4.ts
-      lconvert -i ../../../title_asm4.ts pyfiles.ts -o asm4.ts -source-language en_US -no-obsoletAe -sort-contexts -verbose
+      lconvert -i ../../../title_asm4.ts pyfiles.ts -o asm4.ts -source-language en_US -no-obsolete -sort-contexts -verbose
       # Join Asm4.ts to exist Asm4_(language).ts file ( -no-obsolete)
       lconvert -i ../../../title_asm4.ts asm4.ts asm4_$lang.ts -o $ostr -source-language en_US -target-language $targetstr -no-obsolete -sort-contexts -verbose
       # (Release) Creation of *.qm file from Asm4_(language).ts
