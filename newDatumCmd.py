@@ -154,11 +154,33 @@ class newDatum:
                     Gui.ActiveDocument.getObject(createdDatum.Name).ShapeColor = self.datumColor
                 if self.datumAlpha:
                     Gui.ActiveDocument.getObject(createdDatum.Name).Transparency = self.datumAlpha
+
                 # highlight the created datum object
                 Gui.Selection.clearSelection()
                 Gui.Selection.addSelection( App.ActiveDocument.Name, parentContainer.Name, createdDatum.Name+'.' )
+
                 Gui.runCommand('Part_EditAttachment')
 
+                self.waiting_until_Part_EditAttachment_finishes()
+
+                # Restore original selection...
+                Gui.Selection.clearSelection()
+                Gui.Selection.addSelection(App.ActiveDocument.Name, selectedObj.Name)
+
+
+    def waiting_until_Part_EditAttachment_finishes(self):
+        self.Part_EditAttachment_is_finished = True
+        timer = QtCore.QTimer()
+        timer.timeout.connect(self.check_if_Part_EditAttachment_finished)
+        timer.start(500)
+        while self.Part_EditAttachment_is_finished:
+            Gui.updateGui() # Refresh GUI
+        timer.stop()
+
+
+    def check_if_Part_EditAttachment_finished(self):
+        if Gui.Control.activeDialog() == False:
+            self.Part_EditAttachment_is_finished = False
 
 
 """
