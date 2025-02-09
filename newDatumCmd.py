@@ -87,9 +87,15 @@ class newDatum:
             selectedObj = Gui.Selection.getSelection()[0]
             # ... and it's an App::Part or an datum object
             selType = selectedObj.TypeId
+
             if selType in self.containers or selType in Asm4.datumTypes or selType=='Sketcher::SketchObject':
                 return(selectedObj)
-        # or of nothing is selected ...
+
+            # When the selected item is a feature of a Body, it returns the Body itself.
+            if selectedObj._Body.TypeId == 'PartDesign::Body':
+                return(selectedObj._Body)
+
+        # or if nothing is selected ...
         elif Asm4.getAssembly():
             # ... but there is as assembly:
             return Asm4.getAssembly()
@@ -124,7 +130,7 @@ class newDatum:
             parentContainer = Asm4.getAssembly()
         # something went wrong
         else:
-            Asm4.warningBox("I can't create a "+self.datumType+" with the current selections")
+            Asm4.warningBox("Can't create a "+self.datumType+" with the current selections")
             
         # check whether there is already a similar datum, and increment the instance number 
         # instanceNum = 1
@@ -160,27 +166,6 @@ class newDatum:
                 Gui.Selection.addSelection( App.ActiveDocument.Name, parentContainer.Name, createdDatum.Name+'.' )
 
                 Gui.runCommand('Part_EditAttachment')
-
-                self.waiting_until_Part_EditAttachment_finishes()
-
-                # Restore original selection...
-                Gui.Selection.clearSelection()
-                Gui.Selection.addSelection(App.ActiveDocument.Name, selectedObj.Name)
-
-
-    def waiting_until_Part_EditAttachment_finishes(self):
-        self.Part_EditAttachment_is_finished = True
-        timer = QtCore.QTimer()
-        timer.timeout.connect(self.check_if_Part_EditAttachment_finished)
-        timer.start(500)
-        while self.Part_EditAttachment_is_finished:
-            Gui.updateGui() # Refresh GUI
-        timer.stop()
-
-
-    def check_if_Part_EditAttachment_finished(self):
-        if Gui.Control.activeDialog() == False:
-            self.Part_EditAttachment_is_finished = False
 
 
 """
