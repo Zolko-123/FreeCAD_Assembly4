@@ -2,6 +2,9 @@
 
 ## Release notes
 
+* 2025.02.9 (**0.50.17**) :  
+Re-enabled _Parts_ folder for Assemblies by default (should be an option in the preferences)  
+
 * 2025.01.29 (**0.50.16**) :  
 Don't create a _Parts_ folder for Assemblies by default  
 Added LiberaPay button  

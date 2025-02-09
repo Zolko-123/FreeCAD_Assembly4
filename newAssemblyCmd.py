@@ -72,7 +72,7 @@ def makeAssembly():
         # must be done before creating the assembly
         partsGroup = App.ActiveDocument.getObject('Parts')
         if partsGroup is None:
-            # partsGroup = App.ActiveDocument.addObject( 'App::DocumentObjectGroup', 'Parts' )
+            partsGroup = App.ActiveDocument.addObject( 'App::DocumentObjectGroup', 'Parts' )
             pass
         # create a new App::Part called 'Assembly'
         assembly = App.ActiveDocument.addObject('App::Part','Assembly')
