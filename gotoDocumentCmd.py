@@ -32,7 +32,7 @@ class gotoDocumentCmd:
 
 
     def GetResources(self):
-        return {"MenuText": "Open Document",
+        return {"MenuText": translate("Commands", "Open Document"),
                 "ToolTip": translate("Commands", "Activates the document of the selected linked part"),
                 "Pixmap": os.path.join(Asm4.iconPath, 'Asm4_openDocument.svg')
                 }

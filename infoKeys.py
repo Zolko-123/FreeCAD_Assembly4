@@ -10,6 +10,7 @@
 import os, json
 import Asm4_libs as Asm4
 import FreeCAD as App
+from Asm4_Translate import _atr, QT_TRANSLATE_NOOP, translate
 
 
 #UserAdded fields and routines should be defined  this is file.
@@ -28,7 +29,7 @@ partInfoUserAdded = [
 '''
 
 infoToolTipUserAdded ={
-'FileName': 'File Name'}
+'FileName': translate("Asm4_InfoPart", 'File Name')}
 '''
     'DrawnBy': 'Drawn By',
     'DrawnDate': 'Drawn Date',
@@ -87,8 +88,8 @@ def jtCustomizations(part, doc, singleBodyOfPart):
     part.DrawingName = base_part_id
     part.DrawingRevision = revision
 
-    print("Base Part ID:", base_part_id)
-    print("Revision:", revision)
+    print(translate("Asm4_InfoPart", "Base Part ID:"), base_part_id)
+    print(translate("Asm4_InfoPart", "Revision:"), revision)
 
     # Todo in my business rules base_part_id should be the PartID unless there are multiple parts in the drawing.
     # in that case the base_part_id should be prepended by a :1 :2 .etc
@@ -135,7 +136,7 @@ def jtCustomizations(part, doc, singleBodyOfPart):
         if singleBodyOfPart is not None:
             part.PartDescription = singleBodyOfPart.Label
         else:
-            part.PartDescription ="Multi Body Part(Not implemented)"
+            part.PartDescription = translate("Asm4_InfoPart", "Multi Body Part(Not implemented)")
     part.PartID = partIdtoAdd
 
 
