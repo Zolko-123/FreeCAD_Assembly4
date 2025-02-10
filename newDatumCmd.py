@@ -87,14 +87,11 @@ class newDatum:
             selectedObj = Gui.Selection.getSelection()[0]
             # ... and it's an App::Part or an datum object
             selType = selectedObj.TypeId
-
             if selType in self.containers or selType in Asm4.datumTypes or selType=='Sketcher::SketchObject':
                 return(selectedObj)
-
             # When the selected item is a feature of a Body, it returns the Body itself.
-            if selectedObj._Body.TypeId == 'PartDesign::Body':
+            elif obj.getParentGeoFeatureGroup().TypeId in Asm4.containerTypes:
                 return(selectedObj._Body)
-
         # or if nothing is selected ...
         elif Asm4.getAssembly():
             # ... but there is as assembly:
