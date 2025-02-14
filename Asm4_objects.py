@@ -20,7 +20,6 @@ from FreeCAD import Console as FCC
 import Asm4_libs as Asm4
 
 
-
 """
     +-----------------------------------------------+
     |              a variant link class             |
@@ -49,7 +48,7 @@ tmpDoc.addObject('App::Part
 """
 class VariantLink( object ):
     def __init__(self):
-        FCC.PrintMessage('Initialising variantLink ...\n')
+        FCC.PrintMessage(App.Qt.translate("Asm4", 'Initialising variantLink ...\n'))
         self.Object = None
     # for Python version ≤3.10
     def __getstate__(self):
@@ -108,7 +107,7 @@ class VariantLink( object ):
             # deep-copy the source object and link it back
             obj.LinkedObject = tmpDoc.copyObject( obj.SourceObject, True )
         else:
-            FCC.PrintWarning('100 temporary variant documents are already in use, not creating a new one.\n')
+            FCC.PrintWarning(App.Qt.translate("Asm4", '100 temporary variant documents are already in use, not creating a new one.\n'))
         return
 
     # Python API called after the document is restored
@@ -154,7 +153,7 @@ class VariantLink( object ):
     def fillVarProperties(self,obj):
         variables = obj.SourceObject.getObject('Variables')
         if variables is None:
-            FCC.PrintVarning('No \"Variables\" container in source object\n')
+            FCC.PrintVarning(App.Qt.translate("Asm4", 'No \"Variables\" container in source object\n'))
         else: 
             for prop in variables.PropertiesList:
                 # fetch all properties in the Variables group
@@ -168,13 +167,13 @@ class VariantLink( object ):
 
     # new Python API called when the object is newly created
     def attach(self,obj):
-        FCC.PrintMessage('Attaching VariantLink ...\n')
+        FCC.PrintMessage(App.Qt.translate("Asm4", 'Attaching VariantLink ...\n'))
         # the source object for the variant object
         obj.addProperty("App::PropertyXLink","SourceObject"," Link",
-                        'Original object from which this variant is derived')
+                        App.Qt.translate("Asm4", 'Original object from which this variant is derived'))
         # the actual linked object property with a customized name
         obj.addProperty("App::PropertyXLink","LinkedObject"," Link",
-                        'Link to the modified object')
+                        App.Qt.translate("Asm4", 'Link to the modified object'))
         # the actual linked object property with a customized name
         obj.addProperty("App::PropertyString","Type")
 
@@ -210,19 +209,19 @@ class VariantLink( object ):
     # this is never actually called
     # see https://forum.freecadweb.org/viewtopic.php?f=10&t=72728&p=634441#p634361
     def onSettingDocument(self, obj):
-        FCC.PrintMessage('Triggered onSettingDocument() in VariantLink\n')
+        FCC.PrintMessage(App.Qt.translate("Asm4", 'Triggered onSettingDocument() in VariantLink\n'))
         obj.LinkedObject = obj.SourceObject
         return
 
     # this is never actually called
     def onLostLinkToObject(self, obj):
-        FCC.PrintMessage('Triggered onLostLinkToObject() in VariantLink\n')
+        FCC.PrintMessage(App.Qt.translate("Asm4", 'Triggered onLostLinkToObject() in VariantLink\n'))
         obj.LinkedObject = obj.SourceObject
         return
 
     # this is never actually called
     def setupObject(self, obj):
-        FCC.PrintMessage('Triggered by setupObject() in VariantLink\n')
+        FCC.PrintMessage(App.Qt.translate("Asm4", 'Triggered by setupObject() in VariantLink\n'))
         obj.LinkedObject = obj.SourceObject
 
 
@@ -295,11 +294,11 @@ class LinkArray( object ):
     # new Python API called when the object is newly created
     def attach(self,obj):
         # the actual link property with a customized name
-        obj.addProperty("App::PropertyLink",   "SourceObject", "Array", 'The object to array')
+        obj.addProperty("App::PropertyLink",   "SourceObject", "Array", App.Qt.translate("Asm4", 'The object to array'))
         # the following two properties are required to support link array
         obj.addProperty("App::PropertyBool",   "ShowElement",  "Array", '')
         obj.addProperty("App::PropertyInteger","Count",        "Array",
-                        'Total number of elements in the array')
+                        App.Qt.translate("Asm4", 'Total number of elements in the array'))
         obj.Count=1
         # install the actual extension
         obj.addExtension('App::LinkExtensionPython')
@@ -520,15 +519,15 @@ class ExpressionArray(LinkArray):
         super().attach(obj)
         obj.addProperty('App::PropertyString',      'ArrayType',        'Array', '')
         obj.addProperty('App::PropertyPlacement',   'Placer',           'Array', 
-                        'Calculates element placements in relation to the Axis.\n'
+                        App.Qt.translate("Asm4", 'Calculates element placements in relation to the Axis.\n'
                         'Each element is assigned an Index starting from 0\n'
                         'The Index can be used in expressions calculating this Placement or its sub-properties\n'
                         'Expression examples:\n'
                         'on Angle: Index%2==0?30:-30\n'
-                        'on Position.X: Index*30')
+                        'on Position.X: Index*30'))
         obj.addProperty('App::PropertyInteger',     'Index',            'Array', '')
         obj.addProperty('App::PropertyLinkSub',     'Axis',             'Array',
-                        'The axis, direction or plane the Placer relates to')
+                        App.Qt.translate("Asm4", 'The axis, direction or plane the Placer relates to'))
         obj.addProperty('App::PropertyPlacement',   'AxisPlacement',     'Array','')
         obj.addProperty('App::PropertyFloat',       'Scaler',            'Array','')
         obj.Scaler = 1.0

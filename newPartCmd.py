@@ -17,7 +17,6 @@ import FreeCAD as App
 import Part
 
 import Asm4_libs as Asm4
-from Asm4_Translate import translate
 
 
 """
@@ -32,18 +31,18 @@ class newPart:
         self.partName = partName
         if self.partName == "Part":
             self.partType = "App::Part"
-            self.menutext = "New Part"
-            self.tooltip = translate("Commands1", "Create a new Part")
+            self.menutext = App.Qt.translate("Commands1", "New Part")
+            self.tooltip = App.Qt.translate("Commands1", "Create a new Part")
             self.icon = os.path.join(Asm4.iconPath, "Asm4_Part.svg")
         elif self.partName == "Body":
             self.partType = "PartDesign::Body"
-            self.menutext = "New Body"
-            self.tooltip = translate("Commands1", "Create a new Body")
+            self.menutext = App.Qt.translate("Commands1", "New Body")
+            self.tooltip = App.Qt.translate("Commands1", "Create a new Body")
             self.icon = os.path.join(Asm4.iconPath, "Asm4_Body.svg")
         elif self.partName == "Group":
             self.partType = "App::DocumentObjectGroup"
-            self.menutext = "New Group"
-            self.tooltip = translate("Commands1", "Create a new Group")
+            self.menutext = App.Qt.translate("Commands1", "New Group")
+            self.tooltip = App.Qt.translate("Commands1", "Create a new Group")
             self.icon = os.path.join(Asm4.iconPath, "Asm4_Group.svg")
 
     def GetResources(self):
@@ -72,7 +71,7 @@ class newPart:
 
     def Activated(self):
         instanceName = Asm4.nextInstance( self.partName )
-        text,ok = QtGui.QInputDialog.getText(None, self.tooltip, 'Enter new '+self.partName+' name :'+' '*30, text = instanceName)
+        text,ok = QtGui.QInputDialog.getText(None, self.tooltip, App.Qt.translate("Commands1", 'Enter new ')+self.partName+App.Qt.translate("Commands1", ' name :')+' '*30, text = instanceName)
         if ok and text:
             # create Part
             newPart = App.ActiveDocument.addObject(self.partType,text)

@@ -18,8 +18,6 @@ import Asm4_libs as Asm4
 from Asm4_objects import VariantLink, ViewProviderVariant
 
 
-
-
 """
     +-----------------------------------------------+
     |        create a variant link to a part        |
@@ -34,11 +32,11 @@ class makeVariantLink():
         #pass
 
     def GetResources(self):
-        tooltip  = "EXPERIMENTAL !!!\n"
-        tooltip += "Create a variant link to a part\n"
-        tooltip += "Select a part containing a \"Variables\" property container"
+        tooltip  = App.Qt.translate("Asm4_variantLink", "EXPERIMENTAL !!!\n"
+        + "Create a variant link to a part\n"
+        + "Select a part containing a \"Variables\" property container")
         iconFile = 'Variant_Link.svg'
-        return {"MenuText" : "Create a variant Part", 
+        return {"MenuText" : App.Qt.translate("Asm4_variantLink", "Create a variant Part"),
                 "ToolTip"  :  tooltip, 
                 "Pixmap"   :  os.path.join( Asm4.iconPath, iconFile ) 
                 }
@@ -107,7 +105,7 @@ class makeVariantLink():
         '''
 
         if self.rootAssembly is None:
-            Asm4.warningBox( 'Please create an Assembly' )
+            Asm4.warningBox( App.Qt.translate("Asm4_variantLink", 'Please create an Assembly') )
             return
 
         # Search for all App::Parts having a "Variables" property container in all open documents
@@ -228,7 +226,7 @@ class makeVariantLink():
                 if self.rootAssembly == Asm4.getAssembly():
                     Gui.runCommand( 'Asm4_placeLink' )
             else:
-                Asm4.warningBox('The current document must be saved before inserting an external part')
+                Asm4.warningBox(App.Qt.translate("Asm4_variantLink", 'The current document must be saved before inserting an external part'))
                 return
 
         # if still open, close the dialog UI
@@ -292,7 +290,7 @@ class makeVariantLink():
         # make this dialog stay above the others, always visible
         self.UI.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
         self.UI.setModal(False)
-        self.UI.setWindowTitle('Insert a variant of a Part')
+        self.UI.setWindowTitle(App.Qt.translate("Asm4_variantLink", 'Insert a variant of a Part'))
         self.UI.setWindowIcon( QtGui.QIcon( os.path.join( Asm4.iconPath , 'FreeCad.svg' ) ) )
         self.UI.setMinimumSize(400, 500)
         self.UI.resize(400,500)
@@ -305,18 +303,18 @@ class makeVariantLink():
         # Create a line that will contain the name of the link (in the tree)
         self.linkNameInput = QtGui.QLineEdit(self.UI)
         # Cancel button
-        self.cancelButton = QtGui.QPushButton('Cancel', self.UI)
+        self.cancelButton = QtGui.QPushButton(App.Qt.translate("Asm4_variantLink", 'Cancel'), self.UI)
         # Insert Link button
-        self.insertButton = QtGui.QPushButton('Insert', self.UI)
+        self.insertButton = QtGui.QPushButton(App.Qt.translate("Asm4_variantLink", 'Insert'), self.UI)
         self.insertButton.setDefault(True)
 
         # Place the widgets with layouts
         self.mainLayout = QtGui.QVBoxLayout(self.UI)
-        self.mainLayout.addWidget(QtGui.QLabel("Filter :"))
+        self.mainLayout.addWidget(QtGui.QLabel(App.Qt.translate("Asm4_variantLink", "Filter :")))
         self.mainLayout.addWidget(self.filterPartList)
-        self.mainLayout.addWidget(QtGui.QLabel("Select Part to be inserted :"))
+        self.mainLayout.addWidget(QtGui.QLabel(App.Qt.translate("Asm4_variantLink", "Select Part to be inserted :")))
         self.mainLayout.addWidget(self.partList)
-        self.mainLayout.addWidget(QtGui.QLabel("Name for the link :"))
+        self.mainLayout.addWidget(QtGui.QLabel(App.Qt.translate("Asm4_variantLink", "Name for the link :")))
         self.mainLayout.addWidget(self.linkNameInput)
         self.mainLayout.addWidget(QtGui.QLabel(' '))
         self.buttonsLayout = QtGui.QHBoxLayout()
@@ -331,13 +329,6 @@ class makeVariantLink():
         self.insertButton.clicked.connect(self.onCreateLink)
         self.partList.itemClicked.connect( self.onItemClicked)
         self.filterPartList.textChanged.connect(self.onFilterChange)
-
-
-
-
-
-
-
 
 
 
