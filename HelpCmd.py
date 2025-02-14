@@ -9,7 +9,7 @@
 import os, webbrowser
 
 import FreeCADGui as Gui
-
+import FreeCAD
 import Asm4_libs as Asm4
 
 
@@ -21,8 +21,8 @@ import Asm4_libs as Asm4
 class Asm4Help():
 
     def GetResources(self):
-        return {"MenuText": App.Qt.translate("Asm4_Help", "Help for Assembly4"),
-                "ToolTip": App.Qt.translate("Asm4_Help", "Show basic usage for FreeCAD and Assembly4"),
+        return {"MenuText": FreeCAD.Qt.translate("Asm4_Help", "Help for Assembly4"),
+                "ToolTip": FreeCAD.Qt.translate("Asm4_Help", "Show basic usage for FreeCAD and Assembly4"),
                 "Pixmap": os.path.join(Asm4.iconPath, 'Asm4_Help.svg')
                 }
 
