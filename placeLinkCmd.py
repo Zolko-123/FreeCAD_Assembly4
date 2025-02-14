@@ -39,16 +39,26 @@ class placeLinkCmd():
                 }
 
     def IsActive(self):
-        # We only insert a link into an Asm4  Model
+
+        root = Gui.Selection.getSelectionEx("", 0)[0].Object
+        obj = Gui.Selection.getSelection()[0]
+
         if App.ActiveDocument:
-            ( obj, tree ) = Asm4.getSelectionTree()
-            if tree and len(tree)>=2:
-                # the root container is the first element and must be an App::Part
-                root = App.ActiveDocument.getObject(tree[0])
-                if root and root.TypeId=='App::Part':
-                    # check that the object has a Placement property
-                    if hasattr(obj,'Placement') and obj.getTypeIdOfProperty('Placement')=='App::PropertyPlacement':
+
+            if root and root.TypeId=='App::Part' and root.AssemblyType == "Part::Link":
+
+                # check that the object has a Placement property
+                if hasattr(obj,'Placement') and obj.getTypeIdOfProperty('Placement')=='App::PropertyPlacement':
+                    return True
+
+                elif obj.TypeId != "App:Link":
+                    direct_parent = Asm4.getDirectParent()
+                    if direct_parent and direct_parent is not root:
+                        Gui.Selection.clearSelection()
+                        Gui.Selection.addSelection(App.ActiveDocument.Name, direct_parent.Name)
+                        obj = Gui.Selection.getSelection()[0]
                         return True
+
         return False
 
     def Activated(self):
@@ -81,10 +91,13 @@ class placeLinkCmd():
                         Gui.Control.showDialog(ui)
             else:
                 Asm4.warningBox('Please select a link in the assembly Model.')
+
         else:
             # or any part that has a Placement ?
             if len(Gui.Selection.getSelection())==1:
+
                 selection = Gui.Selection.getSelection()[0]
+
                 # object has a Placement property
                 if hasattr(selection,'Placement') and selection.getTypeIdOfProperty('Placement')=='App::PropertyPlacement':
                     # we don't want to mess with obects that are attached with the Attacher (MapMode)
@@ -113,10 +126,29 @@ class placeLinkCmd():
                                     Gui.Control.showDialog(ui)
                         # the selected object doesn't belong to the root assembly
                         else:
-                            Asm4.warningBox('Please select an object in the assembly Model.')
+
+                            # update selection if something inside the containers/link is selected
+                            # specially when selecting objects by clicking in 3d model
+                            if selection.TypeId != "App:Link":
+                                direct_parent = Asm4.getDirectParent()
+                                Gui.Selection.clearSelection()
+                                Gui.Selection.addSelection(App.ActiveDocument.Name, direct_parent.Name)
+                                selection = direct_parent
+                                # selection = Gui.Selection.getSelection()[0]
+
+                                if Asm4.isAsm4EE(selection):
+                                    # launch the UI in the task panel
+                                    ui = placePartUI()
+                                    Gui.Control.showDialog(ui)
+                                else:
+                                    Asm4.warningBox('Please select an object in the assembly Model.')
+
+                            else:
+                                Asm4.warningBox('Please select an object in the assembly Model.')
+
                             return
 
-    
+
 """
     +-----------------------------------------------+
     |       add the command to the workbench        |
