@@ -6,11 +6,12 @@
     <extra-po-header-po_revision_date></extra-po-header-po_revision_date>
     <extra-po-header-pot_creation_date></extra-po-header-pot_creation_date>
     <extra-po-header-project_id_version>FreeCAD Assembly 4 Language Translations v0.50.17_dev</extra-po-header-project_id_version>
-    <extra-po-header-x_generator>Poedit 3.5</extra-po-header-x_generator>
+    <extra-po-header-x_generator>Poedit 3.2.2</extra-po-header-x_generator>
     <extra-po-header_comment>#
 # Translators:
-# DrBenson &lt;Benson.Dr@GMail.com&gt;, 2023
-#</extra-po-header_comment>
+# DrBenson &lt;Benson.Dr@GMail.com&gt;, 2025
+#
+    </extra-po-header_comment>
     <extra-po-headers>Project-Id-Version,POT-Creation-Date,PO-Revision-Date,Last-Translator,Language-Team,Language,MIME-Version,Content-Type,Content-Transfer-Encoding,Plural-Forms,X-Language,X-Source-Language,X-Qt-Contexts,X-Generator</extra-po-headers>
 <context>
     <name>App::Property</name>
@@ -21,6 +22,20 @@
 </context>
 <context>
     <name>Asm4</name>
+    <message>
+        <source>This Part contains an incompatible &quot;Variables&quot; object, </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>this could lead to unexpected results
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Found legacy AssemblyType property, adding new empty SolverId property
+</source>
+        <translation type="unfinished"></translation>
+    </message>
     <message>
         <source>FreeCAD Warning</source>
         <translation type="unfinished"></translation>
@@ -35,11 +50,6 @@
     </message>
     <message>
         <source>Measure Tool</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source> done
-</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -128,6 +138,11 @@ on Position.X: Index*30</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source> done
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>closing ... </source>
         <translation type="unfinished"></translation>
     </message>
@@ -159,23 +174,18 @@ on Position.X: Index*30</source>
         <source>- Select Variable (only float) -</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
-        <source>This Part contains an incompatible &quot;Variables&quot; object, </source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>this could lead to unexpected results
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Found legacy AssemblyType property, adding new empty SolverId property
-</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>Asm4_Animate</name>
+    <message>
+        <source>Export failed for &quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&quot;. Using another container type can help.
+</source>
+        <translation type="unfinished"></translation>
+    </message>
     <message>
         <source>Capturing and Exporting...</source>
         <translation type="unfinished"></translation>
@@ -231,10 +241,6 @@ Supported extensions are *.gif *.mp4 *.avi *.mov *.mkv</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>read</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Choose an image file
 Supported extensions are *.png *.jpg *.jpeg *.gif</source>
         <translation type="unfinished"></translation>
@@ -268,6 +274,14 @@ Supported extensions are *.png *.jpg *.jpeg *.gif</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Supported Files (*.mp4 *.avi *.mov *.mkv *.gif *.png)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>animationProvider.nextFrame not implemented.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Variable name invalid</source>
         <translation type="unfinished"></translation>
     </message>
@@ -294,6 +308,10 @@ Supported extensions are *.png *.jpg *.jpeg *.gif</source>
     </message>
     <message>
         <source>- Select Variable (only float) -</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unknown State/Transition</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -415,6 +433,10 @@ it is advisable to try with 10 frames</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>read</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>save</source>
         <translation type="unfinished"></translation>
     </message>
@@ -431,19 +453,11 @@ it is advisable to try with 10 frames</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Supported Files (*.mp4 *.avi *.mov *.mkv *.gif *.png)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Color:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>&quot; is not valid. Please select an existing variable.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Unknown State/Transition</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -459,10 +473,6 @@ it is advisable to try with 10 frames</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>animationProvider.nextFrame not implemented.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>The selected variable name &quot;{0}&quot; is not valid. Please select an existing variable.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -472,15 +482,6 @@ it is advisable to try with 10 frames</source>
     </message>
     <message>
         <source>Export</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Export failed for &quot;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&quot;. Using another container type can help.
-</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -755,6 +756,18 @@ Menu Tools &gt; Addon Manager &gt; fasteners</source>
 <context>
     <name>Asm4_InfoPart</name>
     <message>
+        <source>File Name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Base Part ID:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Revision:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>BomKey</source>
         <translation type="unfinished"></translation>
     </message>
@@ -844,18 +857,6 @@ Menu Tools &gt; Addon Manager &gt; fasteners</source>
     </message>
     <message>
         <source>Update</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>File Name</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Base Part ID:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Revision:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -952,12 +953,12 @@ Measure Length of Edge</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../Asm4_Measure.py" line="744"/>
-        <source>Select only faces or lines</source>
+        <source>Measuring angles</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Measuring angles</source>
+        <location filename="../../Asm4_Measure.py" line="744"/>
+        <source>Select only faces or lines</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1212,22 +1213,6 @@ window instead of the Model tree</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../checkInterference_lh.py" line="154"/>
-        <source>
-&gt;&gt; USED PARTS:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../checkInterference_lh.py" line="201"/>
-        <source>{} | Collision detected</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../checkInterference_lh.py" line="206"/>
-        <source>{} | Touching faces (REMOVING)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../../checkInterference.py" line="107"/>
         <source>The {} has {} objects. (with fasteners)</source>
         <translation type="unfinished"></translation>
@@ -1250,6 +1235,39 @@ window instead of the Model tree</source>
     <message>
         <location filename="../../checkInterference.py" line="128"/>
         <source>Interferences check may take time.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../checkInterference.py" line="135"/>
+        <source>
+Elapsed time: {:.2f} ms</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../checkInterference.py" line="135"/>
+        <location filename="../../checkInterference.py" line="137"/>
+        <location filename="../../checkInterference.py" line="139"/>
+        <location filename="../../checkInterference.py" line="141"/>
+        <source>
+Elapsed time:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../checkInterference.py" line="137"/>
+        <source>
+Elapsed time: {:.2f} s</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../checkInterference.py" line="139"/>
+        <source>
+Elapsed time: {:.2f} min</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../checkInterference.py" line="141"/>
+        <source>
+Elapsed time: {:.2f} h</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1341,6 +1359,22 @@ Aborting the current processing...</source>
     </message>
     <message>
         <source>Check Interferences</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../checkInterference_lh.py" line="154"/>
+        <source>
+&gt;&gt; USED PARTS:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../checkInterference_lh.py" line="201"/>
+        <source>{} | Collision detected</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../checkInterference_lh.py" line="206"/>
+        <source>{} | Touching faces (REMOVING)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
