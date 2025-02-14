@@ -35,15 +35,15 @@ class insertLink():
 
 
     def GetResources(self):
-        tooltip  = "<p>Insert a Part into the assembly. "
-        tooltip += "This will create a dynamic link to the part, "
-        tooltip += "which can be in this document or in another document "
-        tooltip += "that is open in the current session</p>"
-        tooltip += "<p><b>Usage</b>: the part must be open in the current session</p>"
-        tooltip += "<p>This command also enables to repair broken/missing links. "
-        tooltip += "Select the broken link, launch this command, and select a new target part in the list</p>"
+        tooltip  = App.Qt.translate("Asm4_insertLink", "<p>Insert a Part into the assembly. "
+        + "This will create a dynamic link to the part, "
+        + "which can be in this document or in another document "
+        + "that is open in the current session</p>"
+        + "<p><b>Usage</b>: the part must be open in the current session</p>"
+        + "<p>This command also enables to repair broken/missing links. "
+        + "Select the broken link, launch this command, and select a new target part in the list</p>")
         iconFile = 'Link_Part.svg'
-        return {"MenuText" : "Insert Part", 
+        return {"MenuText" : App.Qt.translate("Asm4_insertLink", "Insert Part"),
                 "ToolTip"  : tooltip, 
                 "Pixmap"   : os.path.join( Asm4.iconPath , iconFile )
                 }
@@ -104,13 +104,13 @@ class insertLink():
                     self.brokenLink = True
                     self.rootAssembly = parent
                     self.origLink = selObj
-                    self.UI.setWindowTitle('Re-link broken link')
-                    self.insertButton.setText('Replace')
+                    self.UI.setWindowTitle(App.Qt.translate("Asm4_insertLink", 'Re-link broken link'))
+                    self.insertButton.setText(App.Qt.translate("Asm4_insertLink", 'Replace'))
                     self.linkNameInput.setText(Asm4.labelName(selObj))
                     self.linkNameInput.setEnabled(False)
 
         if self.rootAssembly is None:
-            Asm4.warningBox( 'Please create an Assembly' )
+            Asm4.warningBox( App.Qt.translate("Asm4_insertLink", 'Please create an Assembly' ))
             return
 
         # build the list of available parts
@@ -202,7 +202,7 @@ class insertLink():
         importDoc = None
         importDocIsOpen = False
         dialog = QtGui.QFileDialog( QtGui.QApplication.activeWindow(),
-                                    "Select FreeCAD document to import part from" )
+                                    App.Qt.translate("Asm4_insertLink", "Select FreeCAD document to import part from" ))
         # set option "DontUseNativeDialog"=True, as native Filedialog shows
         # misbehavior on Unbuntu 18.04 LTS. It works case sensitively, what is not wanted...
         '''
@@ -211,7 +211,7 @@ class insertLink():
         else:
             dialog.setOption(QtGui.QFileDialog.DontUseNativeDialog, True)
         '''
-        dialog.setNameFilter("Supported Formats *.FCStd *.fcstd (*.FCStd *.fcstd);;All files (*.*)")
+        dialog.setNameFilter(App.Qt.translate("Asm4_insertLink", "Supported Formats *.FCStd *.fcstd (*.FCStd *.fcstd);;All files (*.*)"))
         if dialog.exec_():
             filename = str(dialog.selectedFiles()[0])
             # look only for filenames, not paths, as there are problems on WIN10 (Address-translation??)
@@ -283,7 +283,7 @@ class insertLink():
                 if self.rootAssembly == Asm4.getAssembly():
                     Gui.runCommand( 'Asm4_placeLink' )
             else:
-                Asm4.warningBox('The current document must be saved before inserting an external part')
+                Asm4.warningBox(App.Qt.translate("Asm4_insertLink", 'The current document must be saved before inserting an external part'))
                 return
         # if still open, close the dialog UI
         self.UI.close()
@@ -321,7 +321,7 @@ class insertLink():
         # make this dialog stay above the others, always visible
         self.UI.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
         self.UI.setModal(False)
-        self.UI.setWindowTitle('Insert a Part')
+        self.UI.setWindowTitle(App.Qt.translate("Asm4_insertLink", 'Insert a Part'))
         self.UI.setWindowIcon( QtGui.QIcon( os.path.join( Asm4.iconPath , 'FreeCad.svg' ) ) )
         self.UI.setMinimumSize(400, 500)
         self.UI.resize(400,500)
@@ -334,20 +334,20 @@ class insertLink():
         # Create a line that will contain the name of the link (in the tree)
         self.linkNameInput = QtGui.QLineEdit(self.UI)
         # Cancel button
-        self.cancelButton = QtGui.QPushButton('Cancel', self.UI)
+        self.cancelButton = QtGui.QPushButton(App.Qt.translate("Asm4_insertLink", 'Cancel'), self.UI)
         # Cancel button
-        self.openFileButton = QtGui.QPushButton('Open file', self.UI)
+        self.openFileButton = QtGui.QPushButton(App.Qt.translate("Asm4_insertLink", 'Open file'), self.UI)
         # Insert Link button
-        self.insertButton = QtGui.QPushButton('Insert', self.UI)
+        self.insertButton = QtGui.QPushButton(App.Qt.translate("Asm4_insertLink", 'Insert'), self.UI)
         self.insertButton.setDefault(True)
 
         # Place the widgets with layouts
         self.mainLayout = QtGui.QVBoxLayout(self.UI)
-        self.mainLayout.addWidget(QtGui.QLabel("Filter :"))
+        self.mainLayout.addWidget(QtGui.QLabel(App.Qt.translate("Asm4_insertLink", "Filter :")))
         self.mainLayout.addWidget(self.filterPartList)
-        self.mainLayout.addWidget(QtGui.QLabel("Select Part to be inserted :"))
+        self.mainLayout.addWidget(QtGui.QLabel(App.Qt.translate("Asm4_insertLink", "Select Part to be inserted :")))
         self.mainLayout.addWidget(self.partList)
-        self.mainLayout.addWidget(QtGui.QLabel("Name for the link :"))
+        self.mainLayout.addWidget(QtGui.QLabel(App.Qt.translate("Asm4_insertLink", "Name for the link :")))
         self.mainLayout.addWidget(self.linkNameInput)
         self.mainLayout.addWidget(QtGui.QLabel(' '))
         self.buttonsLayout = QtGui.QHBoxLayout()

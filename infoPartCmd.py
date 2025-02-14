@@ -27,11 +27,11 @@ partInfo = [
 
 
 infoToolTip = {
-    'BomKey': 'BomKey',
-    'DrawingName':     'Document or File name',
-    'DrawingRevision': 'Document Revision',
-    'PartID':     'Part ID',
-    'PartDescription': 'Part Description'}
+    'BomKey': App.Qt.translate("Asm4_InfoPart", 'BomKey'),
+    'DrawingName':      App.Qt.translate("Asm4_InfoPart", 'Document or File name'),
+    'DrawingRevision':  App.Qt.translate("Asm4_InfoPart", 'Document Revision'),
+    'PartID':      App.Qt.translate("Asm4_InfoPart", 'Part ID'),
+    'PartDescription':  App.Qt.translate("Asm4_InfoPart", 'Part Description')}
 
 # Remaining fields that can be customized
 try:
@@ -50,9 +50,9 @@ partInfo_Invisible = [
     'FastenerType']
 
 infoToolTip_Invisible = {
-    'FastenerDiameter': 'Fastener diameter',
-    'FastenerLength':   'Fastener length',
-    'FastenerType':     'Fastener type'}
+    'FastenerDiameter':  App.Qt.translate("Asm4_InfoPart", 'Fastener diameter'),
+    'FastenerLength':    App.Qt.translate("Asm4_InfoPart", 'Fastener length'),
+    'FastenerType':      App.Qt.translate("Asm4_InfoPart", 'Fastener type')}
 
 ConfUserDir = os.path.join(App.getUserAppDataDir(),'Templates')
 ConfUserFilename = "Asm4_infoPartConf.json"
@@ -115,7 +115,7 @@ def infoDefault(part):
     part.Type
     if part.Type =="Assembly" and part.TypeId == 'App::Part':
 
-        print ("We have an assembly")
+        print ( App.Qt.translate("Asm4_InfoPart", "We have an assembly"))
         try:
             infoKeys.AssignCustomerValuesIntoUserFieldsForPartWithSingleBody(part, doc, None)
         except NotImplementedError as e:
@@ -237,10 +237,10 @@ class infoPartCmd():
         super(infoPartCmd, self).__init__()
 
     def GetResources(self):
-        tooltip  = "<p>Edit Part information</p>"
-        tooltip += "<p>User-supplied information can be added to a part</p>"
+        tooltip  =  App.Qt.translate("Asm4_InfoPart", "<p>Edit Part information</p>"
+        + "<p>User-supplied information can be added to a part</p>")
         iconFile = os.path.join(Asm4.iconPath, 'Asm4_PartInfo.svg')
-        return {"MenuText": "Edit Part Information", "ToolTip": tooltip, "Pixmap": iconFile}
+        return {"MenuText":  App.Qt.translate("Asm4_InfoPart", "Edit Part Information"), "ToolTip": tooltip, "Pixmap": iconFile}
 
     def IsActive(self):
         if App.ActiveDocument and Asm4.getSelectedContainer():
@@ -263,7 +263,7 @@ class infoPartUI():
         self.form = self.base
         iconFile = os.path.join(Asm4.iconPath, 'Asm4_PartInfo.svg')
         self.form.setWindowIcon(QtGui.QIcon(iconFile))
-        self.form.setWindowTitle("Edit Part Information")
+        self.form.setWindowTitle( App.Qt.translate("Asm4_InfoPart", "Edit Part Information"))
         # has been checked before
         self.part = Asm4.getSelectedContainer()
         # Check and load if the configuration file exists
@@ -373,7 +373,7 @@ class infoPartUI():
         mb.setText("The Part Info field\nhas been cleared")
         mb.exec_()
         '''
-        Asm4.warningBox("The Part Info field has been cleared")
+        Asm4.warningBox( App.Qt.translate("Asm4_InfoPart", "The Part Info field has been cleared"))
         self.finish()
 
 
@@ -515,12 +515,12 @@ class infoPartUI():
 
         # Buttons
         self.buttonsLayout = QtGui.QHBoxLayout()
-        self.confFields = QtGui.QPushButton('Configure fields')
-        self.confFields.setToolTip('Edit fields')
-        self.reinit = QtGui.QPushButton('Reset fields')
-        self.reinit.setToolTip('Reset fields')
-        self.autoFill = QtGui.QPushButton('Autofill data')
-        self.autoFill.setToolTip('Autofill fields')
+        self.confFields = QtGui.QPushButton( App.Qt.translate("Asm4_InfoPart", 'Configure fields'))
+        self.confFields.setToolTip( App.Qt.translate("Asm4_InfoPart", 'Edit fields'))
+        self.reinit = QtGui.QPushButton( App.Qt.translate("Asm4_InfoPart", 'Reset fields'))
+        self.reinit.setToolTip( App.Qt.translate("Asm4_InfoPart", 'Reset fields'))
+        self.autoFill = QtGui.QPushButton( App.Qt.translate("Asm4_InfoPart", 'Autofill data'))
+        self.autoFill.setToolTip( App.Qt.translate("Asm4_InfoPart", 'Autofill fields'))
         self.buttonsLayout.addWidget(self.confFields)
         self.buttonsLayout.addWidget(self.reinit)
         self.buttonsLayout.addWidget(self.autoFill)
@@ -552,7 +552,7 @@ class infoPartConfUI():
         self.form = self.base
         iconFile = os.path.join(Asm4.iconPath, 'Asm4_PartInfo.svg')
         self.form.setWindowIcon(QtGui.QIcon(iconFile))
-        self.form.setWindowTitle("Edit Part Information")
+        self.form.setWindowTitle( App.Qt.translate("Asm4_InfoPart", "Edit Part Information"))
 
         self.infoKeysDefault = partInfo.copy()
         self.infoToolTip = infoToolTip.copy()
@@ -585,7 +585,7 @@ class infoPartConfUI():
                     mb.setText("Fields Name cannot be blank\nYou must disable or delete it")
                     mb.exec_()
                     '''
-                    Asm4.warningBox("Fields Name cannot be blank. You must disable or delete it")
+                    Asm4.warningBox( App.Qt.translate("Asm4_InfoPart", "Fields Name cannot be blank. You must disable or delete it"))
                     return
                 i += 1
 
@@ -749,7 +749,7 @@ class infoPartConfUI():
         self.gridLayoutButtons.addWidget(self.suppLab, 1, 0)
 
         # 2nd column holds the data
-        user = QtGui.QLabel('Name')
+        user = QtGui.QLabel( App.Qt.translate("Asm4_InfoPart", 'Name'))
         self.gridLayout.addWidget(user, 0, 1)
 
         i = 1
@@ -789,9 +789,9 @@ class infoPartConfUI():
                 self.checker.append(checked)
                 i += 1
 
-        self.addnew = QtGui.QPushButton('Add')
+        self.addnew = QtGui.QPushButton( App.Qt.translate("Asm4_InfoPart", 'Add'))
         self.gridLayoutButtons.addWidget(self.addnew, 0, 2)
-        self.suppBut = QtGui.QPushButton('Delete')
+        self.suppBut = QtGui.QPushButton( App.Qt.translate("Asm4_InfoPart", 'Delete'))
         self.gridLayoutButtons.addWidget(self.suppBut, 1, 2)
 
         # Actions
@@ -804,14 +804,14 @@ class infoPartConfUI():
 
         # Show the update if any
         if self.updateAutoFieldlist() != None:
-            updateLab = QtGui.QLabel('Update automatic input field')
+            updateLab = QtGui.QLabel( App.Qt.translate("Asm4_InfoPart", 'Update automatic input field'))
             self.gridLayoutUpdate.addWidget(updateLab, 0, 0)
             self.upCombo = QtGui.QComboBox()
             self.gridLayoutUpdate.addWidget(self.upCombo, 1, 0)
 
             for prop in self.updateAutoFieldlist():
                 self.upCombo.addItem(prop)
-            self.upBut = QtGui.QPushButton('Update')
+            self.upBut = QtGui.QPushButton( App.Qt.translate("Asm4_InfoPart", 'Update'))
             self.gridLayoutUpdate.addWidget(self.upBut, 1, 1)
 
             # Actions

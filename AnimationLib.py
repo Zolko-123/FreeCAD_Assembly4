@@ -20,7 +20,6 @@ import Asm4_libs as Asm4
 # from AnimationProvider import animationProvider
 
 
-
 """
     +-----------------------------------------------+
     |            animationProvider class            |
@@ -33,7 +32,7 @@ class animationProvider:
     # Signals that the last frame has been reached by returning True
     #
     def nextFrame(self, resetAnimation) -> bool:
-        raise NotImplementedError("animationProvider.nextFrame not implemented.")
+        raise NotImplementedError(App.Qt.translate("Asm4_Animate", "animationProvider.nextFrame not implemented."))
 
     #
     # Optionally flag that pendulum (forth and back animation) is wanted.
@@ -85,9 +84,8 @@ class animateVariable(animationProvider):
         the selected variable is not valid/does not exist.
         """
         def __init__(self, varName):
-            shortMsg = 'Variable name invalid'
-            detailMsg = 'The selected variable name "' + varName + '" is not valid. ' + \
-                    'Please select an existing variable.'
+            shortMsg = App.Qt.translate("Asm4_Animate", 'Variable name invalid')
+            detailMsg = App.Qt.translate("Asm4_Animate", 'The selected variable name "') + varName + App.Qt.translate("Asm4_Animate", '" is not valid. ') + App.Qt.translate("Asm4_Animate", 'Please select an existing variable.')
             super().__init__(shortMsg, detailMsg)
             self.varName = varName
 
@@ -121,8 +119,8 @@ class animateVariable(animationProvider):
 
 
     def GetResources(self):
-        return {"MenuText": "Animate Assembly",
-                "ToolTip": "Animate Assembly",
+        return {"MenuText": App.Qt.translate("Asm4_Animate", "Animate Assembly"),
+                "ToolTip": App.Qt.translate("Asm4_Animate", "Animate Assembly"),
                 "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_GearsAnimate.svg')
                 }
 
@@ -170,7 +168,7 @@ class animateVariable(animationProvider):
     """
 
     def updateDocList(self):
-        docDocs = ['- Select Document -']
+        docDocs = [App.Qt.translate("Asm4_Animate", '- Select Document -')]
         # Collect all documents currently available
         for doc in App.listDocuments():
             docDocs.append(doc)
@@ -212,7 +210,7 @@ class animateVariable(animationProvider):
     +------------------------------------------------+
     """
     def updateVarList(self):
-        docVars = ['- Select Variable (only float) -']
+        docVars = [App.Qt.translate("Asm4_Animate", '- Select Variable (only float) -')]
         # Collect all variables currently available in the doc
         if self.Variables:
             for prop in self.Variables.PropertiesList:
@@ -329,7 +327,7 @@ class animateVariable(animationProvider):
 
         # SANITY CHECK
         else:
-            print("Unknown State/Transition")
+            print(App.Qt.translate("Asm4_Animate", "Unknown State/Transition"))
 
         return endOfCycle
 
@@ -489,7 +487,7 @@ class animateVariable(animationProvider):
         try:
             import cv2
         except:
-            Asm4.warningBox('The Python module \"OpenCV\" (cv2) is not installed')
+            Asm4.warningBox(App.Qt.translate("Asm4_Animate", 'The Python module \"OpenCV\" (cv2) is not installed'))
             return
         if not self.exporter:
             # Only import the export-lib if requested. Helps to keep WB loading times in check.
@@ -534,7 +532,7 @@ class animateVariable(animationProvider):
         # Our main window will be a QDialog
         # make this dialog stay above the others, always visible
         self.UI.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
-        self.UI.setWindowTitle('Animate Assembly')
+        self.UI.setWindowTitle(App.Qt.translate("Asm4_Animate", 'Animate Assembly'))
         self.UI.setWindowIcon( QtGui.QIcon( os.path.join( Asm4.iconPath , 'FreeCad.svg' ) ) )
         self.UI.setMinimumWidth(470)
         self.UI.setModal(False)
@@ -545,26 +543,26 @@ class animateVariable(animationProvider):
         self.formLayout = QtGui.QFormLayout()
         # select Document
         self.docList = updatingComboBox()
-        self.formLayout.addRow(QtGui.QLabel('Document'), self.docList)
+        self.formLayout.addRow(QtGui.QLabel(App.Qt.translate("Asm4_Animate", 'Document')), self.docList)
         # select Variable
         self.varList = updatingComboBox()
-        self.formLayout.addRow(QtGui.QLabel('Variable'),self.varList)
+        self.formLayout.addRow(QtGui.QLabel(App.Qt.translate("Asm4_Animate", 'Variable')),self.varList)
         # Range Minimum
         self.beginValue = QtGui.QDoubleSpinBox()
         self.beginValue.setRange(numpy.finfo(float).min, numpy.finfo(float).max)
         self.beginValue.setKeyboardTracking(False)
-        self.formLayout.addRow(QtGui.QLabel('Range Begin'), self.beginValue)
+        self.formLayout.addRow(QtGui.QLabel(App.Qt.translate("Asm4_Animate", 'Range Begin')), self.beginValue)
         # Maximum
         self.endValue = QtGui.QDoubleSpinBox()
         self.endValue.setRange(numpy.finfo(float).min, numpy.finfo(float).max)
         self.endValue.setKeyboardTracking(False)
-        self.formLayout.addRow(QtGui.QLabel('Range End'), self.endValue)
+        self.formLayout.addRow(QtGui.QLabel(App.Qt.translate("Asm4_Animate", 'Range End')), self.endValue)
         # Step
         self.stepValue = QtGui.QDoubleSpinBox()
         self.stepValue.setRange( 0.01, numpy.finfo(float).max )
         self.stepValue.setValue( 1.0 )
         self.stepValue.setKeyboardTracking(False)
-        self.formLayout.addRow(QtGui.QLabel('Step Size'), self.stepValue)
+        self.formLayout.addRow(QtGui.QLabel(App.Qt.translate("Asm4_Animate", 'Step Size')), self.stepValue)
         
         # Sleep
         self.sleepValue = QtGui.QDoubleSpinBox()
@@ -572,15 +570,15 @@ class animateVariable(animationProvider):
         self.sleepValue.setValue( 0.0 )
         self.sleepValue.setSingleStep(0.01)
         self.sleepValue.setKeyboardTracking(False)
-        self.formLayout.addRow(QtGui.QLabel('Sleep (s)'),self.sleepValue)
+        self.formLayout.addRow(QtGui.QLabel(App.Qt.translate("Asm4_Animate", 'Sleep (s)')),self.sleepValue)
         # apply the layout
         self.mainLayout.addLayout(self.formLayout)
         self.mainLayout.addWidget(QtGui.QLabel())
 
         # Current Variable Value
         self.curVarLayout = QtGui.QHBoxLayout()
-        self.variableValue = QtGui.QLabel('Variable')
-        self.curVarLayout.addWidget(QtGui.QLabel('Current Value:'))
+        self.variableValue = QtGui.QLabel(App.Qt.translate("Asm4_Animate", 'Variable'))
+        self.curVarLayout.addWidget(QtGui.QLabel(App.Qt.translate("Asm4_Animate", 'Current Value:')))
         self.curVarLayout.addStretch()
         self.curVarLayout.addWidget(self.variableValue)
 
@@ -592,11 +590,11 @@ class animateVariable(animationProvider):
         self.slider.setOrientation(QtCore.Qt.Orientation.Horizontal)
         self.slider.setRange(0, 10)
         self.slider.setTickInterval(0)
-        self.sliderLeftValue = QtGui.QLabel('Begin')
-        self.sliderRightValue = QtGui.QLabel('End')
-        tt = "The last reachable variable value with the given stepping. "
-        tt += "Flagged red in case this is not equal to the intended value. "
-        tt += "The last step of the animation will be reduced to stay inside the configured limits."
+        self.sliderLeftValue = QtGui.QLabel(App.Qt.translate("Asm4_Animate", 'Begin'))
+        self.sliderRightValue = QtGui.QLabel(App.Qt.translate("Asm4_Animate", 'End'))
+        tt = App.Qt.translate("Asm4_Animate", "The last reachable variable value with the given stepping. "
+        + "Flagged red in case this is not equal to the intended value. "
+        + "The last step of the animation will be reduced to stay inside the configured limits.")
         self.sliderRightValue.setToolTip(tt)
         self.sliderLayout.addWidget(self.sliderLeftValue)
         self.sliderLayout.addWidget(self.slider)
@@ -606,30 +604,30 @@ class animateVariable(animationProvider):
 
         # Options
         self.optionsGroup = QtGui.QGroupBox()
-        self.optionsGroup.setToolTip("Options Box")
-        self.optionsGroup.setTitle("Options")
+        self.optionsGroup.setToolTip(App.Qt.translate("Asm4_Animate", "Options Box"))
+        self.optionsGroup.setTitle(App.Qt.translate("Asm4_Animate", "Options"))
         self.optionsGroup.setObjectName("optionsGroup")
         self.optionsLayout = QtGui.QVBoxLayout(self.optionsGroup)
         
         # ForceUpdate, loop and pendulum tick-boxes
         self.ForceRender = QtGui.QCheckBox()
         self.ForceRender.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.ForceRender.setToolTip("Force GUI to update on every step.")
-        self.ForceRender.setText("Force-render every step")
+        self.ForceRender.setToolTip(App.Qt.translate("Asm4_Animate", "Force GUI to update on every step."))
+        self.ForceRender.setText(App.Qt.translate("Asm4_Animate", "Force-render every step"))
         self.ForceRender.setChecked(False)
         self.optionsLayout.addWidget(self.ForceRender)
 
         self.Loop = QtGui.QCheckBox()
         self.Loop.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.Loop.setToolTip("Infinite Loop")
-        self.Loop.setText("Loop")
+        self.Loop.setToolTip(App.Qt.translate("Asm4_Animate", "Infinite Loop"))
+        self.Loop.setText(App.Qt.translate("Asm4_Animate", "Loop"))
         self.Loop.setChecked(False)
         self.optionsLayout.addWidget(self.Loop)
 
         self.Pendulum = QtGui.QCheckBox()
         self.Pendulum.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.Pendulum.setToolTip("Back-and-forth pendulum")
-        self.Pendulum.setText("Pendulum")
+        self.Pendulum.setToolTip(App.Qt.translate("Asm4_Animate", "Back-and-forth pendulum"))
+        self.Pendulum.setText(App.Qt.translate("Asm4_Animate", "Pendulum"))
         self.Pendulum.setChecked(False)
         self.optionsLayout.addWidget(self.Pendulum)
 
@@ -645,36 +643,36 @@ class animateVariable(animationProvider):
         # the button row definition
         self.buttonLayout = QtGui.QHBoxLayout()
         # Close button
-        self.CloseButton = QtGui.QPushButton('Close')
-        self.CloseButton.setToolTip("Exit")
+        self.CloseButton = QtGui.QPushButton(App.Qt.translate("Asm4_Animate", 'Close'))
+        self.CloseButton.setToolTip(App.Qt.translate("Asm4_Animate", "Exit"))
         self.buttonLayout.addWidget(self.CloseButton)
         self.buttonLayout.addStretch()
         # Plot button
-        self.PlotButton = QtGui.QPushButton('Plot')
-        self.PlotButton.setToolTip("Plot trajectories in this sequence")
+        self.PlotButton = QtGui.QPushButton(App.Qt.translate("Asm4_Animate", 'Plot'))
+        self.PlotButton.setToolTip(App.Qt.translate("Asm4_Animate", "Plot trajectories in this sequence"))
         self.buttonLayout.addWidget(self.PlotButton)
         self.buttonLayout.addStretch()
         # Export button
-        self.SaveButton = QtGui.QPushButton('Save')
-        self.SaveButton.setToolTip("Save this sequence as video")
+        self.SaveButton = QtGui.QPushButton(App.Qt.translate("Asm4_Animate", 'Save'))
+        self.SaveButton.setToolTip(App.Qt.translate("Asm4_Animate", "Save this sequence as video"))
         self.buttonLayout.addWidget(self.SaveButton)
         self.buttonLayout.addStretch()
         # Stop button
-        self.StopButton = QtGui.QPushButton('Stop')
+        self.StopButton = QtGui.QPushButton(App.Qt.translate("Asm4_Animate", 'Stop'))
         self.buttonLayout.addWidget(self.StopButton)
         self.buttonLayout.addStretch()
         self.StopButton.setEnabled(False)
         # Run button
-        self.RunButton = QtGui.QPushButton('Run')
-        tt = "Run this sequence in the 3D window"
-        tt+= "\n\nIf the model is large and complex,"
-        tt+= "\nit is advisable to try with 10 frames"
+        self.RunButton = QtGui.QPushButton(App.Qt.translate("Asm4_Animate", 'Run'))
+        tt = App.Qt.translate("Asm4_Animate", "Run this sequence in the 3D window"
+        + "\n\nIf the model is large and complex,"
+        + "\nit is advisable to try with 10 frames")
         self.RunButton.setToolTip(tt)
         self.buttonLayout.addWidget(self.RunButton)
 
         # Add an invisibly dummy button to circumvent QDialogs default-button behavior.
         # We need the enter key to trigger spinbox-commits only, without also triggering button actions.
-        self.DummyButton = QtGui.QPushButton('Dummy')
+        self.DummyButton = QtGui.QPushButton(App.Qt.translate("Asm4_Animate", 'Dummy'))
         self.DummyButton.setDefault(True)
         self.DummyButton.setVisible(False)
         self.buttonLayout.addWidget(self.DummyButton)

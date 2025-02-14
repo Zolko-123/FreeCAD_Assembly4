@@ -9,9 +9,6 @@ import FreeCADGui as Gui
 import FreeCAD as App
 
 import Asm4_libs as Asm4
-from Asm4_Translate import translate
-
-
 
 
 """
@@ -25,8 +22,8 @@ class showLcsCmd:
         super(showLcsCmd,self).__init__()
 
     def GetResources(self):
-        return {"MenuText": translate("Asm4_showLcs", "Show LCS"),
-                "ToolTip": translate("Asm4_showLcs", "Show LCS and Datums of selected part and its children"),
+        return {"MenuText": App.Qt.translate("Asm4_showLcs", "Show LCS"),
+                "ToolTip": App.Qt.translate("Asm4_showLcs", "Show LCS and Datums of selected part and its children"),
                 "Pixmap": os.path.join(Asm4.iconPath, 'Asm4_showLCS.svg')
                 }
 
@@ -52,8 +49,8 @@ class hideLcsCmd:
         super(hideLcsCmd,self).__init__()
 
     def GetResources(self):
-        return {"MenuText": translate("Asm4_hideLcs", "Hide LCS"),
-                "ToolTip": translate("Asm4_hideLcs", "Hide LCS and Datums of selected part and its children"),
+        return {"MenuText": App.Qt.translate("Asm4_hideLcs", "Hide LCS"),
+                "ToolTip": App.Qt.translate("Asm4_hideLcs", "Hide LCS and Datums of selected part and its children"),
                 "Pixmap": os.path.join(Asm4.iconPath, 'Asm4_hideLCS.svg')
                 }
 
