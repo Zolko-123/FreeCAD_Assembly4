@@ -26,6 +26,7 @@ class showLcsCmd:
 
     def GetResources(self):
         return {"MenuText": translate("Asm4_showLcs", "Show LCS"),
+                "Accel" : "",
                 "ToolTip": translate("Asm4_showLcs", "Show LCS and Datums of selected part and its children"),
                 "Pixmap": os.path.join(Asm4.iconPath, 'Asm4_showLCS.svg')
                 }
@@ -53,6 +54,7 @@ class hideLcsCmd:
 
     def GetResources(self):
         return {"MenuText": translate("Asm4_hideLcs", "Hide LCS"),
+                "Accel" : "",
                 "ToolTip": translate("Asm4_hideLcs", "Hide LCS and Datums of selected part and its children"),
                 "Pixmap": os.path.join(Asm4.iconPath, 'Asm4_hideLCS.svg')
                 }
