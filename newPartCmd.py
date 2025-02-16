@@ -83,25 +83,19 @@ class newPart:
                 lcs0 = Asm4.newLCS(newPart, 'PartDesign::CoordinateSystem', 'LCS_Origin', [(newPart.Origin.OriginFeatures[0],'')])
                 lcs0.MapMode = 'ObjectXY'
                 lcs0.MapReversed = False
-
                 # Customize Origin planes (colors, visibility)
                 # print("> New Body:", newPart.Name, newPart.Label)
-
-                for obj in newPart.Origin.OutList:
-
-                    if obj.Name[1:5] == "_Axis":
-                        obj.Visibility = False
-
-                    if obj.Name[0:7] == "XY_Plane":
-                        obj.ViewObject.ShapeColor=(1.0, 0.0, 0.0)
-                    if obj.Name[0:7] == "YZ_Plane":
-                        obj.ViewObject.ShapeColor=(0.0, 0.6, 0.0)
-                    if obj.Name[0:7] == "XZ_Plane":
-                        obj.ViewObject.ShapeColor=(0.0, 0.0, 0.8)
-
+                for feature in newPart.Origin.OriginFeatures:
+                    if feature.Name[1:6] == "_Axis":
+                        feature.Visibility = False
+                    if feature.Name[0:8] == "XY_Plane":
+                        feature.ViewObject.ShapeColor=(0.0, 0.0, 0.8)
+                    if feature.Name[0:8] == "YZ_Plane":
+                        feature.ViewObject.ShapeColor=(1.0, 0.0, 0.0)
+                    if feature.Name[0:8] == "XZ_Plane":
+                        feature.ViewObject.ShapeColor=(0.0, 0.6, 0.0)
                 if self.partType=='PartDesign::Body':
                     newPart.Origin.Visibility = True
-
                 # add AttachmentEngine
                 # oooops, no, creates problems because it creates an AttachmentOffset property that collides with Asm4
                 # newPart.addExtension("Part::AttachExtensionPython")
