@@ -316,6 +316,11 @@ class insertLink():
     |     defines the UI, only static elements      |
     +-----------------------------------------------+
     """
+
+    def mouseDoubleClickEvent(self, event):
+        self.onCreateLink()
+        # print('dblclick:', event.text())
+
     def drawUI(self):
         # Our main window is a QDialog
         # make this dialog stay above the others, always visible
@@ -340,6 +345,10 @@ class insertLink():
         # Insert Link button
         self.insertButton = QtGui.QPushButton('Insert', self.UI)
         self.insertButton.setDefault(True)
+
+        # self.connect(self.partList, QtCore.SIGNAL("itemDoubleClicked(QListWidgetItem *)"), self.showItem)
+        self.partList.itemDoubleClicked.connect(self.mouseDoubleClickEvent)
+
 
         # Place the widgets with layouts
         self.mainLayout = QtGui.QVBoxLayout(self.UI)
