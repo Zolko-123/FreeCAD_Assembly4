@@ -34,6 +34,7 @@ class placeLinkCmd():
 
     def GetResources(self):
         return {"MenuText": "Edit Placement of a Part",
+                "Accel": "e",
                 "ToolTip": "Move/Attach a Part in the assembly",
                 "Pixmap" : os.path.join( Asm4.iconPath , 'Place_Link.svg')
                 }

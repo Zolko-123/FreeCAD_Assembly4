@@ -68,8 +68,23 @@ class newDatum:
 
 
     def GetResources(self):
+
+        if self.datumName   == 'Point':
+            accel = ""
+        elif self.datumName == 'Axis':
+            accel = ""
+        elif self.datumName == 'Plane':
+            accel = ""
+        elif self.datumName == 'LCS':
+            accel = ""
+        elif self.datumName == 'Sketch':
+            accel = ""
+        else:
+            accel = ""
+
         return {"MenuText": self.menutext,
                 "ToolTip": self.tooltip,
+                'Accel': accel,
                 "Pixmap" : self.icon }
 
 
@@ -173,6 +188,7 @@ class newDatum:
 class newHole:
     def GetResources(self):
         return {"MenuText": "New Hole Axis",
+                "Accel" : "h",
                 "ToolTip": "Create a Datum Axis attached to a hole",
                 "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_Hole.svg')
                 }
