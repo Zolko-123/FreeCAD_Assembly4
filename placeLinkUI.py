@@ -212,8 +212,7 @@ class placeLinkUI():
                     parent_index += 1
         if not parent_found:
             parent_index = 0
-        self.parentList.setCurrentIndex(parent_index) # why is it not working?
-        self.parentList.setCurrentIndex(1)
+        self.parentList.setCurrentIndex(parent_index)
         # this should have triggered Asm4.getPartLCS() to fill the LCS list
 
         # find the old attachment Datum in the list of the Datums in the linked part...
