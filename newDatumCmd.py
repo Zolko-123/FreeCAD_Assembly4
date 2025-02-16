@@ -188,7 +188,7 @@ class newDatum:
 class newHole:
     def GetResources(self):
         return {"MenuText": "New Hole Axis",
-                "Accel" : "h",
+                "Accel" : "",
                 "ToolTip": "Create a Datum Axis attached to a hole",
                 "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_Hole.svg')
                 }
