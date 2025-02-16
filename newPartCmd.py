@@ -83,19 +83,25 @@ class newPart:
                 lcs0 = Asm4.newLCS(newPart, 'PartDesign::CoordinateSystem', 'LCS_Origin', [(newPart.Origin.OriginFeatures[0],'')])
                 lcs0.MapMode = 'ObjectXY'
                 lcs0.MapReversed = False
-                # set nice colors for the Origin planes
-                for origin in App.ActiveDocument.findObjects(Type='App::Origin'):
-                    if origin.getParentGeoFeatureGroup() == newPart:
-                        index = origin.Name[6:]
-                        App.ActiveDocument.getObject('YZ_Plane'+index).ViewObject.ShapeColor=(1.0, 0.0, 0.0)
-                        App.ActiveDocument.getObject('XZ_Plane'+index).ViewObject.ShapeColor=(0.0, 0.6, 0.0)
-                        App.ActiveDocument.getObject('XY_Plane'+index).ViewObject.ShapeColor=(0.0, 0.0, 0.8)
-                        App.ActiveDocument.getObject('X_Axis'+index).Visibility = False
-                        App.ActiveDocument.getObject('Y_Axis'+index).Visibility = False
-                        App.ActiveDocument.getObject('Z_Axis'+index).Visibility = False
-                        # but only show it for PartDesign Bodies
-                        if self.partType=='PartDesign::Body':
-                            origin.Visibility = True
+
+                # Customize Origin planes (colors, visibility)
+                # print("> New Body:", newPart.Name, newPart.Label)
+
+                for obj in newPart.Origin.OutList:
+
+                    if obj.Name[1:5] == "_Axis":
+                        obj.Visibility = False
+
+                    if obj.Name[0:7] == "XY_Plane":
+                        obj.ViewObject.ShapeColor=(1.0, 0.0, 0.0)
+                    if obj.Name[0:7] == "YZ_Plane":
+                        obj.ViewObject.ShapeColor=(0.0, 0.6, 0.0)
+                    if obj.Name[0:7] == "XZ_Plane":
+                        obj.ViewObject.ShapeColor=(0.0, 0.0, 0.8)
+
+                if self.partType=='PartDesign::Body':
+                    newPart.Origin.Visibility = True
+
                 # add AttachmentEngine
                 # oooops, no, creates problems because it creates an AttachmentOffset property that collides with Asm4
                 # newPart.addExtension("Part::AttachExtensionPython")
