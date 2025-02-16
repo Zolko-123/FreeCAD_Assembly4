@@ -44,6 +44,7 @@ class insertLink():
         tooltip += "Select the broken link, launch this command, and select a new target part in the list</p>"
         iconFile = 'Link_Part.svg'
         return {"MenuText" : "Insert Part", 
+                "Accel"    : "i",
                 "ToolTip"  : tooltip, 
                 "Pixmap"   : os.path.join( Asm4.iconPath , iconFile )
                 }
