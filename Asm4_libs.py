@@ -748,4 +748,106 @@ class QUnitSpinBox(QtGui.QDoubleSpinBox):
         return super().setValue(
             distance / self.length_divisor,
         ) 
-        
+
+
+#=========================
+
+# https://github.com/FreeCAD/FreeCAD/blob/af1f7385d47b9887e758794afdc3b1f69b406b96/src/Mod/CAM/Path/Base/Gui/Util.py#L114
+# https://github.com/gbroques/freecad-rotations
+
+from math import cos, radians, sin, acos, degrees, sqrt
+from typing import Tuple
+
+def euler_to_quaternion(yaw: float,
+                        pitch: float,
+                        roll: float) -> Tuple[float, float, float, float]:
+    """
+    Convert Euler angles (in degrees) to quaternion form:
+        q0 = x, q1 = y, q2 = z and q3 = w
+    where the quaternion is specified by q = w + xi + yj + zk.
+
+    See:
+        https://github.com/FreeCAD/FreeCAD/blob/0.19.2/src/Base/Rotation.cpp#L632-L658
+        https://en.wikipedia.org/wiki/Quaternion
+    """
+    y = radians(yaw)
+    p = radians(pitch)
+    r = radians(roll)
+
+    c1 = cos(y / 2.0)
+    s1 = sin(y / 2.0)
+    c2 = cos(p / 2.0)
+    s2 = sin(p / 2.0)
+    c3 = cos(r / 2.0)
+    s3 = sin(r / 2.0)
+
+    qx = (c1 * c2 * s3) - (s1 * s2 * c3)
+    qy = (c1 * s2 * c3) + (s1 * c2 * s3)
+    qz = (s1 * c2 * c3) - (c1 * s2 * s3)
+    qw = (c1 * c2 * c3) + (s1 * s2 * s3)
+
+    return (qx, qy, qz, qw)
+
+
+def quaternion_to_axis_angle(quaternion: Tuple[float, float, float, float]) -> Tuple[Tuple[float, float, float], float]:
+    """
+    Convert quaternion to axis-angle form.
+
+    Axis-angle is a two-element tuple where
+    the first element is the axis vector (x, y, z),
+    and the second element is the angle in degrees.
+
+    See:
+        https://github.com/FreeCAD/FreeCAD/blob/0.19.2/src/Base/Rotation.cpp#L119-L140
+        https://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToAngle/index.htm
+    """
+    qx, qy, qz, qw = quaternion
+
+    s = sqrt(1 - qw**2)
+    normalization_factor = 1 if s < 0.001 else s
+    x = qx / normalization_factor
+    y = qy / normalization_factor
+    z = qz / normalization_factor
+    axis = (x, y, z)
+
+    angle = degrees(2 * acos(qw))
+
+    return (axis, angle)
+
+
+import Path
+import Path.Base.Util as PathUtil
+
+
+def updateInputField_with_value(obj, prop, value):
+    """updateInputField(obj, prop, value) ... update obj's property prop with the given value.
+    The property's value is only assigned if the new value differs from the current value.
+    This prevents onChanged notifications where the value didn't actually change.
+    """
+    Path.Log.track("value: {}".format(value))
+    attr = PathUtil.getProperty(obj, prop)
+    attrValue = attr.Value if hasattr(attr, "Value") else attr
+
+    isDiff = False
+    if not Path.Geom.isRoughly(attrValue, value):
+        isDiff = True
+    else:
+        if hasattr(obj, "ExpressionEngine"):
+            exprSet = False
+            for (prp, expr) in obj.ExpressionEngine:
+                if prp == prop:
+                    exprSet = True
+                    Path.Log.debug('prop = "expression": {} = "{}"'.format(prp, expr))
+                    value = FreeCAD.Units.Quantity(obj.evalExpression(expr)).Value
+                    if not Path.Geom.isRoughly(attrValue, value):
+                        isDiff = True
+                    break
+
+    if isDiff:
+        Path.Log.debug(
+            "updateInputField(%s, %s): %.2f -> %.2f" % (obj.Label, prop, attr, value)
+        )
+        PathUtil.setProperty(obj, prop, value)
+        return True
+
+    return False

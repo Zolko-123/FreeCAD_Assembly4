@@ -9,10 +9,12 @@
 
 import os, time
 
-from PySide import QtGui, QtCore
+from PySide import QtGui, QtCore, QtWidgets
 import FreeCADGui as Gui
 import FreeCAD as App
 from FreeCAD import Console as FCC
+
+import Path.Base.Gui.Util as PathGuiUtil
 
 import Asm4_libs as Asm4
 from placePartUI import placePartUI
@@ -72,6 +74,28 @@ class placeLinkUI():
             self.old_AO = []
             self.old_linkLCS = ''
 
+        try:
+            self.XRotationStep = self.selectedObj.xRotationStep.Value
+        except:
+            self.XRotationStep = 45
+            self.selectedObj.addProperty("App::PropertyAngle", "xRotationStep", "Assembly", "X Rotation Step")
+            self.selectedObj.xRotationStep = self.XRotationStep
+
+        try:
+            self.YRotationStep = self.selectedObj.yRotationStep.Value
+        except:
+            self.YRotationStep = 45
+            self.selectedObj.addProperty("App::PropertyAngle", "yRotationStep", "Assembly", "Y Rotation Step")
+            self.selectedObj.yRotationStep = self.YRotationStep
+
+        try:
+            self.ZRotationStep = self.selectedObj.zRotationStep.Value
+        except:
+            self.ZRotationStep = 45
+            self.selectedObj.addProperty("App::PropertyAngle", "zRotationStep", "Assembly", "Z Rotation Step")
+            self.selectedObj.zRotationStep = self.ZRotationStep
+
+
         # define the GUI
         # draw the GUI, objects are defined later down
         # self.UI = QtGui.QWidget()
@@ -87,9 +111,9 @@ class placeLinkUI():
         self.old_LinkRotation = self.selectedObj.AttachmentOffset.Rotation
         self.old_LinkPosition = self.selectedObj.AttachmentOffset.Base
         # default values correspond to original AttachmentOffset of linked part
-        self.Xtranslation = self.old_LinkPosition[0]
-        self.Ytranslation = self.old_LinkPosition[1]
-        self.Ztranslation = self.old_LinkPosition[2]
+        self.Xtranslation = self.old_LinkPosition.x
+        self.Ytranslation = self.old_LinkPosition.y
+        self.Ztranslation = self.old_LinkPosition.z
         self.XrotationAngle = self.old_LinkRotation.toEuler()[0]
         self.YrotationAngle = self.old_LinkRotation.toEuler()[1]
         self.ZrotationAngle = self.old_LinkRotation.toEuler()[2]
@@ -188,7 +212,8 @@ class placeLinkUI():
                     parent_index += 1
         if not parent_found:
             parent_index = 0
-        self.parentList.setCurrentIndex( parent_index )
+        self.parentList.setCurrentIndex(parent_index) # why is it not working?
+        self.parentList.setCurrentIndex(1)
         # this should have triggered Asm4.getPartLCS() to fill the LCS list
 
         # find the old attachment Datum in the list of the Datums in the linked part...
@@ -503,47 +528,175 @@ class placeLinkUI():
 
 
     # Reorientation
-    def reorientLink( self ):
-        moveXYZ = App.Placement( App.Vector(self.Xtranslation,self.Ytranslation,self.Ztranslation), self.old_LinkRotation )
-        # New AttachmentOffset rotation of the link is difference between set rotation angles and original AttachmentOffset rotation of the link
-        rotationX = App.Placement( App.Vector(0.00, 0.00, 0.00), App.Rotation( App.Vector(1,0,0), self.XrotationAngle - self.old_LinkRotation.toEuler()[0] ))
-        rotationY = App.Placement( App.Vector(0.00, 0.00, 0.00), App.Rotation( App.Vector(0,1,0), self.YrotationAngle - self.old_LinkRotation.toEuler()[1] ))
-        rotationZ = App.Placement( App.Vector(0.00, 0.00, 0.00), App.Rotation( App.Vector(0,0,1), self.ZrotationAngle - self.old_LinkRotation.toEuler()[2] ))
+
+    def reorientLink(self):
+
+        # yaw   around z-axis
+        # pitch around y-axis
+        # roll  around x-axis
+
+        # q = Asm4.euler_to_quaternion(self.ZrotationAngle, self.YrotationAngle, self.XrotationAngle)
+        # axis, angle = Asm4.quaternion_to_axis_angle(q)
+        # Asm4.updateInputField_with_value(self.selectedObj, "AttachmentOffset.Rotation.Axis.x", axis[0])
+        # Asm4.updateInputField_with_value(self.selectedObj, "AttachmentOffset.Rotation.Axis.y", axis[1])
+        # Asm4.updateInputField_with_value(self.selectedObj, "AttachmentOffset.Rotation.Axis.z", axis[2])
+        # Asm4.updateInputField_with_value(self.selectedObj, "AttachmentOffset.Rotation.Angle",  angle)
+
+        moveXYZ = App.Placement(App.Vector(self.Xtranslation, self.Ytranslation, self.Ztranslation), self.old_LinkRotation)
+
+        # New AttachmentOffset rotation of the link is difference between
+        # set rotation angles and original AttachmentOffset rotation of the link
+
+        # App.Placement(
+        #     App.Vector(0,0,0), 
+        #     App.Rotation(11,22,33),
+        #     App.Vector(0,0,0))
+
+        rotationX = App.Placement(
+            App.Vector(0, 0, 0),
+            App.Rotation(App.Vector(1, 0, 0), self.XrotationAngle - self.old_LinkRotation.toEuler()[0]),
+            App.Vector(0, 0, 0))
+
+        rotationY = App.Placement(
+            App.Vector(0, 0, 0),
+            App.Rotation(App.Vector(0, 1, 0), self.YrotationAngle - self.old_LinkRotation.toEuler()[1]),
+            App.Vector(0, 0, 0))
+
+        rotationZ = App.Placement(
+            App.Vector(0, 0, 0),
+            App.Rotation(App.Vector(0, 0, 1), self.ZrotationAngle - self.old_LinkRotation.toEuler()[2]),
+            App.Vector(0, 0, 0))
+
         self.selectedObj.AttachmentOffset = moveXYZ * rotationX * rotationY * rotationZ
         self.selectedObj.recompute()
 
+
+    def fold_higer_angles(self, angle):
+
+        sign = "+"
+        if angle < 0:
+            sign = "-"
+
+        angle = abs(angle) % 360
+
+        if sign == "-":
+            angle = -angle
+
+
+        # if angle > 270.0: 
+        #     angle = angle - 270.0
+        # else:
+        #     angle = angle + 90.0
+
+        return angle
+
+
+    # Translations
+    #==============================
+
     def onXTranslValChanged(self):
-        self.Xtranslation = self.XtranslSpinBox.value()
+        self.Xtranslation = self.XtranslSpinBox.property('value')
+        PathGuiUtil.updateInputField(self.selectedObj, "Placement.Base.x", self.XtranslSpinBox)
         self.reorientLink()
         
     def onYTranslValChanged(self):
-        self.Ytranslation = self.YtranslSpinBox.value()
+        self.Ytranslation = self.YtranslSpinBox.property('value')
+        PathGuiUtil.updateInputField(self.selectedObj, "Placement.Base.y", self.YtranslSpinBox)
         self.reorientLink()
         
     def onZTranslValChanged(self):
-        self.Ztranslation = self.ZtranslSpinBox.value()
-        self.reorientLink()
-        
-    # Rotations
-    def onRotX(self):
-        if self.XrotationAngle > 270.0: 
-            self.XrotationAngle = self.XrotationAngle - 270.0
-        else:
-            self.XrotationAngle = self.XrotationAngle + 90.0
+        self.Ztranslation = self.ZtranslSpinBox.property('value')
+        PathGuiUtil.updateInputField(self.selectedObj, "Placement.Base.z", self.ZtranslSpinBox)
         self.reorientLink()
 
-    def onRotY(self):
-        if self.YrotationAngle > 270.0: 
-            self.YrotationAngle = self.YrotationAngle - 270.0
-        else:
-            self.YrotationAngle = self.YrotationAngle + 90.0
+
+    # X-Rotations
+    #==============================
+
+    def onXRotValChanged(self):
+        self.XRotationStep = self.XRotSpinBox.value()
+        self.RotXButton_m.setToolTip("Roll rotate +{}° X-axis".format(self.XRotationStep))
+        self.RotXButton_p.setToolTip("Roll rotate -{}° around X-axis".format(self.XRotationStep))
+
+    def onRotX_m(self):
+        angle = self.XRotSpinBox.value()
+        self.XrotationAngle = self.fold_higer_angles(self.XrotationAngle - angle)
+        # self.XRotSpinBox.setProperty("rawValue", angle)
         self.reorientLink()
 
-    def onRotZ(self):
-        if self.ZrotationAngle > 270.0: 
-            self.ZrotationAngle = self.ZrotationAngle - 270.0
-        else:
-            self.ZrotationAngle = self.ZrotationAngle + 90.0
+
+    def onRotX_p(self):
+        angle = self.XRotSpinBox.value()
+        self.XrotationAngle = self.fold_higer_angles(self.XrotationAngle + angle)
+        # self.XRotSpinBox.setProperty("rawValue", angle)
+        self.reorientLink()
+
+
+    def onRotXButton_rst(self):
+        # pass
+        self.XrotationAngle = self.fold_higer_angles(0)
+        # self.XrotationAngle = self.XRotSpinBox.value()
+        # self.XrotationAngle = self.fold_higer_angles(self.XrotationAngle)
+        self.reorientLink()
+
+
+    # Y-Rotations
+    #==============================
+
+    def onYRotValChanged(self):
+        self.YRotationStep = self.YRotSpinBox.value()
+        self.RotYButton_m.setToolTip("Roll rotate +{}° Y-axis".format(self.YRotationStep))
+        self.RotYButton_p.setToolTip("Roll rotate -{}° around Y-axis".format(self.YRotationStep))
+
+    def onRotY_m(self):
+        angle = self.YRotSpinBox.value()
+        self.YrotationAngle = self.fold_higer_angles(self.YrotationAngle - angle)
+        # self.YRotSpinBox.setProperty("rawValue", angle)
+        self.reorientLink()
+
+
+    def onRotY_p(self):
+        angle = self.YRotSpinBox.value()
+        self.YrotationAngle = self.fold_higer_angles(self.YrotationAngle + angle)
+        # self.YRotSpinBox.setProperty("rawValue", angle)
+        self.reorientLink()
+
+
+    def onRotYButton_rst(self):
+        # pass
+        self.YrotationAngle = self.fold_higer_angles(0)
+        # self.XrotationAngle = self.XRotSpinBox.value()
+        # self.XrotationAngle = self.fold_higer_angles(self.XrotationAngle)
+        self.reorientLink()
+
+
+    # Z-Rotations
+    #==============================
+
+    def onZRotValChanged(self):
+        self.ZRotationStep = self.ZRotSpinBox.value()
+        self.RotZButton_m.setToolTip("Roll rotate +{}° Z-axis".format(self.ZRotationStep))
+        self.RotZButton_p.setToolTip("Roll rotate -{}° around Z-axis".format(self.ZRotationStep))
+
+    def onRotZ_m(self):
+        angle = self.ZRotSpinBox.value()
+        self.ZrotationAngle = self.fold_higer_angles(self.ZrotationAngle - angle)
+        # self.ZRotSpinBox.setProperty("rawValue", angle)
+        self.reorientLink()
+
+
+    def onRotZ_p(self):
+        angle = self.ZRotSpinBox.value()
+        self.ZrotationAngle = self.fold_higer_angles(self.ZrotationAngle + angle)
+        # self.ZRotSpinBox.setProperty("rawValue", angle)
+        self.reorientLink()
+
+
+    def onRotZButton_rst(self):
+        # pass
+        self.ZrotationAngle = self.fold_higer_angles(0)
+        # self.XrotationAngle = self.XRotSpinBox.value()
+        # self.XrotationAngle = self.fold_higer_angles(self.XrotationAngle)
         self.reorientLink()
 
 
@@ -669,9 +822,12 @@ class placeLinkUI():
         parentIcon = self.rootAssembly.ViewObject.Icon
         self.parentList.addItem( parentIcon, 'Parent Assembly', self.rootAssembly )
         # set the old position values
-        self.XtranslSpinBox.setValue(self.old_LinkPosition[0])
-        self.YtranslSpinBox.setValue(self.old_LinkPosition[1])
-        self.ZtranslSpinBox.setValue(self.old_LinkPosition[2])
+        self.XtranslSpinBox.setProperty("rawValue", self.old_LinkPosition.x)
+        self.YtranslSpinBox.setProperty("rawValue", self.old_LinkPosition.y)
+        self.ZtranslSpinBox.setProperty("rawValue", self.old_LinkPosition.z)
+        PathGuiUtil.updateInputField(self.selectedObj, "Placement.Base.x", self.XtranslSpinBox)
+        PathGuiUtil.updateInputField(self.selectedObj, "Placement.Base.y", self.YtranslSpinBox)
+        PathGuiUtil.updateInputField(self.selectedObj, "Placement.Base.z", self.ZtranslSpinBox)
 
 
 
@@ -689,7 +845,7 @@ class placeLinkUI():
 
         # combobox showing all available App::Link
         self.parentList = QtGui.QComboBox()
-        self.parentList.setMaximumWidth(300)
+        #self.parentList.setMaximumWidth(300)
         self.parentList.setToolTip('Choose the part in which the attachment\ncoordinate system is to be found')
         # the parent assembly is hardcoded, and made the first real element
         self.formLayout.addRow(QtGui.QLabel('Attach to :'),self.parentList)
@@ -732,55 +888,225 @@ class placeLinkUI():
         # add the 2 columns
         self.columnsLayout.addLayout(self.leftLayout)
         self.columnsLayout.addLayout(self.rightLayout)
+
+        self.formLayout.addRow(QtGui.QLabel('')) # vertical spacer to reduce clutter
+
         self.mainLayout.addLayout(self.columnsLayout)
 
         # The number of decimals in the global configuration
         numberOfDecimals = App.ParamGet("User parameter:BaseApp/Preferences/Units").GetInt('Decimals')
 
-        # X Translation Value
-        self.XoffsetLayout = QtGui.QHBoxLayout()
-        self.XtranslSpinBoxLabel = self.XoffsetLayout.addWidget(QtGui.QLabel("X Translation :"))
-        self.XtranslSpinBox = Asm4.QUnitSpinBox()
-        self.XtranslSpinBox.setRange(-999999.00, 999999.00)
-        self.XtranslSpinBox.setDecimals(numberOfDecimals)
-        self.XtranslSpinBox.setToolTip("Translation along X axis")
-        self.RotXButton = QtGui.QPushButton('Rotate X +90°')
-        self.RotXButton.setToolTip("Rotate 90 deg around X axis")
-        # add the QLDoubleSpinBox
-        self.XoffsetLayout.addWidget(self.XtranslSpinBox)
-        self.XoffsetLayout.addStretch()
-        self.XoffsetLayout.addWidget(self.RotXButton)
-        self.mainLayout.addLayout(self.XoffsetLayout)
 
-        # Y Translation Value
-        self.YoffsetLayout = QtGui.QHBoxLayout()
-        self.YtranslSpinBoxLabel = self.YoffsetLayout.addWidget(QtGui.QLabel("Y Translation :"))
-        self.YtranslSpinBox = Asm4.QUnitSpinBox()
-        self.YtranslSpinBox.setRange(-999999.00, 999999.00)
-        self.YtranslSpinBox.setDecimals(numberOfDecimals)
-        self.YtranslSpinBox.setToolTip("Translation along Y")
-        self.RotYButton = QtGui.QPushButton('Rotate Y +90°')
-        self.RotYButton.setToolTip("Rotate 90 deg around Y axis")
-        # add the QLDoubleSpinBox
-        self.YoffsetLayout.addWidget(self.YtranslSpinBox)
-        self.YoffsetLayout.addStretch()
-        self.YoffsetLayout.addWidget(self.RotYButton)
-        self.mainLayout.addLayout(self.YoffsetLayout)
+        # ===
+        # ===
+        # ===
 
-        # Z Translation Value
-        self.ZoffsetLayout = QtGui.QHBoxLayout()
-        self.ZtranslSpinBoxLabel = self.ZoffsetLayout.addWidget(QtGui.QLabel("Z Translation :"))
-        self.ZtranslSpinBox = Asm4.QUnitSpinBox()
-        self.ZtranslSpinBox.setRange(-999999.00, 999999.00)
-        self.ZtranslSpinBox.setDecimals(numberOfDecimals)
-        self.ZtranslSpinBox.setToolTip("Translation along Z:")
-        self.RotZButton = QtGui.QPushButton('Rotate Z +90°')
-        self.RotZButton.setToolTip("Rotate 90 deg around Z axis")
-        # add to the layout
-        self.ZoffsetLayout.addWidget(self.ZtranslSpinBox)
-        self.ZoffsetLayout.addStretch()
-        self.ZoffsetLayout.addWidget(self.RotZButton)
-        self.mainLayout.addLayout(self.ZoffsetLayout)
+        self.columnsLayout_2 = QtGui.QHBoxLayout()
+        self.layout_1 = QtGui.QVBoxLayout()
+        self.layout_2 = QtGui.QVBoxLayout()
+        self.layout_3 = QtGui.QVBoxLayout()
+        self.layout_4 = QtGui.QVBoxLayout()
+
+        ui = Gui.UiLoader()
+
+        # ROW: X-Translation and X-Rotation
+        # ======================================
+
+        self.XoffsetLayout_1 = QtGui.QHBoxLayout()
+        self.XoffsetLayout_2 = QtGui.QHBoxLayout()
+        self.XoffsetLayout_3 = QtGui.QHBoxLayout()
+
+        self.XtranslSpinBox = ui.createWidget("Gui::QuantitySpinBox")
+        self.XtranslSpinBox.setMinimumWidth(120)
+        self.XtranslSpinBox.setProperty("unit", "mm")
+        self.XtranslSpinBox.setToolTip("Translation along X-axis")
+        PathGuiUtil.QuantitySpinBox(self.XtranslSpinBox, self.selectedObj, "Placement.Base.x")
+
+        # self.XRotSpinBox = Asm4.QUnitSpinBox()
+        # self.XRotSpinBox.setRange(-999999.00, 999999.00)
+        # self.XRotSpinBox.setDecimals(80)
+        # self.XRotSpinBox.setProperty("unit", "deg")
+        # self.XRotSpinBox.setToolTip("Rotation step along X-axis")
+
+        self.XRotSpinBox = QtGui.QDoubleSpinBox()
+        self.XRotSpinBox.setSuffix("°")
+        self.XRotSpinBox.setMinimum(-360)
+        self.XRotSpinBox.setMaximum(360)
+        self.XRotSpinBox.setSingleStep(15)
+        self.XRotSpinBox.setValue(self.XRotationStep)  # Default value
+        self.XRotSpinBox.setToolTip("Rotation step along X-axis")
+
+        self.RotXButton_m = QtGui.QPushButton()
+        self.RotXButton_m.setIcon(self.RotXButton_m.style().standardIcon(QtGui.QStyle.SP_ArrowUp))
+        self.RotXButton_m.setStyleSheet("padding-left: 1px; padding-right: 1px;");
+        self.RotXButton_m.setMinimumWidth(40)
+        self.RotXButton_m.setMaximumWidth(40)
+        self.RotXButton_m.setToolTip("Roll rotate +{}° around X-axis".format(self.XRotationStep))
+
+        self.RotXButton_p = QtGui.QPushButton()
+        self.RotXButton_p.setIcon(self.RotXButton_p.style().standardIcon(QtGui.QStyle.SP_ArrowDown))
+        self.RotXButton_p.setStyleSheet("padding-left: 1px; padding-right: 1px;");
+        self.RotXButton_p.setMinimumWidth(40)
+        self.RotXButton_p.setMaximumWidth(40)
+        self.RotXButton_p.setToolTip("Roll rotate -{}° around X-axis".format(self.XRotationStep))
+
+        self.RotXButton_rst = QtGui.QPushButton("X0")
+        self.RotXButton_rst.setStyleSheet("padding-left: 1px; padding-right: 1px;");
+        self.RotXButton_rst.setMinimumWidth(40)
+        self.RotXButton_rst.setMaximumWidth(40)
+        self.RotXButton_rst.setToolTip("Reset X-Rotation")
+
+        self.XoffsetLayout_1.addWidget(QtGui.QLabel("X Translation:"))
+        self.XoffsetLayout_1.addWidget(self.XtranslSpinBox)
+
+        self.XoffsetLayout_2.addWidget(QtGui.QLabel("X Rotation Step:"))
+        self.XoffsetLayout_2.addWidget(self.XRotSpinBox)
+
+        self.XoffsetLayout_3.addWidget(self.RotXButton_m)
+        self.XoffsetLayout_3.addWidget(self.RotXButton_p)
+        self.XoffsetLayout_3.addWidget(self.RotXButton_rst)
+
+        self.layout_1.addLayout(self.XoffsetLayout_1)
+        self.layout_3.addLayout(self.XoffsetLayout_2)
+        self.layout_4.addLayout(self.XoffsetLayout_3)
+
+        # ROW: Y-Translation and Y-Rotation
+        # ======================================
+
+        self.YoffsetLayout_1 = QtGui.QHBoxLayout()
+        self.YoffsetLayout_2 = QtGui.QHBoxLayout()
+        self.YoffsetLayout_3 = QtGui.QHBoxLayout()
+
+        self.YtranslSpinBox = ui.createWidget("Gui::QuantitySpinBox")
+        self.YtranslSpinBox.setMinimumWidth(120)
+        self.YtranslSpinBox.setProperty("unit", "mm")
+        self.YtranslSpinBox.setToolTip("Translation along Y-axis")
+        PathGuiUtil.QuantitySpinBox(self.YtranslSpinBox, self.selectedObj, "Placement.Base.y")
+
+        # self.YRotSpinBox = ui.createWidget("Gui::QuantitySpinBox")
+        # self.YRotSpinBox.setMinimumWidth(80)
+        # self.YRotSpinBox.setProperty("unit", "deg")
+        # self.YRotSpinBox.setToolTip("Rotation step along Y-axis")
+        # PathGuiUtil.QuantitySpinBox(self.YRotSpinBox, self.selectedObj, "yRotationStep")
+        # self.YRotSpinBox.setProperty("rawValue", self.selectedObj.yRotationStep.Value)
+
+        self.YRotSpinBox = QtGui.QDoubleSpinBox()
+        self.YRotSpinBox.setSuffix("°")
+        self.YRotSpinBox.setMinimum(-360)
+        self.YRotSpinBox.setMaximum(360)
+        self.YRotSpinBox.setSingleStep(15)
+        self.YRotSpinBox.setValue(self.YRotationStep)  # Default value
+        self.YRotSpinBox.setToolTip("Rotation step along Y-axis")
+
+
+        self.RotYButton_m = QtGui.QPushButton()
+        self.RotYButton_m.setIcon(self.RotYButton_m.style().standardIcon(QtGui.QStyle.SP_ArrowUp))
+        self.RotYButton_m.setStyleSheet("padding-left: 1px; padding-right: 1px;");
+        self.RotYButton_m.setMinimumWidth(40)
+        self.RotYButton_m.setMaximumWidth(40)
+        self.RotYButton_m.setToolTip("Pitch rotate +{}° around Y-axis".format(self.YRotationStep))
+
+        self.RotYButton_p = QtGui.QPushButton()
+        self.RotYButton_p.setIcon(self.RotYButton_p.style().standardIcon(QtGui.QStyle.SP_ArrowDown))
+        self.RotYButton_p.setStyleSheet("padding-left: 1px; padding-right: 1px;");
+        self.RotYButton_p.setMinimumWidth(40)
+        self.RotYButton_p.setMaximumWidth(40)
+        self.RotYButton_p.setToolTip("Pitch rotate -{}° around Y-axis".format(self.YRotationStep))
+
+        self.RotYButton_rst = QtGui.QPushButton("Y0")
+        self.RotYButton_rst.setStyleSheet("padding-left: 1px; padding-right: 1px;");
+        self.RotYButton_rst.setMinimumWidth(40)
+        self.RotYButton_rst.setMaximumWidth(40)
+        self.RotYButton_rst.setToolTip("Reset Y-Rotation")
+
+        self.YoffsetLayout_1.addWidget(QtGui.QLabel("Y Translation:"))
+        self.YoffsetLayout_1.addWidget(self.YtranslSpinBox)
+
+        self.YoffsetLayout_2.addWidget(QtGui.QLabel("Y Rotation Step:"))
+        self.YoffsetLayout_2.addWidget(self.YRotSpinBox)
+
+        self.YoffsetLayout_3.addWidget(self.RotYButton_m)
+        self.YoffsetLayout_3.addWidget(self.RotYButton_p)
+        self.YoffsetLayout_3.addWidget(self.RotYButton_rst)
+
+        self.layout_1.addLayout(self.YoffsetLayout_1)
+        self.layout_3.addLayout(self.YoffsetLayout_2)
+        self.layout_4.addLayout(self.YoffsetLayout_3)
+
+        # ROW: Z-Translation and Z-Rotation
+        # ======================================
+
+        self.ZoffsetLayout_1 = QtGui.QHBoxLayout()
+        self.ZoffsetLayout_2 = QtGui.QHBoxLayout()
+        self.ZoffsetLayout_3 = QtGui.QHBoxLayout()
+
+        self.ZtranslSpinBox = ui.createWidget("Gui::QuantitySpinBox")
+        self.ZtranslSpinBox.setMinimumWidth(120)
+        self.ZtranslSpinBox.setProperty("unit", "mm")
+        self.ZtranslSpinBox.setToolTip("Translation along Z-axis")
+        PathGuiUtil.QuantitySpinBox(self.ZtranslSpinBox, self.selectedObj, "Placement.Base.z")
+
+        # self.ZRotSpinBox = ui.createWidget("Gui::QuantitySpinBox")
+        # self.ZRotSpinBox.setMinimumWidth(80)
+        # self.ZRotSpinBox.setProperty("unit", "deg")
+        # self.ZRotSpinBox.setToolTip("Rotation step along Z-axis")
+        # PathGuiUtil.QuantitySpinBox(self.ZRotSpinBox, self.selectedObj, "zRotationStep")
+        # self.ZRotSpinBox.setProperty("rawValue", self.selectedObj.zRotationStep.Value)
+
+        self.ZRotSpinBox = QtGui.QDoubleSpinBox()
+        self.ZRotSpinBox.setSuffix("°")
+        self.ZRotSpinBox.setMinimum(-360)
+        self.ZRotSpinBox.setMaximum(360)
+        self.ZRotSpinBox.setSingleStep(15)
+        self.ZRotSpinBox.setValue(self.ZRotationStep)  # Default value
+        self.ZRotSpinBox.setToolTip("Rotation step along Z-axis")
+
+
+        self.RotZButton_m = QtGui.QPushButton()
+        self.RotZButton_m.setIcon(self.RotZButton_m.style().standardIcon(QtGui.QStyle.SP_ArrowUp))
+        self.RotZButton_m.setStyleSheet("padding-left: 1px; padding-right: 1px;");
+        self.RotZButton_m.setMinimumWidth(40)
+        self.RotZButton_m.setMaximumWidth(40)
+        self.RotZButton_m.setToolTip("Yaw Rotate +{}° around Z-axis".format(self.ZRotationStep))
+
+        self.RotZButton_p = QtGui.QPushButton()
+        self.RotZButton_p.setIcon(self.RotZButton_p.style().standardIcon(QtGui.QStyle.SP_ArrowDown))
+        self.RotZButton_p.setStyleSheet("padding-left: 1px; padding-right: 1px;");
+        self.RotZButton_p.setMinimumWidth(40)
+        self.RotZButton_p.setMaximumWidth(40)
+        self.RotZButton_p.setToolTip("Yaw rotate -{}° around Z-axis".format(self.ZRotationStep))
+
+        self.RotZButton_rst = QtGui.QPushButton("Z0")
+        self.RotZButton_rst.setStyleSheet("padding-left: 1px; padding-right: 1px;");
+        self.RotZButton_rst.setMinimumWidth(40)
+        self.RotZButton_rst.setMaximumWidth(40)
+        self.RotZButton_rst.setToolTip("Reset Z-Rotation")
+
+        self.ZoffsetLayout_1.addWidget(QtGui.QLabel("Z Translation:"))
+        self.ZoffsetLayout_1.addWidget(self.ZtranslSpinBox)
+
+        self.ZoffsetLayout_2.addWidget(QtGui.QLabel("Z Rotation Step:"))
+        self.ZoffsetLayout_2.addWidget(self.ZRotSpinBox)
+
+        self.ZoffsetLayout_3.addWidget(self.RotZButton_m)
+        self.ZoffsetLayout_3.addWidget(self.RotZButton_p)
+        self.ZoffsetLayout_3.addWidget(self.RotZButton_rst)
+
+        self.layout_1.addLayout(self.ZoffsetLayout_1)
+        self.layout_3.addLayout(self.ZoffsetLayout_2)
+        self.layout_4.addLayout(self.ZoffsetLayout_3)
+
+        #====================
+
+        self.layout_2.addWidget(QtGui.QLabel(" ")) # column horizontal spacer
+
+        self.columnsLayout_2.addLayout(self.layout_1)
+        self.columnsLayout_2.addLayout(self.layout_2)
+        self.columnsLayout_2.addLayout(self.layout_3)
+        self.columnsLayout_2.addLayout(self.layout_4)
+
+        self.mainLayout.addWidget(QtGui.QLabel(" ")) # column vertical spacer
+        self.mainLayout.addLayout(self.columnsLayout_2)
 
         # apply the layout to the main window
         self.form.setLayout(self.mainLayout)
@@ -790,10 +1116,23 @@ class placeLinkUI():
         self.parentList.activated.connect( self.onParentSelected )
         self.partLCSlist.itemClicked.connect( self.onLCSclicked )
         self.attLCSlist.itemClicked.connect(  self.onLCSclicked )
-        self.RotXButton.clicked.connect( self.onRotX )
-        self.RotYButton.clicked.connect( self.onRotY )
-        self.RotZButton.clicked.connect( self.onRotZ )
+
         self.XtranslSpinBox.valueChanged.connect(self.onXTranslValChanged)
         self.YtranslSpinBox.valueChanged.connect(self.onYTranslValChanged)
         self.ZtranslSpinBox.valueChanged.connect(self.onZTranslValChanged)
 
+        self.XRotSpinBox.valueChanged.connect(self.onXRotValChanged)
+        self.YRotSpinBox.valueChanged.connect(self.onYRotValChanged)
+        self.ZRotSpinBox.valueChanged.connect(self.onZRotValChanged)
+
+        self.RotXButton_m.clicked.connect(self.onRotX_m)
+        self.RotXButton_p.clicked.connect(self.onRotX_p)
+        self.RotXButton_rst.clicked.connect(self.onRotXButton_rst)
+
+        self.RotYButton_m.clicked.connect(self.onRotY_m)
+        self.RotYButton_p.clicked.connect(self.onRotY_p)
+        self.RotYButton_rst.clicked.connect(self.onRotYButton_rst)
+
+        self.RotZButton_m.clicked.connect(self.onRotZ_m)
+        self.RotZButton_p.clicked.connect(self.onRotZ_p)
+        self.RotZButton_rst.clicked.connect(self.onRotZButton_rst)
