@@ -18,24 +18,28 @@ from FreeCAD import Console as FCC
 import Asm4_libs as Asm4
 
 
-
+QT_TRANSLATE_NOOP = App.Qt.QT_TRANSLATE_NOOP
 
 """
     +-----------------------------------------------+
     |    a circular link array class and command    |
     +-----------------------------------------------+
 """
-class makeShapeBinder():
-    def __init__(self):
-        pass
 
+
+class makeShapeBinder:
     def GetResources(self):
-        tooltip  = "Create a reference to an external shape\n"
-        tooltip += "This creates a SubShapeBinder of the selected shapes\n"
-        tooltip += "(face, edge, point) in the root assembly\n"
-        tooltip += "Only shapes belonging to the same part can be imported in a single step"
-        iconFile = os.path.join( Asm4.iconPath, 'Asm4_shapeBinder.svg' )
-        return {"MenuText": "Create a shape binder", "ToolTip":  tooltip, "Pixmap": iconFile}
+        return {
+            "MenuText": QT_TRANSLATE_NOOP("Asm4_shapeBinder", "Create a shape binder"),
+            "ToolTip": QT_TRANSLATE_NOOP(
+                "Asm4_shapeBinder",
+                "Create a reference to an external shape\n"
+                "This creates a SubShapeBinder of the selected shapes\n"
+                "(face, edge, point) in the root assembly\n"
+                "Only shapes belonging to the same part can be imported in a single step",
+            ),
+            "Pixmap": os.path.join(Asm4.iconPath, "Asm4_shapeBinder.svg"),
+        }
 
     def IsActive(self):
         # only do this for assembly objects and all selected shapes must be in the same part

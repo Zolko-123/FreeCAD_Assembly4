@@ -6,26 +6,28 @@
 #
 # HelpCmd.py
 
-import os, webbrowser
-
+import os
+import webbrowser
+import Asm4_libs as Asm4
+import FreeCAD
 import FreeCADGui as Gui
 
-import Asm4_libs as Asm4
-from Asm4_Translate import translate
-
+QT_TRANSLATE_NOOP = FreeCAD.Qt.QT_TRANSLATE_NOOP
 
 """
     +-----------------------------------------------+
     |                  main class                   |
     +-----------------------------------------------+
 """
-class Asm4Help():
 
+
+class Asm4Help:
     def GetResources(self):
-        return {"MenuText": translate("Asm4_Help", "Help for Assembly4"),
-                "ToolTip": translate("Asm4_Help", "Show basic usage for FreeCAD and Assembly4"),
-                "Pixmap": os.path.join(Asm4.iconPath, 'Asm4_Help.svg')
-                }
+        return {
+            "MenuText": QT_TRANSLATE_NOOP("Asm4_Help", "Help for Assembly4"),
+            "ToolTip": QT_TRANSLATE_NOOP("Asm4_Help", "Show basic usage for FreeCAD and Assembly4"),
+            "Pixmap": os.path.join(Asm4.iconPath, "Asm4_Help.svg"),
+        }
 
     def IsActive(self):
         return True

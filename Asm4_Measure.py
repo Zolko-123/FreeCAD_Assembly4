@@ -43,8 +43,7 @@ import Part
 import Asm4_libs as Asm4
 import selectionFilter
 
-
-
+QT_TRANSLATE_NOOP = App.Qt.QT_TRANSLATE_NOOP
 
 """
     +-----------------------------------------------+
@@ -88,15 +87,18 @@ class setCustomIcon():
     |         The menu and toolbar command          |
     +-----------------------------------------------+
 """
-class MeasureCmd():
+
+
+class MeasureCmd:
     def __init__(self):
-        super(MeasureCmd,self).__init__()
+        super(MeasureCmd, self).__init__()
 
     def GetResources(self):
-        return {"MenuText": "Measure",
-                "ToolTip": "Measure Tool",
-                "Pixmap" : os.path.join( iconDir , 'Part_Measure.svg')
-                }
+        return {
+            "MenuText": QT_TRANSLATE_NOOP("Asm4_Measure", "Measure"),
+            "ToolTip": QT_TRANSLATE_NOOP("Asm4_Measure", "Measure Tool"),
+            "Pixmap": os.path.join(iconDir, "Part_Measure.svg"),
+        }
 
     def IsActive(self):
         if App.ActiveDocument:

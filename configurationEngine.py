@@ -30,6 +30,7 @@ OFFSET_ROT_PITCH_COL    = 'H'
 OFFSET_ROT_ROLL_COL     = 'I'
 NAME_COL_WIDTH          = 250
 
+QT_TRANSLATE_NOOP = App.Qt.QT_TRANSLATE_NOOP
 
 
 """
@@ -77,10 +78,14 @@ class applyConfigurationCmd:
         super(applyConfigurationCmd,self).__init__()
 
     def GetResources(self):
-        return {"MenuText": "Apply configuration",
-                "ToolTip": "Applies selected configuration\nConfigurations allow to set visibilities and offsets of parts",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_applyConfig.svg')
-                }
+        return {
+            "MenuText": QT_TRANSLATE_NOOP("Asm4_applyConfig", "Apply configuration"),
+            "ToolTip": QT_TRANSLATE_NOOP(
+                "Asm4_applyConfig",
+                "Applies selected configuration\nConfigurations allow to set visibilities and offsets of parts",
+            ),
+            "Pixmap": os.path.join(Asm4.iconPath, "Asm4_applyConfig.svg"),
+        }
 
     def IsActive(self):
         # if a spreadsheet in a Group called "Configuration" is selected
@@ -108,10 +113,14 @@ class openConfigurationsCmd:
         super(openConfigurationsCmd,self).__init__()
 
     def GetResources(self):
-        return {"MenuText": "Open configurations panel",
-                "ToolTip": "Configurations allow to set visibilities and offsets of parts",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_Configurations.svg')
-                }
+        return {
+            "MenuText": QT_TRANSLATE_NOOP("Asm4_openConfigurations", "Open configurations panel"),
+            "ToolTip": QT_TRANSLATE_NOOP(
+                "Asm4_openConfigurations",
+                "Configurations allow to set visibilities and offsets of parts",
+            ),
+            "Pixmap": os.path.join(Asm4.iconPath, "Asm4_Configurations.svg"),
+        }
 
     def IsActive(self):
         # Will handle LCSs only for the Assembly4 model
@@ -280,11 +289,13 @@ class newConfigurationCmd:
         self.drawUI()
 
     def GetResources(self):
-        return {"MenuText": "New configuration",
-                "ToolTip": "Create a new configuration of the assembly",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_applyConfig.svg')
-                }
-
+        return {
+            "MenuText": QT_TRANSLATE_NOOP("Asm4_newConfiguration", "New configuration"),
+            "ToolTip": QT_TRANSLATE_NOOP(
+                "Asm4_newConfiguration", "Create a new configuration of the assembly"
+            ),
+            "Pixmap": os.path.join(Asm4.iconPath, "Asm4_applyConfig.svg"),
+        }
 
     def IsActive(self):
         # is there an active document ?

@@ -18,6 +18,7 @@ import infoPartCmd
 #import infoKeys
 #All infor from infoKeys is process by infoPartCmd shouldn't need to
 
+QT_TRANSLATE_NOOP = App.Qt.QT_TRANSLATE_NOOP
 
 crea = infoPartCmd.infoPartUI.makePartInfo
 fill = infoPartCmd.infoPartUI.infoDefault
@@ -64,21 +65,21 @@ class makeBOM:
         '''
 
     def GetResources(self):
-
-        if self.follow_subassemblies == True:
-            menutext = "Bill of Materials"
-            tooltip  = "Create the Bill of Materials of the Assembly including sub-assemblies"
-            iconFile = os.path.join( Asm4.iconPath, 'Asm4_PartsList_Subassemblies.svg' )
+        if self.follow_subassemblies:
+            menutext = QT_TRANSLATE_NOOP("Asm4_makeBOM", "Bill of Materials")
+            tooltip = QT_TRANSLATE_NOOP(
+                "Asm4_makeBOM",
+                "Create the Bill of Materials of the Assembly including sub-assemblies",
+            )
+            iconFile = os.path.join(Asm4.iconPath, "Asm4_PartsList_Subassemblies.svg")
         else:
-            menutext = "Local Bill of Materials"
-            tooltip  = "Create the Bill of Materials of the Assembly"
-            iconFile = os.path.join( Asm4.iconPath, 'Asm4_PartsList.svg' )
+            menutext = QT_TRANSLATE_NOOP("Asm4_makeLocalBOM", "Local Bill of Materials")
+            tooltip = QT_TRANSLATE_NOOP(
+                "Asm4_makeLocalBOM", "Create the Bill of Materials of the Assembly"
+            )
+            iconFile = os.path.join(Asm4.iconPath, "Asm4_PartsList.svg")
 
-        return {
-            "MenuText": menutext,
-            "ToolTip": tooltip,
-            "Pixmap": iconFile
-        }
+        return {"MenuText": menutext, "ToolTip": tooltip, "Pixmap": iconFile}
 
     def IsActive(self):
         if Asm4.getAssembly() is None:

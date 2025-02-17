@@ -16,6 +16,8 @@ from FreeCAD import Console as FCC
 import Asm4_libs as Asm4
 import infoKeys
 
+QT_TRANSLATE_NOOP = App.Qt.QT_TRANSLATE_NOOP
+
 #This is partcoded part information.
 partInfo = [
     'BomKey',
@@ -231,16 +233,20 @@ def AssignValuesForAutofile(part, doc, singleBodyOfPart):
     |                Info Part Command              |
     +-----------------------------------------------+
 """
-class infoPartCmd():
 
+
+class infoPartCmd:
     def __init__(self):
         super(infoPartCmd, self).__init__()
 
     def GetResources(self):
-        tooltip  = "<p>Edit Part information</p>"
-        tooltip += "<p>User-supplied information can be added to a part</p>"
-        iconFile = os.path.join(Asm4.iconPath, 'Asm4_PartInfo.svg')
-        return {"MenuText": "Edit Part Information", "ToolTip": tooltip, "Pixmap": iconFile}
+        return {
+            "MenuText": QT_TRANSLATE_NOOP("Asm4_infoPart", "Edit Part Information"),
+            "ToolTip": QT_TRANSLATE_NOOP(
+                "Asm4_infoPart", "User-supplied information can be added to a part"
+            ),
+            "Pixmap": os.path.join(Asm4.iconPath, "Asm4_PartInfo.svg"),
+        }
 
     def IsActive(self):
         if App.ActiveDocument and Asm4.getSelectedContainer():

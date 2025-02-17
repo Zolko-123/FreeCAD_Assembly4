@@ -7,16 +7,16 @@
 # Copyright HUBERT Zoltán
 
 
-
-import os
+import math, re, os
 
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
+import Part
 
 import Asm4_libs as Asm4
-from Asm4_Translate import translate
 
+QT_TRANSLATE_NOOP = App.Qt.QT_TRANSLATE_NOOP
 
 
 """
@@ -24,19 +24,22 @@ from Asm4_Translate import translate
     |                  main class                   |
     +-----------------------------------------------+
 """
-class gotoDocumentCmd:
 
+
+class gotoDocumentCmd:
     def __init__(self):
         super(gotoDocumentCmd,self).__init__()
         self.selectedLink = []
 
 
     def GetResources(self):
-        return {"MenuText": "Open Document",
-                "ToolTip": translate("Commands", "Activates the document of the selected linked part"),
-                "Pixmap": os.path.join(Asm4.iconPath, 'Asm4_openDocument.svg')
-                }
-
+        return {
+            "MenuText": QT_TRANSLATE_NOOP("Asm4_gotoDocument", "Open Document"),
+            "ToolTip": QT_TRANSLATE_NOOP(
+                "Asm4_gotoDocument", "Activates the document of the selected linked part"
+            ),
+            "Pixmap": os.path.join(Asm4.iconPath, "Asm4_openDocument.svg"),
+        }
 
     def IsActive(self):
         # is there an active document ?

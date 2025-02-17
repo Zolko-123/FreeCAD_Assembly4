@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # coding: utf-8
-# 
-# updateAssembly.py 
+#
+# updateAssembly.py
 
 
 import math, re, os
@@ -13,16 +13,18 @@ import Part
 
 import Asm4_libs as Asm4
 
+QT_TRANSLATE_NOOP = App.Qt.QT_TRANSLATE_NOOP
 
 
 class updateAssembly:
-
     def GetResources(self):
-        return {"MenuText": "Solve and Update Assembly",
-                "ToolTip": "Update Assembly",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_Solver.svg')
-                }
-
+        return {
+            "MenuText": QT_TRANSLATE_NOOP(
+                "Asm4_updateAssembly", "Solve and Update Assembly"
+            ),
+            "ToolTip": QT_TRANSLATE_NOOP("Asm4_updateAssembly", "Update Assembly"),
+            "Pixmap": os.path.join(Asm4.iconPath, "Asm4_Solver.svg"),
+        }
 
     def IsActive(self):
         if App.ActiveDocument:

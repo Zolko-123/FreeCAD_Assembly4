@@ -7,8 +7,6 @@
 # Copyright HUBERT Zoltán
 
 
-
-
 import os, re
 
 from PySide import QtGui, QtCore
@@ -17,14 +15,16 @@ import FreeCAD as App
 
 import Asm4_libs as Asm4
 
-
+QT_TRANSLATE_NOOP = App.Qt.QT_TRANSLATE_NOOP
 
 """
     +-----------------------------------------------+
     |                  main class                   |
     +-----------------------------------------------+
 """
-class insertLink():
+
+
+class insertLink:
     "My tool object"
 
     def __init__(self):
@@ -33,21 +33,21 @@ class insertLink():
         # self.UI = QtGui.QDialog()
         # self.drawUI()
 
-
     def GetResources(self):
-        tooltip  = "<p>Insert a Part into the assembly. "
-        tooltip += "This will create a dynamic link to the part, "
-        tooltip += "which can be in this document or in another document "
-        tooltip += "that is open in the current session</p>"
-        tooltip += "<p><b>Usage</b>: the part must be open in the current session</p>"
-        tooltip += "<p>This command also enables to repair broken/missing links. "
-        tooltip += "Select the broken link, launch this command, and select a new target part in the list</p>"
-        iconFile = 'Link_Part.svg'
-        return {"MenuText" : "Insert Part", 
-                "ToolTip"  : tooltip, 
-                "Pixmap"   : os.path.join( Asm4.iconPath , iconFile )
-                }
-
+        return {
+            "MenuText": QT_TRANSLATE_NOOP("Asm4_insertLink", "Insert Part"),
+            "ToolTip": QT_TRANSLATE_NOOP(
+                "Asm4_insertLink",
+                "<p>Insert a Part into the assembly.\n"
+                "This will create a dynamic link to the part,\n"
+                "which can be in this document or in another document\n"
+                "that is open in the current session</p>\n"
+                "<p><b>Usage</b>: the part must be open in the current session</p>\n"
+                "<p>This command also enables to repair broken/missing links.\n"
+                "Select the broken link, launch this command, and select a new target part in the list</p>",
+            ),
+            "Pixmap": os.path.join(Asm4.iconPath, "Link_Part.svg"),
+        }
 
     def IsActive(self):
         # if an App::Link is selected, even a broken one

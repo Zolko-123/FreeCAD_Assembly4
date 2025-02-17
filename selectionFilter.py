@@ -13,6 +13,8 @@ from FreeCAD import Console as FCC
 
 import Asm4_libs as Asm4
 
+QT_TRANSLATE_NOOP = App.Qt.QT_TRANSLATE_NOOP
+
 
 global Asm4_3DselObserver
 Asm4_3DselObserver = None
@@ -33,14 +35,23 @@ Asm4_3DselObserver = None
         button.objectName()
         button.setCheckable(True)
 """
+
+
 class selectionFilterClearCmd:
     def GetResources(self):
-        return {"MenuText": "Clear all selection filters",
-                "ToolTip": "Clear all selection filters",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_SelectionAll.svg')
-                }
+        return {
+            "MenuText": QT_TRANSLATE_NOOP(
+                "Asm4_SelectionFilterVertexCmd", "Clear all selection filters"
+            ),
+            "ToolTip": QT_TRANSLATE_NOOP(
+                "Asm4_SelectionFilterVertexCmd", "Clear all selection filters"
+            ),
+            "Pixmap": os.path.join(Asm4.iconPath, "Asm4_SelectionAll.svg"),
+        }
+
     def IsActive(self):
         return True
+
     def Activated(self):
         # This function is executed when the command is activated
         Gui.Selection.removeSelectionGate()
@@ -51,12 +62,15 @@ class selectionFilterClearCmd:
 
 class selectionFilterVertexCmd:
     def GetResources(self):
-        return {"MenuText": "Select only Vertices",
-                "ToolTip": "Select only Vertices",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Snap_Vertex.svg')
-                }
+        return {
+            "MenuText": QT_TRANSLATE_NOOP("Asm4_SelectionFilterVertexCmd", "Select only Vertices"),
+            "ToolTip": QT_TRANSLATE_NOOP("Asm4_SelectionFilterVertexCmd", "Select only Vertices"),
+            "Pixmap": os.path.join(Asm4.iconPath, "Snap_Vertex.svg"),
+        }
+
     def IsActive(self):
         return True
+
     def Activated(self):
         # This function is executed when the command is activated
         button = 0
@@ -68,12 +82,15 @@ class selectionFilterVertexCmd:
 
 class selectionFilterEdgeCmd:
     def GetResources(self):
-        return {"MenuText": "Select only Edges",
-                "ToolTip": "Select only Edges",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Snap_Edge.svg')
-                }
+        return {
+            "MenuText": QT_TRANSLATE_NOOP("Asm4_SelectionFilterEdgeCmd", "Select only Edges"),
+            "ToolTip": QT_TRANSLATE_NOOP("Asm4_SelectionFilterEdgeCmd", "Select only Edges"),
+            "Pixmap": os.path.join(Asm4.iconPath, "Snap_Edge.svg"),
+        }
+
     def IsActive(self):
         return True
+
     def Activated(self):
         # This function is executed when the command is activated
         button = 1
@@ -85,12 +102,15 @@ class selectionFilterEdgeCmd:
 
 class selectionFilterFaceCmd:
     def GetResources(self):
-        return {"MenuText": "Select only Faces",
-                "ToolTip": "Select only Faces",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Snap_Face.svg')
-                }
+        return {
+            "MenuText": QT_TRANSLATE_NOOP("Asm4_SelectionFilterFaceCmd", "Select only Faces"),
+            "ToolTip": QT_TRANSLATE_NOOP("Asm4_SelectionFilterFaceCmd", "Select only Faces"),
+            "Pixmap": os.path.join(Asm4.iconPath, "Snap_Face.svg"),
+        }
+
     def IsActive(self):
         return True
+
     def Activated(self):
         # This function is executed when the command is activated
         button = 2
@@ -163,19 +183,27 @@ def applyFilter(button):
     |            treeSelectionOverride              |
     +-----------------------------------------------+
 """
-class selObserver3DViewCmd( QtGui.QDialog):
+
+
+class selObserver3DViewCmd(QtGui.QDialog):
     def __init__(self):
-        super(selObserver3DViewCmd,self).__init__()
+        super(selObserver3DViewCmd, self).__init__()
         global Asm4_3DselObserver
         Asm4_3DselObserver = None
 
     def GetResources(self):
-        return {"MenuText": "Enable/Disable 3D View selection mode",
-                "ToolTip": "Enable/Disable 3D View selection mode\n\n"    + \
-                "Allows to select a Link object in the 3D view\n" + \
+        return {
+            "MenuText": QT_TRANSLATE_NOOP(
+                "Asm4_selObserver3DViewCmd", "Enable/Disable 3D View selection mode"
+            ),
+            "ToolTip": QT_TRANSLATE_NOOP(
+                "Asm4_selObserver3DViewCmd",
+                "Enable/Disable 3D View selection mode\n\n"
+                "Allows to select a Link object in the 3D view\n"
                 "window instead of the Model tree",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_enableLinkSelection.svg')
-                }
+            ),
+            "Pixmap": os.path.join(Asm4.iconPath, "Asm4_enableLinkSelection.svg"),
+        }
 
     def IsActive(self):
         return True

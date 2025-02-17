@@ -18,6 +18,7 @@ from Asm4_objects import (
     findAxisPlacement,
 )
 
+QT_TRANSLATE_NOOP = App.Qt.QT_TRANSLATE_NOOP
 
 """
     +-----------------------------------------------+
@@ -27,28 +28,28 @@ from Asm4_objects import (
 
 
 class makeExpressionArray:
-
-    iconFileName = 'Asm4_ExpressionArray.svg'
-    menuText = 'Create an expression driven Array'
-    arrayType = 'Expression Array'
-    namePrefix = 'XArray_'
-    tooltip = """Create an array of the selected object where the placement of each element is calculated using expressions and an Index property.<br>
-        Select a source object to array and optionally an Axis that transformation will be related to.<br>
-        Without axis the transformations relates to the source object internal Z axis.<br>
-        <br>
-        <b>Count :</b> The amount of elements in the array.<br>
-        <b>Index :</b> Hidden but Placer use it in expressions to calculating the Placements. Increments for each element starting with 0.<br>
-        <b>Placer :</b> Set an expression for the entire placement or its sub-properties.<br>
-           By opening Placer property in Tasks panel it is possible to set expressions for euler angles too.<br>
-        Also see tooltips in Property view
-        """
+    def __init__(self):
+        self.arrayType = "Expression Array"
+        self.namePrefix = "XArray_"
 
     def GetResources(self):
-        iconFile = os.path.join(Asm4.iconPath, self.iconFileName)
         return {
-            'MenuText': self.menuText,
-            'ToolTip': self.tooltip,
-            'Pixmap': iconFile,
+            "MenuText": QT_TRANSLATE_NOOP(
+                "Asm4_expressionArray", "Create an expression driven Array"
+            ),
+            "ToolTip": QT_TRANSLATE_NOOP(
+                "Asm4_expressionArray",
+                "Create an array of the selected object where the placement of each element is calculated using expressions and an Index property.<br>\n"
+                "Select a source object to array and optionally an Axis that transformation will be related to.<br>\n"
+                "Without axis the transformations relates to the source object internal Z axis.<br>\n"
+                "<br>\n"
+                "<b>Count :</b> The amount of elements in the array.<br>\n"
+                "<b>Index :</b> Hidden but Placer use it in expressions to calculating the Placements. Increments for each element starting with 0.<br>\n"
+                "<b>Placer :</b> Set an expression for the entire placement or its sub-properties.<br>\n"
+                "   By opening Placer property in Tasks panel it is possible to set expressions for euler angles too.<br>\n"
+                "Also see tooltips in Property view",
+            ),
+            "Pixmap": os.path.join(Asm4.iconPath, "Asm4_ExpressionArray.svg"),
         }
 
     def _cacheSelectionInfo(self):
@@ -124,16 +125,26 @@ class makeExpressionArray:
     +-----------------------------------------------+
 """
 
-class makeCircularArray(makeExpressionArray):
 
-    iconFileName = 'Asm4_PolarArray.svg'
-    menuText = 'Create a circular array'
-    arrayType = 'Circular Array'
-    namePrefix = 'Circular_'
-    tooltip = """<p>Create a circular (polar) array around an axis. 
-                Supported axis objects are axis or plane from an origin, datum line, LCS axes, straight line segments, arcs and circles</p>
-                <p><b>Usage</b>: Select an object and the axis (hold CTRL key to select second object)</p>"""
- 
+class makeCircularArray(makeExpressionArray):
+    def __init__(self):
+        self.arrayType = "Circular Array"
+        self.namePrefix = "Circular_"
+
+    def GetResources(self):
+        return {
+            "MenuText": QT_TRANSLATE_NOOP(
+                "Asm4_circularArray", "Create a circular array"
+            ),
+            "ToolTip": QT_TRANSLATE_NOOP(
+                "Asm4_circularArray",
+                "<p>Create a circular (polar) array around an axis.\n"
+                "Supported axis objects are axis or plane from an origin, datum line, LCS axes, straight line segments, arcs and circles</p>\n"
+                "<p><b>Usage</b>: Select an object and an axis (hold CTRL key to select second object)</p>",
+            ),
+            "Pixmap": os.path.join(Asm4.iconPath, "Asm4_PolarArray.svg"),
+        }
+
     def IsActive(self):
         self._cacheSelectionInfo()
         return self._selectionInfo[2] is not None
@@ -156,15 +167,23 @@ class makeCircularArray(makeExpressionArray):
     +-----------------------------------------------+
 """
 
-class makeLinearArray(makeExpressionArray):
 
-    iconFileName = 'Asm4_LinearArray.svg'
-    menuText = 'Create a linear array'
-    arrayType = 'Linear Array'
-    namePrefix = 'Linear_'
-    tooltip = """<p>Create a linear array along an axis. 
-                Supported axis objects are axis or plane from an origin, datum line, LCS axes, straight line segments, arcs and circles</p>
-                <p><b>Usage</b>: Select an object and an axis for the direction (hold CTRL key to select second object)</p>"""
+class makeLinearArray(makeExpressionArray):
+    def __init__(self):
+        self.arrayType = "Linear Array"
+        self.namePrefix = "Linear_"
+
+    def GetResources(self):
+        return {
+            "MenuText": QT_TRANSLATE_NOOP("Asm4_linearArray", "Create a linear array"),
+            "ToolTip": QT_TRANSLATE_NOOP(
+                "Asm4_linearArray",
+                "<p>Create a linear array along an axis.\n"
+                "Supported axis objects are axis or plane from an origin, datum line, LCS axes, straight line segments, arcs and circles</p>\n"
+                "<p><b>Usage</b>: Select an object and an axis for the direction (hold CTRL key to select second object)</p>",
+            ),
+            "Pixmap": os.path.join(Asm4.iconPath, "Asm4_LinearArray.svg"),
+        }
 
     def IsActive(self):
         self._cacheSelectionInfo()
@@ -187,15 +206,25 @@ class makeLinearArray(makeExpressionArray):
     |     a mirror link array class and command     |
     +-----------------------------------------------+
 """
-class makeMirrorArray(makeExpressionArray):
 
-    iconFileName = 'Asm4_Mirror.svg'
-    menuText = 'Create mirror'
-    arrayType = 'Mirror Array'
-    namePrefix = 'Mirror_'
-    tooltip = """<p>Create a mirror of a part. 
-                Supported axis objects are axis or plane from an origin, datum line, LCS axes, straight line segments, arcs and circles</p>
-                <p><b>Usage</b>: Select a source object and a mirror plane or a normal to a plane (hold CTRL key to select second object)</p>"""
+
+class makeMirrorArray(makeExpressionArray):
+    def __init__(self) -> None:
+        super().__init__()
+        self.arrayType = "Mirror Array"
+        self.namePrefix = "Mirror_"
+
+    def GetResources(self):
+        return {
+            "MenuText": QT_TRANSLATE_NOOP("Asm4_mirrorArray", "Create mirror"),
+            "ToolTip": QT_TRANSLATE_NOOP(
+                "Asm4_mirrorArray",
+                "<p>Create a mirror of a part.\n"
+                "Supported axis objects are axis or plane from an origin, datum line, LCS axes, straight line segments, arcs and circles</p>\n"
+                "<p><b>Usage</b>: Select a source object and a mirror plane or a normal to a plane (hold CTRL key to select second object)</p>",
+            ),
+            "Pixmap": os.path.join(Asm4.iconPath, "Asm4_Mirror.svg"),
+        }
 
     def IsActive(self):
         self._cacheSelectionInfo()

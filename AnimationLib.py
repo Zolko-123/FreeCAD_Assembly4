@@ -7,7 +7,6 @@
 # AnimationLib.py
 
 
-
 import os, numpy
 
 from PySide import QtGui, QtCore
@@ -17,6 +16,7 @@ import FreeCAD as App
 
 import Asm4_libs as Asm4
 
+QT_TRANSLATE_NOOP = App.Qt.QT_TRANSLATE_NOOP
 # from AnimationProvider import animationProvider
 
 
@@ -121,11 +121,11 @@ class animateVariable(animationProvider):
 
 
     def GetResources(self):
-        return {"MenuText": "Animate Assembly",
-                "ToolTip": "Animate Assembly",
-                "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_GearsAnimate.svg')
-                }
-
+        return {
+            "MenuText": QT_TRANSLATE_NOOP("Asm4_Animate", "Animate Assembly"),
+            "ToolTip": QT_TRANSLATE_NOOP("Asm4_Animate", "Animate Assembly"),
+            "Pixmap": os.path.join(Asm4.iconPath, "Asm4_GearsAnimate.svg"),
+        }
 
     def IsActive(self):
         # is there an active document ?
