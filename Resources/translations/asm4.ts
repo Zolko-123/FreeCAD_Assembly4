@@ -1117,6 +1117,26 @@ Only visible Datum Points are shown</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../AnimationPlotLib.py" line="87"/>
+        <source># CVS output</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../AnimationPlotLib.py" line="88"/>
+        <source>Iter;Variable;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../AnimationPlotLib.py" line="98"/>
+        <source>Finished </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../AnimationPlotLib.py" line="98"/>
+        <source> iterations</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Plot trajectories of the animation</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1244,15 +1264,6 @@ Elapsed time: {:.2f} ms</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../checkInterference.py" line="135"/>
-        <location filename="../../checkInterference.py" line="137"/>
-        <location filename="../../checkInterference.py" line="139"/>
-        <location filename="../../checkInterference.py" line="141"/>
-        <source>
-Elapsed time:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../../checkInterference.py" line="137"/>
         <source>
 Elapsed time: {:.2f} s</source>
@@ -1268,6 +1279,15 @@ Elapsed time: {:.2f} min</source>
         <location filename="../../checkInterference.py" line="141"/>
         <source>
 Elapsed time: {:.2f} h</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../checkInterference.py" line="135"/>
+        <location filename="../../checkInterference.py" line="137"/>
+        <location filename="../../checkInterference.py" line="139"/>
+        <location filename="../../checkInterference.py" line="141"/>
+        <source>
+Elapsed time:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
