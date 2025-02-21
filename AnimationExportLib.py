@@ -526,7 +526,7 @@ class exportDialog(QtGui.QDialog):
         self.gpbOutput.setLayout(self.outputVLayout)
 
         # # # Background Group Box # # #
-        self.gpbBG = QtGui.QGroupBox(App.Qt.translate("Asm4_Animate", "Background", self))
+        self.gpbBG = QtGui.QGroupBox(App.Qt.translate("Asm4_Animate", "Background"), self)
         self.gpbBG.setCheckable(True)
         self.gpbBG.setChecked(False)
         self.bgImgFileSel = fileSelectorWidget( "read", self.gpbBG)
@@ -541,7 +541,7 @@ class exportDialog(QtGui.QDialog):
         self.gpbBG.setLayout(self.bgVLayout)
 
         # # # Logo Group Box # # #
-        self.gpbLogo = QtGui.QGroupBox(App.Qt.translate("Asm4_Animate", "Logo", self))
+        self.gpbLogo = QtGui.QGroupBox(App.Qt.translate("Asm4_Animate", "Logo"), self)
         self.logoFileSel = fileSelectorWidget("read", self.gpbLogo)
         self.logoFileSel.setFile(os.path.join(Asm4.iconPath, 'FreeCad.png'))
         tt = App.Qt.translate("Asm4_Animate", 'Choose an image file\nSupported extensions are *.png *.jpg *.jpeg *.gif')
@@ -665,9 +665,9 @@ class fileSelectorWidget(QtGui.QWidget):
     def __init__(self, type="read", parent=None):
         super().__init__(parent)
 
-        self.label = QtGui.QLabel(App.Qt.translate("Asm4_Animate", "File:", parent))
+        self.label = QtGui.QLabel(App.Qt.translate("Asm4_Animate", "File:"), parent)
         self.leFilename = QtGui.QLineEdit(parent)
-        self.pbSelectFile = QtGui.QPushButton(App.Qt.translate("Asm4_Animate", "Select", parent))
+        self.pbSelectFile = QtGui.QPushButton(App.Qt.translate("Asm4_Animate", "Select"), parent)
         #self.pbSelectFile.resize(50, self.pbSelectFile.height())
         #self.pbSelectFile.setFixedWidth(50)
 
@@ -719,10 +719,10 @@ class colorSelectorWidget(QtGui.QWidget):
     def __init__(self, initialColor=(255, 255, 255, 255), parent=None):
         super().__init__(parent)
 
-        self.label = QtGui.QLabel(App.Qt.translate("Asm4_Animate", "Color:", parent))
+        self.label = QtGui.QLabel(App.Qt.translate("Asm4_Animate", "Color:"), parent)
         self.leColor = QtGui.QLineEdit(parent)
         self.leColor.setReadOnly(True)
-        self.pbSelect = QtGui.QPushButton(App.Qt.translate("Asm4_Animate", "Select", parent))
+        self.pbSelect = QtGui.QPushButton(App.Qt.translate("Asm4_Animate", "Select"), parent)
         #self.pbSelect.resize(50, self.pbSelect.height())
         #self.pbSelect.setFixedWidth(50)
 
