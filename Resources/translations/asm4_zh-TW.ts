@@ -1165,6 +1165,26 @@ Only visible Datum Points are shown</source>
 </translation>
     </message>
     <message>
+        <location filename="../../AnimationPlotLib.py" line="87"/>
+        <source># CVS output</source>
+        <translation># CVS 輸出</translation>
+    </message>
+    <message>
+        <location filename="../../AnimationPlotLib.py" line="88"/>
+        <source>Iter;Variable;</source>
+        <translation>Iter; 變數;</translation>
+    </message>
+    <message>
+        <location filename="../../AnimationPlotLib.py" line="98"/>
+        <source>Finished </source>
+        <translation>已完成 </translation>
+    </message>
+    <message>
+        <location filename="../../AnimationPlotLib.py" line="98"/>
+        <source> iterations</source>
+        <translation> 動作</translation>
+    </message>
+    <message>
         <source>Plot trajectories of the animation</source>
         <translation>動畫的繪圖軌跡</translation>
     </message>
