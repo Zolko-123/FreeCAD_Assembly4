@@ -142,6 +142,8 @@ class insertLink():
 
         if self.partList.count() > 0:
             self.partList.setCurrentRow(0)
+            item = self.partList.item(0)
+            self.onItemClicked(item)
 
         # show the UI
         self.UI.show()
@@ -208,6 +210,9 @@ class insertLink():
                 self.partList.setCurrentRow(0)
             else:
                 self.partList.setCurrentRow(first_visible_idx)
+
+            item = self.partList.item(first_visible_idx)
+            self.onItemClicked(item)
 
     # from A2+
     def openFile(self):
@@ -377,6 +382,7 @@ class insertLink():
         self.openFileButton.clicked.connect(self.openFile)
         self.insertButton.clicked.connect(self.onCreateLink)
         self.partList.itemClicked.connect( self.onItemClicked)
+        self.partList.itemActivated.connect(self.onItemClicked)
         self.filterPartList.textChanged.connect(self.onFilterChange)
 
 
