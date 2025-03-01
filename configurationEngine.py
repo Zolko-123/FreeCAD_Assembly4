@@ -604,7 +604,7 @@ def getConfigDescription(conf):
 def GetValidAlias(str):
     # Spreadsheed doesn't like many characters in the alias, specifically the '.' that we need to separate sub-sub-links
     # For now we will just remove all those characters in hope that there will be no duplication
-    badChars = '`~!@#$%^&*()-+=|\;:\'".,'
+    badChars = r'`~!@#$%^&*()-+=|\;:\'".,'
     ret = ''
     for char in str:
         if char not in badChars:
