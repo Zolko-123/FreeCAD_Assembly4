@@ -370,6 +370,8 @@ class insertLink():
         self.insertButton.clicked.connect(self.onCreateLink)
         self.partList.itemClicked.connect( self.onItemClicked)
         self.filterPartList.textChanged.connect(self.onFilterChange)
+
+
 """
     +-----------------------------------------------+
     |       add the command to the workbench        |
