@@ -188,6 +188,8 @@ class insertLink():
     def onFilterChange(self):
         filterStr = self.filterPartList.text().strip()
 
+        first_visible_idx = None
+
         for x in range(self.partList.count()):
             item = self.partList.item(x)
 
@@ -198,8 +200,14 @@ class insertLink():
             else:
                 item.setHidden(False)
 
+            if item.isHidden() == False and first_visible_idx == None:
+                first_visible_idx = x
+
         if self.partList.count() > 0:
-            self.partList.setCurrentRow(0)
+            if first_visible_idx == None:
+                self.partList.setCurrentRow(0)
+            else:
+                self.partList.setCurrentRow(first_visible_idx)
 
     # from A2+
     def openFile(self):
