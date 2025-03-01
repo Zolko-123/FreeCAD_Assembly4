@@ -140,6 +140,9 @@ class insertLink():
                 # set the proposed name in the entry field
                 self.linkNameInput.setText( proposedLinkName )
 
+        if self.partList.count() > 0:
+            self.partList.setCurrentRow(0)
+
         # show the UI
         self.UI.show()
 
@@ -195,6 +198,8 @@ class insertLink():
             else:
                 item.setHidden(False)
 
+        if self.partList.count() > 0:
+            self.partList.setCurrentRow(0)
 
     # from A2+
     def openFile(self):
@@ -365,8 +370,6 @@ class insertLink():
         self.insertButton.clicked.connect(self.onCreateLink)
         self.partList.itemClicked.connect( self.onItemClicked)
         self.filterPartList.textChanged.connect(self.onFilterChange)
-
-
 """
     +-----------------------------------------------+
     |       add the command to the workbench        |
