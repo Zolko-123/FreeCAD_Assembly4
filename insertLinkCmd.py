@@ -207,10 +207,8 @@ class insertLink():
 
         if self.partList.count() > 0:
             if first_visible_idx == None:
-                self.partList.setCurrentRow(0)
-            else:
-                self.partList.setCurrentRow(first_visible_idx)
-
+                first_visible_idx = 0
+            self.partList.setCurrentRow(first_visible_idx)
             item = self.partList.item(first_visible_idx)
             self.onItemClicked(item)
 
