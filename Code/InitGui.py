@@ -29,8 +29,8 @@ import Asm4_locator
 from Asm4_Translate import _atr, QT_TRANSLATE_NOOP
 global Asm4_icon, Asm4_path, Asm4_trans, _atr
 Asm4_path = os.path.dirname( Asm4_locator.__file__ )
-Asm4_icon = os.path.join( Asm4_path , 'Resources/icons/Assembly4.svg' )
-Asm4_trans = os.path.join(Asm4_path, "Resources/translations")
+Asm4_icon = os.path.join( Asm4_path , '../Resources/icons/Assembly4.svg' )
+Asm4_trans = os.path.join(Asm4_path, "../Resources/translations")
 
 
 # I don't like this being here
