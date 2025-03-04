@@ -11,7 +11,7 @@ import FreeCADGui as Gui
 import FreeCAD as App
 import Part
 
-import Asm4_libs as Asm4
+from . import Asm4_libs as Asm4
 
 
 

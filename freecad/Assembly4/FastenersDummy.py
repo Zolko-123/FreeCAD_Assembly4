@@ -11,8 +11,8 @@ import FreeCADGui as Gui
 import FreeCAD as App
 #from FastenerBase import FSBaseObject
 
-import Asm4_libs as Asm4
-from Asm4_Translate import translate
+from . import Asm4_libs as Asm4
+from .Asm4_Translate import translate
 
 
 

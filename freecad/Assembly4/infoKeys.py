@@ -8,9 +8,9 @@
 
 
 import os, json
-import Asm4_libs as Asm4
 import FreeCAD as App
 
+from . import Asm4_libs as Asm4
 
 #UserAdded fields and routines should be defined  this is file.
 # if you make modifications to this, you'll want to delete the Json file

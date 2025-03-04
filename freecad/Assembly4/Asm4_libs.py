@@ -15,15 +15,15 @@
 """
 
 import os
-wbPath   = os.path.dirname(__file__)
-iconPath = os.path.join( wbPath, '../Resources/icons' )
-libPath  = os.path.join( wbPath, '../Resources/library' )
 
 from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
 from FreeCAD import Console as FCC
 
+from . import Asm4_locator
+Asm4_path = os.path.join(os.path.dirname(Asm4_locator.__file__))
+iconPath = os.path.join(Asm4_path, "Resources", "icons")
 
 
 # Types of datum objects

@@ -13,8 +13,8 @@ from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
 
-import Asm4_libs as Asm4
-import infoPartCmd
+from . import Asm4_libs as Asm4
+from . import infoPartCmd
 #import infoKeys
 #All infor from infoKeys is process by infoPartCmd shouldn't need to
 

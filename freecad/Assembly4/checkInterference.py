@@ -18,10 +18,10 @@ from PySide import QtGui, QtCore
 
 import FreeCADGui as Gui
 import FreeCAD as App
-
-import Asm4_libs as Asm4
-import showHideLcsCmd as lcs
 import Part
+
+from . import Asm4_libs as Asm4
+from . import showHideLcsCmd as lcs
 
 class checkInterference:
 

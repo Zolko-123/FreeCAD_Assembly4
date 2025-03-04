@@ -17,7 +17,7 @@ import FreeCADGui as Gui
 import FreeCAD as App
 from FreeCAD import Console as FCC
 
-import Asm4_libs as Asm4
+from . import Asm4_libs as Asm4
 
 
 
@@ -42,7 +42,7 @@ copyVars.Length=50
 copyVars.Size=50
 asmDoc.recompute()
 
-from Asm4_objects import VariantLink
+from .Asm4_objects import VariantLink
 var = App.ActiveDocument.addObject("Part::FeaturePython", 'varLink', VariantLink(),None,True)
 tmpDoc = App.newDocument( 'TmpDoc', hidden=True, temp=True )
 tmpDoc.addObject('App::Part
@@ -265,7 +265,7 @@ class ViewProviderVariant(object):
     see: 
     https://github.com/realthunder/FreeCAD_assembly3/wiki/Link#app-namespace
 
-from Asm4_objects import LinkArray
+from .Asm4_objects import LinkArray
 la = App.ActiveDocument.addObject("Part::FeaturePython", 'linkArray', LinkArray(),None,True)
 """
 class LinkArray( object ):
