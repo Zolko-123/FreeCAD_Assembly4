@@ -27,6 +27,7 @@ import FreeCADGui as Gui
 import FreeCAD as App
 
 from . import Asm4_locator
+from . import selectionFilter
 from .Asm4_Translate import _atr, QT_TRANSLATE_NOOP
 
 global Asm4_icon, Asm4_path, Asm4_trans, _atr
@@ -34,8 +35,15 @@ Asm4_path = os.path.join(os.path.dirname(Asm4_locator.__file__))
 Asm4_icon = os.path.join(Asm4_path , "Resources", "icons", "Assembly4.svg")
 Asm4_trans = os.path.join(Asm4_path, "Resources", "translations")
 
-# I don't like this being here
-from . import selectionFilter
+git_head_filepath = os.path.join(Asm4_path, "..", "..", ".git", "HEAD")
+if os.path.isfile(git_head_filepath):
+    with open(git_head_filepath) as f:
+        git_branch = f.readline().split(" ")[1].split("/")[-1]
+        if git_branch == None or git_branch == "master":
+            git_branch = ""
+        else:
+            git_branch = " ({} branch)".format(git_branch)
+
 
 
 """
@@ -121,7 +129,7 @@ class Assembly4Workbench(Gui.Workbench):
             # remove trailing newline
             Asm4_version = version[:-1]    
         
-        App.Console.PrintMessage("Initializing Assembly4 workbench"+ ' ('+Asm4_version+') .')
+        App.Console.PrintMessage("Initializing Assembly4 workbench {}{}".format(Asm4_version, git_branch))
         Gui.updateGui()
         # import all stuff
         from . import newAssemblyCmd    # created an App::Part container called 'Assembly'
