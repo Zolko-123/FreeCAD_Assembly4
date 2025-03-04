@@ -13,9 +13,14 @@ import FreeCADGui as Gui
 import FreeCAD as App
 from FreeCAD import Console as FCC
 
+<<<<<<< HEAD
 import Asm4_libs as Asm4
 from Asm4_Translate import _atr, QT_TRANSLATE_NOOP, translate
 import infoKeys
+=======
+from . import Asm4_libs as Asm4
+from . import infoKeys
+>>>>>>> a67fe13 (Adjust paths to reflect the new hierarchy)
 
 #This is partcoded part information.
 partInfo = [

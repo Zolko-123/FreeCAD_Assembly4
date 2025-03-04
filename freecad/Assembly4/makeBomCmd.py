@@ -14,8 +14,8 @@ import FreeCADGui as Gui
 import FreeCAD as App
 from Asm4_Translate import _atr, QT_TRANSLATE_NOOP, translate
 
-import Asm4_libs as Asm4
-import infoPartCmd
+from . import Asm4_libs as Asm4
+from . import infoPartCmd
 #import infoKeys
 #All infor from infoKeys is process by infoPartCmd shouldn't need to
 

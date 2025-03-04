@@ -16,8 +16,8 @@ from FastenerBase import FSBaseObject
 from ScrewMaker import screwTables
 import FastenersCmd as FS
 
-import Asm4_libs as Asm4
-from Asm4_Translate import translate
+from . import Asm4_libs as Asm4
+from .Asm4_Translate import translate
 
 
 

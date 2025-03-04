@@ -25,18 +25,19 @@
 
 import FreeCAD
 
-import Asm4_locator
-Asm4_path = os.path.dirname( Asm4_locator.__file__ )
+from . import Asm4_locator
+
+Asm4_path = os.path.join(os.path.dirname(Asm4_locator.__file__))
 # Assembly4 version info
 # with file package.xml
-packageFile  = os.path.join( Asm4_path, 'package.xml' )
+packageFile  = os.path.join(Asm4_path, '..', '..', 'package.xml')
 try:
     metadata     = FreeCAD.Metadata(packageFile)
     Asm4_date    = metadata.Date
     Asm4_version = metadata.Version
 # with file VERSION
 except:
-    versionPath = os.path.join( Asm4_path, 'VERSION' )
+    versionPath = os.path.join(Asm4_path, '..', '..', 'VERSION')
     versionFile = open(versionPath,"r")
     # read second line
     version = versionFile.readlines()[1]
