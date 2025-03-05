@@ -9,7 +9,7 @@
 
 import os, json
 import FreeCAD as App
-from Asm4_Translate import _atr, QT_TRANSLATE_NOOP, translate
+from .Asm4_Translate import _atr, QT_TRANSLATE_NOOP, translate
 
 from . import Asm4_libs as Asm4
 

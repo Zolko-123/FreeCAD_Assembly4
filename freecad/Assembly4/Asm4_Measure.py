@@ -32,7 +32,7 @@ import base64
 
 from PySide import QtGui, QtCore
 from pivy import coin
-from Asm4_Translate import _atr, QT_TRANSLATE_NOOP
+from .Asm4_Translate import _atr, QT_TRANSLATE_NOOP
 
 import FreeCADGui as Gui
 import FreeCAD as App

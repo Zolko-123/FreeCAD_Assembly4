@@ -13,10 +13,10 @@ from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
 from FreeCAD import Console as FCC
-from Asm4_Translate import _atr, QT_TRANSLATE_NOOP, translate
 
 from . import Asm4_libs as Asm4
 from .Asm4_objects import VariantLink, ViewProviderVariant
+from .Asm4_Translate import _atr, QT_TRANSLATE_NOOP, translate
 
 
 

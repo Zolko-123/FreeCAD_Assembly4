@@ -13,7 +13,7 @@ import math
 import logging
 import time
 from timeit import default_timer as timer
-from Asm4_Translate import _atr, QT_TRANSLATE_NOOP
+from .Asm4_Translate import _atr, QT_TRANSLATE_NOOP
 
 from PySide import QtGui, QtCore
 

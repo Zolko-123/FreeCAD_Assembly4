@@ -28,7 +28,7 @@ import FreeCAD as App
 
 from . import Asm4_locator
 from . import selectionFilter
-from .Asm4_Translate import _atr, QT_TRANSLATE_NOOP
+from .Asm4_Translate import _atr, QT_TRANSLATE_NOOP, translate
 
 global Asm4_icon, Asm4_path, Asm4_trans, _atr
 Asm4_path = os.path.join(os.path.dirname(Asm4_locator.__file__))
@@ -191,27 +191,27 @@ class Assembly4Workbench(Gui.Workbench):
 
         # Define Menus
         # commands to appear in the Assembly4 menu 'Assembly'
-        self.appendMenu(FreeCAD.Qt.translate("Asm4", "&Assembly"), self.assemblyMenuItems())
+        self.appendMenu(App.Qt.translate("Asm4", "&Assembly"), self.assemblyMenuItems())
         self.dot()
 
         # put all constraints related commands in a separate menu
-        self.appendMenu(FreeCAD.Qt.translate("Asm4", "&Constraints"), self.constraintsMenuItems())
+        self.appendMenu(App.Qt.translate("Asm4", "&Constraints"), self.constraintsMenuItems())
         self.dot()
 
         # self.appendMenu("&Geometry",["Asm4_newPart"])
 
         # additional entry in the Help menu
         # self.appendMenu(Qtranslate("Workbench", "&Help"), ["Asm4_Help"])
-        self.appendMenu( FreeCAD.Qt.translate("Workbench", "&Help"), ["Asm4_Help"])
+        self.appendMenu( App.Qt.translate("Workbench", "&Help"), ["Asm4_Help"])
         self.dot()
 
         # Define Toolbars
         # commands to appear in the Assembly4 toolbar
-        self.appendToolbar(FreeCAD.Qt.translate("Asm4", "Assembly"), self.assemblyToolbarItems())
+        self.appendToolbar(App.Qt.translate("Asm4", "Assembly"), self.assemblyToolbarItems())
         self.dot()
 
         # build the selection toolbar
-        self.appendToolbar(FreeCAD.Qt.translate("Asm4", "Selection Filter"), self.selectionToolbarItems())
+        self.appendToolbar(App.Qt.translate("Asm4", "Selection Filter"), self.selectionToolbarItems())
         self.dot()
 
         # self.appendToolbar("Geometry",["Asm4_newPart"])
@@ -360,8 +360,8 @@ class Assembly4Workbench(Gui.Workbench):
 
         self.appendContextMenu("", "Separator")
         self.appendContextMenu("", contextMenu)  # add commands to the context menu
-        self.appendContextMenu(FreeCAD.Qt.translate("Asm4", "Assembly"), assemblySubMenu)  # add commands to the context menu
-        self.appendContextMenu(FreeCAD.Qt.translate("Asm4", "Create"), createSubMenu)  # add commands to the context menu
+        self.appendContextMenu(App.Qt.translate("Asm4", "Assembly"), assemblySubMenu)  # add commands to the context menu
+        self.appendContextMenu(App.Qt.translate("Asm4", "Create"), createSubMenu)  # add commands to the context menu
         self.appendContextMenu("", "Separator")
 
 

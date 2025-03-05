@@ -20,7 +20,7 @@ from PySide import QtGui, QtCore
 import FreeCADGui as Gui
 import FreeCAD as App
 from FreeCAD import Console as FCC
-from Asm4_Translate import _atr, QT_TRANSLATE_NOOP
+from .Asm4_Translate import _atr, QT_TRANSLATE_NOOP
 
 from . import Asm4_locator
 Asm4_path = os.path.join(os.path.dirname(Asm4_locator.__file__))
