@@ -1,5 +1,6 @@
-__pycache__/*
+__pycache__
+Code/__pycache__
+*.py
 *.directory
-AnimationLib_translated.py
 .gitignore
 *.DS_Store
