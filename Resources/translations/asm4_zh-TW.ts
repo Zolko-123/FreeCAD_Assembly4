@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" sourcelanguage="en_US">
+<TS version="2.1" language="zh_TW" sourcelanguage="en_US">
     <extra-po-header-language_team></extra-po-header-language_team>
     <extra-po-header-last_translator>DrBenson &lt;Benson.Dr@GMail.com&gt;</extra-po-header-last_translator>
     <extra-po-header-po_revision_date></extra-po-header-po_revision_date>
@@ -17,91 +17,100 @@
     <name>App::Property</name>
     <message>
         <source>The hintfield for the animation dialog</source>
-        <translation type="unfinished"></translation>
+        <translation>動畫對話框的提示欄位</translation>
     </message>
 </context>
 <context>
     <name>Asm4</name>
     <message>
         <source>This Part contains an incompatible &quot;Variables&quot; object, </source>
-        <translation type="unfinished"></translation>
+        <translation>此零件包含不相容的&quot;變量&quot;物體， </translation>
     </message>
     <message>
         <source>this could lead to unexpected results
 </source>
-        <translation type="unfinished"></translation>
+        <translation>這可能會導致意想不到的結果
+</translation>
     </message>
     <message>
         <source>Found legacy AssemblyType property, adding new empty SolverId property
 </source>
-        <translation type="unfinished"></translation>
+        <translation>找到舊的 &quot;零件組合類型&quot; 屬性，新增新的空白 求解ID 屬性
+</translation>
     </message>
     <message>
         <source>FreeCAD Warning</source>
-        <translation type="unfinished"></translation>
+        <translation>FreeCAD 警示</translation>
     </message>
     <message>
         <source>Are you sure you want to proceed ?</source>
-        <translation type="unfinished"></translation>
+        <translation>您確定要繼續嗎?</translation>
     </message>
     <message>
         <source>Measure</source>
-        <translation type="unfinished"></translation>
+        <translation>測量</translation>
     </message>
     <message>
         <source>Measure Tool</source>
-        <translation type="unfinished"></translation>
+        <translation>測量工具</translation>
     </message>
     <message>
         <source>Initialising variantLink ...
 </source>
-        <translation type="unfinished"></translation>
+        <translation>初始化 變數連結 ...
+</translation>
     </message>
     <message>
         <source>100 temporary variant documents are already in use, not creating a new one.
 </source>
-        <translation type="unfinished"></translation>
+        <translation>100 個臨時變數文件已在使用中，未建立新文件.
+</translation>
     </message>
     <message>
         <source>No &quot;Variables&quot; container in source object
 </source>
-        <translation type="unfinished"></translation>
+        <translation>來源物體中沒有&quot;變數&quot;容器
+</translation>
     </message>
     <message>
         <source>Attaching VariantLink ...
 </source>
-        <translation type="unfinished"></translation>
+        <translation>附加變數連結 ...
+</translation>
     </message>
     <message>
         <source>Original object from which this variant is derived</source>
-        <translation type="unfinished"></translation>
+        <translation>衍生此變數的原始物體</translation>
     </message>
     <message>
         <source>Link to the modified object</source>
-        <translation type="unfinished"></translation>
+        <translation>連結到修改後的物體</translation>
     </message>
     <message>
         <source>Triggered onSettingDocument() in VariantLink
 </source>
-        <translation type="unfinished"></translation>
+        <translation>由變數連結中的 onSettingDocument() 觸發
+</translation>
     </message>
     <message>
         <source>Triggered onLostLinkToObject() in VariantLink
 </source>
-        <translation type="unfinished"></translation>
+        <translation>由變數連結中的 onLostLinkToObject() 觸發
+</translation>
     </message>
     <message>
         <source>Triggered by setupObject() in VariantLink
 </source>
-        <translation type="unfinished"></translation>
+        <translation>由變數連結中的 setupObject() 觸發
+</translation>
     </message>
     <message>
         <source>The object to array</source>
-        <translation type="unfinished"></translation>
+        <translation>要陣列的物體</translation>
     </message>
     <message>
         <source>Total number of elements in the array</source>
-        <translation type="unfinished"></translation>
+        <translation>陣列中元素的總數</translation>
     </message>
     <message>
         <source>Calculates element placements in relation to the Axis.
@@ -110,319 +119,328 @@ The Index can be used in expressions calculating this Placement or its sub-prope
 Expression examples:
 on Angle: Index%2==0?30:-30
 on Position.X: Index*30</source>
-        <translation type="unfinished"></translation>
+        <translation>計算相對於軸的元素放置.
+每個元素分配一個從0開始的索引(Index)
+索引可用於計算此 &apos;放置位置&apos; 或其子屬性的表達式中
+表達範例:
+角度: Index%2==0?30:-30
+在位置.X: Index*30</translation>
     </message>
     <message>
         <location filename="../../Asm4_objects.py" line="535"/>
         <source>The axis, direction or plane the Placer relates to</source>
-        <translation type="unfinished"></translation>
+        <translation>位置相關的軸、方向或平面</translation>
     </message>
     <message>
         <source>&amp;Assembly</source>
-        <translation type="unfinished"></translation>
+        <translation>零件組合(&amp;A)</translation>
     </message>
     <message>
         <source>&amp;Constraints</source>
-        <translation type="unfinished"></translation>
+        <translation>約束(&amp;C)</translation>
     </message>
     <message>
         <source>Assembly</source>
-        <translation type="unfinished"></translation>
+        <translation>零件組合</translation>
     </message>
     <message>
         <source>Selection Filter</source>
-        <translation type="unfinished"></translation>
+        <translation>選擇篩選器</translation>
     </message>
     <message>
         <source>Create</source>
-        <translation type="unfinished"></translation>
+        <translation>建立</translation>
     </message>
     <message>
         <source> done
 </source>
-        <translation type="unfinished"></translation>
+        <translation> 完成
+</translation>
     </message>
     <message>
         <source>closing ... </source>
-        <translation type="unfinished"></translation>
+        <translation>關閉中... </translation>
     </message>
     <message>
         <source>Initializing Assembly4 workbench</source>
-        <translation type="unfinished"></translation>
+        <translation>初始化 零件組合四 工作台</translation>
     </message>
     <message>
         <source>&amp;Help</source>
-        <translation type="unfinished"></translation>
+        <translation>求助說明(&amp;H)</translation>
     </message>
     <message>
         <source>done</source>
-        <translation type="unfinished"></translation>
+        <translation>完成</translation>
     </message>
     <message>
         <source>Activating Assembly4 WorkBench</source>
-        <translation type="unfinished"></translation>
+        <translation>啟用 零件組合四 工作台</translation>
     </message>
     <message>
         <source>Leaving Assembly4 WorkBench</source>
-        <translation type="unfinished"></translation>
+        <translation>離開 零件組合四 工作台</translation>
     </message>
     <message>
         <source>- Select Document -</source>
-        <translation type="unfinished"></translation>
+        <translation>- 選取文件 -</translation>
     </message>
     <message>
         <source>- Select Variable (only float) -</source>
-        <translation type="unfinished"></translation>
+        <translation>- 選擇變量 (只有浮動) -</translation>
     </message>
 </context>
 <context>
     <name>Asm4_Animate</name>
     <message>
         <source>Export failed for &quot;</source>
-        <translation type="unfinished"></translation>
+        <translation>匯出失敗于 &quot;</translation>
     </message>
     <message>
         <source>&quot;. Using another container type can help.
 </source>
-        <translation type="unfinished"></translation>
+        <translation>&quot;. 使用另一種容器類型會有所幫助.
+</translation>
     </message>
     <message>
         <source>Capturing and Exporting...</source>
-        <translation type="unfinished"></translation>
+        <translation>擷取和匯出...</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>取消</translation>
     </message>
     <message>
         <source>Animation Export Preview</source>
-        <translation type="unfinished"></translation>
+        <translation>動畫匯出預覽</translation>
     </message>
     <message>
         <source>Preview</source>
-        <translation type="unfinished"></translation>
+        <translation>預覽</translation>
     </message>
     <message>
         <source>TheImageLabel</source>
-        <translation type="unfinished"></translation>
+        <translation>圖形標籤</translation>
     </message>
     <message>
         <source>Preview Scale:</source>
-        <translation type="unfinished"></translation>
+        <translation>預覽縮放:</translation>
     </message>
     <message>
         <location filename="../../AnimationExportLib.py" line="483"/>
         <source>Output</source>
-        <translation type="unfinished"></translation>
+        <translation>輸出</translation>
     </message>
     <message>
         <source>Choose a file
 Supported extensions are *.gif *.mp4 *.avi *.mov *.mkv</source>
-        <translation type="unfinished"></translation>
+        <translation>選擇一個檔案
+支援的副檔名格式有 *.gif *.mp4 *.avi *.mov *.mkv</translation>
     </message>
     <message>
         <source>Width:</source>
-        <translation type="unfinished"></translation>
+        <translation>寬度:</translation>
     </message>
     <message>
         <source>Height:</source>
-        <translation type="unfinished"></translation>
+        <translation>高度:</translation>
     </message>
     <message>
         <source>FPS:</source>
-        <translation type="unfinished"></translation>
+        <translation>影格/秒:</translation>
     </message>
     <message>
         <source>Loops:</source>
-        <translation type="unfinished"></translation>
+        <translation>循環:</translation>
     </message>
     <message>
         <source>Smoothen:</source>
-        <translation type="unfinished"></translation>
+        <translation>平滑:</translation>
     </message>
     <message>
         <source>Choose an image file
 Supported extensions are *.png *.jpg *.jpeg *.gif</source>
-        <translation type="unfinished"></translation>
+        <translation>選擇圖片檔案
+支援的副檔名格式有 *.png *.jpg *.jpeg *.gif</translation>
     </message>
     <message>
         <source>X-Offset:</source>
-        <translation type="unfinished"></translation>
+        <translation>偏移 X:</translation>
     </message>
     <message>
         <source>Y-Offset:</source>
-        <translation type="unfinished"></translation>
+        <translation>偏移 Y:</translation>
     </message>
     <message>
         <source>Close</source>
-        <translation type="unfinished"></translation>
+        <translation>關閉</translation>
     </message>
     <message>
         <source>Refresh Preview</source>
-        <translation type="unfinished"></translation>
+        <translation>重新整理預覽</translation>
     </message>
     <message>
         <source>Create and Save</source>
-        <translation type="unfinished"></translation>
+        <translation>建立並儲存</translation>
     </message>
     <message>
         <source>Dummy</source>
-        <translation type="unfinished"></translation>
+        <translation>模擬</translation>
     </message>
     <message>
         <source>Select File</source>
-        <translation type="unfinished"></translation>
+        <translation>選擇一個檔案</translation>
     </message>
     <message>
         <source>Supported Files (*.mp4 *.avi *.mov *.mkv *.gif *.png)</source>
-        <translation type="unfinished"></translation>
+        <translation>支援的檔案格式 (*.mp4 *.avi *.mov *.mkv *.gif *.png)</translation>
     </message>
     <message>
         <source>animationProvider.nextFrame not implemented.</source>
-        <translation type="unfinished"></translation>
+        <translation>animationProvider.nextFrame 未達成.</translation>
     </message>
     <message>
         <source>Variable name invalid</source>
-        <translation type="unfinished"></translation>
+        <translation>變量名稱無效</translation>
     </message>
     <message>
         <source>The selected variable name &quot;</source>
-        <translation type="unfinished"></translation>
+        <translation>選定的變數名稱 &quot;</translation>
     </message>
     <message>
         <source>&quot; is not valid. </source>
-        <translation type="unfinished"></translation>
+        <translation>&quot; 不是有效的. </translation>
     </message>
     <message>
         <location filename="../../AnimationLib.py" line="94"/>
         <source>Please select an existing variable.</source>
-        <translation type="unfinished"></translation>
+        <translation>請選擇一個現有變數.</translation>
     </message>
     <message>
         <source>Animate Assembly</source>
-        <translation type="unfinished"></translation>
+        <translation>零件組合動畫</translation>
     </message>
     <message>
         <source>- Select Document -</source>
-        <translation type="unfinished"></translation>
+        <translation>- 選取文件 -</translation>
     </message>
     <message>
         <source>- Select Variable (only float) -</source>
-        <translation type="unfinished"></translation>
+        <translation>- 選擇變量 (只有浮動) -</translation>
     </message>
     <message>
         <source>Unknown State/Transition</source>
-        <translation type="unfinished"></translation>
+        <translation>未知狀態/轉換</translation>
     </message>
     <message>
         <location filename="../../AnimationLib.py" line="495"/>
         <source>The Python module &quot;OpenCV&quot; (cv2) is not installed</source>
-        <translation type="unfinished"></translation>
+        <translation>Python 模組&quot;OpenCV&quot; (cv2) 未安裝</translation>
     </message>
     <message>
         <source>Document</source>
-        <translation type="unfinished"></translation>
+        <translation>文件</translation>
     </message>
     <message>
         <source>Variable</source>
-        <translation type="unfinished"></translation>
+        <translation>變量</translation>
     </message>
     <message>
         <source>Range Begin</source>
-        <translation type="unfinished"></translation>
+        <translation>範圍開始</translation>
     </message>
     <message>
         <source>Range End</source>
-        <translation type="unfinished"></translation>
+        <translation>範圍結束</translation>
     </message>
     <message>
         <source>Step Size</source>
-        <translation type="unfinished"></translation>
+        <translation>步進大小</translation>
     </message>
     <message>
         <source>Sleep (s)</source>
-        <translation type="unfinished"></translation>
+        <translation>暫停(秒)</translation>
     </message>
     <message>
         <source>Current Value:</source>
-        <translation type="unfinished"></translation>
+        <translation>目前值:</translation>
     </message>
     <message>
         <source>Begin</source>
-        <translation type="unfinished"></translation>
+        <translation>開始</translation>
     </message>
     <message>
         <source>End</source>
-        <translation type="unfinished"></translation>
+        <translation>結束</translation>
     </message>
     <message>
         <source>The last reachable variable value with the given stepping. Flagged red in case this is not equal to the intended value. The last step of the animation will be reduced to stay inside the configured limits.</source>
-        <translation type="unfinished"></translation>
+        <translation>具有給定步進的最後一個可到達變數值. 如果此值不等於預期值，則標記為紅色. 動畫的最後一步將被減少，以保持在設定的限制內.</translation>
     </message>
     <message>
         <source>Options Box</source>
-        <translation type="unfinished"></translation>
+        <translation>選項對話框</translation>
     </message>
     <message>
         <source>Options</source>
-        <translation type="unfinished"></translation>
+        <translation>選項</translation>
     </message>
     <message>
         <source>Force GUI to update on every step.</source>
-        <translation type="unfinished"></translation>
+        <translation>強制 GUI 到每一步更新動作.</translation>
     </message>
     <message>
         <source>Force-render every step</source>
-        <translation type="unfinished"></translation>
+        <translation>強制渲染每一步動作</translation>
     </message>
     <message>
         <source>Infinite Loop</source>
-        <translation type="unfinished"></translation>
+        <translation>無限循環</translation>
     </message>
     <message>
         <source>Loop</source>
-        <translation type="unfinished"></translation>
+        <translation>循環</translation>
     </message>
     <message>
         <source>Back-and-forth pendulum</source>
-        <translation type="unfinished"></translation>
+        <translation>來回擺動</translation>
     </message>
     <message>
         <source>Pendulum</source>
-        <translation type="unfinished"></translation>
+        <translation>擺動</translation>
     </message>
     <message>
         <source>Exit</source>
-        <translation type="unfinished"></translation>
+        <translation>結束離開</translation>
     </message>
     <message>
         <location filename="../../AnimationLib.py" line="656"/>
         <source>Plot</source>
-        <translation type="unfinished"></translation>
+        <translation>影像輸出</translation>
     </message>
     <message>
         <location filename="../../AnimationLib.py" line="667"/>
         <source>Plot trajectories in this sequence</source>
-        <translation type="unfinished"></translation>
+        <translation>繪製此序列中的軌跡</translation>
     </message>
     <message>
         <source>Save</source>
-        <translation type="unfinished"></translation>
+        <translation>儲存</translation>
     </message>
     <message>
         <location filename="../../AnimationLib.py" line="640"/>
         <source>Save this sequence as video</source>
-        <translation type="unfinished"></translation>
+        <translation>將此序列儲存為影片</translation>
     </message>
     <message>
         <location filename="../../AnimationLib.py" line="644"/>
         <source>Stop</source>
-        <translation type="unfinished"></translation>
+        <translation>停止</translation>
     </message>
     <message>
         <location filename="../../AnimationLib.py" line="671"/>
         <source>Run</source>
-        <translation type="unfinished"></translation>
+        <translation>執行</translation>
     </message>
     <message>
         <location filename="../../AnimationLib.py" line="686"/>
@@ -430,59 +448,62 @@ Supported extensions are *.png *.jpg *.jpeg *.gif</source>
 
 If the model is large and complex,
 it is advisable to try with 10 frames</source>
-        <translation type="unfinished"></translation>
+        <translation>在 3D 檢視中執行此序列
+
+如果模型龐大且複雜，
+建議嘗試 10 幀</translation>
     </message>
     <message>
         <source>read</source>
-        <translation type="unfinished"></translation>
+        <translation>讀取</translation>
     </message>
     <message>
         <source>save</source>
-        <translation type="unfinished"></translation>
+        <translation>儲存</translation>
     </message>
     <message>
         <source>File:</source>
-        <translation type="unfinished"></translation>
+        <translation>檔案:</translation>
     </message>
     <message>
         <source>Select</source>
-        <translation type="unfinished"></translation>
+        <translation>選擇</translation>
     </message>
     <message>
         <source>Image Files (*.png *.jpg *.jpeg *.gif)</source>
-        <translation type="unfinished"></translation>
+        <translation>圖片檔案 (*.png *.jpg *.jpeg *.gif)</translation>
     </message>
     <message>
         <source>Color:</source>
-        <translation type="unfinished"></translation>
+        <translation>顏色:</translation>
     </message>
     <message>
         <source>&quot; is not valid. Please select an existing variable.</source>
-        <translation type="unfinished"></translation>
+        <translation>&quot; 是無效的. 請選擇一個現有變數.</translation>
     </message>
     <message>
         <source>The Python module &quot;OpenCV&quot; is not installed</source>
-        <translation type="unfinished"></translation>
+        <translation>Python模組 &quot;OpenCV&quot; 尚未安裝</translation>
     </message>
     <message>
         <source>optionsGroup</source>
-        <translation type="unfinished"></translation>
+        <translation>選項群組</translation>
     </message>
     <message>
         <source>The hintfield for the animation dialog</source>
-        <translation type="unfinished"></translation>
+        <translation>動畫對話框的提示欄位</translation>
     </message>
     <message>
         <source>The selected variable name &quot;{0}&quot; is not valid. Please select an existing variable.</source>
-        <translation type="unfinished"></translation>
+        <translation>所選變數名稱&quot;{0}&quot;無效. 請選擇一個現有變數.</translation>
     </message>
     <message>
         <source>Select Variable (only float)</source>
-        <translation type="unfinished"></translation>
+        <translation>選擇變量 (只有浮動)</translation>
     </message>
     <message>
         <source>Export</source>
-        <translation type="unfinished"></translation>
+        <translation>匯出</translation>
     </message>
 </context>
 <context>
@@ -490,142 +511,146 @@ it is advisable to try with 10 frames</source>
     <message>
         <source>No assembly container here, quitting
 </source>
-        <translation type="unfinished"></translation>
+        <translation>這裡沒有組合容器，退出
+</translation>
     </message>
     <message>
         <source>Apply configuration</source>
-        <translation type="unfinished"></translation>
+        <translation>套用參數設定</translation>
     </message>
     <message>
         <source>Applies selected configuration
 Configurations allow to set visibilities and offsets of parts</source>
-        <translation type="unfinished"></translation>
+        <translation>套用選定的參數設定
+參數設定允許設定零件的可見性和偏移</translation>
     </message>
     <message>
         <source>Open configurations panel</source>
-        <translation type="unfinished"></translation>
+        <translation>開啟參數設定面板</translation>
     </message>
     <message>
         <source>Configurations allow to set visibilities and offsets of parts</source>
-        <translation type="unfinished"></translation>
+        <translation>參數設定允許設定零件的可見性和偏移</translation>
     </message>
     <message>
         <source>Assembly Configurations</source>
-        <translation type="unfinished"></translation>
+        <translation>零件組合參數設定</translation>
     </message>
     <message>
         <source>Please select a configuration in the list</source>
-        <translation type="unfinished"></translation>
+        <translation>請在列表中選擇一個參數設定</translation>
     </message>
     <message>
         <source>This will delete configuration &quot;</source>
-        <translation type="unfinished"></translation>
+        <translation>這將刪除參數設定 &quot;</translation>
     </message>
     <message>
         <source>Configuration &quot;</source>
-        <translation type="unfinished"></translation>
+        <translation>參數設定 &quot;</translation>
     </message>
     <message>
         <source>&quot; not touched
 </source>
-        <translation type="unfinished"></translation>
+        <translation>&quot; 沒有被觸及
+</translation>
     </message>
     <message>
         <source>Object &quot;</source>
-        <translation type="unfinished"></translation>
+        <translation>物體 &quot;</translation>
     </message>
     <message>
         <source>&quot; is not a valid Assembly4 configuration, leaving untouched
 </source>
-        <translation type="unfinished"></translation>
+        <translation>&quot; 不是有效的零件組合四參數設定，保持不變
+</translation>
     </message>
     <message>
         <source>Available configurations:</source>
-        <translation type="unfinished"></translation>
+        <translation>可用參數設定:</translation>
     </message>
     <message>
         <source>Description:</source>
-        <translation type="unfinished"></translation>
+        <translation>內容描述:</translation>
     </message>
     <message>
         <source>New</source>
-        <translation type="unfinished"></translation>
+        <translation>新增</translation>
     </message>
     <message>
         <source>Delete</source>
-        <translation type="unfinished"></translation>
+        <translation>刪除</translation>
     </message>
     <message>
         <source>Overwrite</source>
-        <translation type="unfinished"></translation>
+        <translation>覆蓋</translation>
     </message>
     <message>
         <source>New configuration</source>
-        <translation type="unfinished"></translation>
+        <translation>新增參數設定</translation>
     </message>
     <message>
         <source>Create a new configuration of the assembly</source>
-        <translation type="unfinished"></translation>
+        <translation>新增此零件組合參數設定</translation>
     </message>
     <message>
         <source>Please specify configuration name!</source>
-        <translation type="unfinished"></translation>
+        <translation>請指定參數設定名稱!</translation>
     </message>
     <message>
         <source>Create a new assembly configuration</source>
-        <translation type="unfinished"></translation>
+        <translation>新增零件組合參數設定</translation>
     </message>
     <message>
         <source>Enter configuration name:</source>
-        <translation type="unfinished"></translation>
+        <translation>輸入參數設定名稱:</translation>
     </message>
     <message>
         <source>Description (optional):</source>
-        <translation type="unfinished"></translation>
+        <translation>描述 (選項):</translation>
     </message>
     <message>
         <source>Existing configurations:</source>
-        <translation type="unfinished"></translation>
+        <translation>現有參數設定:</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>取消</translation>
     </message>
     <message>
         <source>OK</source>
-        <translation type="unfinished"></translation>
+        <translation>確定</translation>
     </message>
     <message>
         <source>Saving configuration to &quot;</source>
-        <translation type="unfinished"></translation>
+        <translation>儲存新增參數設定到 &quot;</translation>
     </message>
     <message>
         <source>Cancel save of configuration &quot;</source>
-        <translation type="unfinished"></translation>
+        <translation>取消儲存參數設定 &quot;</translation>
     </message>
     <message>
         <source>Restoring configuration &quot;</source>
-        <translation type="unfinished"></translation>
+        <translation>恢復參數設定 &quot;</translation>
     </message>
     <message>
         <source>No data for object &quot;</source>
-        <translation type="unfinished"></translation>
+        <translation>沒有物體的資料 &quot;</translation>
     </message>
     <message>
         <source>&quot; in configuration &quot;</source>
-        <translation type="unfinished"></translation>
+        <translation>&quot; 於參數設定 &quot;</translation>
     </message>
     <message>
         <source>Unknown AssemblyType &quot;</source>
-        <translation type="unfinished"></translation>
+        <translation>未知零件組合類型 &quot;</translation>
     </message>
     <message>
         <source>&quot; for object &quot;</source>
-        <translation type="unfinished"></translation>
+        <translation>&quot; 於物體 &quot;</translation>
     </message>
     <message>
         <source>This will overwrite existing configuration &quot;</source>
-        <translation type="unfinished"></translation>
+        <translation>這將覆蓋現有參數設定 &quot;</translation>
     </message>
 </context>
 <context>
@@ -633,458 +658,478 @@ Configurations allow to set visibilities and offsets of parts</source>
     <message>
         <location filename="../../exportFiles.py" line="52"/>
         <source>Structure tree of the assembly</source>
-        <translation type="unfinished"></translation>
+        <translation>零件組合的結構樹</translation>
     </message>
     <message>
         <location filename="../../exportFiles.py" line="55"/>
         <source>&lt;p&gt;Show the hierarchical tree structure of parts and sub-assemblies in the assembly. The tree is displayed with ASCII art&lt;/p&gt;&lt;p&gt;&lt;b&gt;Usage&lt;/b&gt;: select an entity and click the command&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;顯示組合件中零件和子組合件的層次樹結構. 結構樹以ASCII方式顯示&lt;/p&gt;&lt;p&gt;&lt;b&gt;用法&lt;/b&gt;: 選擇一個實體並點選指令&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Oups, you shouldn&apos;t see this message, something went wrong</source>
-        <translation type="unfinished"></translation>
+        <translation>哎呀，您不應該看到此訊息，出了點問題</translation>
     </message>
     <message>
         <source>Copied to clipboard</source>
-        <translation type="unfinished"></translation>
+        <translation>複製到剪貼簿</translation>
     </message>
     <message>
         <source>Tree structure of the selected object</source>
-        <translation type="unfinished"></translation>
+        <translation>所選物體的樹狀結構</translation>
     </message>
     <message>
         <source>Copy to clipboard</source>
-        <translation type="unfinished"></translation>
+        <translation>複製到剪貼簿</translation>
     </message>
     <message>
         <source>Close</source>
-        <translation type="unfinished"></translation>
+        <translation>關閉</translation>
     </message>
     <message>
         <source>Tree of Linked Files</source>
-        <translation type="unfinished"></translation>
+        <translation>連結檔案樹</translation>
     </message>
     <message>
         <source>&lt;p&gt;Show the hierarchical tree structure of parts in the selected container. The tree is displayed with ASCII art&lt;/p&gt;&lt;p&gt;&lt;b&gt;Usage&lt;/b&gt;: select an entity and click the command&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;顯示所選容器中零件的層次樹結構. 樹以ASCII方式顯示&lt;/p&gt;&lt;p&gt;&lt;b&gt;用法&lt;/b&gt;: 選擇一個實體並點選指令&lt;/p&gt;</translation>
     </message>
 </context>
 <context>
     <name>Asm4_Fasteners</name>
     <message>
         <source>Insert Screw</source>
-        <translation type="unfinished"></translation>
+        <translation>插入螺絲</translation>
     </message>
     <message>
         <source>Insert Nut</source>
-        <translation type="unfinished"></translation>
+        <translation>插入螺母</translation>
     </message>
     <message>
         <source>Insert Washer</source>
-        <translation type="unfinished"></translation>
+        <translation>插入墊圈</translation>
     </message>
     <message>
         <source>Insert threaded rod</source>
-        <translation type="unfinished"></translation>
+        <translation>插入螺桿</translation>
     </message>
     <message>
         <source>FastenersWorkbench is not installed.
  
 You can install it with the FreeCAD AddonsManager:
 Menu Tools &gt; Addon Manager &gt; fasteners</source>
-        <translation type="unfinished"></translation>
+        <translation>緊固件工作台尚未安裝.
+
+您可以使用 FreeCAD 附加元件管理員 安裝它:
+功能表工具 &gt; 附加元件管理器 &gt; fasteners</translation>
     </message>
     <message>
         <source>Edit Attachment of a Fastener</source>
-        <translation type="unfinished"></translation>
+        <translation>編輯緊固件的連接</translation>
     </message>
     <message>
         <source>Change Fastener parameters</source>
-        <translation type="unfinished"></translation>
+        <translation>更改緊固件參數</translation>
     </message>
     <message>
         <source>Clone Fastener to Axes</source>
-        <translation type="unfinished"></translation>
+        <translation>將緊固件複製到軸</translation>
     </message>
     <message>
         <source>&lt;p&gt;Insert a Screw into the Assembly&lt;/p&gt;&lt;p&gt;If another fastener is selected, a new fastener of the same type is created in the same assembly.If an axis or LCS is selected, the new fastener will be attached to it.If an assembly is selected, the new fastener will be inside that assembly.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;將螺絲插入緊固件&lt;/p&gt;&lt;p&gt;如果選擇了另一個緊固件，則會在同一緊固件中建立相同類型的新緊固件。如果選擇了軸或區域座標系統(LCS)，如果選擇了某個緊固件則會附加新緊固件，新的緊固件將位於該緊固件內.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>&lt;p&gt;Insert a Nut into the Assembly&lt;/p&gt;&lt;p&gt;If another fastener is selected, a new fastener of the same type is created in the same assembly.If an axis or LCS is selected, the new fastener will be attached to it.If an assembly is selected, the new fastener will be inside that assembly.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;將螺帽插入零件組合&lt;/p&gt;&lt;p&gt;如果選擇了另一個緊固件，則會在同一零件組合中建立相同類型的新緊固件。如果選擇了軸或LCS，如果選擇了某個零件組合則會附加新緊固件，新的緊固件將位於該零件組合內.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>&lt;p&gt;Insert a Washer into the Assembly&lt;/p&gt;&lt;p&gt;If another fastener is selected, a new fastener of the same type is created in the same assembly.If an axis or LCS is selected, the new fastener will be attached to it.If an assembly is selected, the new fastener will be inside that assembly.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;將墊圈插入零件組合&lt;/p&gt;&lt;p&gt;如果選擇了另一個緊固件，則會在同一零件組合中建立相同類型的新緊固件。如果選擇了軸或LCS，如果選擇了某個零件組合則會附加新緊固件，新的緊固件將位於該零件組合內.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Selected object doesn&apos;t seem to be a valid fastener, ignoring
 </source>
-        <translation type="unfinished"></translation>
+        <translation>所選物體似乎不是有效的緊固件，忽略
+</translation>
     </message>
     <message>
         <source>Length &quot;</source>
-        <translation type="unfinished"></translation>
+        <translation>長度 &quot;</translation>
     </message>
     <message>
         <source>&quot; is not available, ignoring
 </source>
-        <translation type="unfinished"></translation>
+        <translation>&quot; 不可用，忽略
+</translation>
     </message>
     <message>
         <source>unknown fastener type &quot;</source>
-        <translation type="unfinished"></translation>
+        <translation>未知緊固件類型 &quot;</translation>
     </message>
     <message>
         <source>&quot;, ignoring
 </source>
-        <translation type="unfinished"></translation>
+        <translation>&quot; 忽略
+</translation>
     </message>
 </context>
 <context>
     <name>Asm4_Help</name>
     <message>
         <source>Help for Assembly4</source>
-        <translation type="unfinished"></translation>
+        <translation>零件組合四 求助說明</translation>
     </message>
     <message>
         <source>Show basic usage for FreeCAD and Assembly4</source>
-        <translation type="unfinished"></translation>
+        <translation>顯示 FreeCAD 和 零件組合四 的基本用法</translation>
     </message>
 </context>
 <context>
     <name>Asm4_InfoPart</name>
     <message>
         <source>File Name</source>
-        <translation type="unfinished"></translation>
+        <translation>檔案名稱</translation>
     </message>
     <message>
         <source>Base Part ID:</source>
-        <translation type="unfinished"></translation>
+        <translation>基礎零件ID:</translation>
     </message>
     <message>
         <source>Revision:</source>
-        <translation type="unfinished"></translation>
+        <translation>修訂版本:</translation>
     </message>
     <message>
         <source>BomKey</source>
-        <translation type="unfinished"></translation>
+        <translation>物料清單索引</translation>
     </message>
     <message>
         <source>Document or File name</source>
-        <translation type="unfinished"></translation>
+        <translation>文件或檔案名稱</translation>
     </message>
     <message>
         <source>Document Revision</source>
-        <translation type="unfinished"></translation>
+        <translation>文件修訂版本</translation>
     </message>
     <message>
         <source>Part ID</source>
-        <translation type="unfinished"></translation>
+        <translation>零件ID</translation>
     </message>
     <message>
         <source>Part Description</source>
-        <translation type="unfinished"></translation>
+        <translation>零件描述</translation>
     </message>
     <message>
         <source>Fastener diameter</source>
-        <translation type="unfinished"></translation>
+        <translation>緊固件直徑</translation>
     </message>
     <message>
         <source>Fastener length</source>
-        <translation type="unfinished"></translation>
+        <translation>緊固件長度</translation>
     </message>
     <message>
         <source>Fastener type</source>
-        <translation type="unfinished"></translation>
+        <translation>緊固件類型</translation>
     </message>
     <message>
         <source>We have an assembly</source>
-        <translation type="unfinished"></translation>
+        <translation>已有一個零件組合</translation>
     </message>
     <message>
         <source>&lt;p&gt;Edit Part information&lt;/p&gt;&lt;p&gt;User-supplied information can be added to a part&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;編輯零件資訊&lt;/p&gt;&lt;p&gt;可以將使用者提供的資訊加入零件中&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Edit Part Information</source>
-        <translation type="unfinished"></translation>
+        <translation>編輯零件資訊</translation>
     </message>
     <message>
         <source>The Part Info field has been cleared</source>
-        <translation type="unfinished"></translation>
+        <translation>零件資訊欄位已被清除</translation>
     </message>
     <message>
         <source>Configure fields</source>
-        <translation type="unfinished"></translation>
+        <translation>參數設定欄位</translation>
     </message>
     <message>
         <source>Edit fields</source>
-        <translation type="unfinished"></translation>
+        <translation>編輯欄位</translation>
     </message>
     <message>
         <source>Reset fields</source>
-        <translation type="unfinished"></translation>
+        <translation>重置欄位</translation>
     </message>
     <message>
         <source>Autofill data</source>
-        <translation type="unfinished"></translation>
+        <translation>自動填入數據資料</translation>
     </message>
     <message>
         <source>Autofill fields</source>
-        <translation type="unfinished"></translation>
+        <translation>自動填入欄位</translation>
     </message>
     <message>
         <source>Fields Name cannot be blank. You must disable or delete it</source>
-        <translation type="unfinished"></translation>
+        <translation>欄位名稱不能為空. 您必須停用或刪除它</translation>
     </message>
     <message>
         <source>Name</source>
-        <translation type="unfinished"></translation>
+        <translation>名稱</translation>
     </message>
     <message>
         <source>Add</source>
-        <translation type="unfinished"></translation>
+        <translation>新增</translation>
     </message>
     <message>
         <source>Delete</source>
-        <translation type="unfinished"></translation>
+        <translation>刪除</translation>
     </message>
     <message>
         <source>Update automatic input field</source>
-        <translation type="unfinished"></translation>
+        <translation>更新自動輸入欄位</translation>
     </message>
     <message>
         <source>Update</source>
-        <translation type="unfinished"></translation>
+        <translation>更新</translation>
     </message>
     <message>
         <source>Function not implemented yet</source>
-        <translation type="unfinished"></translation>
+        <translation>功能尚未實現</translation>
     </message>
     <message>
         <source>Multi Body Part(Not implemented)</source>
-        <translation type="unfinished"></translation>
+        <translation>多重實體零件(未實現)</translation>
     </message>
     <message>
         <source>Need to develop logic for something that is neither a part or an assembly</source>
-        <translation type="unfinished"></translation>
+        <translation>需要為既不是零件也不是零件組合的開發邏輯</translation>
     </message>
     <message>
         <source>Part does not contain a single PartDesign::Body.</source>
-        <translation type="unfinished"></translation>
+        <translation>零件不包含單一零件設計實體(PartDesign::Body).</translation>
     </message>
     <message>
         <source>Field</source>
-        <translation type="unfinished"></translation>
+        <translation>欄位</translation>
     </message>
     <message>
         <source>Active</source>
-        <translation type="unfinished"></translation>
+        <translation>啟用</translation>
     </message>
 </context>
 <context>
     <name>Asm4_Measure</name>
     <message>
         <source>Controls</source>
-        <translation type="unfinished"></translation>
+        <translation>控制</translation>
     </message>
     <message>
         <source>Measure Radius of Arc or Circle
 Measure Length of Edge</source>
-        <translation type="unfinished"></translation>
+        <translation>測量圓弧或圓的半徑
+測量邊長</translation>
     </message>
     <message>
         <source>Measure Distance</source>
-        <translation type="unfinished"></translation>
+        <translation>測量距離</translation>
     </message>
     <message>
         <source>Measure Angle</source>
-        <translation type="unfinished"></translation>
+        <translation>測量角度</translation>
     </message>
     <message>
         <source>Snap to EndPoint, MiddlePoint, Center</source>
-        <translation type="unfinished"></translation>
+        <translation>捕捉到端點、中間點、中心</translation>
     </message>
     <message>
         <source>Select Shape</source>
-        <translation type="unfinished"></translation>
+        <translation>選取造型</translation>
     </message>
     <message>
         <source>Selection 1</source>
-        <translation type="unfinished"></translation>
+        <translation>選擇 1</translation>
     </message>
     <message>
         <source>Select First Element</source>
-        <translation type="unfinished"></translation>
+        <translation>選擇第一個元素</translation>
     </message>
     <message>
         <source>Selection 2</source>
-        <translation type="unfinished"></translation>
+        <translation>選擇 2</translation>
     </message>
     <message>
         <source>Select Second Element</source>
-        <translation type="unfinished"></translation>
+        <translation>選擇第二個元素</translation>
     </message>
     <message>
         <source>Enable extra Label</source>
-        <translation type="unfinished"></translation>
+        <translation>啟用額外標籤</translation>
     </message>
     <message>
         <source>Show Label in 3D view</source>
-        <translation type="unfinished"></translation>
+        <translation>在 3D 視圖中顯示標籤</translation>
     </message>
     <message>
         <source>Show all dimension components</source>
-        <translation type="unfinished"></translation>
+        <translation>顯示所有維度組件</translation>
     </message>
     <message>
         <source>Show Components</source>
-        <translation type="unfinished"></translation>
+        <translation>顯示元件</translation>
     </message>
     <message>
         <source>Results</source>
-        <translation type="unfinished"></translation>
+        <translation>結果</translation>
     </message>
     <message>
         <source>Can&apos;t measure
 </source>
-        <translation type="unfinished"></translation>
+        <translation>無法測量
+</translation>
     </message>
     <message>
         <source>Measuring angles</source>
-        <translation type="unfinished"></translation>
+        <translation>量測角度</translation>
     </message>
     <message>
         <location filename="../../Asm4_Measure.py" line="744"/>
         <source>Select only faces or lines</source>
-        <translation type="unfinished"></translation>
+        <translation>僅選擇面或線段</translation>
     </message>
     <message>
         <source>Ivalid directions</source>
-        <translation type="unfinished"></translation>
+        <translation>方向無效</translation>
     </message>
     <message>
         <source>Ivalid shapes</source>
-        <translation type="unfinished"></translation>
+        <translation>非有效形狀</translation>
     </message>
     <message>
         <source>Minimum Distance :
   </source>
-        <translation type="unfinished"></translation>
+        <translation>最小距離:
+  </translation>
     </message>
     <message>
         <source>Length = </source>
-        <translation type="unfinished"></translation>
+        <translation>長度 = </translation>
     </message>
     <message>
         <source>Not a valid Line
 </source>
-        <translation type="unfinished"></translation>
+        <translation>非有效線段
+</translation>
     </message>
     <message>
         <source>Distance = </source>
-        <translation type="unfinished"></translation>
+        <translation>距離 = </translation>
     </message>
     <message>
         <source>Not valid Points</source>
-        <translation type="unfinished"></translation>
+        <translation>非有效端點</translation>
     </message>
     <message>
         <source>Radius : </source>
-        <translation type="unfinished"></translation>
+        <translation>半徑: </translation>
     </message>
     <message>
         <source>Diameter : </source>
-        <translation type="unfinished"></translation>
+        <translation>直徑: </translation>
     </message>
     <message>
         <source>Center : 
 </source>
-        <translation type="unfinished"></translation>
+        <translation>中心: 
+</translation>
     </message>
     <message>
         <source>Axis : 
 </source>
-        <translation type="unfinished"></translation>
+        <translation>軸座標: 
+</translation>
     </message>
     <message>
         <source>Not a valid circle
 </source>
-        <translation type="unfinished"></translation>
+        <translation>非有效圓形
+</translation>
     </message>
     <message>
         <source>Invalid shape
 </source>
-        <translation type="unfinished"></translation>
+        <translation>非有效形狀
+</translation>
     </message>
     <message>
         <source>Not a valid point
 </source>
-        <translation type="unfinished"></translation>
+        <translation>非有效端點
+</translation>
     </message>
     <message>
         <location filename="../../Asm4_Measure.py" line="919"/>
         <source>Coordinates :</source>
-        <translation type="unfinished"></translation>
+        <translation>座標軸 :</translation>
     </message>
     <message>
         <source>Coordinates :
 </source>
-        <translation type="unfinished"></translation>
+        <translation>座標軸:
+</translation>
     </message>
     <message>
         <source>Flat face
 Area : </source>
-        <translation type="unfinished"></translation>
+        <translation>平面
+區域: </translation>
     </message>
     <message>
         <source>Area : </source>
-        <translation type="unfinished"></translation>
+        <translation>區域: </translation>
     </message>
     <message>
         <source>Not a valid surface
 </source>
-        <translation type="unfinished"></translation>
+        <translation>不是有效表面
+</translation>
     </message>
     <message>
         <source>Angle : </source>
-        <translation type="unfinished"></translation>
+        <translation>角度: </translation>
     </message>
     <message>
         <source>Distance // </source>
-        <translation type="unfinished"></translation>
+        <translation>距離 // </translation>
     </message>
     <message>
         <source>Angle: </source>
-        <translation type="unfinished"></translation>
+        <translation>角度: </translation>
     </message>
     <message>
         <source>Distance</source>
-        <translation type="unfinished"></translation>
+        <translation>距離</translation>
     </message>
     <message>
         <source>Measure</source>
-        <translation type="unfinished"></translation>
+        <translation>測量</translation>
     </message>
     <message>
         <source>Measure Tool</source>
-        <translation type="unfinished"></translation>
+        <translation>測量工具</translation>
     </message>
     <message>
         <source>Observer started
 </source>
-        <translation type="unfinished"></translation>
+        <translation>已啟動觀測
+</translation>
     </message>
     <message>
         <source>was not able to remove observer
 </source>
-        <translation type="unfinished"></translation>
+        <translation>無法刪除觀測
+</translation>
     </message>
     <message>
         <source>Removing all measurements ...</source>
-        <translation type="unfinished"></translation>
+        <translation>清除全部量測標注 ...</translation>
     </message>
 </context>
 <context>
@@ -1093,193 +1138,184 @@ Area : </source>
         <source>Plot trajectories of Points
 
 Only visible Datum Points are shown</source>
-        <translation type="unfinished"></translation>
+        <translation>繪製點的軌跡
+
+僅顯示可見基準點</translation>
     </message>
     <message>
         <source>Plot Animation</source>
-        <translation type="unfinished"></translation>
+        <translation>繪製動畫</translation>
     </message>
     <message>
         <source>Unrecognized assembly type, this might not work</source>
-        <translation type="unfinished"></translation>
+        <translation>無法識別的零件組合類型，有可能不起作用</translation>
     </message>
     <message>
         <source>This Model deosn&apos;t seem to have compatible Variables</source>
-        <translation type="unfinished"></translation>
+        <translation>這個模型似乎沒有相容的變數</translation>
     </message>
     <message>
         <source># Running animation sequence on variable &quot;</source>
-        <translation type="unfinished"></translation>
+        <translation># 在變數上執行動畫序列 &quot;</translation>
     </message>
     <message>
         <source>&quot;, please wait... 
 </source>
-        <translation type="unfinished"></translation>
+        <translation>&quot;, 請稍後... 
+</translation>
     </message>
     <message>
         <location filename="../../AnimationPlotLib.py" line="87"/>
         <source># CVS output</source>
-        <translation type="unfinished"></translation>
+        <translation># CVS 輸出</translation>
     </message>
     <message>
         <location filename="../../AnimationPlotLib.py" line="88"/>
         <source>Iter;Variable;</source>
-        <translation type="unfinished"></translation>
+        <translation>Iter; 變數;</translation>
     </message>
     <message>
         <location filename="../../AnimationPlotLib.py" line="98"/>
         <source>Finished </source>
-        <translation type="unfinished"></translation>
+        <translation>已完成 </translation>
     </message>
     <message>
         <location filename="../../AnimationPlotLib.py" line="98"/>
         <source> iterations</source>
-        <translation type="unfinished"></translation>
+        <translation> 動作</translation>
     </message>
     <message>
         <source>Plot trajectories of the animation</source>
-        <translation type="unfinished"></translation>
+        <translation>動畫的繪圖軌跡</translation>
     </message>
     <message>
         <source>Animation Plotter: this tool plots the values of all the variables and the X,Y,Z coordinates of each *visible* Datum Point for each step of the animation sequence</source>
-        <translation type="unfinished"></translation>
+        <translation>動畫繪圖器: 此工具繪製動畫序列每個步驟的所有變數的值和每個*可見*基準點的 X、Y、Z 座標</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>取消</translation>
     </message>
     <message>
         <source>Remove trajectories and Exit</source>
-        <translation type="unfinished"></translation>
+        <translation>刪除軌跡並退出</translation>
     </message>
     <message>
         <source>Refresh</source>
-        <translation type="unfinished"></translation>
+        <translation>重新整理</translation>
     </message>
     <message>
         <source>Recalculate animation sequence</source>
-        <translation type="unfinished"></translation>
+        <translation>重新計算動畫序列</translation>
     </message>
     <message>
         <source>Export</source>
-        <translation type="unfinished"></translation>
+        <translation>匯出</translation>
     </message>
     <message>
         <source>Save data as plain text *.CSV file</source>
-        <translation type="unfinished"></translation>
+        <translation>將資料另存為純文字 *.CSV 檔案</translation>
     </message>
     <message>
         <source>OK</source>
-        <translation type="unfinished"></translation>
+        <translation>確定</translation>
     </message>
     <message>
         <source>Close animation widget and keep plots</source>
-        <translation type="unfinished"></translation>
+        <translation>關閉動畫工具並保留繪圖</translation>
     </message>
 </context>
 <context>
     <name>Asm4_SelectionFilter</name>
     <message>
         <source>Clear all selection filters</source>
-        <translation type="unfinished"></translation>
+        <translation>清除所有選擇過濾器</translation>
     </message>
     <message>
         <source>All selection filters cleared
 </source>
-        <translation type="unfinished"></translation>
+        <translation>已清除所有選擇過濾器
+</translation>
     </message>
     <message>
         <source>Select only Vertices</source>
-        <translation type="unfinished"></translation>
+        <translation>僅選擇頂點</translation>
     </message>
     <message>
         <source>Select only Edges</source>
-        <translation type="unfinished"></translation>
+        <translation>僅選擇邊緣</translation>
     </message>
     <message>
         <source>Select only Faces</source>
-        <translation type="unfinished"></translation>
+        <translation>僅選擇平面</translation>
     </message>
     <message>
         <source>Enable/Disable 3D View selection mode</source>
-        <translation type="unfinished"></translation>
+        <translation>啟用/禁用 3D視圖連結選擇模式</translation>
     </message>
     <message>
         <source>Enable/Disable 3D View selection mode
 
 Allows to select a Link object in the 3D view
 window instead of the Model tree</source>
-        <translation type="unfinished"></translation>
+        <translation>啟用/停用 3D 視圖選擇模式
+
+允許在 3D 視圖視窗中選擇連結物體而不是模型樹</translation>
     </message>
     <message>
         <source>Asm4 3D view selection mode is now ENABLED
 </source>
-        <translation type="unfinished"></translation>
+        <translation>零件組合 3D視圖連結選擇模式現已啟用
+</translation>
     </message>
     <message>
         <source>Asm4 3D view selection mode is now DISABLED
 </source>
-        <translation type="unfinished"></translation>
+        <translation>零件組合 3D視圖連結選擇模式現已停用
+</translation>
     </message>
 </context>
 <context>
     <name>Asm4_checkInterference</name>
     <message>
         <source>Check Intereferences</source>
-        <translation type="unfinished"></translation>
+        <translation>檢查交叉引用</translation>
     </message>
     <message>
         <source>Check interferences among assembled objects (may take time)</source>
-        <translation type="unfinished"></translation>
+        <translation>檢查零件組合物體之間的干涉(可能需要點時間)</translation>
     </message>
     <message>
         <location filename="../../checkInterference.py" line="107"/>
         <source>The {} has {} objects. (with fasteners)</source>
-        <translation type="unfinished"></translation>
+        <translation>{} 共有 {} 個物件. (含緊固件)</translation>
     </message>
     <message>
         <location filename="../../checkInterference.py" line="109"/>
         <source>The {} has {} objects.</source>
-        <translation type="unfinished"></translation>
+        <translation>{} 共有 {} 個物件.</translation>
     </message>
     <message>
         <location filename="../../checkInterference.py" line="125"/>
         <source>Totaling {} possible comparisons (with fasteners)</source>
-        <translation type="unfinished"></translation>
+        <translation>總計有 {} 種可能的比較 (含緊固件)</translation>
     </message>
     <message>
         <location filename="../../checkInterference.py" line="127"/>
         <source>Totaling {} possible comparisons</source>
-        <translation type="unfinished"></translation>
+        <translation>總計有 {} 種可能的比較</translation>
     </message>
     <message>
         <location filename="../../checkInterference.py" line="128"/>
         <source>Interferences check may take time.</source>
-        <translation type="unfinished"></translation>
+        <translation>干涉檢查可能需要一些時間.</translation>
     </message>
     <message>
         <location filename="../../checkInterference.py" line="135"/>
         <source>
 Elapsed time: {:.2f} ms</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../checkInterference.py" line="137"/>
-        <source>
-Elapsed time: {:.2f} s</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../checkInterference.py" line="139"/>
-        <source>
-Elapsed time: {:.2f} min</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../checkInterference.py" line="141"/>
-        <source>
-Elapsed time: {:.2f} h</source>
-        <translation type="unfinished"></translation>
+        <translation>
+佔用時間: {:.2f} 毫秒</translation>
     </message>
     <message>
         <location filename="../../checkInterference.py" line="135"/>
@@ -1288,250 +1324,285 @@ Elapsed time: {:.2f} h</source>
         <location filename="../../checkInterference.py" line="141"/>
         <source>
 Elapsed time:</source>
-        <translation type="unfinished"></translation>
+        <translation>
+佔用時間:</translation>
+    </message>
+    <message>
+        <location filename="../../checkInterference.py" line="137"/>
+        <source>
+Elapsed time: {:.2f} s</source>
+        <translation>
+佔用時間: {:.2f} 秒</translation>
+    </message>
+    <message>
+        <location filename="../../checkInterference.py" line="139"/>
+        <source>
+Elapsed time: {:.2f} min</source>
+        <translation>
+佔用時間: {:.2f} 分鐘</translation>
+    </message>
+    <message>
+        <location filename="../../checkInterference.py" line="141"/>
+        <source>
+Elapsed time: {:.2f} h</source>
+        <translation>
+佔用時間: {:.2f} 小時</translation>
     </message>
     <message>
         <location filename="../../checkInterference.py" line="154"/>
         <source>Checked items:</source>
-        <translation type="unfinished"></translation>
+        <translation>已檢查項目:</translation>
     </message>
     <message>
         <location filename="../../checkInterference.py" line="170"/>
         <source>
 &gt;&gt;&gt; Starting to check for interferences... &lt;&lt;&lt;</source>
-        <translation type="unfinished"></translation>
+        <translation>
+&gt;&gt;&gt; 開始檢查交叉引用干涉... &lt;&lt;&lt;</translation>
     </message>
     <message>
         <location filename="../../checkInterference.py" line="307"/>
         <source>
 &gt;&gt;&gt; No interferences were found. The {} is clean! &lt;&lt;&lt;</source>
-        <translation type="unfinished"></translation>
+        <translation>
+&gt;&gt;&gt; 沒有發現干涉. {} 為正常! &lt;&lt;&lt;</translation>
     </message>
     <message>
         <location filename="../../checkInterference.py" line="312"/>
         <source>
 &gt;&gt;&gt; Found {} interferences &lt;&lt;&lt;</source>
-        <translation type="unfinished"></translation>
+        <translation>
+&gt;&gt;&gt; 發現干涉物件 {} &lt;&lt;&lt;</translation>
     </message>
     <message>
         <location filename="../../checkInterference.py" line="476"/>
         <source>Minimum interference volume = {}</source>
-        <translation type="unfinished"></translation>
+        <translation>最小干涉體積 = {}</translation>
     </message>
     <message>
         <source>Abort</source>
-        <translation type="unfinished"></translation>
+        <translation>中止</translation>
     </message>
     <message>
         <location filename="../../checkInterference.py" line="485"/>
         <source>
 &gt;&gt;&gt; OPERATION HAS BEEN ABORTED &lt;&lt;&lt;</source>
-        <translation type="unfinished"></translation>
+        <translation>
+&gt;&gt;&gt; 操作已中止 &lt;&lt;&lt;</translation>
     </message>
     <message>
         <source>Close</source>
-        <translation type="unfinished"></translation>
+        <translation>關閉</translation>
     </message>
     <message>
         <location filename="../../checkInterference.py" line="498"/>
         <source>
 Aborting the current processing...</source>
-        <translation type="unfinished"></translation>
+        <translation>
+中止目前操作處理...</translation>
     </message>
     <message>
         <location filename="../../checkInterference.py" line="521"/>
         <source>Allow faces touching = {}</source>
-        <translation type="unfinished"></translation>
+        <translation>允許平面接觸 = {}</translation>
     </message>
     <message>
         <location filename="../../checkInterference.py" line="530"/>
         <source>Check fasteners = {}</source>
-        <translation type="unfinished"></translation>
+        <translation>檢查緊固件 = {}</translation>
     </message>
     <message>
         <location filename="../../checkInterference.py" line="540"/>
         <source>Verbose = {}</source>
-        <translation type="unfinished"></translation>
+        <translation>預覽 = {}</translation>
     </message>
     <message>
         <source>Interference Checks</source>
-        <translation type="unfinished"></translation>
+        <translation>檢查交叉引用</translation>
     </message>
     <message>
         <source>Allow faces touching</source>
-        <translation type="unfinished"></translation>
+        <translation>允許平面接觸</translation>
     </message>
     <message>
         <source>Include fasteners</source>
-        <translation type="unfinished"></translation>
+        <translation>包含緊固件</translation>
     </message>
     <message>
         <source>Verbose</source>
-        <translation type="unfinished"></translation>
+        <translation>預覽</translation>
     </message>
     <message>
         <source>Minimum interference volume:</source>
-        <translation type="unfinished"></translation>
+        <translation>最小干涉體積:</translation>
     </message>
     <message>
         <source>Clear Checks</source>
-        <translation type="unfinished"></translation>
+        <translation>清除檢查</translation>
     </message>
     <message>
         <source>Check Interferences</source>
-        <translation type="unfinished"></translation>
+        <translation>檢查交叉引用干涉</translation>
     </message>
     <message>
         <location filename="../../checkInterference_lh.py" line="154"/>
         <source>
 &gt;&gt; USED PARTS:</source>
-        <translation type="unfinished"></translation>
+        <translation>
+&gt;&gt; 使用過的零件:</translation>
     </message>
     <message>
         <location filename="../../checkInterference_lh.py" line="201"/>
         <source>{} | Collision detected</source>
-        <translation type="unfinished"></translation>
+        <translation>{}| 偵測到碰撞</translation>
     </message>
     <message>
         <location filename="../../checkInterference_lh.py" line="206"/>
         <source>{} | Touching faces (REMOVING)</source>
-        <translation type="unfinished"></translation>
+        <translation>{} | 接觸平面(移除)</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>取消</translation>
     </message>
     <message>
         <source>
 &gt;&gt; BUILDING PART LIST ...</source>
-        <translation type="unfinished"></translation>
+        <translation>
+&gt;&gt; 建立零件清單 ...</translation>
     </message>
     <message>
         <source>FOUND {} OBJECTS
 </source>
-        <translation type="unfinished"></translation>
+        <translation>找到 {} 個物體
+</translation>
     </message>
     <message>
         <source>
 &gt;&gt; PROCESSING INTERSECTIONS ... </source>
-        <translation type="unfinished"></translation>
+        <translation>
+&gt;&gt; 處理交叉引用 ... </translation>
     </message>
     <message>
         <source>Not enough parts for intersections
 </source>
-        <translation type="unfinished"></translation>
+        <translation>交叉引用零件不足
+</translation>
     </message>
     <message>
         <source>DONE. 
 There seems to be some conflicts between parts
 </source>
-        <translation type="unfinished"></translation>
+        <translation>完成.
+各零件之間似乎存在一些衝突
+</translation>
     </message>
     <message>
         <source>DONE. No conflicts found
 </source>
-        <translation type="unfinished"></translation>
+        <translation>完成. 沒有發現衝突
+</translation>
     </message>
 </context>
 <context>
     <name>Asm4_createDatum</name>
     <message>
         <source>New Point</source>
-        <translation type="unfinished"></translation>
+        <translation>新增點</translation>
     </message>
     <message>
         <source>Create a new Datum Point in a Part</source>
-        <translation type="unfinished"></translation>
+        <translation>在零件中建立新的基準點</translation>
     </message>
     <message>
         <source>New Axis</source>
-        <translation type="unfinished"></translation>
+        <translation>新增軸</translation>
     </message>
     <message>
         <source>Create a new Datum Axis in a Part</source>
-        <translation type="unfinished"></translation>
+        <translation>在零件中建立新的基準軸</translation>
     </message>
     <message>
         <source>New Plane</source>
-        <translation type="unfinished"></translation>
+        <translation>新增基準面</translation>
     </message>
     <message>
         <source>Create a new Datum Plane in a Part</source>
-        <translation type="unfinished"></translation>
+        <translation>在零件中建立新的基準平面</translation>
     </message>
     <message>
         <source>New Coordinate System</source>
-        <translation type="unfinished"></translation>
+        <translation>新增座標系統</translation>
     </message>
     <message>
         <source>Create a new Coordinate System in a Part</source>
-        <translation type="unfinished"></translation>
+        <translation>在零件中建立新座標系統</translation>
     </message>
     <message>
         <source>New Sketch</source>
-        <translation type="unfinished"></translation>
+        <translation>新增草圖</translation>
     </message>
     <message>
         <source>Create a new Sketch in a Part</source>
-        <translation type="unfinished"></translation>
+        <translation>在零件中建立新的草圖</translation>
     </message>
     <message>
         <source>I can&apos;t create a </source>
-        <translation type="unfinished"></translation>
+        <translation>我無法建立一個 </translation>
     </message>
     <message>
         <source> with the current selections</source>
-        <translation type="unfinished"></translation>
+        <translation> 與目前的選擇</translation>
     </message>
     <message>
         <source>New Hole Axis</source>
-        <translation type="unfinished"></translation>
+        <translation>新增圓孔軸</translation>
     </message>
     <message>
         <source>Create a Datum Axis attached to a hole</source>
-        <translation type="unfinished"></translation>
+        <translation>建立附加到孔的基準軸</translation>
     </message>
     <message>
         <source>Datum objects can only be created inside Part or Body containers</source>
-        <translation type="unfinished"></translation>
+        <translation>基準物體只能在「零件」或「實體」容器內建立</translation>
     </message>
     <message>
         <source>Create Datum Object</source>
-        <translation type="unfinished"></translation>
+        <translation>建立基準物件</translation>
     </message>
     <message>
         <source>Create new </source>
-        <translation type="unfinished"></translation>
+        <translation>建立一個新的 </translation>
     </message>
     <message>
         <source>Enter </source>
-        <translation type="unfinished"></translation>
+        <translation>輸入 </translation>
     </message>
     <message>
         <source> name :</source>
-        <translation type="unfinished"></translation>
+        <translation> 名稱 :</translation>
     </message>
 </context>
 <context>
     <name>Asm4_gotoDocument</name>
     <message>
         <source>Open Document</source>
-        <translation type="unfinished"></translation>
+        <translation>開啟文件</translation>
     </message>
     <message>
         <source>Activates the document of the selected linked part</source>
-        <translation type="unfinished"></translation>
+        <translation>啟用所選連結零件的檔案</translation>
     </message>
 </context>
 <context>
     <name>Asm4_hideLcs</name>
     <message>
         <source>Hide LCS</source>
-        <translation type="unfinished"></translation>
+        <translation>隱藏區域座標系統(LCS)</translation>
     </message>
     <message>
         <source>Hide LCS and Datums of selected part and its children</source>
-        <translation type="unfinished"></translation>
+        <translation>隱藏所選零件及其子零件的區域座標系統和基準</translation>
     </message>
 </context>
 <context>
@@ -1542,160 +1613,176 @@ This creates a new datum of the same type, and with the same global placement
 
 This command can also be used to override the placement of an existing datum :
 select a second datum in the same root container as the first selected datum</source>
-        <translation type="unfinished"></translation>
+        <translation>將選取的基準物體從子零件匯入到根組合體中.
+這將建立相同類型且具有相同全域位置的新基準
+
+此命令也可用於涵蓋現有基準的放置:
+在與第一個選定基準相同的根容器中選擇第二個基準</translation>
     </message>
     <message>
         <source>Import Datum object</source>
-        <translation type="unfinished"></translation>
+        <translation>匯入基準</translation>
     </message>
     <message>
         <source>This will superimpose </source>
-        <translation type="unfinished"></translation>
+        <translation>這將疊加 </translation>
     </message>
     <message>
         <source> in </source>
-        <translation type="unfinished"></translation>
+        <translation> 於 </translation>
     </message>
     <message>
         <source> on:
 
 </source>
-        <translation type="unfinished"></translation>
+        <translation> 在:
+
+</translation>
     </message>
     <message>
         <location filename="../../importDatumCmd.py" line="87"/>
         <source> is already attached to some geometry. </source>
-        <translation type="unfinished"></translation>
+        <translation> 已經附加到一些幾何體上. </translation>
     </message>
     <message>
         <location filename="../../importDatumCmd.py" line="88"/>
         <source>This will superimpose its Placement on:
 
 </source>
-        <translation type="unfinished"></translation>
+        <translation>這會將其放置疊加在:
+
+</translation>
     </message>
     <message>
         <source> is already at the top-level and cannot be imported</source>
-        <translation type="unfinished"></translation>
+        <translation> 已經是頂層，無法匯入</translation>
     </message>
     <message>
         <source>Create a new </source>
-        <translation type="unfinished"></translation>
+        <translation>建立一個新的 </translation>
     </message>
     <message>
         <source> 
 superimposed on:
 
 </source>
-        <translation type="unfinished"></translation>
+        <translation> 
+疊加於:
+
+</translation>
     </message>
     <message>
         <source>
 Enter name for this datum :</source>
-        <translation type="unfinished"></translation>
+        <translation>
+輸入該基準資料的名稱:</translation>
     </message>
     <message>
         <source>Import Datum</source>
-        <translation type="unfinished"></translation>
+        <translation>匯入基準</translation>
     </message>
     <message>
         <source> selected datum objects will be imported into the root assembly
 with their default names such as:
 </source>
-        <translation type="unfinished"></translation>
+        <translation> 選定的基準將以其預設名稱匯入到根零件組合中. 例如:
+</translation>
     </message>
     <message>
         <source> is already attached to some geometry. This will superimpose its Placement on:
 
 </source>
-        <translation type="unfinished"></translation>
+        <translation> 已經附加到一些幾何體上. 這會將其放置疊加在:
+
+</translation>
     </message>
     <message>
         <source>&gt; </source>
-        <translation type="unfinished"></translation>
+        <translation>&gt; </translation>
     </message>
     <message>
         <source> selected datum objects will be imported into the root assembly
 with their default names such as: 
 </source>
-        <translation type="unfinished"></translation>
+        <translation> 選定的基準將以其預設名稱匯入到根零件組合中，例如: 
+</translation>
     </message>
 </context>
 <context>
     <name>Asm4_infoPart</name>
     <message>
         <source>BomKey</source>
-        <translation type="unfinished"></translation>
+        <translation>物料清單索引</translation>
     </message>
 </context>
 <context>
     <name>Asm4_insertLink</name>
     <message>
         <source>&lt;p&gt;Insert a Part into the assembly. This will create a dynamic link to the part, which can be in this document or in another document that is open in the current session&lt;/p&gt;&lt;p&gt;&lt;b&gt;Usage&lt;/b&gt;: the part must be open in the current session&lt;/p&gt;&lt;p&gt;This command also enables to repair broken/missing links. Select the broken link, launch this command, and select a new target part in the list&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;將零件插入組合件中。 這將建立到該零件的動態連結，該連結可以位於此文件中，也可以位於當前作業階段中打開的另一個文件中&lt;/p&gt;&lt;p&gt;&lt;b&gt;用法&lt;/b&gt;: 該零件必須在目前作業階段&lt;/p&gt;&lt;p&gt;此命令還可以修復損壞/遺失的連結. 選擇損壞的連結，啟動此命令，然後在列表中選擇新的目標零件&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Insert Part</source>
-        <translation type="unfinished"></translation>
+        <translation>插入零件</translation>
     </message>
     <message>
         <source>Re-link broken link</source>
-        <translation type="unfinished"></translation>
+        <translation>重新連結損壞的連結</translation>
     </message>
     <message>
         <source>Replace</source>
-        <translation type="unfinished"></translation>
+        <translation>取代</translation>
     </message>
     <message>
         <source>Please create an Assembly</source>
-        <translation type="unfinished"></translation>
+        <translation>請先建立一個零件組合</translation>
     </message>
     <message>
         <source>Select FreeCAD document to import part from</source>
-        <translation type="unfinished"></translation>
+        <translation>選取 FreeCAD 文件匯入部分</translation>
     </message>
     <message>
         <source>Supported Formats *.FCStd *.fcstd (*.FCStd *.fcstd);;All files (*.*)</source>
-        <translation type="unfinished"></translation>
+        <translation>支援的檔案格式 *.FCStd *.fcstd (*.FCStd *.fcstd);;All files (*.*)</translation>
     </message>
     <message>
         <source>The current document must be saved before inserting an external part</source>
-        <translation type="unfinished"></translation>
+        <translation>插入外部零件之前必須儲存目前文件</translation>
     </message>
     <message>
         <source>Insert a Part</source>
-        <translation type="unfinished"></translation>
+        <translation>插入零件</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>取消</translation>
     </message>
     <message>
         <source>Open file</source>
-        <translation type="unfinished"></translation>
+        <translation>開啟檔案</translation>
     </message>
     <message>
         <source>Insert</source>
-        <translation type="unfinished"></translation>
+        <translation>插入</translation>
     </message>
     <message>
         <source>Filter :</source>
-        <translation type="unfinished"></translation>
+        <translation>篩選器 :</translation>
     </message>
     <message>
         <source>Select Part to be inserted :</source>
-        <translation type="unfinished"></translation>
+        <translation>選擇要插入的零件:</translation>
     </message>
     <message>
         <source>Name for the link :</source>
-        <translation type="unfinished"></translation>
+        <translation>連結的名稱:</translation>
     </message>
 </context>
 <context>
     <name>Asm4_makeArray</name>
     <message>
         <source>Create an expression driven Array</source>
-        <translation type="unfinished"></translation>
+        <translation>建立表達式驅動陣列</translation>
     </message>
     <message>
         <source>Create an array of the selected object where the placement of each element is calculated using expressions and an Index property.&lt;br&gt;
@@ -1708,139 +1795,165 @@ with their default names such as:
            By opening Placer property in Tasks panel it is possible to set expressions for euler angles too.&lt;br&gt;
         Also see tooltips in Property view
         </source>
-        <translation type="unfinished"></translation>
+        <translation>建立所選物件的陣列，其中使用表達式和 Index 屬性計算每個元素的位置.&lt;br&gt;
+         選擇要排列的來源對象，以及可選的與轉換相關的軸.&lt;br&gt;
+         如果沒有軸，變換與來源物件內部 Z 軸相關.&lt;br&gt;
+         &lt;br&gt;
+         &lt;b&gt;計數:&lt;/b&gt;陣列中元素的數量。&lt;br&gt;
+         &lt;b&gt;索引:&lt;/b&gt;隱藏，但 Placer 在表達式中使用它來計算展示位置。 每個元素的增量從 0 開始.&lt;br&gt;
+         &lt;b&gt;位置:&lt;/b&gt;為整個展示位置或其子屬性設定表達式.&lt;br&gt;
+            透過在任務面板中開啟 位置 屬性，也可以設定歐拉角​​的表達式.&lt;br&gt;
+         另請參閱屬性檢視中的工具提示
+        </translation>
     </message>
     <message>
         <source>Create a circular array</source>
-        <translation type="unfinished"></translation>
+        <translation>建立一個圓形陣列</translation>
     </message>
     <message>
         <source>&lt;p&gt;Create a circular (polar) array around an axis.
                 Supported axis objects are axis or plane from an origin, datum line, LCS axes, straight line segments, arcs and circles&lt;/p&gt;
                 &lt;p&gt;&lt;b&gt;Usage&lt;/b&gt;: Select an object and the axis (hold CTRL key to select second object)&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;圍繞軸建立圓形(極座標)陣列.
+                 支援的軸物件是從原點開始的軸或平面、基準線、LCS 軸、直線段、圓弧和圓&lt;/p&gt;
+                 &lt;p&gt;&lt;b&gt;用法&lt;/b&gt;:選擇一個物件和軸(按住CTRL鍵選擇第二個物件)&lt;/p&gt;</translation>
     </message>
     <message>
         <source>The angle between two subsequent elements.
 Expression to place the last element at 180°: &lt;code&gt;180/(Count-1)&lt;/code&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>兩個後續元素之間的角度.
+將最後一個元素置於 180° 的表達式: &lt;code&gt;180/(Count-1)&lt;/code&gt;</translation>
     </message>
     <message>
         <source>Create a linear array</source>
-        <translation type="unfinished"></translation>
+        <translation>建立線性陣列</translation>
     </message>
     <message>
         <source>&lt;p&gt;Create a linear array along an axis.
                 Supported axis objects are axis or plane from an origin, datum line, LCS axes, straight line segments, arcs and circles&lt;/p&gt;
                 &lt;p&gt;&lt;b&gt;Usage&lt;/b&gt;: Select an object and an axis for the direction (hold CTRL key to select second object)&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;沿軸建立線性陣列.
+                 支援的軸物件是從原點開始的軸或平面、基準線、LCS 軸、直線段、圓弧和圓&lt;/p&gt;
+                 &lt;p&gt;&lt;b&gt;用法&lt;/b&gt;:選擇一個物件和方向軸(按住 CTRL 鍵選擇第二個物件)&lt;/p&gt;</translation>
     </message>
     <message>
         <source>The length between two subsequent elements.
 Expression to place the last element at 100 mm: 100mm/(Count-1)</source>
-        <translation type="unfinished"></translation>
+        <translation>兩個後續元素之間的長度.
+將最後一個元素放置在 100 mm 處的表達式: 100mm/(Count-1)</translation>
     </message>
     <message>
         <source>Create mirror</source>
-        <translation type="unfinished"></translation>
+        <translation>建立鏡像特徵</translation>
     </message>
     <message>
         <source>&lt;p&gt;Create a mirror of a part.
                 Supported axis objects are axis or plane from an origin, datum line, LCS axes, straight line segments, arcs and circles&lt;/p&gt;
                 &lt;p&gt;&lt;b&gt;Usage&lt;/b&gt;: Select a source object and a mirror plane or a normal to a plane (hold CTRL key to select second object)&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;建立零件的鏡像.
+                 支援的軸物件是從原點開始的軸或平面、基準線、LCS 軸、直線段、圓弧和圓&lt;/p&gt;
+                 &lt;p&gt;&lt;b&gt;用法&lt;/b&gt;:選擇來源物件和鏡像平面或平面法線(按住 CTRL 鍵選擇第二個物件)&lt;/p&gt;</translation>
     </message>
 </context>
 <context>
     <name>Asm4_makeBOM</name>
     <message>
         <source>Bill of Materials</source>
-        <translation type="unfinished"></translation>
+        <translation>材料清單</translation>
     </message>
     <message>
         <source>Create the Bill of Materials of the Assembly including sub-assemblies</source>
-        <translation type="unfinished"></translation>
+        <translation>建立零件組合的材料清單，包括子零件組合</translation>
     </message>
     <message>
         <source>Local Bill of Materials</source>
-        <translation type="unfinished"></translation>
+        <translation>區域材料清單</translation>
     </message>
     <message>
         <source>Create the Bill of Materials of the Assembly</source>
-        <translation type="unfinished"></translation>
+        <translation>建立零件組合的材料清單</translation>
     </message>
     <message>
         <source>ASM4&gt; BOM of the Assembly 4 Model</source>
-        <translation type="unfinished"></translation>
+        <translation>ASM4&gt; 零件組合四模型的物料清單(BOM)</translation>
     </message>
     <message>
         <source>ASM4&gt; BOM of the legacy Assembly 4 Model</source>
-        <translation type="unfinished"></translation>
+        <translation>ASM4&gt; 舊版零件組合四模型的物料清單(BOM)</translation>
     </message>
     <message>
         <source>ASM4&gt; BOM might not work with this file</source>
-        <translation type="unfinished"></translation>
+        <translation>ASM4&gt; 物料清單(BOM) 可能不適用於此文件</translation>
     </message>
     <message>
         <source>ASM4&gt; BOM following sub-assemblies</source>
-        <translation type="unfinished"></translation>
+        <translation>ASM4&gt; 物料清單(BOM)跟隨子零件組合</translation>
     </message>
     <message>
         <source>ASM4&gt; BOM local parts only</source>
-        <translation type="unfinished"></translation>
+        <translation>ASM4&gt; 物料清單(BOM)僅區域零件</translation>
     </message>
     <message>
         <source>Nothing Applied</source>
-        <translation type="unfinished"></translation>
+        <translation>未套用任何項目</translation>
     </message>
     <message>
         <source>Parts List (BOM)</source>
-        <translation type="unfinished"></translation>
+        <translation>零件清單&quot;物料清單(BOM)&quot;</translation>
     </message>
     <message>
         <source>BOM generates bill of materials.
 
 It uses the Parts&apos; info to generate entries on BOM, unless autofill is set.
 </source>
-        <translation type="unfinished"></translation>
+        <translation>BOM 產生物料清單.
+
+它使用零件資訊在 BOM 上建立分錄，除非設定了自動填充.
+</translation>
     </message>
     <message>
         <source>Check &lt;a href=&apos;https://github.com/Zolko-123/FreeCAD_Assembly4/tree/master/Examples/ConfigBOM/README.md&apos;&gt;BOM tutorial&lt;/a&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>檢視&lt;a href=&apos;https://github.com/Zolko-123/FreeCAD_Assembly4/tree/master/Examples/ConfigBOM/README.md&apos;&gt;BOM 教學&lt;/a&gt;</translation>
     </message>
     <message>
         <source>
 
 Report:</source>
-        <translation type="unfinished"></translation>
+        <translation>
+
+報表:</translation>
     </message>
     <message>
         <source>OK</source>
-        <translation type="unfinished"></translation>
+        <translation>確定</translation>
     </message>
     <message>
         <source>-------------------------------------------------- remove after debugging</source>
-        <translation type="unfinished"></translation>
+        <translation>-------------------------------------------------- 偵錯後移除</translation>
     </message>
     <message>
         <source>- object already added (</source>
-        <translation type="unfinished"></translation>
+        <translation>- 物體已新增 (</translation>
     </message>
     <message>
         <source>- adding object (1)
 </source>
-        <translation type="unfinished"></translation>
+        <translation>- 新增物體 (1)
+</translation>
     </message>
     <message>
         <source>
 BOM creation is done
 </source>
-        <translation type="unfinished"></translation>
+        <translation>
+物料清單(BOM)建立完成
+</translation>
     </message>
     <message>
         <source> spreadsheet was created.
 </source>
-        <translation type="unfinished"></translation>
+        <translation> 電子表格已建立.
+</translation>
     </message>
 </context>
 <context>
@@ -1849,90 +1962,92 @@ BOM creation is done
         <source>Create a mirrored part of a part. Use only on individual parts, not assemblies
 You must re-create the attachment datums in the resulting part</source>
         <oldsource>New Assembly</oldsource>
-        <translation type="unfinished"></translation>
+        <translation>建立零件的鏡像零件. 僅適用於單一零件，不適用於零件組合體
+您必須在產生的零件中重新建立零件基準</translation>
     </message>
     <message>
         <source>Create symmetric of part</source>
-        <translation type="unfinished"></translation>
+        <translation>建立對稱零件</translation>
     </message>
     <message>
         <source>ERROR : You shouldn&apos;t see this message from mirrorPartCmd()
 </source>
-        <translation type="unfinished"></translation>
+        <translation>錯誤: 您不應該從mirrorPartCmd()看到此訊息
+</translation>
     </message>
     <message>
         <source>Create mirrored Part</source>
-        <translation type="unfinished"></translation>
+        <translation>建立鏡像特徵零件</translation>
     </message>
     <message>
         <source>Selected Part :</source>
-        <translation type="unfinished"></translation>
+        <translation>選擇的零件:</translation>
     </message>
     <message>
         <source>Select the symmetry plane :</source>
-        <translation type="unfinished"></translation>
+        <translation>選擇對稱平面:</translation>
     </message>
     <message>
         <source>Mirrored part&apos;s name :</source>
-        <translation type="unfinished"></translation>
+        <translation>鏡像零件名稱:</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>取消</translation>
     </message>
     <message>
         <source>OK</source>
-        <translation type="unfinished"></translation>
+        <translation>確定</translation>
     </message>
 </context>
 <context>
     <name>Asm4_newAssembly</name>
     <message>
         <source>New Assembly</source>
-        <translation type="unfinished"></translation>
+        <translation>新增零件組合</translation>
     </message>
     <message>
         <source>This document already contains a valid Assembly, please use it</source>
-        <translation type="unfinished"></translation>
+        <translation>此文件已包含有效零件組合，請使用它</translation>
     </message>
     <message>
         <source>There seems to already be a Parts object, you might get unexpected behaviour</source>
-        <translation type="unfinished"></translation>
+        <translation>似乎已經有一個零件物體，您可能會得到意想不到的行為</translation>
     </message>
 </context>
 <context>
     <name>Asm4_newPart</name>
     <message>
         <source>New Part</source>
-        <translation type="unfinished"></translation>
+        <translation>新增零件</translation>
     </message>
     <message>
         <source>Create a new Part</source>
-        <translation type="unfinished"></translation>
+        <translation>建立一個新的零件</translation>
     </message>
     <message>
         <source>New Body</source>
-        <translation type="unfinished"></translation>
+        <translation>新增實體</translation>
     </message>
     <message>
         <source>Create a new Body</source>
-        <translation type="unfinished"></translation>
+        <translation>建立一個實體</translation>
     </message>
     <message>
         <source>New Group</source>
-        <translation type="unfinished"></translation>
+        <translation>新增群組</translation>
     </message>
     <message>
         <source>Create a new Group</source>
-        <translation type="unfinished"></translation>
+        <translation>建立一個群組</translation>
     </message>
     <message>
         <source>Enter new </source>
-        <translation type="unfinished"></translation>
+        <translation>輸入新的 </translation>
     </message>
     <message>
         <source> name :</source>
-        <translation type="unfinished"></translation>
+        <translation> 名稱 :</translation>
     </message>
 </context>
 <context>
@@ -1940,48 +2055,54 @@ You must re-create the attachment datums in the resulting part</source>
     <message>
         <source>Initialising ...
 </source>
-        <translation type="unfinished"></translation>
+        <translation>初始化 ...
+</translation>
     </message>
     <message>
         <source>No &quot;Variables&quot; container in source object
 </source>
-        <translation type="unfinished"></translation>
+        <translation>來源物體中沒有&quot;變數&quot;容器
+</translation>
     </message>
     <message>
         <source>Attaching VariantLink ...
 </source>
-        <translation type="unfinished"></translation>
+        <translation>附加變數連結 ...
+</translation>
     </message>
     <message>
         <source>Original object from which this variant is derived</source>
-        <translation type="unfinished"></translation>
+        <translation>衍生此變數的原始物體</translation>
     </message>
     <message>
         <source>Link to the modified object</source>
-        <translation type="unfinished"></translation>
+        <translation>連結到修改後的物體</translation>
     </message>
     <message>
         <source>Triggered onSettingDocument() in VariantLink
 </source>
-        <translation type="unfinished"></translation>
+        <translation>由變數連結中的 onSettingDocument() 觸發
+</translation>
     </message>
     <message>
         <source>Triggered onLostLinkToObject() in VariantLink
 </source>
-        <translation type="unfinished"></translation>
+        <translation>由變數連結中的 onLostLinkToObject() 觸發
+</translation>
     </message>
     <message>
         <source>Triggered by setupObject() in VariantLink
 </source>
-        <translation type="unfinished"></translation>
+        <translation>由變數連結中的 setupObject() 觸發
+</translation>
     </message>
     <message>
         <source>The object to array</source>
-        <translation type="unfinished"></translation>
+        <translation>要陣列的物體</translation>
     </message>
     <message>
         <source>Total number of elements in the array</source>
-        <translation type="unfinished"></translation>
+        <translation>陣列中元素的總數</translation>
     </message>
     <message>
         <source>Calculates element placements in relation to the Axis.
@@ -1990,259 +2111,273 @@ The Index can be used in expressions calculating this Placement or its sub-prope
 Expression examples:
 on Angle: Index%2==0?30:-30
 on Position.X: Index*30</source>
-        <translation type="unfinished"></translation>
+        <translation>計算相對於軸的元素放置.
+每個元素分配一個從0開始的索引(Index)
+索引可用於計算此 &apos;放置位置&apos; 或其子屬性的表達式中
+表達範例:
+角度: Index%2==0?30:-30
+在位置.X: Index*30</translation>
     </message>
     <message>
         <source>Missing Source Object</source>
-        <translation type="unfinished"></translation>
+        <translation>缺少來源物體</translation>
     </message>
     <message>
         <source>Source Object must reside inside a Part</source>
-        <translation type="unfinished"></translation>
+        <translation>來源物體必須駐留在零件內</translation>
     </message>
     <message>
         <source>Source Object and Axis must have the same parent Part</source>
-        <translation type="unfinished"></translation>
+        <translation>來源物體和軸必須具有相同的上級零件</translation>
     </message>
     <message>
         <source>The type of the selected axis is not supported</source>
-        <translation type="unfinished"></translation>
+        <translation>不支援所選軸的類型</translation>
     </message>
     <message>
         <source>Circular reference detected: {} -&gt; {}</source>
-        <translation type="unfinished"></translation>
+        <translation>偵測到循環引用: {} -&gt; {}</translation>
     </message>
 </context>
 <context>
     <name>Asm4_placePart</name>
     <message>
         <source>Edit Placement of a Part</source>
-        <translation type="unfinished"></translation>
+        <translation>編輯零件的放置位置</translation>
     </message>
     <message>
         <source>Move/Attach a Part in the assembly</source>
-        <translation type="unfinished"></translation>
+        <translation>在零件組合中移動/附加零件</translation>
     </message>
     <message>
         <source>This Part has the Attachment extension, it can only be placed manually</source>
-        <translation type="unfinished"></translation>
+        <translation>該零件有附件延伸，只能手動放置</translation>
     </message>
     <message>
         <source>This Part wasn&apos;t assembled with this Assembly4 WorkBench, but I can convert it.</source>
-        <translation type="unfinished"></translation>
+        <translation>該零件不是用這個版本的 零件組合四工作台 組裝的，但可以轉換它.</translation>
     </message>
     <message>
         <source>Please select a link in the assembly Model.</source>
-        <translation type="unfinished"></translation>
+        <translation>請在零件組合模型中選擇一個連結.</translation>
     </message>
     <message>
         <source>Please select an object in the assembly Model.</source>
-        <translation type="unfinished"></translation>
+        <translation>請在零件組合模型中選擇一個物體.</translation>
     </message>
     <message>
         <source>WARNING : unsupported Assembly/Solver/Part combination, you shouldn&apos;t be seeing this
 </source>
-        <translation type="unfinished"></translation>
+        <translation>警告: 不支援的組裝/解算器/零件組合，您不應該看到此內容
+</translation>
     </message>
     <message>
         <source>Place linked Part</source>
-        <translation type="unfinished"></translation>
+        <translation>放置連結的零件</translation>
     </message>
     <message>
         <source>Problem in selections
 </source>
-        <translation type="unfinished"></translation>
+        <translation>選擇上的問題
+</translation>
     </message>
     <message>
         <source>Part is now manually placed
 </source>
-        <translation type="unfinished"></translation>
+        <translation>零件現在手動放置
+</translation>
     </message>
     <message>
         <source>Part untouched
 </source>
-        <translation type="unfinished"></translation>
+        <translation>零件未接觸
+</translation>
     </message>
     <message>
         <source>Parent Assembly</source>
-        <translation type="unfinished"></translation>
+        <translation>上層零件組合</translation>
     </message>
     <message>
         <source>Please select</source>
-        <translation type="unfinished"></translation>
+        <translation>請選擇</translation>
     </message>
     <message>
         <source>Selected Link :</source>
-        <translation type="unfinished"></translation>
+        <translation>選定的連結:</translation>
     </message>
     <message>
         <source>Choose the part in which the attachment
 coordinate system is to be found</source>
-        <translation type="unfinished"></translation>
+        <translation>選擇要在其中找到附加依賴座標系統的零件</translation>
     </message>
     <message>
         <source>Attach to :</source>
-        <translation type="unfinished"></translation>
+        <translation>附加到:</translation>
     </message>
     <message>
         <source>Linked Part :</source>
-        <translation type="unfinished"></translation>
+        <translation>連結的零件:</translation>
     </message>
     <message>
         <source>Select LCS in Part :</source>
-        <translation type="unfinished"></translation>
+        <translation>在零件中選擇區域座標系統(LCS):</translation>
     </message>
     <message>
         <source>Select a coordinate system from the list</source>
-        <translation type="unfinished"></translation>
+        <translation>從清單中選擇座標系統</translation>
     </message>
     <message>
         <source>Parent Part :</source>
-        <translation type="unfinished"></translation>
+        <translation>上層零件:</translation>
     </message>
     <message>
         <source>Select LCS in Parent :</source>
-        <translation type="unfinished"></translation>
+        <translation>在上層零件中選擇區域座標系統(LCS):</translation>
     </message>
     <message>
         <source>X Translation :</source>
-        <translation type="unfinished"></translation>
+        <translation>X 軸平移:</translation>
     </message>
     <message>
         <source>Translation along X axis</source>
-        <translation type="unfinished"></translation>
+        <translation>沿 Z 軸平移</translation>
     </message>
     <message>
         <source>Rotate X +90°</source>
-        <translation type="unfinished"></translation>
+        <translation>X 軸旋轉 90°</translation>
     </message>
     <message>
         <source>Rotate 90 deg around X axis</source>
-        <translation type="unfinished"></translation>
+        <translation>繞X軸旋轉90°</translation>
     </message>
     <message>
         <source>Y Translation :</source>
-        <translation type="unfinished"></translation>
+        <translation>Y 軸平移:</translation>
     </message>
     <message>
         <source>Translation along Y</source>
-        <translation type="unfinished"></translation>
+        <translation>沿 Y 軸平移</translation>
     </message>
     <message>
         <source>Rotate Y +90°</source>
-        <translation type="unfinished"></translation>
+        <translation>Y 軸旋轉 90°</translation>
     </message>
     <message>
         <source>Rotate 90 deg around Y axis</source>
-        <translation type="unfinished"></translation>
+        <translation>繞Y軸旋轉90°</translation>
     </message>
     <message>
         <source>Z Translation :</source>
-        <translation type="unfinished"></translation>
+        <translation>Z 軸平移:</translation>
     </message>
     <message>
         <source>Translation along Z:</source>
-        <translation type="unfinished"></translation>
+        <translation>沿 Z 軸平移:</translation>
     </message>
     <message>
         <source>Rotate Z +90°</source>
-        <translation type="unfinished"></translation>
+        <translation>Z 軸旋轉 90°</translation>
     </message>
     <message>
         <source>Rotate 90 deg around Z axis</source>
-        <translation type="unfinished"></translation>
+        <translation>繞Z軸旋轉90°</translation>
     </message>
     <message>
         <source>Place a Part in the assembly</source>
-        <translation type="unfinished"></translation>
+        <translation>將零件放置在零件組合件中</translation>
     </message>
     <message>
         <source>Please select ab object with a Placement property</source>
-        <translation type="unfinished"></translation>
+        <translation>請選擇具有放置位置(Placement) 屬性的物體</translation>
     </message>
     <message>
         <source>selection: </source>
-        <translation type="unfinished"></translation>
+        <translation>選擇: </translation>
     </message>
     <message>
         <source>Selected Object :</source>
-        <translation type="unfinished"></translation>
+        <translation>選擇的物體:</translation>
     </message>
     <message>
         <source>Select attachment LCS in parent Part :</source>
-        <translation type="unfinished"></translation>
+        <translation>在上層零件中選擇附件區域座標系統(LCS):</translation>
     </message>
     <message>
         <source>This command will release all attachments on </source>
-        <translation type="unfinished"></translation>
+        <translation>此命令將釋放所有附件 </translation>
     </message>
     <message>
         <source> and set it to manual positioning in its current location.</source>
-        <translation type="unfinished"></translation>
+        <translation> 並將其設定為手動定位在目前位置.</translation>
     </message>
 </context>
 <context>
     <name>Asm4_releaseAttachment</name>
     <message>
         <source>Release from Attachment</source>
-        <translation type="unfinished"></translation>
+        <translation>從附件中釋放</translation>
     </message>
     <message>
         <source>Release an object from all attachments to any geometry</source>
-        <translation type="unfinished"></translation>
+        <translation>將物體從任何幾何形體的所有附件中釋放</translation>
     </message>
     <message>
         <source>This command will release all attachments on </source>
-        <translation type="unfinished"></translation>
+        <translation>此命令將釋放所有附件 </translation>
     </message>
     <message>
         <source> and set it to manual positioning in its current location.</source>
-        <translation type="unfinished"></translation>
+        <translation> 並將其設定為手動定位在目前位置.</translation>
     </message>
 </context>
 <context>
     <name>Asm4_selectionFilter</name>
     <message>
         <source>Clear all selection filters</source>
-        <translation type="unfinished"></translation>
+        <translation>清除所有選擇過濾器</translation>
     </message>
     <message>
         <source>All selection filters cleared
 </source>
-        <translation type="unfinished"></translation>
+        <translation>已清除所有選擇過濾器
+</translation>
     </message>
     <message>
         <source>Select only Vertices</source>
-        <translation type="unfinished"></translation>
+        <translation>僅選擇頂點</translation>
     </message>
     <message>
         <source>Select only Edges</source>
-        <translation type="unfinished"></translation>
+        <translation>僅選擇邊緣</translation>
     </message>
     <message>
         <source>Select only Faces</source>
-        <translation type="unfinished"></translation>
+        <translation>僅選擇平面</translation>
     </message>
     <message>
         <source>Enable/Disable 3D View selection mode</source>
-        <translation type="unfinished"></translation>
+        <translation>啟用/禁用 3D視圖連結選擇模式</translation>
     </message>
     <message>
         <source>Enable/Disable 3D View selection mode
 
 Allows to select a Link object in the 3D view
 window instead of the Model tree</source>
-        <translation type="unfinished"></translation>
+        <translation>啟用/停用 3D 視圖選擇模式
+
+允許在 3D 視圖視窗中選擇連結物體而不是模型樹</translation>
     </message>
     <message>
         <source>Asm4 3D view selection mode is now ENABLED
 </source>
-        <translation type="unfinished"></translation>
+        <translation>零件組合 3D視圖連結選擇模式現已啟用
+</translation>
     </message>
     <message>
         <source>Asm4 3D view selection mode is now DISABLED
 </source>
-        <translation type="unfinished"></translation>
+        <translation>零件組合 3D視圖連結選擇模式現已停用
+</translation>
     </message>
 </context>
 <context>
@@ -2252,126 +2387,135 @@ window instead of the Model tree</source>
 This creates a SubShapeBinder of the selected shapes
 (face, edge, point) in the root assembly
 Only shapes belonging to the same part can be imported in a single step</source>
-        <translation type="unfinished"></translation>
+        <translation>建立對外部形狀的引用
+這將建立所選形狀的子形狀黏合
+根零件組合中的(面、邊、點)
+只能在一個步驟中匯入屬於同一零件的形狀</translation>
     </message>
     <message>
         <source>Create a shape binder</source>
-        <translation type="unfinished"></translation>
+        <translation>建立形狀粘合</translation>
     </message>
 </context>
 <context>
     <name>Asm4_showLcs</name>
     <message>
         <source>Show LCS</source>
-        <translation type="unfinished"></translation>
+        <translation>顯示區域座標系統(LCS)</translation>
     </message>
     <message>
         <source>Show LCS and Datums of selected part and its children</source>
-        <translation type="unfinished"></translation>
+        <translation>顯示所選零件及其子零件的區域座標系統和基準</translation>
     </message>
 </context>
 <context>
     <name>Asm4_treeSelectionOverride</name>
     <message>
         <source>Enable/Disable 3D View selection mode</source>
-        <translation type="unfinished"></translation>
+        <translation>啟用/禁用 3D視圖連結選擇模式</translation>
     </message>
     <message>
         <source>Enable/Disable 3D View selection mode
 
 Allows to select a Link object in the 3D view
 window instead of the Model tree</source>
-        <translation type="unfinished"></translation>
+        <translation>啟用/停用 3D 視圖選擇模式
+
+允許在 3D 視圖視窗中選擇連結物體而不是模型樹</translation>
     </message>
     <message>
         <source>3D view link selection mode is now ENABLED
 </source>
-        <translation type="unfinished"></translation>
+        <translation>3D 視圖連結選擇模式現已啟用
+</translation>
     </message>
     <message>
         <source>3D view link selection mode is now DISABLED
 </source>
-        <translation type="unfinished"></translation>
+        <translation>3D 視圖連結選擇模式現已停用
+</translation>
     </message>
 </context>
 <context>
     <name>Asm4_updateAssembly</name>
     <message>
         <source>Solve and Update Assembly</source>
-        <translation type="unfinished"></translation>
+        <translation>求解並更新零件組合</translation>
     </message>
     <message>
         <source>Update Assembly</source>
-        <translation type="unfinished"></translation>
+        <translation>更新零件組合</translation>
     </message>
 </context>
 <context>
     <name>Asm4_variables</name>
     <message>
         <source>&lt;p&gt;Adds a variable into the &lt;i&gt;Variables&lt;/i&gt; placeholder in the document. This variable can then be used in any formula using the &lt;i&gt;ExpressionEngine&lt;/i&gt; of any compatible input field. These are marked with a &quot;f(x)&quot; symbol&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;將變數加入文件中的&lt;i&gt;變數&lt;/i&gt;佔位符中. 然後，可以使用&lt;i&gt;ExpressionEngine&lt;/i&gt;在任何公式中使用該變數任何相容的輸入欄位. 它們標有&quot;f(x)&quot;符號&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Add Variable</source>
-        <translation type="unfinished"></translation>
+        <translation>新增變量</translation>
     </message>
     <message>
         <source>Type</source>
-        <translation type="unfinished"></translation>
+        <translation>類型</translation>
     </message>
     <message>
         <source>Name</source>
-        <translation type="unfinished"></translation>
+        <translation>名稱</translation>
     </message>
     <message>
         <source>Value</source>
-        <translation type="unfinished"></translation>
+        <translation>值</translation>
     </message>
     <message>
         <source>Description</source>
-        <translation type="unfinished"></translation>
+        <translation>說明</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>取消</translation>
     </message>
     <message>
         <source>OK</source>
-        <translation type="unfinished"></translation>
+        <translation>確定</translation>
     </message>
     <message>
         <source>Delete Variable</source>
-        <translation type="unfinished"></translation>
+        <translation>刪除變量</translation>
     </message>
     <message>
         <source>Delete a Variable</source>
-        <translation type="unfinished"></translation>
+        <translation>刪除一個變量</translation>
     </message>
     <message>
         <source>There are no variables here</source>
-        <translation type="unfinished"></translation>
+        <translation>這裡沒有變數</translation>
     </message>
     <message>
         <source>Please choose</source>
-        <translation type="unfinished"></translation>
+        <translation>請選擇</translation>
     </message>
     <message>
         <source>Variable</source>
-        <translation type="unfinished"></translation>
+        <translation>變量</translation>
     </message>
     <message>
         <source>Delete</source>
-        <translation type="unfinished"></translation>
+        <translation>刪除</translation>
     </message>
     <message>
         <source>Adds a variable into the &quot;Variables&quot; placeholder in the document.
 This variable can then be used in any formula using the ExpressionEngine
 of any compatible input field. These are marked with a &quot;f(x)&quot; symbol.</source>
-        <translation type="unfinished"></translation>
+        <translation>將變數加入文件中的&quot;變數&quot;佔位符中.
+然後，可以使用&quot;ExpressionEngine&quot;在任何公式中使用該變數任何相容的輸入欄位.
+它們標有&quot;f(x)&quot;符號.</translation>
     </message>
     <message>
         <source>Variables</source>
-        <translation type="unfinished"></translation>
+        <translation>變量</translation>
     </message>
 </context>
 <context>
@@ -2380,78 +2524,80 @@ of any compatible input field. These are marked with a &quot;f(x)&quot; symbol.<
         <source>EXPERIMENTAL !!!
 Create a variant link to a part
 Select a part containing a &quot;Variables&quot; property container</source>
-        <translation type="unfinished"></translation>
+        <translation>實驗性!!!
+建立零件的變體鏈接
+選擇包含“變數”屬性容器的零件</translation>
     </message>
     <message>
         <source>Create a variant Part</source>
-        <translation type="unfinished"></translation>
+        <translation>建立一個變量零件</translation>
     </message>
     <message>
         <source>Please create an Assembly</source>
-        <translation type="unfinished"></translation>
+        <translation>請先建立一個零件組合</translation>
     </message>
     <message>
         <source>The current document must be saved before inserting an external part</source>
-        <translation type="unfinished"></translation>
+        <translation>插入外部零件之前必須儲存目前文件</translation>
     </message>
     <message>
         <source>Insert a variant of a Part</source>
-        <translation type="unfinished"></translation>
+        <translation>插入零件的變數</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>取消</translation>
     </message>
     <message>
         <source>Insert</source>
-        <translation type="unfinished"></translation>
+        <translation>插入</translation>
     </message>
     <message>
         <source>Filter :</source>
-        <translation type="unfinished"></translation>
+        <translation>篩選器 :</translation>
     </message>
     <message>
         <source>Select Part to be inserted :</source>
-        <translation type="unfinished"></translation>
+        <translation>選擇要插入的零件:</translation>
     </message>
     <message>
         <source>Name for the link :</source>
-        <translation type="unfinished"></translation>
+        <translation>連結的名稱:</translation>
     </message>
 </context>
 <context>
     <name>Commands</name>
     <message>
         <source>Open Document</source>
-        <translation type="unfinished"></translation>
+        <translation>開啟文件</translation>
     </message>
     <message>
         <source>Activates the document of the selected linked part</source>
-        <translation type="unfinished"></translation>
+        <translation>啟用所選連結零件的檔案</translation>
     </message>
     <message>
         <source>&lt;p&gt;Create a new Assembly container&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>新增零件組合容器</translation>
     </message>
     <message>
         <location filename="../../newAssemblyCmd.py" line="44"/>
         <source>New Assembly</source>
-        <translation type="unfinished"></translation>
+        <translation>新增零件組合</translation>
     </message>
     <message>
         <location filename="../../newAssemblyCmd.py" line="62"/>
         <source>This document already contains a valid Assembly, please use it</source>
-        <translation type="unfinished"></translation>
+        <translation>此文件已包含有效零件組合，請使用它</translation>
     </message>
     <message>
         <location filename="../../newAssemblyCmd.py" line="67"/>
         <source>This document already contains another FreeCAD object called &quot;Assembly&quot;, but it&apos;s of type &quot;</source>
-        <translation type="unfinished"></translation>
+        <translation>該文件已包含另一個名為&quot;Assembly&quot;的 FreeCAD 物體，但它的類型為 &quot;</translation>
     </message>
     <message>
         <location filename="../../newAssemblyCmd.py" line="68"/>
         <source>&quot;, unsuitable for an assembly. I can&apos;t proceed.</source>
-        <translation type="unfinished"></translation>
+        <translation>&quot;，不適合零件組合. 無法繼續.</translation>
     </message>
 </context>
 <context>
@@ -2459,135 +2605,141 @@ Select a part containing a &quot;Variables&quot; property container</source>
     <message>
         <location filename="../../newPartCmd.py" line="40"/>
         <source>New Part</source>
-        <translation type="unfinished"></translation>
+        <translation>新增零件</translation>
     </message>
     <message>
         <source>Create a new Part</source>
-        <translation type="unfinished"></translation>
+        <translation>建立一個零件組合</translation>
     </message>
     <message>
         <location filename="../../newPartCmd.py" line="45"/>
         <source>New Body</source>
-        <translation type="unfinished"></translation>
+        <translation>新增實體</translation>
     </message>
     <message>
         <source>Create a new Body</source>
-        <translation type="unfinished"></translation>
+        <translation>建立一個實體</translation>
     </message>
     <message>
         <location filename="../../newPartCmd.py" line="50"/>
         <source>New Group</source>
-        <translation type="unfinished"></translation>
+        <translation>新增群組</translation>
     </message>
     <message>
         <source>Create a new Group</source>
-        <translation type="unfinished"></translation>
+        <translation>建立一個群組</translation>
     </message>
     <message>
         <location filename="../../newPartCmd.py" line="79"/>
         <source>Enter new </source>
-        <translation type="unfinished"></translation>
+        <translation>輸入新的 </translation>
     </message>
     <message>
         <location filename="../../newPartCmd.py" line="79"/>
         <source> name :</source>
-        <translation type="unfinished"></translation>
+        <translation> 名稱 :</translation>
     </message>
 </context>
 <context>
     <name>Fasteners</name>
     <message>
         <source>Insert Screw</source>
-        <translation type="unfinished"></translation>
+        <translation>插入螺絲</translation>
     </message>
     <message>
         <source>Insert Nut</source>
-        <translation type="unfinished"></translation>
+        <translation>插入螺母</translation>
     </message>
     <message>
         <source>Insert Washer</source>
-        <translation type="unfinished"></translation>
+        <translation>插入墊圈</translation>
     </message>
     <message>
         <source>Insert threaded rod</source>
-        <translation type="unfinished"></translation>
+        <translation>插入螺桿</translation>
     </message>
     <message>
         <source>FastenersWorkbench is not installed.
  
 You can install it with the FreeCAD AddonsManager:
 Menu Tools &gt; Addon Manager &gt; fasteners</source>
-        <translation type="unfinished"></translation>
+        <translation>緊固件工作台尚未安裝.
+
+您可以使用 FreeCAD 附加元件管理員 安裝它:
+功能表工具 &gt; 附加元件管理器 &gt; fasteners</translation>
     </message>
     <message>
         <source>Edit Attachment of a Fastener</source>
-        <translation type="unfinished"></translation>
+        <translation>編輯緊固件的連接</translation>
     </message>
     <message>
         <source>Change Fastener parameters</source>
-        <translation type="unfinished"></translation>
+        <translation>更改緊固件參數</translation>
     </message>
     <message>
         <source>Clone Fastener to Axes</source>
-        <translation type="unfinished"></translation>
+        <translation>將緊固件複製到軸</translation>
     </message>
     <message>
         <source>&lt;p&gt;Insert a Screw into the Assembly&lt;/p&gt;&lt;p&gt;If another fastener is selected, a new fastener of the same type is created in the same assembly.If an axis or LCS is selected, the new fastener will be attached to it.If an assembly is selected, the new fastener will be inside that assembly.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;將螺絲插入緊固件&lt;/p&gt;&lt;p&gt;如果選擇了另一個緊固件，則會在同一緊固件中建立相同類型的新緊固件。如果選擇了軸或區域座標系統(LCS)，如果選擇了某個緊固件則會附加新緊固件，新的緊固件將位於該緊固件內.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>&lt;p&gt;Insert a Nut into the Assembly&lt;/p&gt;&lt;p&gt;If another fastener is selected, a new fastener of the same type is created in the same assembly.If an axis or LCS is selected, the new fastener will be attached to it.If an assembly is selected, the new fastener will be inside that assembly.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;將螺帽插入零件組合&lt;/p&gt;&lt;p&gt;如果選擇了另一個緊固件，則會在同一零件組合中建立相同類型的新緊固件。如果選擇了軸或LCS，如果選擇了某個零件組合則會附加新緊固件，新的緊固件將位於該零件組合內.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>&lt;p&gt;Insert a Washer into the Assembly&lt;/p&gt;&lt;p&gt;If another fastener is selected, a new fastener of the same type is created in the same assembly.If an axis or LCS is selected, the new fastener will be attached to it.If an assembly is selected, the new fastener will be inside that assembly.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;將墊圈插入零件組合&lt;/p&gt;&lt;p&gt;如果選擇了另一個緊固件，則會在同一零件組合中建立相同類型的新緊固件。如果選擇了軸或LCS，如果選擇了某個零件組合則會附加新緊固件，新的緊固件將位於該零件組合內.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Selected object doesn&apos;t seem to be a valid fastener, ignoring
 </source>
-        <translation type="unfinished"></translation>
+        <translation>所選物體似乎不是有效的緊固件，忽略
+</translation>
     </message>
     <message>
         <source>Length &quot;</source>
-        <translation type="unfinished"></translation>
+        <translation>長度: &quot;</translation>
     </message>
     <message>
         <source>&quot; is not available, ignoring
 </source>
-        <translation type="unfinished"></translation>
+        <translation>&quot; 不可用，忽略
+</translation>
     </message>
     <message>
         <source>unknown fastener type &quot;</source>
-        <translation type="unfinished"></translation>
+        <translation>未知緊固件類型 &quot;</translation>
     </message>
     <message>
         <source>&quot;, ignoring
 </source>
-        <translation type="unfinished"></translation>
+        <translation>&quot;, 忽略
+</translation>
     </message>
     <message>
         <source>Fasteners</source>
-        <translation type="unfinished"></translation>
+        <translation>緊固件</translation>
     </message>
 </context>
 <context>
     <name>Workbench</name>
     <message>
         <source>Assembly 4</source>
-        <translation type="unfinished"></translation>
+        <translation>零件組合 4</translation>
     </message>
     <message>
         <source>Assembly 4 workbench</source>
-        <translation type="unfinished"></translation>
+        <translation>零件組合 4 工作台</translation>
     </message>
     <message>
         <source>&amp;Help</source>
-        <translation type="unfinished"></translation>
+        <translation>求助說明(&amp;H)</translation>
     </message>
     <message>
         <source>&amp;Assembly</source>
-        <translation type="unfinished"></translation>
+        <translation>零件組合(&amp;A)</translation>
     </message>
 </context>
 </TS>

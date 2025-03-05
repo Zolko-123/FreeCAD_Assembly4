@@ -14,12 +14,11 @@ import Part
 import Asm4_libs as Asm4
 
 
-
 class updateAssembly:
 
     def GetResources(self):
-        return {"MenuText": "Solve and Update Assembly",
-                "ToolTip": "Update Assembly",
+        return {"MenuText": App.Qt.translate("Asm4_updateAssembly", "Solve and Update Assembly"),
+                "ToolTip": App.Qt.translate("Asm4_updateAssembly", "Update Assembly"),
                 "Pixmap" : os.path.join( Asm4.iconPath , 'Asm4_Solver.svg')
                 }
 

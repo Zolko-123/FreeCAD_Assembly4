@@ -15,8 +15,6 @@ import FreeCADGui as Gui
 import FreeCAD as App
 
 import Asm4_libs as Asm4
-from Asm4_Translate import translate
-
 
 
 class newAssemblyCmd:
@@ -37,9 +35,9 @@ def makeAssembly():
 
     """
     def GetResources(self):
-        tooltip  = translate("Commands", "<p>Create a new Assembly container</p>")
+        tooltip  = App.Qt.translate("Commands", "<p>Create a new Assembly container</p>")
         iconFile = os.path.join( Asm4.iconPath , 'Asm4_Model.svg')
-        return {"MenuText": "New Assembly", "ToolTip": tooltip, "Pixmap" : iconFile }
+        return {"MenuText": App.Qt.translate("Commands", "New Assembly"), "ToolTip": tooltip, "Pixmap" : iconFile }
 
 
     def IsActive(self):
@@ -56,13 +54,12 @@ def makeAssembly():
         assy = Asm4.getAssembly()
         if assy is not None:
             if assy.TypeId=='App::Part':
-                message = "This document already contains a valid Assembly, please use it"
+                message = App.Qt.translate("Commands", "This document already contains a valid Assembly, please use it")
                 Asm4.warningBox(message)
                 # set the Type to Assembly
                 assy.Type = 'Assembly'
             else:
-                message  = "This document already contains another FreeCAD object called \"Assembly\", "
-                message += "but it's of type \""+assy.TypeId+"\", unsuitable for an assembly. I can\'t proceed."
+                message  = App.Qt.translate("Commands", "This document already contains another FreeCAD object called \"Assembly\", but it's of type \"")+assy.TypeId+App.Qt.translate("Commands", "\", unsuitable for an assembly. I can\'t proceed.")
                 Asm4.warningBox(message)
             # abort
             return

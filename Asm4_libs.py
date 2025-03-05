@@ -25,7 +25,6 @@ import FreeCAD as App
 from FreeCAD import Console as FCC
 
 
-
 # Types of datum objects
 datumTypes = [  'PartDesign::CoordinateSystem', \
                 'PartDesign::Plane',            \
@@ -191,8 +190,8 @@ def makeVarContainer():
                 variables.Type = 'App::PropertyContainer'            
                 retval = variables
         else:
-            FCC.PrintWarning('This Part contains an incompatible \"Variables\" object, ')
-            FCC.PrintWarning('this could lead to unexpected results\n')
+            FCC.PrintWarning(App.Qt.translate("Asm4", 'This Part contains an incompatible \"Variables\" object, '))
+            FCC.PrintWarning(App.Qt.translate("Asm4", 'this could lead to unexpected results\n'))
     # there is none, so we create it
     else:
         variables = App.ActiveDocument.addObject('App::FeaturePython','Variables')
@@ -510,7 +509,7 @@ def isAsm4EE(obj):
     # DEPRECATED, to be removed
     elif hasattr(obj,'AssemblyType') :
         if obj.AssemblyType == 'Asm4EE' or obj.AssemblyType == '' :
-            FCC.PrintMessage('Found legacy AssemblyType property, adding new empty SolverId property\n')
+            FCC.PrintMessage(App.Qt.translate("Asm4", 'Found legacy AssemblyType property, adding new empty SolverId property\n'))
             # add the new property to convert legacy object
             obj.addProperty( 'App::PropertyString', 'SolverId', 'Assembly' )
             return True
@@ -537,7 +536,7 @@ def isAsm4Model(obj):
 """
 def warningBox( text ):
     msgBox = QtGui.QMessageBox()
-    msgBox.setWindowTitle( 'FreeCAD Warning' )
+    msgBox.setWindowTitle( App.Qt.translate("Asm4", 'FreeCAD Warning' ))
     msgBox.setIcon( QtGui.QMessageBox.Critical )
     msgBox.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
     msgBox.setText( text )
@@ -547,11 +546,11 @@ def warningBox( text ):
 
 def confirmBox( text ):
     msgBox = QtGui.QMessageBox()
-    msgBox.setWindowTitle('FreeCAD Warning')
+    msgBox.setWindowTitle(App.Qt.translate("Asm4", 'FreeCAD Warning'))
     msgBox.setIcon(QtGui.QMessageBox.Warning)
     msgBox.setWindowFlags( QtCore.Qt.WindowStaysOnTopHint )
     msgBox.setText(text)
-    msgBox.setInformativeText('Are you sure you want to proceed ?')
+    msgBox.setInformativeText(App.Qt.translate("Asm4", 'Are you sure you want to proceed ?'))
     msgBox.setStandardButtons(QtGui.QMessageBox.Cancel | QtGui.QMessageBox.Ok)
     msgBox.setEscapeButton(QtGui.QMessageBox.Cancel)
     msgBox.setDefaultButton(QtGui.QMessageBox.Ok)
@@ -574,11 +573,11 @@ def confirmBox( text ):
 class dropDownCmd:
     def __init__(self, cmdlist, menu, tooltip = None, icon = None):
         self.cmdlist = cmdlist
-        self.menu = menu
+        self.menu = App.Qt.translate("Asm4", menu)
         if tooltip is None:
-            self.tooltip = menu
+            self.tooltip = App.Qt.translate("Asm4", menu)
         else:
-            self.tooltip = tooltip
+            self.tooltip = App.Qt.translate("Asm4", tooltip)
 
     def GetCommands(self):
         return tuple(self.cmdlist)
