@@ -39,16 +39,24 @@ class placeLinkCmd():
                 }
 
     def IsActive(self):
-        # We only insert a link into an Asm4  Model
+
+        root = Gui.Selection.getSelectionEx("", 0)[0].Object
+        obj = Gui.Selection.getSelection()[0]
+
         if App.ActiveDocument:
-            ( obj, tree ) = Asm4.getSelectionTree()
-            if tree and len(tree)>=2:
-                # the root container is the first element and must be an App::Part
-                root = App.ActiveDocument.getObject(tree[0])
-                if root and root.TypeId=='App::Part':
-                    # check that the object has a Placement property
-                    if hasattr(obj,'Placement') and obj.getTypeIdOfProperty('Placement')=='App::PropertyPlacement':
-                        return True
+
+            if root and root.TypeId=='App::Part' and root.AssemblyType == "Part::Link":
+
+                # check that the object has a Placement property
+                if hasattr(obj,'Placement') and obj.getTypeIdOfProperty('Placement')=='App::PropertyPlacement':
+                    return True
+
+                else:
+                    link_obj = Asm4.getAppLinkObj()
+                    if link_obj and link_obj is not root:
+                        if hasattr(obj,'Placement') and obj.getTypeIdOfProperty('Placement')=='App::PropertyPlacement':
+                            return True
+
         return False
 
     def Activated(self):
@@ -81,10 +89,13 @@ class placeLinkCmd():
                         Gui.Control.showDialog(ui)
             else:
                 Asm4.warningBox('Please select a link in the assembly Model.')
+
         else:
             # or any part that has a Placement ?
             if len(Gui.Selection.getSelection())==1:
+
                 selection = Gui.Selection.getSelection()[0]
+
                 # object has a Placement property
                 if hasattr(selection,'Placement') and selection.getTypeIdOfProperty('Placement')=='App::PropertyPlacement':
                     # we don't want to mess with obects that are attached with the Attacher (MapMode)
@@ -113,10 +124,39 @@ class placeLinkCmd():
                                     Gui.Control.showDialog(ui)
                         # the selected object doesn't belong to the root assembly
                         else:
-                            Asm4.warningBox('Please select an object in the assembly Model.')
-                            return
 
-    
+                            # update selection with the link object
+                            link_obj = Asm4.getAppLinkObj()
+                            if link_obj != None:
+                                Gui.Selection.clearSelection()
+                                Gui.Selection.addSelection(App.ActiveDocument.Name, link_obj.Name)
+                                selection = Gui.Selection.getSelection()[0]
+                                parent = selection.getParentGeoFeatureGroup()
+
+                            if parent and parent == Asm4.getAssembly():
+                                # if it's a valid assembly and part
+                                if Asm4.isAsm4EE(selection):
+                                    # BUGFIX: if the part was corrupted by Assembly4 v0.11.5:
+                                    if hasattr(selection,'MapMode'):
+                                        Asm4.warningBox("This Part has the Attachment extension, it can only be placed manually")
+                                    else:
+                                        # launch the UI in the task panel
+                                        ui = placeLinkUI()
+                                        Gui.Control.showDialog(ui)
+                            # else try to convert it
+                            else:
+                                convert = Asm4.confirmBox("This Part wasn't assembled with this Assembly4 WorkBench, but I can convert it.")
+                                if convert:
+                                    Asm4.makeAsmProperties( selection, reset=True )
+                                    # launch the UI in the task panel
+                                    ui = placeLinkUI()
+                                    Gui.Control.showDialog(ui)
+                else:
+                    Asm4.warningBox('Please select an object in the assembly Model.')
+
+        return
+
+
 """
     +-----------------------------------------------+
     |       add the command to the workbench        |
