@@ -682,17 +682,19 @@ def getSelectedContainer():
     return retval
 
 
-def getDirectParent():
-    # including links, specially usefull for when selecting ojects by clicking on 3d models
+def getAppLinkObj():
     sels = Gui.Selection.getSelectionEx("", 0)
     sel = sels[0]
+    doc = sel.Document
     sub = sel.SubElementNames[0] if sel.SubElementNames else ""
-    obj = sel.Object.getSubObject(sub, 1)
-    if obj == sel.Object:
-        direct_parent = None
-    else:
-        direct_parent = sel.Object.getSubObject(sub.rpartition(obj.Name)[0], 1)
-    return direct_parent
+    subs = sub.split(".")[:-1]
+    path = [sel.Object] + [doc.getObject(name) for name in subs]
+    try:
+        for o in path:
+            if o.isDerivedFrom('App::Link') and o.LinkedObject is not None and o.LinkedObject.TypeId in containerTypes:
+                return o
+    except:
+        return None
 
 
 # returns the selected App::Link
