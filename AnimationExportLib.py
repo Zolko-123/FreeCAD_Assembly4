@@ -6,7 +6,7 @@
 # Library to store animations as video/image
 # Created as part of the Asm4 wb
 
-import os, numpy
+import os
 
 from PySide import QtGui, QtCore
 from PIL import Image, ImageFilter
@@ -14,6 +14,7 @@ from PIL.ImageQt import ImageQt
 import tempfile
 import pathlib
 import cv2
+import numpy
 
 import FreeCADGui as Gui
 import FreeCAD as App
@@ -169,7 +170,8 @@ class animationExporter():
             self.imageList.extend(list(reversed(self.imageList)))
 
         # Grab the stats from image1 to use for the resultant video
-        height, width, layers = numpy.array(self.imageList[0]).shape
+        # height, width, layers = numpy.array(self.imageList[0]).shape
+        width, height = self.imageList[0].size
 
         # create video
         fps = self.expDiag.sbOutFPS.value()
