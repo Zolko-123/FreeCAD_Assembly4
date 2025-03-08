@@ -27,7 +27,7 @@
 
 
 import threading, sys, math, os
-import numpy as np
+# import numpy as np
 import base64
 
 from PySide import QtGui, QtCore
