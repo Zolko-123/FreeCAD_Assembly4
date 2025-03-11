@@ -140,6 +140,11 @@ class insertLink():
                 # set the proposed name in the entry field
                 self.linkNameInput.setText( proposedLinkName )
 
+        if self.partList.count() > 0:
+            self.partList.setCurrentRow(0)
+            item = self.partList.item(0)
+            self.onItemClicked(item)
+
         # show the UI
         self.UI.show()
 
@@ -185,6 +190,8 @@ class insertLink():
     def onFilterChange(self):
         filterStr = self.filterPartList.text().strip()
 
+        first_visible_idx = None
+
         for x in range(self.partList.count()):
             item = self.partList.item(x)
 
@@ -195,6 +202,15 @@ class insertLink():
             else:
                 item.setHidden(False)
 
+            if item.isHidden() == False and first_visible_idx == None:
+                first_visible_idx = x
+
+        if self.partList.count() > 0:
+            if first_visible_idx == None:
+                first_visible_idx = 0
+            self.partList.setCurrentRow(first_visible_idx)
+            item = self.partList.item(first_visible_idx)
+            self.onItemClicked(item)
 
     # from A2+
     def openFile(self):
@@ -364,6 +380,7 @@ class insertLink():
         self.openFileButton.clicked.connect(self.openFile)
         self.insertButton.clicked.connect(self.onCreateLink)
         self.partList.itemClicked.connect( self.onItemClicked)
+        self.partList.itemActivated.connect(self.onItemClicked)
         self.filterPartList.textChanged.connect(self.onFilterChange)
 
 
